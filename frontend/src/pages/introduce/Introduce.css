@@ -290,16 +290,52 @@
   margin-top: 40px;
 }
 
-@media (max-width: 700px) {
+@media (max-width: 800px) {
+  .intro-nav {
+    height: 52px;
+    padding: 0 14px;
+    gap: 12px;
+  }
+  .intro-nav-links {
+    display: none;
+  }
+  .intro-container {
+    padding: 0 16px;
+  }
+  .intro-hero {
+    padding: 48px 0 36px;
+  }
   .intro-hero h1 {
-    font-size: 32px;
+    font-size: 30px;
+  }
+  .intro-hero p {
+    font-size: 14px;
+    margin-bottom: 24px;
+  }
+  .intro-cta-row {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .intro-cta {
+    width: 100%;
+    text-align: center;
+    border-radius: var(--radius-pill);
   }
   .intro-stats {
     grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .intro-stats .num {
+    font-size: 22px;
   }
   .intro-concept-grid,
   .intro-case-grid,
   .intro-feat-grid {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 380px) {
+  .intro-stats {
     grid-template-columns: 1fr;
   }
 }

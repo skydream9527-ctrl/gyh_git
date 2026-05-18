@@ -46,16 +46,16 @@ export function TopNav({ mode, crumb, agentChip, rightActions }: Props) {
   return (
     <nav className={`topnav topnav-${mode}`}>
       <Link to="/dashboard" className="brand">
-        <div className="brand-logo">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#fff" strokeWidth="2.2">
-            <path d="M12 2L2 7l10 5 10-5-10-5z" />
-            <path d="M2 17l10 5 10-5" />
-            <path d="M2 12l10 5 10-5" />
+        <div className="brand-logo" aria-hidden="true">
+          <svg viewBox="0 0 32 32" width="22" height="22" fill="none" className="brand-logo-svg">
+            <rect x="2" y="2" width="28" height="28" rx="8" className="bl-bg" />
+            <path d="M9 11h10M9 16h14M9 21h7" className="bl-stroke" strokeWidth="2" strokeLinecap="round" />
+            <circle cx="22" cy="21" r="3" className="bl-dot" strokeWidth="1.5" />
           </svg>
         </div>
         <span className="brand-name">
           <span className="brand-accent">ICE</span>{" "}
-          {mode === "admin" ? "管理后台" : "Data Workbench"}
+          {mode === "admin" ? "管理后台" : "Workbench"}
         </span>
       </Link>
       {crumb && <div className="crumb">{crumb}</div>}

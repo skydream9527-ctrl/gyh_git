@@ -1,0 +1,14 @@
+/* 复用 global.css 的 .m-bottombar / .m-bottombar-tab 基础样式
+   这里只补充 Link 类型节点的视觉一致 */
+.m-bottombar-tab {
+  text-decoration: none;
+}
+.m-bottombar-tab:active {
+  background: var(--surface-2);
+}
+.m-bottombar-tab .pill {
+  font-family: inherit;
+}
+.m-bottombar[data-cnt="3"] .m-bottombar-tab {
+  flex: 1;
+}

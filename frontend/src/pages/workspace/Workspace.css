@@ -425,44 +425,98 @@
   color: var(--text-muted);
 }
 
-/* ---- mobile sidebar toggles ---- */
+/* ---- mobile 3-segment 顶部 tab + 单栏切换（design_v4 mobile workspace） ---- */
+.ws-mobile-segs {
+  display: none;
+}
+@media (max-width: 800px) {
+  .ws-mobile-segs {
+    display: flex;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border-soft);
+    padding: 0 8px;
+    flex-shrink: 0;
+  }
+  .ws-mobile-segs button {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 9px 6px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    text-align: center;
+    font-family: inherit;
+    line-height: 1.2;
+  }
+  .ws-mobile-segs button.active {
+    color: var(--text);
+    border-bottom-color: var(--accent);
+  }
+}
+
 @media (max-width: 800px) {
   .ws-body {
     grid-template-columns: 1fr !important;
   }
+  /* 在 segments 模式下：默认只有 chat 主区可见，左右栏走 segments 切换 */
+  .ws-body > .ws-sidebar,
+  .ws-body > .ws-right,
+  .ws-body > .ws-main {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .ws-body[data-mobile-tab="files"] .ws-sidebar {
+    display: flex;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+  }
+  .ws-body[data-mobile-tab="files"] .ws-main,
+  .ws-body[data-mobile-tab="files"] .ws-right {
+    display: none;
+  }
+  .ws-body[data-mobile-tab="chat"] .ws-sidebar,
+  .ws-body[data-mobile-tab="chat"] .ws-right {
+    display: none;
+  }
+  .ws-body[data-mobile-tab="chat"] .ws-main {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+  .ws-body[data-mobile-tab="right"] .ws-right {
+    display: flex;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+  }
+  .ws-body[data-mobile-tab="right"] .ws-sidebar,
+  .ws-body[data-mobile-tab="right"] .ws-main {
+    display: none;
+  }
+  /* segments 接管后，老的 mobile-open 抽屉直接走 segments 路径，
+     还要兼容 chat-head 里的 📂 / 🤖 旧按钮，让它们点击直接切 segment */
   .ws-sidebar.mobile-open,
   .ws-right.mobile-open {
     display: flex;
-    position: fixed;
-    z-index: 60;
-    top: 52px;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: var(--surface);
+    position: relative;
+    width: 100%;
+    height: 100%;
     overflow-y: auto;
   }
-  /* 抽屉关闭按钮，仅小屏可见 */
+  /* 抽屉关闭按钮在 segments 模式下不再需要 */
   .ws-drawer-close {
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    background: var(--surface-2);
-    color: var(--text-dim);
-    border: none;
-    border-bottom: 1px solid var(--border);
-    cursor: pointer;
-    font-size: 12px;
-    padding: 10px 14px;
-    margin: 0 -14px 8px;
-    width: calc(100% + 28px);
-    position: sticky;
-    top: 0;
-    z-index: 5;
+    display: none !important;
   }
-  .ws-drawer-close:active {
-    background: var(--surface-3, var(--surface-2));
+  /* chat 头部的 📂 / 🤖 老按钮：在 segments 模式下隐藏，避免与上面 segments 重复 */
+  .ws-chat-head > .ws-mobile-toggle:first-child,
+  .ws-chat-head > .ws-mobile-toggle:last-child {
+    display: none;
   }
   .ws-mobile-toggle {
     display: inline-flex;
@@ -470,7 +524,7 @@
     border: 1px solid var(--border);
     color: var(--text);
     padding: 6px 12px;
-    border-radius: 6px;
+    border-radius: var(--radius-pill);
     font-size: 12px;
     cursor: pointer;
     gap: 4px;

@@ -505,23 +505,32 @@
   text-decoration: underline;
 }
 
-/* ---- 小屏 ---- */
-@media (max-width: 600px) {
+/* ---- 小屏：单栏全屏（design_v4 mobile） ---- */
+@media (max-width: 800px) {
   .login-page {
-    padding: 16px;
-    align-items: flex-start;
+    padding: 0;
+    align-items: stretch;
+    min-height: 100vh;
   }
   .login-card {
-    margin-top: 32px;
-    border-radius: 12px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.32);
+    margin: 0;
+    width: 100%;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    grid-template-columns: 1fr;
+    min-height: 100vh;
+  }
+  .login-left {
+    display: none !important;
   }
   .login-right {
-    padding: 28px 22px;
-    gap: 10px;
+    padding: 32px 22px;
+    gap: 12px;
+    justify-content: center;
   }
   .login-right h1 {
-    font-size: 20px;
+    font-size: 22px;
   }
   .login-tabs {
     margin: 0 0 12px;
@@ -535,8 +544,9 @@
     font-size: 12px;
   }
   .feishu-btn {
-    padding: 11px 16px;
-    font-size: 13px;
+    padding: 12px 16px;
+    font-size: 14px;
+    border-radius: var(--radius-pill);
   }
   .test-list {
     flex-direction: column;

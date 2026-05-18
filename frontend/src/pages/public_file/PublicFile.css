@@ -58,15 +58,18 @@
 }
 
 /* ---- 移动端 ---- */
-@media (max-width: 600px) {
+@media (max-width: 800px) {
   .pf-page {
     padding: 18px 14px 60px;
   }
   .pf-title {
-    font-size: 17px;
+    font-size: 18px;
   }
   .pf-pre {
     font-size: 12px;
     padding: 12px;
+  }
+  .pf-head {
+    gap: 8px;
   }
 }

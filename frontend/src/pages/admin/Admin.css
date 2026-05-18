@@ -406,9 +406,10 @@
     top: 52px;
     bottom: 0;
     left: 0;
-    width: 240px;
+    width: 260px;
     z-index: 60;
-    box-shadow: 4px 0 16px var(--shadow);
+    box-shadow: var(--shadow-3);
+    background: var(--surface);
   }
   .adm-sb.mobile-open {
     display: block;
@@ -420,11 +421,12 @@
     background: var(--surface-2);
     border: 1px solid var(--border);
     color: var(--text);
-    padding: 4px 10px;
-    border-radius: 4px;
-    font-size: 12px;
+    padding: 6px 12px;
+    border-radius: var(--radius-pill);
+    font-size: 13px;
     cursor: pointer;
     margin-right: 6px;
+    min-height: 32px;
   }
   .adm-main {
     padding: 14px 14px 60px;
@@ -434,14 +436,21 @@
   }
   .adm-stat-grid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+  .adm-stat {
+    padding: 12px;
+    border-radius: var(--radius-sm);
   }
   .adm-two-col {
     grid-template-columns: 1fr;
   }
+  /* 表格在小屏支持横向滚 */
   .adm-table {
     font-size: 12px;
     overflow-x: auto;
     display: block;
+    white-space: nowrap;
   }
   .adm-form-grid {
     grid-template-columns: 1fr;
@@ -452,6 +461,14 @@
   .adm-toolbar input,
   .adm-toolbar select {
     width: 100%;
+  }
+  .adm-alert-card {
+    padding: 14px;
+  }
+}
+@media (max-width: 480px) {
+  .adm-stat-grid {
+    grid-template-columns: 1fr;
   }
 }
 .adm-mobile-menu {

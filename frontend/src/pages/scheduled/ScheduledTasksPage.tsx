@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { TopNav } from "@/components/shell/TopNav";
+import { MobileBottomBar } from "@/components/shell/MobileBottomBar";
 import { ConfirmModal } from "@/components/feedback/ConfirmModal";
 import { EmptyState } from "@/components/feedback/ErrorState";
 import { Skeleton } from "@/components/feedback/Skeleton";
@@ -108,7 +109,7 @@ export function ScheduledTasksPage() {
   return (
     <div className="sc-page">
       <TopNav mode="workspace" crumb={<span>首页 / <span className="current">定时任务</span></span>} />
-      <main className="sc-main">
+      <main className="sc-main has-bottombar">
         <header className="sc-head">
           <div>
             <h1>⏱ 定时任务</h1>
@@ -275,6 +276,7 @@ export function ScheduledTasksPage() {
         onConfirm={() => confirmDelete && remove(confirmDelete)}
         onCancel={() => setConfirmDelete(null)}
       />
+      <MobileBottomBar />
     </div>
   );
 }

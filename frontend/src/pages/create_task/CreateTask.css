@@ -254,27 +254,42 @@
   margin-top: 8px;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 800px) {
   .ct-main {
-    padding: 18px 14px 60px;
+    padding: 16px 14px 80px;
   }
+  /* 移动端「全屏分步」：stepper 横向滚不换行，单个步骤紧凑 */
   .ct-stepper {
-    padding: 12px 12px;
-    gap: 8px;
-    flex-wrap: wrap;
+    padding: 10px 12px;
+    gap: 12px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    margin-bottom: 16px;
+    border-radius: var(--radius-pill);
+    scrollbar-width: none;
+  }
+  .ct-stepper::-webkit-scrollbar {
+    display: none;
   }
   .ct-step {
     gap: 6px;
+    flex: 0 0 auto;
   }
-  /* 步骤之间的连接线在小屏堆叠会丑，藏掉 */
   .ct-step + .ct-step::before {
     display: none;
   }
-  .ct-step-label {
+  .ct-step-num {
+    width: 22px;
+    height: 22px;
     font-size: 11px;
+  }
+  .ct-step-label {
+    font-size: 12px;
+    white-space: nowrap;
   }
   .ct-section {
     padding: 16px 14px;
+    border-radius: var(--radius);
   }
   .ct-fields {
     grid-template-columns: 1fr;
@@ -282,24 +297,43 @@
   .ct-field.full {
     grid-column: span 1;
   }
+  .ct-agent-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
   .ct-agent-card {
     height: auto;
-    min-height: 130px;
+    min-height: 120px;
     padding: 14px;
   }
   .ct-agent-icon {
-    width: 38px;
-    height: 38px;
-    font-size: 20px;
+    width: 36px;
+    height: 36px;
+    font-size: 19px;
   }
+  /* 主操作按钮固定在底部，比按钮散在内容里更顺手 */
   .ct-actions {
-    flex-direction: column-reverse;
-    align-items: stretch;
+    position: sticky;
+    bottom: 0;
+    background: var(--bg);
+    margin: 0 -14px -60px;
+    padding: 10px 14px calc(12px + env(safe-area-inset-bottom, 0px));
+    border-top: 1px solid var(--border-soft);
+    flex-direction: row;
+    gap: 8px;
   }
-  .ct-actions button {
-    width: 100%;
+  .ct-actions .btn-primary {
+    flex: 1;
+  }
+  .ct-actions .btn-secondary {
+    flex: 0 0 auto;
   }
   .ct-cron-presets {
     gap: 4px;
+  }
+}
+@media (max-width: 380px) {
+  .ct-agent-grid {
+    grid-template-columns: 1fr;
   }
 }

@@ -5,6 +5,7 @@ import type { KBArticle, KBSummary } from "@/api/endpoints";
 import { useAuthStore } from "@/stores/authStore";
 import { useUIStore } from "@/stores/uiStore";
 import { TopNav } from "@/components/shell/TopNav";
+import { MobileBottomBar } from "@/components/shell/MobileBottomBar";
 import { EmptyState } from "@/components/feedback/ErrorState";
 import { Skeleton } from "@/components/feedback/Skeleton";
 import { ConfirmModal } from "@/components/feedback/ConfirmModal";
@@ -131,24 +132,24 @@ export function DashboardPage() {
         mode="dashboard"
         rightActions={
           <>
-            <button className="btn-primary" onClick={() => navigate("/create-task")}>
+            <button className="btn-primary dash-top-new" onClick={() => navigate("/create-task")}>
               + 新任务
             </button>
-            <button className="btn-ghost" onClick={() => navigate("/scheduled-tasks")}>
+            <button className="btn-ghost dash-top-extra" onClick={() => navigate("/scheduled-tasks")}>
               ⏱ 定时
             </button>
-            <button className="btn-ghost" onClick={() => navigate("/guide")}>
+            <button className="btn-ghost dash-top-extra" onClick={() => navigate("/guide")}>
               📖 指南
             </button>
             {(user?.auth_role === "admin" || user?.auth_role === "super_admin") && (
-              <button className="btn-ghost" onClick={() => navigate("/admin")}>
+              <button className="btn-ghost dash-top-extra" onClick={() => navigate("/admin")}>
                 🛡 管理
               </button>
             )}
           </>
         }
       />
-      <main className="dash-main">
+      <main className="dash-main has-bottombar">
         <div className="dash-welcome">
           <h1>👋 你好，{user?.name || "同学"}</h1>
           <p>选一个范式开始今天的工作</p>
@@ -558,6 +559,16 @@ export function DashboardPage() {
       {browseKB && (
         <BrowseKBModal kb={browseKB} onClose={() => setBrowseKB(null)} />
       )}
+
+      <button
+        type="button"
+        className="m-fab dash-fab"
+        aria-label="新建任务"
+        onClick={() => navigate("/create-task")}
+      >
+        ＋
+      </button>
+      <MobileBottomBar />
     </div>
   );
 }

@@ -19,6 +19,13 @@
   margin: 0 0 32px;
 }
 
+@media (max-width: 800px) {
+  /* 顶栏只保留主 CTA，其它入口靠底部 tab + FAB；省横向空间 */
+  .dash-top-extra,
+  .dash-top-new {
+    display: none !important;
+  }
+}
 @media (max-width: 600px) {
   .dash-main {
     padding: 18px 14px 60px;
@@ -33,6 +40,13 @@
   .dash-section {
     margin-bottom: 24px;
   }
+  .dash-section h2 {
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-dim);
+    font-weight: 500;
+  }
   /* 起点卡 / paradigm 卡 / 任务卡 在小屏字体 + 内边距全部紧凑 */
   .start-card {
     padding: 14px 16px;
@@ -43,24 +57,85 @@
     height: 38px;
     font-size: 22px;
   }
+  /* paradigm 改为 5 列横向窄卡（design_v4 的「5 范式快开」） */
+  .paradigm-grid {
+    grid-template-columns: repeat(5, 1fr) !important;
+    gap: 6px;
+  }
   .paradigm-card {
     height: auto;
-    min-height: 130px;
-    padding: 14px;
+    min-height: 92px;
+    padding: 10px 6px;
+    align-items: center;
+    text-align: center;
+    border-top-width: 0;
+    border: 1px solid var(--border-soft);
+    overflow: hidden;
+  }
+  .paradigm-card .pc-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    margin-bottom: 6px;
+    font-size: 18px;
+  }
+  .paradigm-card .pc-name {
+    font-size: 11px;
+    line-height: 1.25;
+    margin-bottom: 0;
+  }
+  .paradigm-card .pc-desc {
+    display: none;
+  }
+  .paradigm-card .pc-badge-soon {
+    display: none;
   }
   .task-card {
     padding: 14px;
-    min-height: 110px;
+    min-height: auto;
+  }
+  .task-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px;
+  }
+  .task-card {
+    border-top-width: 1px;
+    border-left: 3px solid var(--primary);
+  }
+  .tc-biz {
+    border-left-color: var(--p-biz);
+  }
+  .tc-ab {
+    border-left-color: var(--p-ab);
+  }
+  .tc-data {
+    border-left-color: var(--p-data);
+  }
+  .tc-wave {
+    border-left-color: var(--p-wave);
+  }
+  .tc-gray {
+    border-left-color: var(--p-gray);
   }
   .public-task-card {
     padding: 10px 12px;
+    min-height: auto;
   }
   .public-tabs {
     gap: 4px;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    margin: 0 -14px 14px;
+    padding: 0 14px 4px;
+    scrollbar-width: none;
+  }
+  .public-tabs::-webkit-scrollbar {
+    display: none;
   }
   .public-tab {
     padding: 6px 12px;
     font-size: 12px;
+    white-space: nowrap;
   }
   /* 任务起名弹窗 — 宽度别死锁 */
   .dash-name-prompt {
@@ -75,6 +150,23 @@
     flex-wrap: wrap;
     gap: 8px;
     padding: 10px 12px;
+  }
+}
+@media (max-width: 380px) {
+  /* 极窄屏：5 范式难放下，做横向滚 */
+  .paradigm-grid {
+    grid-template-columns: none !important;
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: none;
+    margin: 0 -14px;
+    padding: 0 14px 6px;
+  }
+  .paradigm-grid::-webkit-scrollbar {
+    display: none;
+  }
+  .paradigm-grid .paradigm-card {
+    flex: 0 0 76px;
   }
 }
 

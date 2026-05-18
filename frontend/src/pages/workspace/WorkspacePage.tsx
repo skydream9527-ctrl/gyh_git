@@ -86,6 +86,8 @@ export function WorkspacePage() {
   const [mobileSidebar, setMobileSidebar] = useState(false);
   const [mobileRight, setMobileRight] = useState(false);
   const [mobileActionsOpen, setMobileActionsOpen] = useState(false);
+  // 移动端 3 段切换：Sources(files) / Chat / Studio(right)。桌面忽略此值。
+  const [mobileTab, setMobileTab] = useState<"files" | "chat" | "right">("chat");
   const [model, setModel] = useState<string>("");
   const [importOpen, setImportOpen] = useState(false);
   const [inviteOpen, setInviteOpen] = useState(false);
@@ -482,8 +484,36 @@ export function WorkspacePage() {
         }
       />
 
+      <div className="ws-mobile-segs" role="tablist" aria-label="工作区面板">
+        <button
+          role="tab"
+          aria-selected={mobileTab === "files"}
+          className={mobileTab === "files" ? "active" : ""}
+          onClick={() => setMobileTab("files")}
+        >
+          📂 文件
+        </button>
+        <button
+          role="tab"
+          aria-selected={mobileTab === "chat"}
+          className={mobileTab === "chat" ? "active" : ""}
+          onClick={() => setMobileTab("chat")}
+        >
+          💬 对话
+        </button>
+        <button
+          role="tab"
+          aria-selected={mobileTab === "right"}
+          className={mobileTab === "right" ? "active" : ""}
+          onClick={() => setMobileTab("right")}
+        >
+          🤖 详情
+        </button>
+      </div>
+
       <div
         className="ws-body"
+        data-mobile-tab={mobileTab}
         style={{
           gridTemplateColumns: `${leftW}px 6px 1fr 6px ${rightW}px`,
         }}

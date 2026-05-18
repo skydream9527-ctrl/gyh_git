@@ -1,18 +1,14 @@
 .topnav {
-  height: 52px;
+  height: 56px;
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
   padding: 0 20px;
-  background: rgba(33, 33, 33, 0.85);
-  backdrop-filter: blur(16px);
-  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+  border-bottom: 1px solid var(--border-soft);
   position: sticky;
   top: 0;
   z-index: 50;
-}
-:root[data-theme="light"] .topnav {
-  background: rgba(255, 255, 255, 0.85);
 }
 .brand {
   display: flex;
@@ -22,21 +18,34 @@
   color: var(--text);
 }
 .brand-logo {
-  width: 30px;
-  height: 30px;
-  border-radius: 7px;
-  background: linear-gradient(135deg, var(--primary), var(--agent));
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
 }
+.brand-logo-svg .bl-bg {
+  fill: var(--accent-soft);
+}
+.brand-logo-svg .bl-stroke {
+  stroke: var(--accent);
+}
+.brand-logo-svg .bl-dot {
+  fill: var(--warning-soft);
+  stroke: var(--warning);
+}
 .brand-name {
   font-family: var(--font-head);
-  font-weight: 600;
-  font-size: 15px;
+  font-weight: 500;
+  font-size: 16px;
+  letter-spacing: -0.2px;
+  color: var(--text);
 }
 .brand-accent {
-  color: var(--primary);
+  color: var(--text);
+  font-weight: 600;
 }
 .back-btn {
   background: var(--surface-2);
@@ -56,29 +65,32 @@
   color: var(--text);
 }
 .agent-chip {
-  background: var(--agent-dim);
-  border: 1px solid var(--agent);
-  border-radius: 18px;
+  background: var(--p-gray-soft);
+  border: 1px solid var(--p-gray-soft);
+  border-radius: var(--radius-pill);
   padding: 4px 12px;
   font-size: 12px;
-  color: var(--agent);
+  color: var(--p-gray);
 }
 .right {
   margin-left: auto;
   display: flex;
-  gap: 8px;
+  gap: 4px;
   align-items: center;
 }
 .icon-btn {
   background: transparent;
   border: none;
   color: var(--text-dim);
-  width: 32px;
-  height: 32px;
-  border-radius: 6px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
   cursor: pointer;
   font-size: 14px;
   position: relative;
+  display: inline-grid;
+  place-items: center;
+  transition: background 0.15s, color 0.15s;
 }
 .icon-btn:hover {
   background: var(--surface-2);
@@ -88,30 +100,33 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 5px 12px 5px 5px;
-  background: var(--surface-2);
-  border-radius: 20px;
-  border: 1px solid var(--border);
+  padding: 4px 12px 4px 4px;
+  background: transparent;
+  border-radius: var(--radius-pill);
+  border: 1px solid transparent;
   cursor: pointer;
   color: var(--text);
+  margin-left: 4px;
+  transition: background 0.15s, border-color 0.15s;
 }
 .user-pill:hover {
-  background: var(--surface-3);
+  background: var(--surface-2);
 }
 .user-pill .avatar {
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--primary), var(--agent));
-  color: #fff;
-  font-size: 11px;
-  font-weight: 600;
+  background: var(--surface-3);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 500;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 .user-pill .uname {
-  font-size: 12px;
+  font-size: 13px;
+  font-weight: 500;
 }
 .user-pill .caret {
   font-size: 10px;
@@ -129,8 +144,8 @@
   min-width: 220px;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 10px;
-  box-shadow: 0 12px 32px var(--shadow);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-3);
   padding: 6px;
   z-index: 100;
 }
@@ -145,19 +160,19 @@
   height: 36px;
   font-size: 14px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--primary), var(--agent));
-  color: #fff;
+  background: var(--surface-3);
+  color: var(--text);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 600;
+  font-weight: 500;
 }
 .umi-info {
   min-width: 0;
   flex: 1;
 }
 .umi-name {
-  font-weight: 600;
+  font-weight: 500;
   font-size: 13px;
   color: var(--text);
 }
@@ -170,7 +185,7 @@
 }
 .umi-divider {
   height: 1px;
-  background: var(--border);
+  background: var(--border-soft);
   margin: 4px 0;
 }
 .umi-item {
@@ -191,25 +206,40 @@
   background: var(--surface-2);
 }
 .umi-item.danger {
-  color: #e57b7b;
+  color: var(--error);
 }
 .umi-item.danger:hover {
-  background: rgba(229, 123, 123, 0.08);
+  background: var(--error-soft);
 }
 
 /* ---- 移动端 ---- */
+@media (max-width: 800px) {
+  .topnav {
+    height: 52px;
+    gap: 8px;
+    padding: 0 12px;
+  }
+  .brand-name {
+    font-size: 14px;
+  }
+  /* iPhone safe-area 顶部贴合 */
+  .topnav {
+    padding-top: env(safe-area-inset-top, 0px);
+    height: calc(52px + env(safe-area-inset-top, 0px));
+  }
+}
 @media (max-width: 600px) {
   .topnav {
     gap: 6px;
-    padding: 6px 10px;
+    padding: 0 10px;
   }
   /* 仅保留品牌 logo，文字过长会撑爆 */
   .brand-name {
     display: none;
   }
   .brand-logo {
-    width: 28px;
-    height: 28px;
+    width: 30px;
+    height: 30px;
   }
   .crumb,
   .agent-chip {
@@ -219,17 +249,27 @@
     padding: 3px 10px;
   }
   .right {
-    gap: 4px;
+    gap: 2px;
+  }
+  .icon-btn {
+    width: 36px;
+    height: 36px;
   }
   .user-pill {
-    border-radius: 999px;
-    width: 32px;
-    height: 32px;
     padding: 0;
+    margin-left: 2px;
+    width: 36px;
+    height: 36px;
     justify-content: center;
+    border-radius: 50%;
   }
+  .user-pill .uname,
   .user-pill .caret {
     display: none;
+  }
+  .user-pill .avatar {
+    width: 30px;
+    height: 30px;
   }
   .user-menu-pop {
     right: 0;

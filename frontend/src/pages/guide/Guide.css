@@ -104,17 +104,28 @@
 }
 
 /* ---- 移动端 ---- */
-@media (max-width: 600px) {
+@media (max-width: 800px) {
   .gd-body {
     padding: 0;
+    grid-template-columns: 1fr;
+  }
+  .gd-toc {
+    display: none;
+  }
+  .gd-content {
+    padding: 16px 14px 80px;
   }
   .gd-main {
-    padding: 16px 14px 60px !important;
+    padding: 16px 14px 80px !important;
   }
   .gd-h1, .gd-section h1 {
     font-size: 20px;
   }
   .gd-h2, .gd-section h2 {
     font-size: 16px;
+  }
+  .gd-info {
+    flex-wrap: wrap;
+    gap: 8px;
   }
 }

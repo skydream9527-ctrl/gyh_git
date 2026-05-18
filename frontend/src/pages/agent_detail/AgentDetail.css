@@ -232,30 +232,45 @@
   }
 }
 
-/* ---- 移动端 ---- */
-@media (max-width: 600px) {
+/* ---- 移动端：Profile 风（design_v4 mobile） ---- */
+@media (max-width: 800px) {
   .ad-main {
-    padding: 18px 14px 60px;
+    padding: 18px 14px 100px;
     gap: 14px;
   }
+  /* hero 居中，类 Profile */
   .ad-header {
     flex-direction: column;
-    align-items: flex-start;
-    padding: 16px 14px;
-    gap: 10px;
+    align-items: center;
+    text-align: center;
+    padding: 22px 16px 18px;
+    gap: 12px;
   }
   .ad-icon {
-    width: 48px;
-    height: 48px;
-    font-size: 24px;
+    width: 64px;
+    height: 64px;
+    font-size: 30px;
+    border-radius: 50%;
+  }
+  .ad-meta {
+    width: 100%;
   }
   .ad-meta h1 {
-    font-size: 18px;
+    font-size: 20px;
+  }
+  .ad-paradigm {
+    margin-bottom: 4px;
   }
   .ad-section {
     padding: 16px 14px;
   }
   .ad-section h2 {
     font-size: 15px;
+  }
+  .ad-prompt-actions {
+    flex-direction: column;
+  }
+  .ad-prompt-actions button {
+    width: 100%;
   }
 }
