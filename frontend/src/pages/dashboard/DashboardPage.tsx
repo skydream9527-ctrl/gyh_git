@@ -132,7 +132,7 @@ export function DashboardPage() {
         mode="dashboard"
         rightActions={
           <>
-            <button className="btn-primary dash-top-new" onClick={() => navigate("/create-task")}>
+            <button className="btn-primary dash-top-extra" onClick={() => navigate("/create-task")}>
               + 新任务
             </button>
             <button className="btn-ghost dash-top-extra" onClick={() => navigate("/scheduled-tasks")}>
@@ -562,7 +562,7 @@ export function DashboardPage() {
 
       <button
         type="button"
-        className="m-fab dash-fab"
+        className="m-fab"
         aria-label="新建任务"
         onClick={() => navigate("/create-task")}
       >

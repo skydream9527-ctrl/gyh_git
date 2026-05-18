@@ -83,10 +83,8 @@ export function WorkspacePage() {
   const [activeContent, setActiveContent] = useState<string | null>(null);
   const [loadErr, setLoadErr] = useState<string | null>(null);
   const [crystallizeFor, setCrystallizeFor] = useState<ChatMessage | null>(null);
-  const [mobileSidebar, setMobileSidebar] = useState(false);
-  const [mobileRight, setMobileRight] = useState(false);
   const [mobileActionsOpen, setMobileActionsOpen] = useState(false);
-  // 移动端 3 段切换：Sources(files) / Chat / Studio(right)。桌面忽略此值。
+  // mobile-only 3-segment switch: files / chat / right
   const [mobileTab, setMobileTab] = useState<"files" | "chat" | "right">("chat");
   const [model, setModel] = useState<string>("");
   const [importOpen, setImportOpen] = useState(false);
@@ -518,15 +516,7 @@ export function WorkspacePage() {
           gridTemplateColumns: `${leftW}px 6px 1fr 6px ${rightW}px`,
         }}
       >
-        <aside className={`ws-sidebar ${mobileSidebar ? "mobile-open" : ""}`}>
-          <button
-            type="button"
-            className="ws-drawer-close"
-            onClick={() => setMobileSidebar(false)}
-            aria-label="关闭文件面板"
-          >
-            ✕  关闭文件面板
-          </button>
+        <aside className="ws-sidebar">
           <div className="ws-sb-section">
             <div className="ws-sb-head">
               <span>📂 工作文件</span>
@@ -739,9 +729,6 @@ export function WorkspacePage() {
 
         <main className="ws-main">
           <div className="ws-chat-head">
-            <button className="ws-mobile-toggle" onClick={() => setMobileSidebar(!mobileSidebar)}>
-              📂 文件
-            </button>
             <span className="model">
               📦 <ModelSelector value={model} onChange={setModel} compact />
             </span>
@@ -795,9 +782,6 @@ export function WorkspacePage() {
                 </>
               )}
             </div>
-            <button className="ws-mobile-toggle" onClick={() => setMobileRight(!mobileRight)}>
-              🤖 详情
-            </button>
           </div>
           <AgentUpdateBanner
             task={task}
@@ -887,15 +871,7 @@ export function WorkspacePage() {
           title="拖动调整宽度 · 双击恢复默认"
         />
 
-        <aside className={`ws-right ${mobileRight ? "mobile-open" : ""}`}>
-          <button
-            type="button"
-            className="ws-drawer-close"
-            onClick={() => setMobileRight(false)}
-            aria-label="关闭详情面板"
-          >
-            ✕  关闭详情面板
-          </button>
+        <aside className="ws-right">
           <div className="ws-right-tabs">
             {(
               [

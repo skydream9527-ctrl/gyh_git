@@ -19,26 +19,13 @@ const TABS: Tab[] = [
 
 export function MobileBottomBar() {
   const { pathname } = useLocation();
-  const user = useAuthStore((s) => s.user);
-  const isAdmin = user?.auth_role === "admin" || user?.auth_role === "super_admin";
-
-  const visible = TABS.filter((t) => !t.adminOnly || isAdmin);
-  const fillCount = isAdmin ? 4 : 3;
-  // 非 admin 时用「我」占位，提供退出/账号入口（最简实现：链接到首页 + 头像，可后续扩展）
-  const tabs: Tab[] = isAdmin
-    ? visible
-    : [
-        ...visible,
-        {
-          to: "/dashboard?profile=1",
-          icon: user?.name?.[0] || "我",
-          label: "我",
-          match: () => false,
-        },
-      ];
+  const isAdmin = useAuthStore(
+    (s) => s.user?.auth_role === "admin" || s.user?.auth_role === "super_admin",
+  );
+  const tabs = TABS.filter((t) => !t.adminOnly || isAdmin);
 
   return (
-    <nav className="m-bottombar" aria-label="底部导航" data-cnt={fillCount}>
+    <nav className="m-bottombar" aria-label="底部导航">
       {tabs.map((t) => {
         const active = t.match(pathname);
         return (

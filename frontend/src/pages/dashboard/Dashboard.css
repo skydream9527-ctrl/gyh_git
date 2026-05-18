@@ -20,9 +20,8 @@
 }
 
 @media (max-width: 800px) {
-  /* 顶栏只保留主 CTA，其它入口靠底部 tab + FAB；省横向空间 */
-  .dash-top-extra,
-  .dash-top-new {
+  /* 顶栏入口在小屏全部隐藏，由底部 tab + FAB 接管 */
+  .dash-top-extra {
     display: none !important;
   }
 }

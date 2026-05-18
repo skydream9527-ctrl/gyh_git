@@ -499,38 +499,6 @@
   .ws-body[data-mobile-tab="right"] .ws-main {
     display: none;
   }
-  /* segments 接管后，老的 mobile-open 抽屉直接走 segments 路径，
-     还要兼容 chat-head 里的 📂 / 🤖 旧按钮，让它们点击直接切 segment */
-  .ws-sidebar.mobile-open,
-  .ws-right.mobile-open {
-    display: flex;
-    position: relative;
-    width: 100%;
-    height: 100%;
-    overflow-y: auto;
-  }
-  /* 抽屉关闭按钮在 segments 模式下不再需要 */
-  .ws-drawer-close {
-    display: none !important;
-  }
-  /* chat 头部的 📂 / 🤖 老按钮：在 segments 模式下隐藏，避免与上面 segments 重复 */
-  .ws-chat-head > .ws-mobile-toggle:first-child,
-  .ws-chat-head > .ws-mobile-toggle:last-child {
-    display: none;
-  }
-  .ws-mobile-toggle {
-    display: inline-flex;
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    color: var(--text);
-    padding: 6px 12px;
-    border-radius: var(--radius-pill);
-    font-size: 12px;
-    cursor: pointer;
-    gap: 4px;
-    min-height: 32px;
-    align-items: center;
-  }
   .ws-chat-head {
     padding: 8px 12px;
     gap: 8px;
@@ -580,12 +548,8 @@
     padding: 0 12px 10px !important;
   }
 }
-.ws-mobile-toggle {
-  display: none;
-}
-.ws-drawer-close {
-  display: none;
-}
+/* .ws-mobile-toggle is only used inside .ws-sec-more (the ⋯ overflow menu);
+   no global default needed. */
 
 /* Batch C-2: 第二栏在移动端折叠为 ⋯ 菜单 */
 .ws-sec-more {
