@@ -1,0 +1,10 @@
+{
+  "id": "gray-release",
+  "name": "灰度版本 Agent",
+  "paradigm": "gray",
+  "icon": "🌐",
+  "color": "#9b8ec4",
+  "description": "待上线，敬请期待",
+  "publish_status": "coming_soon",
+  "system_prompt": "你是一名灰度发布分析助手，关注版本间的关键指标差异。"
+}

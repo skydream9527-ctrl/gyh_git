@@ -1,0 +1,305 @@
+.ct-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+.ct-main {
+  max-width: 880px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 32px 24px 80px;
+}
+.ct-stepper {
+  display: flex;
+  gap: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin-bottom: 24px;
+}
+.ct-step {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-muted);
+  position: relative;
+}
+.ct-step + .ct-step::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 100%;
+  height: 1px;
+  background: var(--border);
+  z-index: 0;
+}
+.ct-step.active .ct-step-num,
+.ct-step.done .ct-step-num {
+  background: var(--primary);
+  color: var(--primary-on);
+}
+.ct-step.active {
+  color: var(--primary);
+}
+.ct-step-num {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  z-index: 1;
+}
+.ct-step-label {
+  font-size: 12px;
+  font-family: var(--font-head);
+}
+
+.ct-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* Step 1 · Agent 网格（与 Dashboard 快速开始 保持一致的卡片样式） */
+.ct-step1-head {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ct-step1-title {
+  font-family: var(--font-head);
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0;
+}
+.ct-step1-hint {
+  font-size: 12px;
+  color: var(--text-dim);
+  margin: 0;
+}
+.ct-agent-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+}
+.ct-agent-card {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--primary);
+  border-radius: var(--radius);
+  padding: 18px;
+  text-align: left;
+  cursor: pointer;
+  color: var(--text);
+  transition: all 0.18s;
+  height: 160px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.ct-agent-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px var(--shadow);
+}
+.ct-agent-card.selected {
+  box-shadow: 0 0 0 2px var(--primary) inset;
+}
+.ct-agent-card-soon {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.ct-agent-card-soon:hover {
+  transform: none !important;
+  box-shadow: none;
+}
+.ct-agent-card-skel {
+  cursor: default;
+  border-top-color: var(--border);
+}
+.ct-agent-badge-soon {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+.ct-agent-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  margin-bottom: 12px;
+}
+.ct-agent-name {
+  font-family: var(--font-head);
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+.ct-agent-desc {
+  color: var(--text-dim);
+  font-size: 12px;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ct-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.ct-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.ct-field.full {
+  grid-column: span 2;
+}
+.ct-field span {
+  font-size: 12px;
+  color: var(--text-dim);
+}
+.ct-field input,
+.ct-field select,
+.ct-field textarea {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  padding: 9px 12px;
+  font-size: 13px;
+  outline: none;
+}
+.ct-field input:focus,
+.ct-field textarea:focus,
+.ct-field select:focus {
+  border-color: var(--primary);
+}
+
+.ct-fold {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0;
+}
+.ct-fold summary {
+  padding: 12px 14px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  user-select: none;
+}
+.ct-fold[open] summary {
+  border-bottom: 1px solid var(--border);
+}
+.ct-fold-body {
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.ct-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.ct-cron-presets {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.ct-visibility {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 13px;
+}
+.ct-confirm {
+  border-top: 1px solid var(--border);
+  padding-top: 14px;
+}
+.ct-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+@media (max-width: 600px) {
+  .ct-main {
+    padding: 18px 14px 60px;
+  }
+  .ct-stepper {
+    padding: 12px 12px;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .ct-step {
+    gap: 6px;
+  }
+  /* 步骤之间的连接线在小屏堆叠会丑，藏掉 */
+  .ct-step + .ct-step::before {
+    display: none;
+  }
+  .ct-step-label {
+    font-size: 11px;
+  }
+  .ct-section {
+    padding: 16px 14px;
+  }
+  .ct-fields {
+    grid-template-columns: 1fr;
+  }
+  .ct-field.full {
+    grid-column: span 1;
+  }
+  .ct-agent-card {
+    height: auto;
+    min-height: 130px;
+    padding: 14px;
+  }
+  .ct-agent-icon {
+    width: 38px;
+    height: 38px;
+    font-size: 20px;
+  }
+  .ct-actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+  .ct-actions button {
+    width: 100%;
+  }
+  .ct-cron-presets {
+    gap: 4px;
+  }
+}

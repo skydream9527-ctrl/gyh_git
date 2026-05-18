@@ -1,0 +1,103 @@
+/* v4 Design tokens · NotebookLM-inspired repaint
+ * 仅替换色值 / 字体 / 圆角，不动任何变量名 / 结构 / 命名
+ * 新增：--primary-on（主按钮文字色，对比主色）/ --radius-pill（胶囊按钮）
+ */
+:root[data-theme="dark"] {
+  --bg: #1f1f1f;
+  --surface: #262626;
+  --surface-2: #2e2e2e;
+  --surface-3: #363636;
+  --border: #3c3c3c;
+  --border-light: #4a4a4a;
+
+  --text: #e8eaed;
+  --text-dim: #9aa0a6;
+  --text-muted: #6c7075;
+
+  --primary: #8ab4f8;
+  --primary-hover: #aecbfa;
+  --primary-pressed: #6c9eff;
+  --primary-on: #1f1f1f;
+  --primary-dim: rgba(138, 180, 248, 0.16);
+  --primary-glow: rgba(138, 180, 248, 0.25);
+
+  --agent: #c58af9;
+  --agent-dim: rgba(197, 138, 249, 0.16);
+
+  --p-ab: #8ab4f8;
+  --p-ab-dim: rgba(138, 180, 248, 0.16);
+  --p-biz: #fdd663;
+  --p-biz-dim: rgba(253, 214, 99, 0.14);
+  --p-gray: #c58af9;
+  --p-gray-dim: rgba(197, 138, 249, 0.14);
+  --p-data: #81c995;
+  --p-data-dim: rgba(129, 201, 149, 0.14);
+  --p-wave: #f28b82;
+  --p-wave-dim: rgba(242, 139, 130, 0.14);
+
+  --success: #81c995;
+  --success-dim: rgba(129, 201, 149, 0.14);
+  --warning: #fdd663;
+  --warning-dim: rgba(253, 214, 99, 0.14);
+  --error: #f28b82;
+  --error-dim: rgba(242, 139, 130, 0.14);
+  --info: #8ab4f8;
+  --info-dim: rgba(138, 180, 248, 0.14);
+
+  --shadow: rgba(0, 0, 0, 0.5);
+}
+
+:root[data-theme="light"] {
+  --bg: #faf9f6;
+  --surface: #ffffff;
+  --surface-2: #f5f3ee;
+  --surface-3: #ece8e0;
+  --border: #e6e2dc;
+  --border-light: #dcd6cd;
+
+  --text: #1f1f1f;
+  --text-dim: #5f6368;
+  --text-muted: #80868b;
+
+  --primary: #1a73e8;
+  --primary-hover: #1557b0;
+  --primary-pressed: #0d47a1;
+  --primary-on: #ffffff;
+  --primary-dim: #e8f0fe;
+  --primary-glow: rgba(26, 115, 232, 0.18);
+
+  --agent: #5f4b8b;
+  --agent-dim: rgba(95, 75, 139, 0.10);
+
+  --p-ab: #1967d2;
+  --p-biz: #b06000;
+  --p-gray: #5f4b8b;
+  --p-data: #137333;
+  --p-wave: #b3261e;
+  --p-ab-dim: #e8f0fe;
+  --p-biz-dim: #fef7e0;
+  --p-gray-dim: #f3edff;
+  --p-data-dim: #e6f4ea;
+  --p-wave-dim: #fce8e6;
+
+  --success: #137333;
+  --warning: #b06000;
+  --error: #b3261e;
+  --info: #1a73e8;
+  --success-dim: #e6f4ea;
+  --warning-dim: #fef7e0;
+  --error-dim: #fce8e6;
+  --info-dim: #e8f0fe;
+
+  --shadow: rgba(60, 64, 67, 0.08);
+}
+
+:root {
+  --radius: 14px;
+  --radius-sm: 10px;
+  --radius-xs: 8px;
+  --radius-pill: 999px;
+  --font-head: "Inter", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  --font-body: "Inter", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
