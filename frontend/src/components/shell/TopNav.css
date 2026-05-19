@@ -219,8 +219,9 @@
     gap: 8px;
     padding: 0 12px;
   }
+  /* 仅保留品牌 logo，文字过长会撑爆 */
   .brand-name {
-    font-size: 14px;
+    display: none;
   }
   /* iPhone safe-area 顶部贴合 */
   .topnav {
@@ -232,10 +233,6 @@
   .topnav {
     gap: 6px;
     padding: 0 10px;
-  }
-  /* 仅保留品牌 logo，文字过长会撑爆 */
-  .brand-name {
-    display: none;
   }
   .brand-logo {
     width: 30px;

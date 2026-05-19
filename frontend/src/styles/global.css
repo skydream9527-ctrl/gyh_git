@@ -181,7 +181,7 @@ select {
 
 .btn-ghost {
   background: transparent;
-  border: 1px solid transparent;
+  border: 1px solid var(--border);
   color: var(--text-dim);
   padding: 8px 14px;
   border-radius: var(--radius-pill);
@@ -326,7 +326,7 @@ select {
     bottom: calc(16px + var(--m-bottombar-h, 60px) + env(safe-area-inset-bottom, 0px));
     width: var(--m-fab-size);
     height: var(--m-fab-size);
-    border-radius: 18px;
+    border-radius: 50%;
     background: var(--accent);
     color: #fff;
     border: none;

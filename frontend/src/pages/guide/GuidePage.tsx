@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { TopNav } from "@/components/shell/TopNav";
+import { MobileBottomBar } from "@/components/shell/MobileBottomBar";
 import { Skeleton } from "@/components/feedback/Skeleton";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { MarkdownRenderer } from "@/components/markdown/MarkdownRenderer";
@@ -67,7 +68,7 @@ export function GuidePage() {
             ))}
           </ul>
         </aside>
-        <main className="gd-content">
+        <main className="gd-content has-bottombar">
           <div className="gd-info">
             <span>📅 最后更新 2026-05-07</span>
             <button onClick={() => window.print()} className="btn-ghost">🖨 打印</button>
@@ -89,6 +90,7 @@ export function GuidePage() {
           )}
         </main>
       </div>
+      <MobileBottomBar />
     </div>
   );
 }

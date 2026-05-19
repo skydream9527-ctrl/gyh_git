@@ -2,6 +2,7 @@ import { useState } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { TopNav } from "@/components/shell/TopNav";
+import { MobileBottomBar } from "@/components/shell/MobileBottomBar";
 import { useAuthStore } from "@/stores/authStore";
 import "./Admin.css";
 
@@ -92,10 +93,11 @@ export function AdminLayout() {
             );
           })}
         </aside>
-        <main className="adm-main">
+        <main className="adm-main has-bottombar">
           <Outlet />
         </main>
       </div>
+      <MobileBottomBar />
     </div>
   );
 }
