@@ -273,4 +273,24 @@
   .ad-prompt-actions button {
     width: 100%;
   }
+  /* history 行卡片化：桌面是横排（time | meta | actions），手机端纵向堆叠 */
+  .ad-history-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+    padding: 10px 12px;
+  }
+  .ad-history-time {
+    min-width: 0;
+    font-size: 11px;
+  }
+  .ad-history-actions {
+    display: flex;
+    gap: 6px;
+  }
+  .ad-history-actions button {
+    flex: 1;
+    padding: 6px 10px;
+    margin-left: 0;
+  }
 }

@@ -454,4 +454,13 @@
   .sc-card-actions button {
     flex: 1 1 30%;
   }
+  /* card body：桌面是 grid 2 列（cron / 任务 / 下次 / 上次），手机端单列 + label 紧凑 */
+  .sc-card-body {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+  .sc-label {
+    width: auto;
+    margin-right: 6px;
+  }
 }
