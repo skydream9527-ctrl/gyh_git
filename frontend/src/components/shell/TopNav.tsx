@@ -90,6 +90,16 @@ export function TopNav({ mode, crumb, agentChip, rightActions }: Props) {
                   </div>
                 </div>
                 <div className="umi-divider" />
+                <button
+                  className="umi-item"
+                  onClick={() => {
+                    toggleTheme();
+                  }}
+                  role="menuitem"
+                >
+                  {theme === "dark" ? "☀ 浅色主题" : "🌓 深色主题"}
+                </button>
+                <div className="umi-divider" />
                 <button className="umi-item danger" onClick={handleLogout} role="menuitem">
                   🚪 退出登录
                 </button>

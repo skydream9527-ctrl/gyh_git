@@ -219,21 +219,25 @@
     gap: 8px;
     padding: 0 12px;
   }
-  /* 保留品牌名，缩小字号 + 单行截断；极窄屏（≤420px）才隐藏 */
+  /* 保留品牌名，缩小字号 + 单行截断；只在极窄屏（≤360px）才隐藏 */
   .brand-name {
     font-size: 13px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 130px;
+    max-width: 120px;
   }
   /* iPhone safe-area 顶部贴合 */
   .topnav {
     padding-top: env(safe-area-inset-top, 0px);
     height: calc(52px + env(safe-area-inset-top, 0px));
   }
+  /* 主题切换在手机端隐藏，挪到用户菜单里以省顶栏空间 */
+  .topnav > .right > .icon-btn[aria-label="theme"] {
+    display: none;
+  }
 }
-@media (max-width: 420px) {
+@media (max-width: 360px) {
   .brand-name {
     display: none;
   }
