@@ -219,14 +219,23 @@
     gap: 8px;
     padding: 0 12px;
   }
-  /* 仅保留品牌 logo，文字过长会撑爆 */
+  /* 保留品牌名，缩小字号 + 单行截断；极窄屏（≤420px）才隐藏 */
   .brand-name {
-    display: none;
+    font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 130px;
   }
   /* iPhone safe-area 顶部贴合 */
   .topnav {
     padding-top: env(safe-area-inset-top, 0px);
     height: calc(52px + env(safe-area-inset-top, 0px));
+  }
+}
+@media (max-width: 420px) {
+  .brand-name {
+    display: none;
   }
 }
 @media (max-width: 600px) {

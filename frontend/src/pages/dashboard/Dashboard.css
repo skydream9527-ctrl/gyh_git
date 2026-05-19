@@ -323,7 +323,8 @@
 @media (max-width: 720px) {
   .task-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
-@media (max-width: 480px) {
+/* 手机端保持 2 列，仅极窄屏 (≤340px) 才退回单列 */
+@media (max-width: 340px) {
   .task-grid { grid-template-columns: 1fr; }
 }
 .task-card {
