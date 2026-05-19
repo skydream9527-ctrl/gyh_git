@@ -242,6 +242,33 @@
     display: none;
   }
 }
+
+/* 覆盖 global.css 里的 .topnav flex-wrap/width:100% 强制规则。
+   原规则把 crumb 和 agent-chip 各塞一行，导致手机 TopNav 总高 3 行 +
+   下面 3-段 + chat-head 总共 5+ 行视觉堆叠。统一压回 1 行。 */
+@media (max-width: 800px) {
+  .topnav {
+    flex-wrap: nowrap !important;
+    height: 52px !important;
+    min-height: 0 !important;
+    padding: 0 12px !important;
+    padding-top: env(safe-area-inset-top, 0px) !important;
+    height: calc(52px + env(safe-area-inset-top, 0px)) !important;
+  }
+  .topnav .crumb {
+    width: auto !important;
+    order: 0 !important;
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  /* agent-chip 在手机端隐藏 —— 信息冗余（可在 🤖 详情段查看 agent + 范式） */
+  .topnav .agent-chip {
+    display: none !important;
+  }
+}
 @media (max-width: 600px) {
   .topnav {
     gap: 6px;
