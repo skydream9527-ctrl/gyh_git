@@ -1017,5 +1017,24 @@
   .ws-mobile-segs button {
     font-size: 13px;
     padding: 9px 4px;
+    white-space: nowrap;
+  }
+  /* 输入区底部「Plan Mode」按钮和「发送」按钮原本是上下两行视觉孤立。
+     在手机上把 plan-toggle-row 紧贴 chat-input 同一视觉块（同色 + 上拉），
+     看起来是同一组操作。 */
+  .chat-input {
+    padding-bottom: 6px !important;
+  }
+  .plan-toggle-row {
+    background: var(--surface);
+    border-top: 0 !important;
+    margin-top: 0 !important;
+    padding: 0 12px calc(8px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+  /* Plan Mode 按钮在小屏吃 100% 宽度，按惯例在主操作下面（替代 hint 的位置） */
+  .plan-toggle-row > button {
+    width: 100%;
+    padding: 8px 12px !important;
+    font-size: 12px !important;
   }
 }

@@ -37,15 +37,28 @@
   padding: 1px 5px;
   font-family: var(--font-mono);
   font-size: 12px;
+  /* 长 inline code (URL / 路径) 在窄屏不撑爆容器 */
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 .md-body pre {
   margin: 0;
+  /* 代码块内不换行，但容器横滚而不是撑开页面 */
+  overflow-x: auto;
+  max-width: 100%;
+}
+.md-body img {
+  max-width: 100%;
+  height: auto;
 }
 .md-body table {
   border-collapse: collapse;
   width: 100%;
   margin: 0.8em 0;
   font-size: 13px;
+  /* 让 table 在窄屏可以横向滚动而不是撑爆 viewport */
+  display: block;
+  overflow-x: auto;
 }
 .md-body th,
 .md-body td {
@@ -104,6 +117,11 @@
   color: var(--primary);
 }
 /* streaming-lite code block — keeps streaming render cheap */
+.md-code-block,
+.md-code-plain {
+  max-width: 100%;
+  overflow-x: auto;
+}
 .md-code-plain {
   margin: 0;
   padding: 12px 14px;
