@@ -101,10 +101,14 @@ if _FRONTEND_DIST.is_dir() and (_FRONTEND_DIST / "index.html").exists():
         app.mount("/assets", StaticFiles(directory=_assets_dir), name="assets")
 
     _index_path = _FRONTEND_DIST / "index.html"
+    # index.html 引用的是 hash 化的 /assets/*.js 和 *.css，所以浏览器缓存
+    # index.html 是错的（拿到旧 hash 引用，永远拉不到新 build）。强制
+    # 浏览器每次都校验 index.html 是否有更新；新 build 后自动失效旧缓存。
+    _NO_CACHE_HEADERS = {"Cache-Control": "no-cache, must-revalidate"}
 
     @app.get("/", include_in_schema=False)
     async def _spa_root():
-        return FileResponse(_index_path)
+        return FileResponse(_index_path, headers=_NO_CACHE_HEADERS)
 
     @app.get("/{full_path:path}", include_in_schema=False)
     async def _spa_fallback(full_path: str):
@@ -116,7 +120,7 @@ if _FRONTEND_DIST.is_dir() and (_FRONTEND_DIST / "index.html").exists():
         candidate = _FRONTEND_DIST / full_path
         if full_path and candidate.is_file():
             return FileResponse(candidate)
-        return FileResponse(_index_path)
+        return FileResponse(_index_path, headers=_NO_CACHE_HEADERS)
 
     log.info("Serving frontend SPA from %s", _FRONTEND_DIST)
 else:
