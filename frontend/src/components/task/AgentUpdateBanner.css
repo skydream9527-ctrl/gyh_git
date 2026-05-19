@@ -24,7 +24,7 @@
 .aub-btn {
   padding: 6px 14px;
   background: var(--primary);
-  color: #fff;
+  color: var(--primary-on);
   border: none;
   border-radius: var(--radius-sm, 6px);
   font-size: 13px;

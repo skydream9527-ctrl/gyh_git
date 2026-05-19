@@ -14,7 +14,7 @@
   width: 100%;
   padding: 10px 14px;
   background: var(--primary);
-  color: #fff;
+  color: var(--primary-on);
   border: none;
   border-radius: var(--radius-sm, 6px);
   font-size: 13px;
@@ -147,7 +147,7 @@
 
 .jrp-btn-primary {
   background: var(--primary);
-  color: #fff;
+  color: var(--primary-on);
 }
 
 .jrp-btn-primary:hover:not(:disabled) {

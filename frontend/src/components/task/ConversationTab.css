@@ -27,7 +27,7 @@
   padding: 4px 10px;
   font-size: 12px;
   background: var(--primary);
-  color: #fff;
+  color: var(--primary-on);
   border: none;
   border-radius: var(--radius-sm, 6px);
   cursor: pointer;
@@ -182,7 +182,7 @@
 }
 .conv-inline-confirm {
   background: var(--primary);
-  color: #fff;
+  color: var(--primary-on);
   border-color: var(--primary);
 }
 .conv-inline-confirm:hover {

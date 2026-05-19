@@ -117,7 +117,7 @@ select {
 /* ---- v4 按钮系统：统一胶囊形 + 克制蓝 ---- */
 .btn-primary {
   background: var(--accent);
-  color: #fff;
+  color: var(--primary-on);
   border: 1px solid transparent;
   padding: 10px 20px;
   border-radius: var(--radius-pill);
@@ -328,7 +328,7 @@ select {
     height: var(--m-fab-size);
     border-radius: 50%;
     background: var(--accent);
-    color: #fff;
+    color: var(--primary-on);
     border: none;
     display: grid;
     place-items: center;

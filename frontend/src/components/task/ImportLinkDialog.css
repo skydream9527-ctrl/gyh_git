@@ -113,7 +113,7 @@
 
 .ild-btn-primary {
   background: var(--primary);
-  color: #fff;
+  color: var(--primary-on);
 }
 
 .ild-btn-primary:hover:not(:disabled) {
