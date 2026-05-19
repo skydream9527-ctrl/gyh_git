@@ -78,8 +78,9 @@ Mify gateway (`MIFY_GATEWAY_*`) is preferred; `ANTHROPIC_API_KEY` is only the fa
 ### Tool calling / agent runtime
 
 - 5-round bounded tool-calling loop (`MAX_TOOL_ROUNDS=5`, `TOOL_TIMEOUT_SEC=30` in `llm_gateway.py`). Main streaming path: `api/v1/ws.py`. Non-streaming sub-agent / bg-task path: `agent_runtime.run_agent_turn`.
-- Built-in tools (always available regardless of agent): `now`, `echo`, `kyuubi_query` (xiaomi-kyuubi-cli SELECT), `feishu_publish` (`feishu` CLI), `write_file` (drops to `tasks/{tid}/files/output/`).
+- Built-in tools (always available regardless of agent): `now`, `echo`, `kyuubi_query` (xiaomi-kyuubi-cli SELECT), `feishu_publish` (`feishu` CLI), `feishu_upload_image` (PNG → docx), `write_file` (drops to `tasks/{tid}/files/output/`), `execute_python` (sandboxed; data-analysis agent only — see below).
 - External CLI tools degrade to error codes (`KYUUBI_NOT_CONFIGURED`, `FEISHU_CLI_NOT_INSTALLED`) when the CLI is missing — they don't block boot.
+- `execute_python` runs user-generated Python in `backend/.venv-sandbox/` (bootstrap once via `make install-sandbox`) — separate venv with whitelisted analytics packages (pandas/numpy/scipy/sklearn/statsmodels/prophet/ruptures/matplotlib/seaborn/pyarrow). Sandbox enforces: CPU 60s, memory 1GB (Linux RLIMIT_AS), file size 50MB, no network (socket monkey-patched), no service credentials in env, cwd=`<task_workspace>/files/output/`. Stateless — every call is a fresh process. See `backend/app/services/sandbox/`.
 - Inflight guard in `ws.py`: `(task_id, conv_id)` → running task. WS disconnect during a turn does **not** cancel; only explicit `abort` messages flip the cancel event. A second message while a turn is running returns `CONVERSATION_INFLIGHT`.
 - v2 runtime mechanisms (TodoList, sub-agents, plan mode, parallel tools, compaction, bg tasks) are env-gated — see `ICE_*_ENABLED` flags in `.env.example`. **Compaction defaults on**; everything else defaults off so conversations are bit-stable on upgrade.
 
