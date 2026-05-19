@@ -69,6 +69,27 @@ export function GuidePage() {
           </ul>
         </aside>
         <main className="gd-content has-bottombar">
+          {toc.length > 0 && (
+            <select
+              className="gd-jump-mobile"
+              defaultValue=""
+              onChange={(e) => {
+                const id = e.target.value;
+                if (id) {
+                  document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+                  e.target.value = "";
+                }
+              }}
+            >
+              <option value="">📑 跳转到章节…</option>
+              {toc.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {"　".repeat(Math.max(0, t.level - 2))}
+                  {t.text}
+                </option>
+              ))}
+            </select>
+          )}
           <div className="gd-info">
             <span>📅 最后更新 2026-05-07</span>
             <button onClick={() => window.print()} className="btn-ghost">🖨 打印</button>

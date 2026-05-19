@@ -158,8 +158,8 @@
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--primary), var(--agent));
-  color: #fff;
+  background: var(--primary);
+  color: var(--primary-on);
   font-size: 11px;
   font-weight: 600;
   display: flex;
@@ -445,12 +445,63 @@
   .adm-two-col {
     grid-template-columns: 1fr;
   }
-  /* 表格在小屏支持横向滚 */
+  /* 表格在小屏支持横向滚（fallback for tables without .adm-table-cards） */
   .adm-table {
     font-size: 12px;
     overflow-x: auto;
     display: block;
     white-space: nowrap;
+  }
+  /* adm-table-cards：明确卡片化的表格在小屏渲染为卡片堆叠 */
+  .adm-table.adm-table-cards,
+  .adm-table.adm-table-cards thead,
+  .adm-table.adm-table-cards tbody,
+  .adm-table.adm-table-cards tr,
+  .adm-table.adm-table-cards td {
+    display: block;
+    width: 100%;
+    overflow: visible;
+    white-space: normal;
+  }
+  .adm-table.adm-table-cards thead {
+    display: none;
+  }
+  .adm-table.adm-table-cards tr {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    margin-bottom: 10px;
+    padding: 12px 14px;
+  }
+  .adm-table.adm-table-cards td {
+    border: none;
+    padding: 4px 0;
+    font-size: 13px;
+  }
+  .adm-table.adm-table-cards td[data-label]::before {
+    content: attr(data-label) "：";
+    color: var(--text-muted);
+    font-size: 11px;
+    margin-right: 6px;
+  }
+  .adm-table.adm-table-cards td.row-actions {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--border-soft);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .adm-table.adm-table-cards td.row-actions::before {
+    display: none;
+  }
+  .adm-table.adm-table-cards td.row-actions button {
+    flex: 1 1 30%;
+  }
+  /* agent 卡片网格收缩到 1 列（避免 minmax 260 横滚） */
+  .adm-agent-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px;
   }
   .adm-form-grid {
     grid-template-columns: 1fr;

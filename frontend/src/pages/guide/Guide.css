@@ -103,6 +103,30 @@
   }
 }
 
+/* 移动端章节跳转（替代隐藏的 sidebar TOC） */
+.gd-jump-mobile {
+  display: none;
+}
+@media (max-width: 900px) {
+  .gd-jump-mobile {
+    display: block;
+    width: 100%;
+    padding: 10px 12px;
+    margin-bottom: 16px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface-2);
+    color: var(--text);
+    font-family: inherit;
+    appearance: none;
+    background-image: linear-gradient(45deg, transparent 50%, var(--text-dim) 50%),
+      linear-gradient(135deg, var(--text-dim) 50%, transparent 50%);
+    background-position: calc(100% - 18px) 50%, calc(100% - 13px) 50%;
+    background-size: 5px 5px;
+    background-repeat: no-repeat;
+  }
+}
+
 /* ---- 移动端 ---- */
 @media (max-width: 800px) {
   .gd-body {

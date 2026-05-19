@@ -135,7 +135,7 @@ export function AdminUsers() {
       {loading ? (
         <Skeleton lines={6} />
       ) : (
-        <table className="adm-table">
+        <table className="adm-table adm-table-cards">
           <thead>
             <tr>
               <th>姓名</th>
@@ -151,13 +151,13 @@ export function AdminUsers() {
           <tbody>
             {items.map((u) => (
               <tr key={u.id}>
-                <td>{u.name}</td>
-                <td style={{ fontFamily: "var(--font-mono)", fontSize: 12 }}>{u.email}</td>
-                <td>
+                <td data-label="姓名">{u.name}</td>
+                <td data-label="邮箱" style={{ fontFamily: "var(--font-mono)", fontSize: 12 }}>{u.email}</td>
+                <td data-label="角色">
                   <span className={`role-badge role-${u.auth_role}`}>{u.auth_role}</span>
                 </td>
-                <td>{u.feishu_bound ? "✅" : "—"}</td>
-                <td>
+                <td data-label="飞书">{u.feishu_bound ? "✅" : "—"}</td>
+                <td data-label="状态">
                   <span
                     className={`adm-status-${u.status}`}
                     title={u.status === "rejected" && u.reject_reason ? u.reject_reason : undefined}
@@ -171,8 +171,8 @@ export function AdminUsers() {
                       : "禁用"}
                   </span>
                 </td>
-                <td>{u.team || "-"}</td>
-                <td style={{ fontSize: 11, color: "var(--text-muted)" }}>
+                <td data-label="团队">{u.team || "-"}</td>
+                <td data-label="注册时间" style={{ fontSize: 11, color: "var(--text-muted)" }}>
                   {u.created_at ? new Date(u.created_at).toLocaleDateString() : "-"}
                 </td>
                 <td className="row-actions">
