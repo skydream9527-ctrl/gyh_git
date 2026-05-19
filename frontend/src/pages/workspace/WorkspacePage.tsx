@@ -460,24 +460,83 @@ export function WorkspacePage() {
         }
         rightActions={
           <>
-            <ShareToggle
-              taskId={taskId}
-              visibility={task.visibility}
-              publishStatus={(task as any).publish_status}
-              onChanged={async () => {
-                const t = await taskApi.detail(taskId);
-                setTask(t);
-              }}
-            />
-            {(role === "owner" || role === "admin") && (
+            <div className="ws-actions-desktop">
+              <ShareToggle
+                taskId={taskId}
+                visibility={task.visibility}
+                publishStatus={(task as any).publish_status}
+                onChanged={async () => {
+                  const t = await taskApi.detail(taskId);
+                  setTask(t);
+                }}
+              />
+              {(role === "owner" || role === "admin") && (
+                <button
+                  className="btn-ghost"
+                  onClick={() => setInviteOpen(true)}
+                  title="邀请其他用户协作此任务"
+                >
+                  👥 邀请协作
+                </button>
+              )}
+            </div>
+            <div className="ws-actions-mobile">
               <button
-                className="btn-ghost"
-                onClick={() => setInviteOpen(true)}
-                title="邀请其他用户协作此任务"
+                className="ws-actions-more"
+                onClick={() => setMobileActionsOpen((v) => !v)}
+                aria-label="更多操作"
+                aria-expanded={mobileActionsOpen}
               >
-                👥 邀请协作
+                ⋯
               </button>
-            )}
+              {mobileActionsOpen && (
+                <>
+                  <div
+                    className="ws-sec-more-mask"
+                    onClick={() => setMobileActionsOpen(false)}
+                  />
+                  <div className="ws-sec-more-menu ws-actions-mobile-menu" role="menu">
+                    <div onClick={() => setMobileActionsOpen(false)} role="presentation">
+                      <ShareToggle
+                        taskId={taskId}
+                        visibility={task.visibility}
+                        publishStatus={(task as any).publish_status}
+                        onChanged={async () => {
+                          const t = await taskApi.detail(taskId);
+                          setTask(t);
+                        }}
+                      />
+                    </div>
+                    {(role === "owner" || role === "admin") && (
+                      <button
+                        onClick={() => {
+                          setMobileActionsOpen(false);
+                          setInviteOpen(true);
+                        }}
+                      >
+                        👥 邀请协作
+                      </button>
+                    )}
+                    <button
+                      onClick={() => {
+                        setMobileActionsOpen(false);
+                        exportConversation();
+                      }}
+                    >
+                      💾 导出对话
+                    </button>
+                    <button
+                      onClick={() => {
+                        setMobileActionsOpen(false);
+                        refreshTaskData();
+                      }}
+                    >
+                      🔁 重新加载
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
           </>
         }
       />
@@ -746,42 +805,7 @@ export function WorkspacePage() {
             >
               🔁 重新加载
             </button>
-            {/* 移动端：上面两个按钮被 CSS 隐藏，用"⋯"弹出菜单替代 */}
-            <div className="ws-sec-more">
-              <button
-                className="ws-mobile-toggle"
-                onClick={() => setMobileActionsOpen((v) => !v)}
-                aria-label="更多"
-              >
-                ⋯
-              </button>
-              {mobileActionsOpen && (
-                <>
-                  <div
-                    className="ws-sec-more-mask"
-                    onClick={() => setMobileActionsOpen(false)}
-                  />
-                  <div className="ws-sec-more-menu" role="menu">
-                    <button
-                      onClick={() => {
-                        setMobileActionsOpen(false);
-                        exportConversation();
-                      }}
-                    >
-                      💾 导出对话
-                    </button>
-                    <button
-                      onClick={() => {
-                        setMobileActionsOpen(false);
-                        refreshTaskData();
-                      }}
-                    >
-                      🔁 重新加载
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
+            {/* 移动端 ⋯ 菜单已搬到 TopNav 右上角，统一一处管所有任务级动作 */}
           </div>
           <AgentUpdateBanner
             task={task}
