@@ -81,6 +81,12 @@ class Settings(BaseSettings):
     ICE_SUBAGENT_TIMEOUT_SEC: int = 120
     ICE_KYUUBI_CONCURRENCY: int = 3
     ICE_BG_TASK_ENABLED: bool = False
+    # Python sandbox (data-analysis agent's execute_python tool)
+    ICE_PYTHON_SANDBOX_ENABLED: bool = True
+    ICE_PYTHON_SANDBOX_TIMEOUT_SEC: int = 60
+    ICE_PYTHON_SANDBOX_MEMORY_MB: int = 1024
+    ICE_PYTHON_SANDBOX_FSIZE_MB: int = 50
+    ICE_PYTHON_SANDBOX_CONCURRENCY: int = 2
 
     # 米盾 (Aegis) — production auth. When enabled, JWT is replaced by
     # X-Proxy-UserDetail header verification. Public key from the Aegis admin

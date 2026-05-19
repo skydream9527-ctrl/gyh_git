@@ -1,4 +1,4 @@
-.PHONY: help install backend frontend dev seed test fmt clean pack pack-clean reset-data \
+.PHONY: help install install-sandbox backend frontend dev seed test fmt clean pack pack-clean reset-data \
         prod-build prod-run prod
 
 VERSION ?= $(shell date +%Y%m%d)
@@ -11,7 +11,8 @@ PROD_HOST ?= 0.0.0.0
 help:
 	@echo "ICE Data Workbench v3 — local dev + deploy"
 	@echo ""
-	@echo "  make install     install backend (pip) + frontend (npm)"
+	@echo "  make install         install backend (pip) + frontend (npm)"
+	@echo "  make install-sandbox bootstrap Python sandbox venv (data-analysis agent)"
 	@echo "  make dev         run backend + frontend in parallel (dev :5173 + :8000)"
 	@echo "  make backend     only backend on :8000"
 	@echo "  make frontend    only frontend on :5173"
@@ -30,6 +31,9 @@ help:
 install:
 	cd backend && python3 -m venv .venv && . .venv/bin/activate && pip install -U pip && pip install -e ".[dev]"
 	cd frontend && npm install
+
+install-sandbox:
+	bash backend/scripts/bootstrap_sandbox_venv.sh
 
 backend:
 	cd backend && . .venv/bin/activate && uvicorn app.main:app --reload --port 8000
@@ -76,7 +80,7 @@ reset-data:
 	@echo "  done."
 
 clean:
-	rm -rf backend/.venv backend/.pytest_cache
+	rm -rf backend/.venv backend/.venv-sandbox backend/.pytest_cache
 	find backend -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
 	rm -rf frontend/node_modules frontend/dist
 	rm -rf .cache
@@ -90,6 +94,7 @@ pack: prod-build
 	@zip -r $(PKG_NAME) . \
 	  -x '*.git/*' '*.git' \
 	  -x '*backend/.venv/*' \
+	  -x '*backend/.venv-sandbox/*' \
 	  -x '*frontend/node_modules/*' \
 	  -x '.cache/*' '*/.cache/*' \
 	  -x 'users/[a-f0-9]*/*' \

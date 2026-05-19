@@ -147,6 +147,20 @@ class StoragePaths:
     def task_files_imported_meta(self, task_id: str, file_id: str) -> Path:
         return self.task_files_imported(task_id) / ".meta" / f"{file_id}.json"
 
+    # Python sandbox artifacts
+
+    def task_python_runs_dir(self, task_id: str) -> Path:
+        """Where execute_python stores the user-code .py files (auditable)."""
+        return self.task_dir(task_id) / ".python_runs"
+
+    def task_charts_dir(self, task_id: str) -> Path:
+        """Where execute_python writes PNG/SVG chart artifacts."""
+        return self.task_dir(task_id) / "files" / "output" / "charts"
+
+    def task_models_dir(self, task_id: str) -> Path:
+        """Where execute_python persists fitted model pickles for replay."""
+        return self.task_dir(task_id) / "files" / "output" / "models"
+
     # Source-of-truth agent files (shared across tasks)
 
     def agent_prompt_system_md(self, agent_id: str) -> Path:

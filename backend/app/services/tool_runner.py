@@ -11,6 +11,7 @@ Tools available regardless of which Agent the conversation is bound to:
 from __future__ import annotations
 
 import asyncio
+import os
 from datetime import datetime, timezone
 from typing import Any
 
@@ -118,6 +119,100 @@ BUILTIN_TOOL_SCHEMAS: list[dict] = [
         },
         "_meta": {
             "display_name": "保存文件到工作区",
+            "side_effect": "write",
+            "parallel_safe": False,
+            "plan_mode_allowed": False,
+            "subagent_exposable": True,
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "execute_python",
+            "description": (
+                "Execute Python code in a sandboxed subprocess for data "
+                "analysis (predictive modeling / statistical methods that SQL "
+                "cannot do). The sandbox has pandas, numpy, scipy, sklearn, "
+                "statsmodels, prophet, ruptures, matplotlib, seaborn pre-"
+                "installed. Network is BLOCKED — code must read inputs from "
+                "<task_workspace>/files/output/data/ (CSVs you previously "
+                "wrote with write_file or kyuubi_query) and write outputs to "
+                "data/ (CSV) or charts/ (PNG, matplotlib Agg). Wall-clock "
+                "timeout 60s, memory 1GB. ONLY use when the analysis cannot "
+                "be done in SQL — for aggregation/filtering, prefer "
+                "kyuubi_query first then process the smaller CSV here."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "code": {
+                        "type": "string",
+                        "description": (
+                            "Full Python source. Use relative paths (cwd = "
+                            "<task_workspace>/files/output/). Print key "
+                            "results to stdout for the LLM/user to see; write "
+                            "artifacts to disk."
+                        ),
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": (
+                            "One-line summary of what this run computes "
+                            "(audit / display, not behavior)."
+                        ),
+                    },
+                    "timeout_sec": {
+                        "type": "integer",
+                        "description": (
+                            "Optional override for wall-clock + CPU limit; "
+                            "defaults to ICE_PYTHON_SANDBOX_TIMEOUT_SEC."
+                        ),
+                    },
+                },
+                "required": ["code"],
+            },
+        },
+        "_meta": {
+            "display_name": "执行 Python 分析",
+            "side_effect": "write",
+            "parallel_safe": False,
+            "plan_mode_allowed": False,
+            "subagent_exposable": True,
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "feishu_upload_image",
+            "description": (
+                "Upload a PNG/JPG image from the task workspace to a Feishu "
+                "doc and return its image_token (so subsequent feishu docx "
+                "edits can embed it). Wraps `feishu docx upload-image "
+                "<doc_token> --file <path>`. Use after `feishu_publish` "
+                "creates the doc and `execute_python` produces a chart PNG "
+                "under <task_workspace>/files/output/charts/."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "doc_token": {
+                        "type": "string",
+                        "description": "Feishu docx token (returned by feishu_publish).",
+                    },
+                    "image_path": {
+                        "type": "string",
+                        "description": (
+                            "Path relative to <task_workspace>/files/output/, "
+                            "e.g. 'charts/T3_forecast.png'. Absolute paths "
+                            "outside the task workspace are rejected."
+                        ),
+                    },
+                },
+                "required": ["doc_token", "image_path"],
+            },
+        },
+        "_meta": {
+            "display_name": "上传图片到飞书",
             "side_effect": "write",
             "parallel_safe": False,
             "plan_mode_allowed": False,
@@ -754,6 +849,123 @@ async def _tool_write_file(args: dict, ctx: dict | None = None) -> Any:
     }
 
 
+_python_sem: asyncio.Semaphore | None = None
+
+
+def _get_python_sem() -> asyncio.Semaphore:
+    global _python_sem
+    if _python_sem is None:
+        _python_sem = asyncio.Semaphore(
+            max(1, get_settings().ICE_PYTHON_SANDBOX_CONCURRENCY)
+        )
+    return _python_sem
+
+
+async def _tool_execute_python(args: dict, ctx: dict | None = None) -> Any:
+    """Run Python code in the data-analysis sandbox.
+
+    Inputs:
+        code: full Python source (required)
+        description: free-form audit string
+        timeout_sec: optional override (capped at config max)
+
+    Outputs:
+        Same shape as SandboxResult.to_dict() plus registered file_ids for
+        any new artifact under tasks/{tid}/files/output/. The frontend's
+        left-side file panel picks up the registered files automatically.
+    """
+    from .sandbox import run_python, SandboxStatus
+    from . import file_svc
+    from ..core.storage.paths import get_paths
+
+    s = get_settings()
+    if not s.ICE_PYTHON_SANDBOX_ENABLED:
+        return {
+            "error_code": "PYTHON_SANDBOX_DISABLED",
+            "message": "Python 沙箱已关闭：管理员需在 .env 设 ICE_PYTHON_SANDBOX_ENABLED=true",
+        }
+
+    code = args.get("code")
+    if not isinstance(code, str) or not code.strip():
+        return {"error_code": "VALIDATION_ERROR", "message": "code is required"}
+
+    task_id = (ctx or {}).get("task_id")
+    user_id = (ctx or {}).get("user_id")
+    if not task_id or not user_id:
+        return {
+            "error_code": "VALIDATION_ERROR",
+            "message": "execute_python is only available in a task context",
+        }
+
+    timeout_req = args.get("timeout_sec")
+    try:
+        timeout_sec = int(timeout_req) if timeout_req is not None else s.ICE_PYTHON_SANDBOX_TIMEOUT_SEC
+    except (TypeError, ValueError):
+        timeout_sec = s.ICE_PYTHON_SANDBOX_TIMEOUT_SEC
+    timeout_sec = max(5, min(timeout_sec, s.ICE_PYTHON_SANDBOX_TIMEOUT_SEC))
+
+    paths = get_paths()
+    task_dir = paths.task_dir(task_id)
+    if not task_dir.exists():
+        return {
+            "error_code": "TASK_NOT_FOUND",
+            "message": f"task workspace missing: {task_dir}",
+        }
+
+    try:
+        async with _get_python_sem():
+            result = await run_python(
+                code,
+                task_dir=task_dir,
+                timeout_sec=timeout_sec,
+                memory_mb=s.ICE_PYTHON_SANDBOX_MEMORY_MB,
+                fsize_mb=s.ICE_PYTHON_SANDBOX_FSIZE_MB,
+                description=str(args.get("description") or "")[:200],
+            )
+    except Exception as exc:  # noqa: BLE001 — sandbox shouldn't crash the agent
+        return {
+            "error_code": "PYTHON_SANDBOX_ERROR",
+            "message": str(exc)[:300],
+        }
+
+    payload = result.to_dict()
+
+    # Register newly-created files under files/output/ with file_svc so the
+    # frontend file panel picks them up. Only files inside files/output/ are
+    # registered (the runner reports paths relative to that directory).
+    registered: list[dict] = []
+    if result.status == SandboxStatus.OK and result.files_created:
+        out_root = paths.task_files_output(task_id)
+        for f in result.files_created:
+            full = out_root / f.relpath
+            try:
+                if not full.is_file():
+                    continue
+                data = full.read_bytes()
+                # Filename in the registry uses just the basename. Keeping
+                # subdir structure (charts/, models/, data/) on disk is fine,
+                # but the file_svc registry is flat per task.
+                meta = await file_svc.upload_task_file(
+                    task_id=task_id,
+                    owner_id=user_id,
+                    filename=f.relpath.replace(os.sep, "_"),
+                    data=data,
+                    scope="output",
+                )
+                registered.append({
+                    "relpath": f.relpath,
+                    "file_id": meta["id"],
+                    "size_bytes": meta["size_bytes"],
+                    "kind": f.kind,
+                })
+            except Exception:  # noqa: BLE001
+                # don't fail the whole tool call on file registration error
+                continue
+
+    payload["registered_files"] = registered
+    return payload
+
+
 async def _tool_feishu_publish(args: dict, ctx: dict | None = None) -> Any:
     """Create a Feishu doc via the bundled `feishu` CLI."""
     import json as _json
@@ -809,6 +1021,89 @@ async def _tool_feishu_publish(args: dict, ctx: dict | None = None) -> Any:
         "doc_token": data.get("doc_token", ""),
         "title": title,
         "warning": err_s.strip() if proc.returncode in (2, 3) else None,
+    }
+
+
+async def _tool_feishu_upload_image(args: dict, ctx: dict | None = None) -> Any:
+    """Upload a PNG/JPG from the task workspace to a Feishu doc.
+
+    Wraps `feishu docx upload-image <doc_token> --file <path>`.
+    Path must resolve under <task_workspace>/files/output/ — absolute escapes
+    are rejected. Returns image_token (used for embedding) + raw stdout.
+    """
+    import json as _json
+    import shutil
+    from pathlib import Path
+
+    from ..core.storage.paths import get_paths
+
+    doc_token = (args.get("doc_token") or "").strip()
+    rel = (args.get("image_path") or "").strip()
+    if not doc_token or not rel:
+        return {"error_code": "VALIDATION_ERROR", "message": "doc_token and image_path are required"}
+    task_id = (ctx or {}).get("task_id")
+    if not task_id:
+        return {"error_code": "VALIDATION_ERROR", "message": "feishu_upload_image needs a task context"}
+
+    cli = shutil.which("feishu")
+    if not cli:
+        return {
+            "error_code": "FEISHU_CLI_NOT_INSTALLED",
+            "message": "feishu CLI 未安装；请管理员在后端环境安装 feishu 命令行",
+        }
+
+    # Resolve image_path against task output dir; reject escapes.
+    paths = get_paths()
+    out_root = paths.task_files_output(task_id).resolve()
+    candidate = (out_root / rel).resolve()
+    try:
+        candidate.relative_to(out_root)
+    except ValueError:
+        return {
+            "error_code": "PATH_OUTSIDE_TASK_WORKSPACE",
+            "message": f"image_path must be under {out_root}",
+        }
+    if not candidate.is_file():
+        return {
+            "error_code": "FILE_NOT_FOUND",
+            "message": f"image not found: {rel}",
+        }
+    if candidate.stat().st_size > 10 * 1024 * 1024:
+        return {
+            "error_code": "IMAGE_TOO_LARGE",
+            "message": f"image > 10MB: {rel}",
+        }
+
+    proc = await asyncio.create_subprocess_exec(
+        cli, "docx", "upload-image", doc_token, "--file", str(candidate),
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE,
+    )
+    try:
+        out_b, err_b = await asyncio.wait_for(proc.communicate(), timeout=60.0)
+    except asyncio.TimeoutError:
+        proc.kill()
+        await proc.wait()
+        return {"error_code": "FEISHU_CLI_TIMEOUT", "message": "feishu upload-image timeout (60s)"}
+
+    out_s = out_b.decode(errors="replace")
+    err_s = err_b.decode(errors="replace")
+    if proc.returncode != 0:
+        return {
+            "error_code": "FEISHU_CLI_ERROR",
+            "message": (err_s.strip() or f"feishu exit {proc.returncode}")[:600],
+        }
+    try:
+        data = _json.loads(out_s)
+    except _json.JSONDecodeError:
+        # CLI may print plain token; normalize
+        token = out_s.strip().split()[-1] if out_s.strip() else ""
+        return {"image_token": token, "raw_output": out_s.strip()[:600]}
+    return {
+        "image_token": data.get("image_token") or data.get("token") or "",
+        "doc_token": doc_token,
+        "image_path": rel,
+        "raw": data,
     }
 
 
@@ -1380,9 +1675,11 @@ _DISPATCH = {
     "echo": _tool_echo,
     "kyuubi_query": _tool_kyuubi,
     "write_file": _tool_write_file,
+    "execute_python": _tool_execute_python,
     "list_files": _tool_list_files,
     "read_file": _tool_read_file,
     "feishu_publish": _tool_feishu_publish,
+    "feishu_upload_image": _tool_feishu_upload_image,
     "read_skill": _tool_read_skill,
     "read_agent_knowledge": _tool_read_agent_knowledge,
     "todo_write": _tool_todo_write,
