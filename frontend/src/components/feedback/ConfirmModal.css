@@ -42,3 +42,22 @@
   cursor: pointer;
   font-size: 13px;
 }
+
+@media (max-width: 640px) {
+  .cm-overlay {
+    align-items: flex-end;
+  }
+  .cm-card {
+    min-width: 0;
+    max-width: 100%;
+    width: 100%;
+    border-radius: 16px 16px 0 0;
+    padding: 22px 20px calc(20px + env(safe-area-inset-bottom, 0px));
+  }
+  .cm-actions {
+    gap: 8px;
+  }
+  .cm-actions button {
+    flex: 1;
+  }
+}

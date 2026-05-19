@@ -11,7 +11,7 @@ interface Tab {
 }
 
 const TABS: Tab[] = [
-  { to: "/dashboard", icon: "📒", label: "笔记本", match: (p) => p.startsWith("/dashboard") || p === "/" },
+  { to: "/dashboard", icon: "📒", label: "任务", match: (p) => p.startsWith("/dashboard") || p === "/" },
   { to: "/scheduled-tasks", icon: "⏱", label: "定时", match: (p) => p.startsWith("/scheduled") },
   { to: "/guide", icon: "📖", label: "指南", match: (p) => p.startsWith("/guide") },
   { to: "/admin", icon: "🛡", label: "管理", match: (p) => p.startsWith("/admin"), adminOnly: true },

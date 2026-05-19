@@ -125,3 +125,27 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+@media (max-width: 640px) {
+  .import-link-backdrop {
+    align-items: flex-end;
+    padding: 0;
+  }
+  .import-link-dialog {
+    width: 100%;
+    max-width: 100%;
+    border-radius: 16px 16px 0 0;
+  }
+  .ild-head,
+  .ild-body {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  .ild-actions {
+    padding: 12px 16px calc(14px + env(safe-area-inset-bottom, 0px));
+    gap: 8px;
+  }
+  .ild-actions button {
+    flex: 1;
+  }
+}

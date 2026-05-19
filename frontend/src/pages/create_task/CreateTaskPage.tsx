@@ -89,6 +89,12 @@ export function CreateTaskPage() {
     }
   }, [params]);
 
+  useEffect(() => {
+    if (window.innerWidth <= 800) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [step]);
+
   const filteredAgents = useMemo(
     () => agents.filter((a) => !form.paradigm || a.paradigm === form.paradigm),
     [agents, form.paradigm],

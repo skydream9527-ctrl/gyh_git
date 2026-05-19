@@ -103,15 +103,28 @@
   background: var(--surface, #fff);
 }
 
-@media (max-width: 600px) {
+@media (max-width: 640px) {
+  .crystallize-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
   .crystallize-card {
     width: 100%;
-    max-height: calc(100vh - 32px);
+    max-width: 100%;
+    max-height: 92vh;
+    border-radius: 16px 16px 0 0;
   }
   .crystallize-head,
   .crystallize-body,
   .crystallize-actions {
     padding-left: 16px;
     padding-right: 16px;
+  }
+  .crystallize-actions {
+    padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+    gap: 8px;
+  }
+  .crystallize-actions button {
+    flex: 1;
   }
 }
