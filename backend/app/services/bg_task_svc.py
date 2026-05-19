@@ -18,7 +18,7 @@ import logging
 import uuid
 from datetime import datetime, timezone
 
-from ..core.storage import append_jsonl, get_paths
+from ..core.storage import append_jsonl, get_paths, read_json
 from . import agent_runtime, agents_svc, experience_card_svc, notification_svc, tool_runner
 
 log = logging.getLogger("bg_task")
@@ -70,14 +70,19 @@ async def _run(
     paths = get_paths()
     started = _now()
     try:
-        system_prompt = experience_card_svc.merged_system_prompt(agent_id)
+        meta = read_json(paths.task_meta(task_id)) or {}
+        skill_ids = list(meta.get("skill_ids") or [])
+        system_prompt = experience_card_svc.merged_system_prompt(
+            agent_id, task_skill_ids=skill_ids
+        )
         tools = tool_runner.get_anthropic_tools(
             feature_flags={
                 # Background jobs can use normal tools but can't recurse or re-enqueue.
                 "spawn_subagent": False,
                 "run_background": False,
                 "exit_plan_mode": False,
-            }
+            },
+            task_skill_ids=skill_ids,
         )
         ctx = {
             "user_id": user_id,

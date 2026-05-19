@@ -487,6 +487,7 @@ def get_anthropic_tools(
     plan_mode: bool = False,
     in_subagent: bool = False,
     feature_flags: dict | None = None,
+    task_skill_ids: list[str] | None = None,
 ) -> list[dict]:
     """Convert BUILTIN_TOOL_SCHEMAS to Anthropic native tool schema.
 
@@ -496,6 +497,11 @@ def get_anthropic_tools(
     `feature_flags` filters out v2 tools whose global flag is off; pass a dict
     like {"todo_write": True, "exit_plan_mode": False, "spawn_subagent": True,
     "run_background": False}. Missing keys default to True (tool stays on).
+    `task_skill_ids` (when not None) rewrites the read_skill tool description
+    so the LLM only sees the agentic skills bound to the current task — the
+    hardcoded example list (kyuubi, nl-sql, ...) is replaced by the actual
+    bound ids. Pass [] to advertise "no agentic skills bound". Pass None for
+    contexts without a task (admin sandbox, scheduler one-shot completion).
     """
     out = []
     for t in BUILTIN_TOOL_SCHEMAS:
@@ -509,14 +515,43 @@ def get_anthropic_tools(
             flag = feature_flags.get(fn["name"])
             if flag is False:
                 continue
+        description = fn["description"]
+        if task_skill_ids is not None and fn["name"] == "read_skill":
+            description = _read_skill_description_for_task(task_skill_ids)
         out.append(
             {
                 "name": fn["name"],
-                "description": fn["description"],
+                "description": description,
                 "input_schema": fn["parameters"],
             }
         )
     return out
+
+
+def _read_skill_description_for_task(task_skill_ids: list[str]) -> str:
+    """Override the hardcoded example list in read_skill's schema with the
+    skills actually bound to the current task. Keeps the call protocol /
+    `path` semantics intact — only the example enumeration changes.
+    """
+    if not task_skill_ids:
+        return (
+            "Fetch the skill's instruction file. NOTE: this task has NO agentic "
+            "skills bound — calling read_skill will return SKILL_NOT_FOUND for "
+            "every skill_id. Ask the user to add a skill in the workspace "
+            "「🧰 本任务 Skills」 panel first, then retry."
+        )
+    bound = ", ".join(f"`{sid}`" for sid in task_skill_ids)
+    return (
+        f"Fetch the skill's instruction file. This task has these agentic "
+        f"skills bound: {bound}. Calling read_skill on any OTHER skill id "
+        "returns SKILL_NOT_FOUND — only the listed ids are available. "
+        "Default (no `path`) = returns SKILL.md. To read a sibling reference "
+        "file that the SKILL.md points you to (e.g. `reference/browser/"
+        "table-schema.md`), pass `path` with the relative path. Pass "
+        "`path=\"/\"` or `path=\"ls\"` to list all files in the skill folder. "
+        "Content is read from the task's own snapshot, so answers are "
+        "reproducible even if the global skill is updated later."
+    )
 
 
 def get_display_name(tool_name: str) -> str:
@@ -946,9 +981,11 @@ async def _tool_read_agent_knowledge(args: dict, ctx: dict | None = None) -> Any
 
 
 async def _tool_read_skill(args: dict, ctx: dict | None = None) -> Any:
-    """Return skill content. Resolution order:
-      1. task-scoped snapshot: tasks/<task_id>/skills/<sid>/
-      2. global fallback:       skills/<sid>/
+    """Return skill content. Resolution rule:
+      - inside a task (ctx.task_id present): ONLY tasks/<task_id>/skills/<sid>/.
+        Skills not bound to the task are invisible — call returns SKILL_NOT_FOUND
+        even if the same skill exists in the global catalog.
+      - outside a task (admin sandbox / test_run): falls back to global skills/<sid>/.
 
     Supports `path` arg:
       - omitted or empty → SKILL.md
@@ -966,25 +1003,41 @@ async def _tool_read_skill(args: dict, ctx: dict | None = None) -> Any:
         return {"error_code": "VALIDATION_ERROR", "message": "skill_id is required"}
     rel = (args.get("path") or "").strip().lstrip("/")
 
-    # Resolve source dir: task snapshot has priority
     task_id = (ctx or {}).get("task_id")
     paths = get_paths()
-    candidates: list[tuple[str, Path]] = []
-    if task_id:
-        candidates.append(("task", paths.task_skills_dir(task_id) / sid))
-    candidates.append(("global", paths.skills / sid))
 
     base: Path | None = None
-    source = "global"
-    for src, p in candidates:
-        if p.exists() and p.is_dir():
-            base = p.resolve()
-            source = src
-            break
+    source: str
+    if task_id:
+        candidate = paths.task_skills_dir(task_id) / sid
+        source = "task"
+        if candidate.exists() and candidate.is_dir():
+            base = candidate.resolve()
+    else:
+        candidate = paths.skills / sid
+        source = "global"
+        if candidate.exists() and candidate.is_dir():
+            base = candidate.resolve()
+
     if base is None:
+        if task_id:
+            bound: list[str] = []
+            skills_root = paths.task_skills_dir(task_id)
+            if skills_root.exists():
+                bound = sorted(p.name for p in skills_root.iterdir() if p.is_dir())
+            hint = (
+                f"未在本任务的 Skills 列表里找到 '{sid}'。"
+                f"已绑定的 skill：{bound or '（无）'}。"
+                "如需使用，请在工作区右栏「🧰 本任务 Skills」点击 +添加。"
+            )
+            return {
+                "error_code": "SKILL_NOT_FOUND",
+                "message": hint,
+                "bound_skill_ids": bound,
+            }
         return {
             "error_code": "SKILL_NOT_FOUND",
-            "message": f"skill '{sid}' not found in task snapshot or global catalog",
+            "message": f"skill '{sid}' not found in global catalog",
         }
 
     # "ls" or "/" → directory listing
@@ -1202,7 +1255,12 @@ async def _tool_spawn_subagent(args: dict, ctx: dict | None = None) -> Any:
     transcript_path = paths.task_subagent_run(task_id, run_id)
     transcript_path.parent.mkdir(parents=True, exist_ok=True)
 
-    system_prompt = experience_card_svc.merged_system_prompt(agent_id)
+    from ..core.storage import read_json as _read_json
+    parent_meta = _read_json(paths.task_meta(task_id)) or {}
+    parent_skill_ids = list(parent_meta.get("skill_ids") or [])
+    system_prompt = experience_card_svc.merged_system_prompt(
+        agent_id, task_skill_ids=parent_skill_ids
+    )
     allowed = args.get("allowed_tools") if isinstance(args.get("allowed_tools"), list) else None
     feature_flags = None
     if allowed:
@@ -1210,7 +1268,11 @@ async def _tool_spawn_subagent(args: dict, ctx: dict | None = None) -> Any:
         # If the parent passed a whitelist, all OTHER tools are off in the child.
         # get_anthropic_tools treats "flag=False" as drop; explicit "True" keeps.
         feature_flags = {t["function"]["name"]: (t["function"]["name"] in allowed) for t in BUILTIN_TOOL_SCHEMAS}
-    tools = get_anthropic_tools(in_subagent=True, feature_flags=feature_flags)
+    tools = get_anthropic_tools(
+        in_subagent=True,
+        feature_flags=feature_flags,
+        task_skill_ids=parent_skill_ids,
+    )
 
     child_ctx = {
         "user_id": parent_ctx.get("user_id"),

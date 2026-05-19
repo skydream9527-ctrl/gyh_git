@@ -295,14 +295,22 @@ async def _handle_user_message(
     agent_id = task.get("agent_id") or "biz-insight"
     plan_state = await conversation_svc.get_plan_mode(task_id=task_id, conv_id=conversation_id)
     plan_mode = bool(plan_state.get("plan_mode"))
-    system_prompt = experience_card_svc.merged_system_prompt(agent_id, plan_mode=plan_mode)
+    system_prompt = experience_card_svc.merged_system_prompt(
+        agent_id,
+        plan_mode=plan_mode,
+        task_skill_ids=list(task.get("skill_ids") or []),
+    )
     feature_flags = {
         "todo_write": s.ICE_TODO_ENABLED,
         "exit_plan_mode": s.ICE_PLAN_MODE_ENABLED,
         "spawn_subagent": s.ICE_SUBAGENT_ENABLED,
         "run_background": s.ICE_BG_TASK_ENABLED,
     }
-    tools = tool_runner.get_anthropic_tools(plan_mode=plan_mode, feature_flags=feature_flags)
+    tools = tool_runner.get_anthropic_tools(
+        plan_mode=plan_mode,
+        feature_flags=feature_flags,
+        task_skill_ids=list(task.get("skill_ids") or []),
+    )
     # Per-message > task workspace > settings default
     model_id = (
         msg.get("model")

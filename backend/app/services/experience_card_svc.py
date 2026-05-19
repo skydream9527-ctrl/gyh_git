@@ -275,12 +275,23 @@ _PLAN_MODE_BANNER = (
 )
 
 
-def merged_system_prompt(agent_id: str, *, plan_mode: bool = False) -> str:
-    """Agent base prompt + approved cards + global skill catalog.
+def merged_system_prompt(
+    agent_id: str,
+    *,
+    plan_mode: bool = False,
+    task_skill_ids: list[str] | None = None,
+) -> str:
+    """Agent base prompt + approved cards + skill catalog.
 
-    The global skill catalog lets EVERY Agent see EVERY registered skill so the
-    LLM can use them without per-Agent binding (per product decision: skills
-    are globally callable).
+    The skill catalog section is task-scoped:
+      - `task_skill_ids` is None → show every globally-callable function tool
+        plus EVERY agentic skill (legacy behavior, used by admin sandbox /
+        scheduler / pre-task contexts where there is no task to scope to).
+      - `task_skill_ids` is a list → show globally-callable function tools
+        plus ONLY the agentic skills bound to the task. Agentic skills not in
+        the list are not enumerated to the LLM, so it doesn't even know they
+        exist (preventing it from calling read_skill against unbound ones, or
+        from regurgitating a "here are all the skills" table to the user).
 
     `plan_mode=True` appends the PLAN MODE banner so the LLM knows write-side
     tools are off-limits until `exit_plan_mode` is called.
@@ -293,7 +304,7 @@ def merged_system_prompt(agent_id: str, *, plan_mode: bool = False) -> str:
     parts: list[str] = [base]
     if cards_path.exists():
         parts.append(cards_path.read_text(encoding="utf-8"))
-    skill_section = _build_skill_catalog_section()
+    skill_section = _build_skill_catalog_section(task_skill_ids=task_skill_ids)
     if skill_section:
         parts.append(skill_section)
     s = get_settings()
@@ -304,14 +315,17 @@ def merged_system_prompt(agent_id: str, *, plan_mode: bool = False) -> str:
     return "\n\n---\n\n".join(parts)
 
 
-def _build_skill_catalog_section() -> str:
-    """Short global skill index — every Agent sees every Skill.
+def _build_skill_catalog_section(*, task_skill_ids: list[str] | None = None) -> str:
+    """Skill index for the system prompt.
 
     Strategy: list every skill's `id` + frontmatter `description` only (a few
     KB total). The full SKILL.md body is fetched on-demand via the `read_skill`
     function tool when the LLM decides a skill applies. This is the Claude
     Code progressive-disclosure pattern; it keeps the system prompt small
     enough to cache cheaply across rounds.
+
+    When `task_skill_ids` is provided, agentic-skill enumeration is filtered
+    to that allowlist so the LLM is unaware of unbound skills.
     """
     from .skill_svc import list_all
 
@@ -337,25 +351,42 @@ def _build_skill_catalog_section() -> str:
         "spawn_subagent",
         "run_background",
     }
+    from .tool_runner import _read_skill_description_for_task
+
     callable_lines: list[str] = []
     agentic_lines: list[str] = []
+    bound_set: set[str] | None = set(task_skill_ids) if task_skill_ids is not None else None
 
     for s in skills:
         sid = s.get("id") or s.get("name") or ""
         name = s.get("name") or sid
         desc = (s.get("description") or "").strip().replace("\n", " ")
+        # `read_skill` 的官方描述硬编码了 kyuubi/nl-sql/docx/... 全集示例；
+        # task 内必须用任务作用域的描述覆盖，否则 LLM 仍会从这条索引里读到全部
+        # skill 名字并在回复里复述给用户。
+        if sid == "read_skill" and bound_set is not None:
+            desc = _read_skill_description_for_task(list(task_skill_ids or [])).replace("\n", " ")
         if len(desc) > 280:
             desc = desc[:280].rstrip() + "…"
         if sid in callable_names:
             callable_lines.append(f"- `{sid}` — {name}：{desc}")
             continue
         if s.get("category") == "agentic":
+            if bound_set is not None and sid not in bound_set:
+                continue
             agentic_lines.append(f"- `{sid}` — {name}：{desc}")
 
-    out: list[str] = [
-        "# 可用 Skill 全集（全局，所有 Agent 共享）",
-        "本平台对所有 Agent 暴露同一套 Skill。下面是索引，全文按需用 `read_skill` 拉取。",
-    ]
+    if bound_set is None:
+        header = "# 可用 Skill 全集（全局，所有 Agent 共享）"
+        intro = "本平台对所有 Agent 暴露同一套 Skill。下面是索引，全文按需用 `read_skill` 拉取。"
+    else:
+        header = "# 本任务可用 Skill"
+        intro = (
+            "下面是**本任务**绑定的 Skill 索引（agentic skill 仅列任务里加过的；其他 skill "
+            "对本任务不可见，禁止臆测、禁止调用 `read_skill` 索取未列出的 id）。"
+            "agentic 全文按需用 `read_skill(skill_id=...)` 拉取。"
+        )
+    out: list[str] = [header, intro]
     if callable_lines:
         out.append(
             "## 直接调用的函数工具（function calling）\n"
@@ -369,6 +400,12 @@ def _build_skill_catalog_section() -> str:
             "**先调用 `read_skill(skill_id=...)` 拉取完整说明，再严格按其步骤执行**；"
             "产出的最终内容请用 `write_file` 保存到工作区，必要时用 `feishu_publish` 发布。\n\n"
             + "\n".join(agentic_lines)
+        )
+    elif bound_set is not None:
+        out.append(
+            "## Agentic Skills（说明书型）\n"
+            "本任务**未绑定任何 agentic skill**。如需 nl-sql / docx / pdf 之类，"
+            "请提示用户去工作区右栏「🧰 本任务 Skills」点击 +添加。"
         )
     return "\n\n".join(out)
 
