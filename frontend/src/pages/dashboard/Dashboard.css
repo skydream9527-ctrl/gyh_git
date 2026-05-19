@@ -95,8 +95,8 @@
     padding: 14px;
     min-height: auto;
   }
+  /* 不再 !important 强制 1 列，让外层断点 (≤720→2col, ≤340→1col) 接管 */
   .task-grid {
-    grid-template-columns: 1fr !important;
     gap: 10px;
   }
   .task-card {
