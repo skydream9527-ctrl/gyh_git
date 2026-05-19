@@ -5,6 +5,7 @@ import type { ApiError } from "@/api/client";
 import type { AgentCard } from "@/types/api";
 import type { TemplateRecord } from "@/api/endpoints";
 import { TopNav } from "@/components/shell/TopNav";
+import { MobileBottomBar } from "@/components/shell/MobileBottomBar";
 import { Skeleton } from "@/components/feedback/Skeleton";
 import { useUIStore } from "@/stores/uiStore";
 import "./CreateTask.css";
@@ -167,7 +168,7 @@ export function CreateTaskPage() {
     <div className="ct-page">
       <TopNav mode="workspace" crumb={<span>首页 / <span className="current">创建任务</span></span>} />
 
-      <main className="ct-main">
+      <main className="ct-main has-bottombar">
         <div className="ct-stepper">
           {[1, 2, 3].map((n) => (
             <div key={n} className={`ct-step ${step === n ? "active" : ""} ${step > n ? "done" : ""}`}>
@@ -392,6 +393,7 @@ export function CreateTaskPage() {
           </section>
         )}
       </main>
+      <MobileBottomBar />
     </div>
   );
 }

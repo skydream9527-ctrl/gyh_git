@@ -3,6 +3,13 @@
   display: flex;
   flex-direction: column;
 }
+/* 移动端给底部 MobileBottomBar 让出 60px + safe-area，否则 ws-body
+   会被底栏盖住底部（包括 ChatInput）。桌面端保持 100vh 不变。 */
+@media (max-width: 800px) {
+  .ws {
+    height: calc(100vh - var(--m-bottombar-h, 60px) - env(safe-area-inset-bottom, 0px));
+  }
+}
 .ws-loading,
 .ws-error {
   padding: 80px 32px;
@@ -444,12 +451,15 @@
     color: var(--text-muted);
     font-size: 13px;
     font-weight: 500;
-    padding: 9px 6px;
+    /* 提到 12-14px 让 button 总高 ≥44px (font 13×1.2 + 14×2 + 2px border)，
+       接近 iOS HIG 推荐的最小触控目标。 */
+    padding: 14px 6px 12px;
     cursor: pointer;
     border-bottom: 2px solid transparent;
     text-align: center;
     font-family: inherit;
     line-height: 1.2;
+    min-height: 44px;
   }
   .ws-mobile-segs button.active {
     color: var(--text);

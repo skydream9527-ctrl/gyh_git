@@ -137,20 +137,13 @@ export function AdminAgentEdit() {
         </div>
       </div>
 
-      <div style={{ display: "flex", gap: 4, borderBottom: "1px solid var(--border)", marginBottom: 18 }}>
+      <div className="adm-edit-tabs">
         {TABS.map((t) => (
           <button
             key={t.k}
+            type="button"
+            className={`adm-edit-tab ${tab === t.k ? "active" : ""}`}
             onClick={() => setTab(t.k)}
-            style={{
-              background: "transparent",
-              border: "none",
-              padding: "10px 18px",
-              fontSize: 13,
-              cursor: "pointer",
-              color: tab === t.k ? "var(--primary)" : "var(--text-dim)",
-              borderBottom: tab === t.k ? "2px solid var(--primary)" : "2px solid transparent",
-            }}
           >
             {t.label}
           </button>

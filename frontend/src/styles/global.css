@@ -421,30 +421,11 @@ select {
   body {
     font-size: 13px;
   }
-  .topnav {
-    height: auto;
-    min-height: 52px;
-    padding: 8px 10px;
-    flex-wrap: wrap;
-    gap: 6px;
-  }
-  .topnav .crumb,
-  .topnav .agent-chip {
-    width: 100%;
-    order: 10;
-  }
+  /* TopNav 在手机端的具体布局放在 components/shell/TopNav.css 里
+     （单行不换行 + safe-area + 360px 隐 brand-name）；这里只保留全局
+     共用的 icon-btn 触控目标。 */
   .topnav .right {
     margin-left: auto;
-  }
-  /* 小屏只留 "ICE" 字符，省横向空间 */
-  .topnav .brand-name {
-    font-size: 14px;
-  }
-  .user-pill .uname {
-    display: none;
-  }
-  .user-pill {
-    padding: 4px;
   }
   /* 让所有 icon-btn 在触屏下都到 36px+ 触感舒适 */
   .icon-btn {

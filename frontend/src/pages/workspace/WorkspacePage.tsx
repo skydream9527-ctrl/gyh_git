@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { agentApi, conversationApi, fileApi, kbApi, scheduledApi, shareApi, skillApi, taskApi } from "@/api/endpoints";
 import type { KBArticle, KBSummary, ScheduledTask } from "@/api/endpoints";
 import { TopNav } from "@/components/shell/TopNav";
+import { MobileBottomBar } from "@/components/shell/MobileBottomBar";
 import { ChatInput } from "@/components/chat/ChatInput";
 import { CrystallizeModal } from "@/components/chat/CrystallizeModal";
 import { MessageList } from "@/components/chat/MessageList";
@@ -1323,6 +1324,7 @@ export function WorkspacePage() {
           onReject={(pid) => socket.rejectPlan(pid)}
         />
       )}
+      <MobileBottomBar />
     </div>
   );
 }

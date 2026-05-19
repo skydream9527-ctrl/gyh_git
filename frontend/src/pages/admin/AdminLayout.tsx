@@ -70,6 +70,13 @@ export function AdminLayout() {
         }
       />
       <div className="adm-body">
+        {mobileOpen && (
+          <div
+            className="adm-sb-backdrop"
+            onClick={() => setMobileOpen(false)}
+            aria-hidden="true"
+          />
+        )}
         <aside className={`adm-sb ${mobileOpen ? "mobile-open" : ""}`}>
           {groupOrder.map((g) => {
             const items = NAV.filter((n) => n.group === g);

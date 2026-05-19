@@ -35,12 +35,12 @@ export function AdminSqlAudit() {
 
   return (
     <div>
-      <div className="adm-page-head" style={{ display: "flex", justifyContent: "space-between" }}>
+      <div className="adm-page-head adm-page-head-with-toolbar">
         <div>
           <h1>🔍 SQL 审计</h1>
           <p>每条 SQL Skill 调用都会被分类（allow / warn / block）并持久化</p>
         </div>
-        <div style={{ display: "flex", gap: 8 }}>
+        <div className="adm-period-toolbar">
           {PERIODS.map((d) => (
             <button
               key={d}

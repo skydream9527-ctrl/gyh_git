@@ -4,6 +4,7 @@ import { adminApi, agentApi, taskApi } from "@/api/endpoints";
 import type { AgentCard } from "@/types/api";
 import type { AdminAgent, AgentPromptSnapshot } from "@/api/endpoints";
 import { TopNav } from "@/components/shell/TopNav";
+import { MobileBottomBar } from "@/components/shell/MobileBottomBar";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { Skeleton } from "@/components/feedback/Skeleton";
 import { useAuthStore } from "@/stores/authStore";
@@ -146,7 +147,7 @@ export function AgentDetailPage() {
         }
       />
 
-      <main className="ad-main">
+      <main className="ad-main has-bottombar">
         <header className="ad-header">
           <div className="ad-icon" style={{ background: `${agent.color}22`, color: agent.color }}>
             {agent.icon}
@@ -251,6 +252,7 @@ export function AgentDetailPage() {
           🚀 用此 Agent 创建任务
         </button>
       </div>
+      <MobileBottomBar />
     </div>
   );
 }

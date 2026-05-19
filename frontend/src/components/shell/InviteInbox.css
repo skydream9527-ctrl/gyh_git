@@ -158,7 +158,9 @@
   .ii-pop {
     position: fixed;
     top: auto;
-    bottom: 12px;
+    /* 叠 safe-area-inset-bottom 让出 iPhone Home Indicator；
+       叠 m-bottombar-h 让出全局底部 Tab Bar，避免按钮压在底栏背后。 */
+    bottom: calc(12px + var(--m-bottombar-h, 60px) + env(safe-area-inset-bottom, 0px));
     left: 12px;
     right: 12px;
     width: auto;

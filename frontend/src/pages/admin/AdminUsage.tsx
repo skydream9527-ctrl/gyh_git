@@ -84,12 +84,12 @@ export function AdminUsage() {
 
   return (
     <div>
-      <div className="adm-page-head" style={{ display: "flex", justifyContent: "space-between" }}>
+      <div className="adm-page-head adm-page-head-with-toolbar">
         <div>
           <h1>💰 用量与成本</h1>
           <p>按 LLM tokens × 单价计算；超预算自动告警</p>
         </div>
-        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+        <div className="adm-period-toolbar">
           {PERIODS.map((d) => (
             <button
               key={d}

@@ -212,12 +212,17 @@
   background: var(--error-soft);
 }
 
-/* ---- 移动端 ---- */
+/* ---- 移动端 ----
+   单行不换行布局（crumb 占满中间剩余宽度，agent-chip 隐藏，主题按钮挪到
+   用户菜单）；与 global.css 已不再冲突，所以这里全部不需要 !important。 */
 @media (max-width: 800px) {
   .topnav {
-    height: 52px;
+    flex-wrap: nowrap;
+    min-height: 0;
+    height: calc(52px + env(safe-area-inset-top, 0px));
     gap: 8px;
     padding: 0 12px;
+    padding-top: env(safe-area-inset-top, 0px);
   }
   /* 保留品牌名，缩小字号 + 单行截断；只在极窄屏（≤360px）才隐藏 */
   .brand-name {
@@ -227,10 +232,18 @@
     text-overflow: ellipsis;
     max-width: 120px;
   }
-  /* iPhone safe-area 顶部贴合 */
-  .topnav {
-    padding-top: env(safe-area-inset-top, 0px);
-    height: calc(52px + env(safe-area-inset-top, 0px));
+  .topnav .crumb {
+    width: auto;
+    order: 0;
+    flex: 1 1 0;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  /* agent-chip 在手机端隐藏 —— 信息冗余（可在 🤖 详情段查看 agent + 范式） */
+  .topnav .agent-chip {
+    display: none;
   }
   /* 主题切换在手机端隐藏，挪到用户菜单里以省顶栏空间 */
   .topnav > .right > .icon-btn[aria-label="theme"] {
@@ -240,33 +253,6 @@
 @media (max-width: 360px) {
   .brand-name {
     display: none;
-  }
-}
-
-/* 覆盖 global.css 里的 .topnav flex-wrap/width:100% 强制规则。
-   原规则把 crumb 和 agent-chip 各塞一行，导致手机 TopNav 总高 3 行 +
-   下面 3-段 + chat-head 总共 5+ 行视觉堆叠。统一压回 1 行。 */
-@media (max-width: 800px) {
-  .topnav {
-    flex-wrap: nowrap !important;
-    height: 52px !important;
-    min-height: 0 !important;
-    padding: 0 12px !important;
-    padding-top: env(safe-area-inset-top, 0px) !important;
-    height: calc(52px + env(safe-area-inset-top, 0px)) !important;
-  }
-  .topnav .crumb {
-    width: auto !important;
-    order: 0 !important;
-    flex: 1 1 0 !important;
-    min-width: 0 !important;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  /* agent-chip 在手机端隐藏 —— 信息冗余（可在 🤖 详情段查看 agent + 范式） */
-  .topnav .agent-chip {
-    display: none !important;
   }
 }
 @media (max-width: 600px) {

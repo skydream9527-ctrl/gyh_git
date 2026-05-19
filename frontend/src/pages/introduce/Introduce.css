@@ -1,7 +1,9 @@
 .intro-page {
   min-height: 100vh;
   position: relative;
-  overflow-x: hidden;
+  /* overflow-x: clip 比 hidden 更稳，不会触发额外滚动上下文，
+     用以兜住 480-600px 的装饰 orb 在窄屏溢出 viewport。 */
+  overflow-x: clip;
 }
 .intro-bg-grid {
   position: fixed;

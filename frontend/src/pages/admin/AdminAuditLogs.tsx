@@ -37,21 +37,11 @@ export function AdminAuditLogs() {
         <div className="adm-audit-log">
           {items.map((r) => (
             <details key={r.id} className="adm-audit-row">
-              <summary
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "180px 100px 100px 1fr",
-                  alignItems: "center",
-                  cursor: "pointer",
-                  width: "100%",
-                }}
-              >
+              <summary className="adm-audit-summary">
                 <span className="adm-audit-time">{new Date(r.created_at).toLocaleString()}</span>
                 <span className="adm-audit-action">{r.action}</span>
-                <span style={{ color: "var(--text-dim)" }}>{r.target_type}</span>
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--text-muted)" }}>
-                  {r.target_id.slice(0, 12)}…
-                </span>
+                <span className="adm-audit-target-type">{r.target_type}</span>
+                <span className="adm-audit-target-id">{r.target_id.slice(0, 12)}…</span>
               </summary>
               <pre
                 style={{
