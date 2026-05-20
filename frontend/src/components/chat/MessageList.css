@@ -127,3 +127,44 @@
   border-color: var(--primary);
   color: var(--primary);
 }
+
+/* ---- 工具调用区块 — 移动端默认折叠，仅显示结论 ----
+   桌面端 toggle 按钮隐藏，body 始终展开（与原始行为一致）；
+   移动端（≤800px）显示一个小 toggle，body 默认折叠，需点击展开。 */
+.tool-calls-block {
+  margin-top: 10px;
+}
+.tool-calls-toggle {
+  display: none;
+}
+.tool-calls-body {
+  display: block;
+}
+
+@media (max-width: 800px) {
+  .tool-calls-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-family: inherit;
+    cursor: pointer;
+    margin-bottom: 6px;
+  }
+  .tool-calls-toggle:hover,
+  .tool-calls-toggle:focus-visible {
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+  .tool-calls-block .tool-calls-body {
+    display: none;
+  }
+  .tool-calls-block.expanded .tool-calls-body {
+    display: block;
+  }
+}

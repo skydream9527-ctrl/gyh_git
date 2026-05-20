@@ -211,15 +211,37 @@ function AssistantBubbleImpl({
     }
   };
 
+  // 移动端默认折叠工具执行细节，只展示结论；桌面端 CSS 强制展开。
+  // 流式过程中默认展开，让用户能看到正在跑的步骤；流式结束后折叠回去。
+  const [toolsExpanded, setToolsExpanded] = useState<boolean>(!!streaming);
+  useEffect(() => {
+    if (!streaming) setToolsExpanded(false);
+  }, [streaming]);
+
   return (
     <div className="bubble-row assistant">
       <div className="agent-avatar">🤖</div>
       <div className="bubble assistant-bubble">
         {content && <MarkdownRenderer content={content} streaming={streaming} />}
         {streaming && content && <span className="cursor" />}
-        {toolCalls.map((tc) => (
-          <ToolCallCard key={tc.tool_call_id} call={tc} />
-        ))}
+        {toolCalls.length > 0 && (
+          <div className={`tool-calls-block ${toolsExpanded ? "expanded" : ""}`}>
+            <button
+              type="button"
+              className="tool-calls-toggle"
+              onClick={() => setToolsExpanded((v) => !v)}
+              aria-expanded={toolsExpanded}
+              title={toolsExpanded ? "折叠工具执行" : "展开工具执行"}
+            >
+              🔧 {toolCalls.length} 步工具执行 {toolsExpanded ? "▲" : "▼"}
+            </button>
+            <div className="tool-calls-body">
+              {toolCalls.map((tc) => (
+                <ToolCallCard key={tc.tool_call_id} call={tc} />
+              ))}
+            </div>
+          </div>
+        )}
         {!streaming && content && (
           <div className="msg-actions">
             <button
