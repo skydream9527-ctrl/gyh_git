@@ -144,6 +144,35 @@ def test_dns_blocked(isolated_data_root):
     assert "DNS_LEAK" not in r.stdout
 
 
+def test_dns_legacy_resolvers_blocked(isolated_data_root):
+    """gethostbyname / gethostbyname_ex / gethostbyaddr go through libc's
+    gethostbyname() and bypass a getaddrinfo-only patch. The runner must
+    block all of them; otherwise a malicious LLM could exfil data via
+    DNS query payloads (the queried hostname itself carries the data).
+    """
+    td = _make_task_dir(isolated_data_root)
+    code = (
+        "import socket\n"
+        "leaks = []\n"
+        "for fn_name in ('gethostbyname', 'gethostbyname_ex', 'gethostbyaddr'):\n"
+        "    fn = getattr(socket, fn_name)\n"
+        "    arg = '127.0.0.1' if fn_name == 'gethostbyaddr' else 'example.com'\n"
+        "    try:\n"
+        "        fn(arg)\n"
+        "        leaks.append(fn_name)\n"
+        "    except OSError as e:\n"
+        "        print(fn_name, 'blocked:', str(e)[:60])\n"
+        "if leaks:\n"
+        "    print('DNS_LEAK', leaks)\n"
+    )
+    r = _run(code, td)
+    assert r.status == SandboxStatus.OK
+    assert "DNS_LEAK" not in r.stdout, f"DNS resolvers leaked: {r.stdout!r}"
+    assert "gethostbyname blocked" in r.stdout
+    assert "gethostbyname_ex blocked" in r.stdout
+    assert "gethostbyaddr blocked" in r.stdout
+
+
 # ---- env scrub -------------------------------------------------------------
 
 def test_credentials_not_in_env(isolated_data_root, monkeypatch):

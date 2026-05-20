@@ -28,8 +28,14 @@ DEFAULT_VENV_PYTHON = _REPO_ROOT / "backend" / ".venv-sandbox" / "bin" / "python
 
 
 def _resolve_executable(custom: str | None = None) -> Path:
+    # IMPORTANT: do NOT call `.resolve()` — that follows symlinks, and
+    # `.venv-sandbox/bin/python` is a symlink chain to `/usr/bin/python3`.
+    # If we resolve through the chain, subprocess ends up invoking system
+    # Python directly, which can no longer locate the venv's pyvenv.cfg /
+    # site-packages, and `import pandas` fails. Use `.absolute()` so we get
+    # an absolute path without dereferencing symlinks.
     if custom:
-        return Path(custom).resolve()
+        return Path(custom).absolute()
     if DEFAULT_VENV_PYTHON.exists():
         return DEFAULT_VENV_PYTHON
     # Fallback: parent's interpreter (development convenience; tests will
@@ -58,6 +64,17 @@ def _build_clean_env(*, venv_python: Path, task_dir: Path) -> dict[str, str]:
         # Pandas defaults
         "LANG": "C.UTF-8",
         "LC_ALL": "C.UTF-8",
+        # BLAS single-thread: numpy / scipy / sklearn pull in OpenBLAS / MKL,
+        # which by default spawn one worker thread per logical CPU on import.
+        # Under RLIMIT_NPROC (or a busy machine where the per-UID thread count
+        # is near limit), pthread_create fails repeatedly, the import path
+        # raises a flood of warnings and eventually deadlocks. Forcing 1
+        # thread keeps imports cheap and avoids the issue on every host.
+        "OPENBLAS_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": "1",
     }
     # Carry over any safe vars the parent has explicitly opted in to
     return minimal
@@ -100,8 +117,18 @@ async def run_python(
     timeout_sec: int = 60,
     memory_mb: int = 1024,
     fsize_mb: int = 50,
-    nproc: int = 32,
-    nofile: int = 64,
+    # RLIMIT_NPROC is per-UID, not per-process — it counts ALL threads/procs
+    # owned by the same user, so on a shared dev box the user typically has
+    # thousands of background processes already. A low cap (e.g. 32) makes
+    # any subsequent fork()/pthread_create() inside the sandbox fail
+    # immediately, breaking matplotlib's font-cache thread, BLAS, etc.
+    # Setting it high prevents that hard fail; it's not real fork-bomb
+    # defense (proper containment needs cgroups / pid namespaces) but it
+    # caps a runaway code path at "many but bounded".
+    nproc: int = 4096,
+    # Same per-UID story for NOFILE; keep it generous for libs that open
+    # many .so / data files at import.
+    nofile: int = 1024,
     venv_python: str | None = None,
     description: str = "",
 ) -> SandboxResult:
@@ -180,8 +207,13 @@ async def run_python(
     try:
         proc = await asyncio.create_subprocess_exec(
             str(venv_py),
-            "-I",  # isolated mode (ignore PYTHON* env, no sys.path extras)
-            "-S",  # don't import site
+            # Isolated mode: ignore PYTHON* env, no user site-packages, no sys.path[0]
+            # injection, and (importantly) no PYTHONSTARTUP. We DO want site.py to run
+            # though — without it, the venv's own site-packages/ never loads onto
+            # sys.path, and pandas/numpy/prophet from .venv-sandbox become invisible.
+            # That's why -S is intentionally NOT used; -I alone gives us the env-var
+            # isolation we want without breaking the venv.
+            "-I",
             str(RUNNER_SCRIPT),
             str(code_path),
             str(result_w),
