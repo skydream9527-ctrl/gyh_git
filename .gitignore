@@ -1,0 +1,4 @@
+.DS_Store
+.env
+.ai/skills/external/text2html2png/node_modules/
+.ai/outputs/viz/**/*.png
