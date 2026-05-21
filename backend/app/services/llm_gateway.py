@@ -24,7 +24,12 @@ from ..core.errors import APIError, ErrorCode
 
 log = logging.getLogger("llm_gateway")
 
-MAX_TOOL_ROUNDS = 5
+# Hard ceilings — runtime callers (ws.py, bg_task_svc, agent_runtime) should
+# read the per-install limit from sysconfig (`tool_call_max_rounds` /
+# `tool_call_timeout_s`) and clamp into these bounds. The constants below
+# are NOT the live default — that's in sysconfig_svc.DEFAULTS — they exist
+# so the gateway has a safety net even if a caller forgets to clamp.
+MAX_TOOL_ROUNDS = 50
 TOOL_TIMEOUT_SEC = 30
 
 
@@ -88,10 +93,11 @@ async def _stream_anthropic(
     messages: list[dict],
     tools: list[dict] | None,
     model: str,
+    max_tokens: int,
 ) -> AsyncIterator[dict]:
     async with client.messages.stream(
         model=model,
-        max_tokens=4096,
+        max_tokens=max_tokens,
         system=system_prompt,
         messages=messages,
         tools=tools or None,
@@ -249,6 +255,7 @@ async def _stream_openai_chat(
     messages: list[dict],
     tools: list[dict] | None,
     model: str,
+    max_tokens: int,
 ) -> AsyncIterator[dict]:
     client = _openai_chat_client()
     api_messages = _messages_to_openai(messages, system_prompt)
@@ -262,6 +269,7 @@ async def _stream_openai_chat(
         "messages": api_messages,
         "stream": True,
         "stream_options": {"include_usage": True},
+        "max_tokens": max_tokens,
     }
     if api_tools:
         kwargs["tools"] = api_tools
@@ -339,6 +347,7 @@ async def _stream_openai_responses(
     messages: list[dict],
     tools: list[dict] | None,
     model: str,
+    max_tokens: int,
 ) -> AsyncIterator[dict]:
     """Call /v1/responses streaming. Convert events to internal protocol.
 
@@ -361,7 +370,7 @@ async def _stream_openai_responses(
         ],
         "instructions": system_prompt,
         "stream": True,
-        "max_output_tokens": 4096,
+        "max_output_tokens": max_tokens,
     }
     if tools:
         payload["tools"] = [
@@ -480,11 +489,17 @@ async def stream_chat(
     messages: list[dict],
     tools: list[dict] | None = None,
     model: str | None = None,
+    max_tokens: int | None = None,
 ) -> AsyncIterator[dict]:
     assert_configured()
     chosen = resolve_model(model)
     route = _route(chosen)
-    log.info("stream_chat route=%s model=%s", route, chosen)
+    s = get_settings()
+    # Per-call override > env default. The default (16384) is generous so
+    # long markdown bodies in tool_use input (e.g. feishu_publish 报告正文)
+    # don't get cut off mid-string by the 4k cap that used to be hardcoded.
+    eff_max = max_tokens if max_tokens else s.ICE_LLM_MAX_OUTPUT_TOKENS
+    log.info("stream_chat route=%s model=%s max_tokens=%d", route, chosen, eff_max)
     if route == "anthropic_native":
         async for ev in _stream_anthropic(
             client=_mify_anthropic_client(),
@@ -492,20 +507,22 @@ async def stream_chat(
             messages=messages,
             tools=tools,
             model=chosen,
+            max_tokens=eff_max,
         ):
             yield ev
     elif route == "openai_responses":
         async for ev in _stream_openai_responses(
-            system_prompt=system_prompt, messages=messages, tools=tools, model=chosen
+            system_prompt=system_prompt, messages=messages, tools=tools, model=chosen,
+            max_tokens=eff_max,
         ):
             yield ev
     elif route == "openai_chat":
         async for ev in _stream_openai_chat(
-            system_prompt=system_prompt, messages=messages, tools=tools, model=chosen
+            system_prompt=system_prompt, messages=messages, tools=tools, model=chosen,
+            max_tokens=eff_max,
         ):
             yield ev
     else:  # legacy_anthropic
-        s = get_settings()
         if not s.ANTHROPIC_API_KEY:
             raise APIError(503, ErrorCode.LLM_KEY_MISSING, "LLM 未配置")
         bare = chosen.rsplit("/", 1)[-1] if "/" in chosen else chosen
@@ -515,6 +532,7 @@ async def stream_chat(
             messages=messages,
             tools=tools,
             model=bare,
+            max_tokens=eff_max,
         ):
             yield ev
 

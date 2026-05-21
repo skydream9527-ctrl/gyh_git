@@ -68,6 +68,12 @@
   height: 100%;
   overflow: hidden;
 }
+/* Sidebar has no inner scroll region (sections + KB list flow as one column),
+   so it must scroll itself when files+KB exceed viewport. Override the
+   generic overflow:hidden above. */
+.ws-body > .ws-sidebar {
+  overflow-y: auto;
+}
 @media (max-width: 1100px) {
   .ws-body {
     grid-template-columns: 240px 1fr !important;
@@ -554,9 +560,8 @@
     gap: 6px;
     padding: 8px 12px !important;
   }
-  .plan-toggle-row {
-    padding: 0 12px 10px !important;
-  }
+  /* .plan-toggle-row 在手机端已隐藏（见后文 mobile-only 规则），
+     不再需要手机端的 padding 微调。 */
 }
 /* .ws-mobile-toggle is only used inside .ws-sec-more (the ⋯ overflow menu);
    no global default needed. */
@@ -1029,22 +1034,16 @@
     padding: 9px 4px;
     white-space: nowrap;
   }
-  /* 输入区底部「Plan Mode」按钮和「发送」按钮原本是上下两行视觉孤立。
-     在手机上把 plan-toggle-row 紧贴 chat-input 同一视觉块（同色 + 上拉），
-     看起来是同一组操作。 */
-  .chat-input {
-    padding-bottom: 6px !important;
-  }
+  /* Plan Mode 在手机端已经移进 TopNav 的 ⋯ 菜单（参见 WorkspacePage.tsx）。
+     这里整块隐藏 plan-toggle-row，把空间还给 chat-input —— 否则 ws-main 的
+     overflow:hidden 在内容紧凑时会把这一行裁掉，造成「发送按钮被底栏挤压」
+     的视觉问题。chat-input 自己负担 safe-area + 给底部 Tab Bar 的呼吸空间。 */
   .plan-toggle-row {
-    background: var(--surface);
-    border-top: 0 !important;
-    margin-top: 0 !important;
-    padding: 0 12px calc(8px + env(safe-area-inset-bottom, 0px)) !important;
+    display: none !important;
   }
-  /* Plan Mode 按钮在小屏吃 100% 宽度，按惯例在主操作下面（替代 hint 的位置） */
-  .plan-toggle-row > button {
-    width: 100%;
-    padding: 8px 12px !important;
-    font-size: 12px !important;
+  .chat-input {
+    /* 8px 视觉间距 + iPhone home indicator 的 safe-area；底部 m-bottombar 已经
+       在 .ws 的 height calc 里减掉了 60px，所以这里只补 safe-area + 8px。 */
+    padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px)) !important;
   }
 }

@@ -23,6 +23,7 @@ from ...services import (
     conversation_svc,
     experience_card_svc,
     llm_gateway,
+    sysconfig_svc,
     task_svc,
     tool_runner,
     usage_svc,
@@ -333,10 +334,22 @@ async def _handle_user_message(
 
     await _send(ws, {"type": "agent_typing", "status": "start"})
 
+    # Read the round limit from sysconfig (admin-tunable). Clamp into
+    # [1, MAX_TOOL_ROUNDS] so a misconfigured value can't kill the loop or
+    # let it run unbounded.
+    sys_params = sysconfig_svc.get_system_params()
+    max_rounds = max(
+        1,
+        min(
+            llm_gateway.MAX_TOOL_ROUNDS,
+            int(sys_params.get("tool_call_max_rounds") or 20),
+        ),
+    )
+
     final_text = ""
     files_created: list[dict] = []
     try:
-        for round_idx in range(llm_gateway.MAX_TOOL_ROUNDS + 1):
+        for round_idx in range(max_rounds + 1):
             if cancel_event.is_set():
                 await _send(ws, {"type": "agent_typing", "status": "stop"})
                 await _send(ws, {"type": "agent_message_done", "files_created": files_created, "aborted": True})
@@ -446,7 +459,7 @@ async def _handle_user_message(
             )
             final_text = assistant_text or final_text
 
-            if not tool_uses or round_idx == llm_gateway.MAX_TOOL_ROUNDS:
+            if not tool_uses or round_idx == max_rounds:
                 break
 
             # Partition: parallel-safe reads can fan out via gather; anything

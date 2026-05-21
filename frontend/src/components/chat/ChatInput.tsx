@@ -1,4 +1,5 @@
 import { KeyboardEvent, useLayoutEffect, useRef, useState } from "react";
+import { useUIStore } from "@/stores/uiStore";
 import "./ChatInput.css";
 
 interface Props {
@@ -7,6 +8,9 @@ interface Props {
   isStreaming?: boolean;
   onSend: (text: string) => void;
   onAbort?: () => void;
+  /** Open the voice-conversation overlay. If undefined the 🎙 button is
+   * not rendered (legacy / non-voice contexts). */
+  onVoiceConversation?: () => void;
 }
 
 const PARADIGM_PLACEHOLDER: Record<string, string> = {
@@ -20,9 +24,17 @@ const PARADIGM_PLACEHOLDER: Record<string, string> = {
 const MIN_HEIGHT = 70;
 const MAX_HEIGHT = 240;
 
-export function ChatInput({ paradigm = "biz", disabled, isStreaming, onSend, onAbort }: Props) {
+export function ChatInput({
+  paradigm = "biz",
+  disabled,
+  isStreaming,
+  onSend,
+  onAbort,
+  onVoiceConversation,
+}: Props) {
   const [value, setValue] = useState("");
   const taRef = useRef<HTMLTextAreaElement>(null);
+  const voiceEnabled = useUIStore((s) => s.voiceEnabled);
   // IME 组字态。Mac 中文输入法下，用户拼拼音时按 Enter 是"上屏候选词"，
   // 不应触发发送。同时监听 React 合成事件 + nativeEvent.isComposing + keyCode=229，
   // 三者任一命中都视作组字中（不同浏览器/输入法的信号不一致）。
@@ -69,6 +81,18 @@ export function ChatInput({ paradigm = "biz", disabled, isStreaming, onSend, onA
       />
       <div className="chat-input-actions">
         <span className="chat-hint">Enter 发送 · Shift+Enter 换行</span>
+        {voiceEnabled && onVoiceConversation && (
+          <button
+            type="button"
+            className="btn-voice-conv"
+            onClick={onVoiceConversation}
+            disabled={disabled}
+            title="语音对话：持续聆听、自动朗读 Agent 回答"
+            aria-label="进入语音对话"
+          >
+            🎙 语音
+          </button>
+        )}
         {isStreaming ? (
           <button className="btn-secondary" onClick={onAbort}>
             ⏸ 暂停生成

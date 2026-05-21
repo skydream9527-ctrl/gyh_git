@@ -28,8 +28,48 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 8px;
 }
 .chat-hint {
   font-size: 11px;
   color: var(--text-muted);
+}
+
+/* 「🎙 语音」按钮 — 在发送按钮左侧。和 .btn-secondary 风格相近但圆角更大、
+   背景半透明，避免和发送按钮抢主视觉。点击后开 VoiceConversationOverlay。 */
+.btn-voice-conv {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: border-color 0.15s, background 0.15s;
+}
+.btn-voice-conv:hover,
+.btn-voice-conv:focus-visible {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+.btn-voice-conv:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 手机端：屏幕窄，hint + 语音 + 发送 三件挤不下 → hint 让位 */
+@media (max-width: 800px) {
+  .chat-input-actions .chat-hint {
+    display: none;
+  }
+  .chat-input-actions {
+    justify-content: flex-end;
+  }
 }

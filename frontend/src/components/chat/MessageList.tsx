@@ -9,6 +9,7 @@ import {
 import type { ChatMessage, ToolCall } from "@/types/api";
 import { MarkdownRenderer } from "@/components/markdown/MarkdownRenderer";
 import { ToolCallCard } from "./ToolCallCard";
+import { VoicePlayButton } from "./VoicePlayButton";
 import { useUIStore } from "@/stores/uiStore";
 import type { PartialAssistant, StreamPhase } from "@/hooks/useChatSocket";
 import "./MessageList.css";
@@ -179,6 +180,7 @@ function AssistantBubbleImpl({
   onCrystallize,
 }: AssistantBubbleProps) {
   const pushToast = useUIStore((s) => s.pushToast);
+  const voiceEnabled = useUIStore((s) => s.voiceEnabled);
   const [copied, setCopied] = useState(false);
   const copyTimerRef = useRef<number | null>(null);
 
@@ -251,6 +253,7 @@ function AssistantBubbleImpl({
             >
               {copied ? "✅ 已复制" : "📋 复制"}
             </button>
+            {voiceEnabled && <VoicePlayButton text={content} />}
             {onCrystallize && (
               <button
                 className="msg-action-btn"

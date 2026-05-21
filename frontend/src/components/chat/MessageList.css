@@ -128,6 +128,19 @@
   color: var(--primary);
 }
 
+/* 朗读按钮 — 桌面 + 手机都显示。桌面端 hover 才露出整个 .msg-actions 行，
+   所以朗读按钮在那种状态下也只是一并出现，不会喧宾夺主；手机端 .msg-actions
+   永远显示（手机没 hover）。 */
+.voice-play-btn {
+  display: inline-block;
+}
+@media (max-width: 800px) {
+  /* 手机端 .msg-actions 永远显示（不需要 hover 触发，手机本来也没 hover） */
+  .bubble-row.assistant .msg-actions {
+    opacity: 1;
+  }
+}
+
 /* ---- 工具调用区块 — 移动端默认折叠，仅显示结论 ----
    桌面端 toggle 按钮隐藏，body 始终展开（与原始行为一致）；
    移动端（≤800px）显示一个小 toggle，body 默认折叠，需点击展开。 */

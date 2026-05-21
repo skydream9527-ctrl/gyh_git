@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { agentApi, conversationApi, fileApi, kbApi, scheduledApi, shareApi, skillApi, taskApi } from "@/api/endpoints";
+import { agentApi, conversationApi, fileApi, kbApi, scheduledApi, shareApi, skillApi, sysApi, taskApi } from "@/api/endpoints";
 import type { KBArticle, KBSummary, ScheduledTask } from "@/api/endpoints";
 import { TopNav } from "@/components/shell/TopNav";
 import { MobileBottomBar } from "@/components/shell/MobileBottomBar";
@@ -8,6 +8,7 @@ import { ChatInput } from "@/components/chat/ChatInput";
 import { CrystallizeModal } from "@/components/chat/CrystallizeModal";
 import { MessageList } from "@/components/chat/MessageList";
 import { ModelSelector } from "@/components/chat/ModelSelector";
+import { VoiceConversationOverlay } from "@/components/chat/VoiceConversationOverlay";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { Skeleton } from "@/components/feedback/Skeleton";
 import AgentUpdateBanner from "@/components/task/AgentUpdateBanner";
@@ -53,6 +54,8 @@ export function WorkspacePage() {
   const { taskId = "" } = useParams<{ taskId: string }>();
   const navigate = useNavigate();
   const pushToast = useUIStore((s) => s.pushToast);
+  const voiceEnabled = useUIStore((s) => s.voiceEnabled);
+  const setVoiceEnabled = useUIStore((s) => s.setVoiceEnabled);
   const currentUser = useAuthStore((s) => s.user);
   const [task, setTask] = useState<TaskDetail | null>(null);
   const [agent, setAgent] = useState<AgentCard | null>(null);
@@ -90,6 +93,7 @@ export function WorkspacePage() {
   const [model, setModel] = useState<string>("");
   const [importOpen, setImportOpen] = useState(false);
   const [inviteOpen, setInviteOpen] = useState(false);
+  const [voiceConvOpen, setVoiceConvOpen] = useState(false);
 
   // ---- 左右栏可拖拽宽度（localStorage 持久化）----
   const LS_LEFT = "ws-left-w";
@@ -159,6 +163,16 @@ export function WorkspacePage() {
       pushToast("success", `${m.name} 已上传`);
     },
   });
+
+  // 一次性拉 voice_enabled（手机端 PTT / 朗读按钮可见性的唯一开关）。
+  // 只在 store 还是 null（未加载）时拉取，避免每次切任务都打一次。
+  useEffect(() => {
+    if (voiceEnabled !== null) return;
+    sysApi
+      .toggles()
+      .then((t) => setVoiceEnabled(Boolean(t.voice_enabled)))
+      .catch(() => setVoiceEnabled(false));
+  }, [voiceEnabled, setVoiceEnabled]);
 
   useEffect(() => {
     let cancelled = false;
@@ -534,6 +548,16 @@ export function WorkspacePage() {
                     >
                       🔁 重新加载
                     </button>
+                    <button
+                      onClick={() => {
+                        setMobileActionsOpen(false);
+                        if (conversationId) socket.setPlanMode(!socket.planMode);
+                      }}
+                      disabled={!conversationId}
+                      title="计划模式：agent 先出方案，你批准后再执行"
+                    >
+                      🧭 {socket.planMode ? "Plan Mode 已开" : "进入 Plan Mode"}
+                    </button>
                   </div>
                 </>
               )}
@@ -864,6 +888,11 @@ export function WorkspacePage() {
             isStreaming={isStreaming}
             onSend={handleSend}
             onAbort={socket.abort}
+            onVoiceConversation={
+              voiceEnabled && conversationId
+                ? () => setVoiceConvOpen(true)
+                : undefined
+            }
           />
           <div className="plan-toggle-row" style={{ display: "flex", gap: 8, padding: "0 16px 12px", alignItems: "center" }}>
             <button
@@ -1324,6 +1353,13 @@ export function WorkspacePage() {
           onReject={(pid) => socket.rejectPlan(pid)}
         />
       )}
+      <VoiceConversationOverlay
+        open={voiceConvOpen}
+        onClose={() => setVoiceConvOpen(false)}
+        onSend={handleSend}
+        phase={socket.phase}
+        finalized={allMessages}
+      />
       <MobileBottomBar />
     </div>
   );

@@ -81,12 +81,30 @@ class Settings(BaseSettings):
     ICE_SUBAGENT_TIMEOUT_SEC: int = 120
     ICE_KYUUBI_CONCURRENCY: int = 3
     ICE_BG_TASK_ENABLED: bool = False
+    # Max output tokens per assistant turn (streaming). The agent's preamble
+    # text + tool_use input JSON share this budget — long markdown bodies
+    # (e.g. feishu_publish 报告正文) can hit the cap and truncate the JSON
+    # mid-string, which silently drops fields the runtime never sees. 16384
+    # is the safe default for Claude Opus 4.7 / Sonnet 4.6; bump higher if
+    # your provider supports it.
+    ICE_LLM_MAX_OUTPUT_TOKENS: int = 16384
     # Python sandbox (data-analysis agent's execute_python tool)
     ICE_PYTHON_SANDBOX_ENABLED: bool = True
     ICE_PYTHON_SANDBOX_TIMEOUT_SEC: int = 60
     ICE_PYTHON_SANDBOX_MEMORY_MB: int = 1024
     ICE_PYTHON_SANDBOX_FSIZE_MB: int = 50
     ICE_PYTHON_SANDBOX_CONCURRENCY: int = 2
+
+    # Voice (mobile PTT). Reuses MIFY_GATEWAY_BASE_URL + MIFY_GATEWAY_API_KEY;
+    # zero new secret. Off by default — flip on after Mify rate-limit confirmed.
+    # Both ASR and TTS go through Xiaomi MiMo's chat-completions API shape
+    # (see services/voice_svc.py). Built-in TTS voice IDs:
+    # mimo_default / Chloe / Mia / Milo / Dean / 冰糖 / 茉莉 / 苏打 / 白桦.
+    ICE_VOICE_ENABLED: bool = False
+    ICE_VOICE_ASR_MODEL: str = "mimo-v2.5"
+    ICE_VOICE_TTS_MODEL: str = "mimo-v2.5-tts"
+    ICE_VOICE_DEFAULT_TTS_VOICE: str = "Chloe"
+    ICE_VOICE_AUDIO_MAX_MB: int = 5
 
     # 米盾 (Aegis) — production auth. When enabled, JWT is replaced by
     # X-Proxy-UserDetail header verification. Public key from the Aegis admin
@@ -157,6 +175,12 @@ class Settings(BaseSettings):
     @property
     def mify_dataset_enabled(self) -> bool:
         return bool(self.MIFY_DATASET_BASE_URL and self.MIFY_DATASET_API_KEY)
+
+    @property
+    def voice_enabled(self) -> bool:
+        """ASR/TTS routes only function when both the feature flag is on AND
+        the Mify gateway is configured (voice reuses MIFY_GATEWAY_*)."""
+        return bool(self.ICE_VOICE_ENABLED) and self.gateway_enabled
 
     @property
     def kyuubi_enabled(self) -> bool:

@@ -20,6 +20,7 @@ async def global_toggles():
             "feishu_enabled": s.feishu_enabled,
             "llm_enabled": s.llm_enabled,
             "kyuubi_enabled": s.kyuubi_enabled,
+            "voice_enabled": s.voice_enabled,
             "upload_max_size_mb": params["upload_max_size_mb"],
             "upload_max_size_hard_cap_mb": params["upload_max_size_hard_cap_mb"],
         }

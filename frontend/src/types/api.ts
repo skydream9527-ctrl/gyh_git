@@ -203,6 +203,7 @@ export interface GlobalToggles {
   feishu_enabled: boolean;
   llm_enabled: boolean;
   kyuubi_enabled: boolean;
+  voice_enabled?: boolean;
   enable_open_register: boolean;
   enable_public_task_review: boolean;
   enable_feishu_strict_whitelist: boolean;

@@ -38,7 +38,11 @@ DEFAULTS: dict = {
         "upload_max_size_mb": 20,
         "upload_max_size_hard_cap_mb": 50,
         "context_size": 20,
-        "tool_call_max_rounds": 5,
+        # 单次用户对话允许的最大工具调用轮数。每轮 = 一次模型回复 + 这一轮里
+        # 全部工具的并发执行。复杂数据分析任务（多次 SQL + Python + 画图 +
+        # 飞书发布）很快会撞 5 轮上限，故默认 20。clamp 到 [1, 50]
+        # 防止 admin 设过头打爆 token 预算（见 ws.py / bg_task_svc.py）。
+        "tool_call_max_rounds": 20,
         "tool_call_timeout_s": 30,
     },
     "llm": {
@@ -78,6 +82,14 @@ def _read() -> dict:
     # hard-cap implementation — budget is now notification-only.
     if "enforce_budget_cap" in merged.get("llm", {}):
         merged["llm"].pop("enforce_budget_cap", None)
+        dirty = True
+    # Bump legacy 5-round tool-call ceiling to the new 20-round default.
+    # The 5 was baked in before ws.py / bg_task_svc.py read this setting at
+    # all, so any saved 5 is leftover stale state, never a deliberate admin
+    # choice. Once the value is anything other than 5 we leave it alone.
+    sp_saved = saved.get("system_params", {}) if isinstance(saved, dict) else {}
+    if int(sp_saved.get("tool_call_max_rounds", 20)) == 5:
+        merged["system_params"]["tool_call_max_rounds"] = 20
         dirty = True
     if dirty:
         write_json(p, merged)

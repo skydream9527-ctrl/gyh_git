@@ -19,7 +19,15 @@ import uuid
 from datetime import datetime, timezone
 
 from ..core.storage import append_jsonl, get_paths, read_json
-from . import agent_runtime, agents_svc, experience_card_svc, notification_svc, tool_runner
+from . import (
+    agent_runtime,
+    agents_svc,
+    experience_card_svc,
+    llm_gateway,
+    notification_svc,
+    sysconfig_svc,
+    tool_runner,
+)
 
 log = logging.getLogger("bg_task")
 
@@ -92,12 +100,23 @@ async def _run(
             "plan_mode": False,
             "subagent_depth": 0,
         }
+        # Mirror the WS path: read admin-tunable round limit from sysconfig,
+        # clamp into [1, MAX_TOOL_ROUNDS]. Background tasks (定时任务 / 后台
+        # 续跑) run the same agent loop and used to be hardcoded to 5 rounds.
+        sys_params = sysconfig_svc.get_system_params()
+        max_rounds = max(
+            1,
+            min(
+                llm_gateway.MAX_TOOL_ROUNDS,
+                int(sys_params.get("tool_call_max_rounds") or 20),
+            ),
+        )
         result = await agent_runtime.run_agent_turn(
             system_prompt=system_prompt,
             initial_messages=[{"role": "user", "content": prompt}],
             tools=tools,
             ctx=ctx,
-            max_rounds=5,
+            max_rounds=max_rounds,
             max_tokens=2048,
         )
         append_jsonl(

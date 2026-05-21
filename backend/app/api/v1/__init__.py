@@ -24,6 +24,7 @@ from . import (
     tasks,
     templates,
     users,
+    voice,
     ws,
 )
 
@@ -52,4 +53,5 @@ api_router.include_router(admin_usage.router, prefix="/admin/usage", tags=["admi
 api_router.include_router(admin_sql_audit.router, prefix="/admin/sql-audit", tags=["admin-sql-audit"])
 api_router.include_router(admin_review.router, prefix="/admin", tags=["admin-review"])
 api_router.include_router(admin_resources.router, prefix="/admin", tags=["admin-resources"])
+api_router.include_router(voice.router, prefix="/voice", tags=["voice"])
 api_router.include_router(ws.router, tags=["websocket"])

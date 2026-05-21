@@ -11,10 +11,15 @@ export interface ToastMsg {
 interface UIState {
   theme: Theme;
   toasts: ToastMsg[];
+  /** Server-reported feature flag — set by ensureVoiceConfig() after first
+   * /system-config/global-toggles fetch. `null` means "not yet loaded";
+   * components should treat that as "off" until it resolves. */
+  voiceEnabled: boolean | null;
   toggleTheme: () => void;
   setTheme: (t: Theme) => void;
   pushToast: (kind: ToastMsg["kind"], message: string) => void;
   dismissToast: (id: string) => void;
+  setVoiceEnabled: (v: boolean) => void;
 }
 
 const THEME_KEY = "ice-theme-v3";
@@ -33,6 +38,8 @@ function applyTheme(t: Theme) {
 export const useUIStore = create<UIState>((set, get) => ({
   theme: readTheme(),
   toasts: [],
+  voiceEnabled: null,
+  setVoiceEnabled: (v) => set({ voiceEnabled: v }),
   toggleTheme: () => {
     const next: Theme = get().theme === "dark" ? "light" : "dark";
     applyTheme(next);

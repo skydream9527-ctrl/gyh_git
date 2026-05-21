@@ -201,6 +201,27 @@ export const sysApi = {
   toggles: () => api<GlobalToggles>(http.get("/system-config/global-toggles")),
 };
 
+// ---- voice (mobile PTT) ----
+// ASR: multipart upload of recorded audio → { text }.
+// TTS: JSON { text, voice? } → audio/wav blob (axios responseType='blob').
+export const voiceApi = {
+  asr: (audio: Blob, mime: string) => {
+    const fd = new FormData();
+    // Filename hint for backend logs only — extension follows mime.
+    const ext = mime.includes("mp4") ? "m4a" : mime.includes("ogg") ? "ogg" : "webm";
+    fd.append("file", audio, `clip.${ext}`);
+    return api<{ text: string }>(http.post("/voice/asr", fd));
+  },
+  tts: async (text: string, voice?: string) => {
+    const resp = await http.post<Blob>(
+      "/voice/tts",
+      { text, voice },
+      { responseType: "blob" },
+    );
+    return resp.data;
+  },
+};
+
 export const searchApi = {
   search: (q: string, type?: string) =>
     api<{ tasks: unknown[]; agents: unknown[]; skills: unknown[]; files: unknown[] }>(
