@@ -8,14 +8,21 @@ from ..core.errors import APIError, ErrorCode
 from ..core.storage import file_transaction, get_index_db, get_paths, read_json, write_json
 from . import agent_snapshot_svc
 
-# 新建任务默认内置的 4 个 skill；调用方未传或传空数组时注入。
-# 显式传入非空数组的高级调用方（如管理员脚本）不受影响。
-DEFAULT_SKILL_IDS: tuple[str, ...] = (
-    "kyuubi",
-    "feishu",
-    "nl-mapping-table-sql",
-    "nl-python",
-)
+
+def _discover_default_skill_ids() -> list[str]:
+    """枚举 skills/ 下所有 agentic skill 目录（含 SKILL.md 或 skill.json）。
+    新建任务未显式指定 skill_ids 时默认全量注入；新增/移除 skill 自动同步。
+    """
+    root = get_paths().skills
+    if not root.exists():
+        return []
+    out: list[str] = []
+    for d in sorted(root.iterdir()):
+        if not d.is_dir() or d.name.startswith("."):
+            continue
+        if (d / "SKILL.md").exists() or (d / "skill.json").exists():
+            out.append(d.name)
+    return out
 
 
 def _now() -> str:
@@ -41,8 +48,9 @@ async def create_task(
     db = get_index_db()
     tid = _new_id()
     cid = _new_id()
-    # 未指定 skill_ids 或传空数组时注入 DEFAULT_SKILL_IDS；显式给定非空数组按用户意图执行。
-    effective_skills = list(skill_ids) if skill_ids else list(DEFAULT_SKILL_IDS)
+    # 未指定 skill_ids 或传空数组 → 默认全量注入 skills/ 下的 agentic skill；
+    # 显式给定非空数组按用户意图执行。
+    effective_skills = list(skill_ids) if skill_ids else _discover_default_skill_ids()
     meta = {
         "id": tid,
         "name": name,
@@ -59,11 +67,24 @@ async def create_task(
         "created_at": _now(),
         "updated_at": _now(),
     }
-    from . import llm_gateway
+    # 新任务默认模型固定为 xiaomi/mimo-v2.5-pro；admin 在系统配置里禁用了它再回退
+    # 到 gateway 通用默认（resolve_model(None)），避免新任务一上来就拿到 503。
+    from . import llm_gateway, sysconfig_svc
 
+    DEFAULT_TASK_MODEL = "xiaomi/mimo-v2.5-pro"
+    enabled_ids = {
+        m["id"]
+        for m in (sysconfig_svc.get_llm_config().get("models") or [])
+        if m.get("enabled", True)
+    }
+    chosen_model = (
+        DEFAULT_TASK_MODEL
+        if DEFAULT_TASK_MODEL in enabled_ids
+        else llm_gateway.resolve_model(None)
+    )
     workspace = {
         "current_conversation_id": cid,
-        "model": llm_gateway.resolve_model(None),
+        "model": chosen_model,
         "context_size": 20,
     }
     paths_to_lock = [paths.task_meta(tid), paths.user_tasks_index(owner_id)]
@@ -233,6 +254,9 @@ async def get_task(task_id: str, user_id: str, *, is_admin: bool = False) -> dic
             u = await auth_svc.load_user_by_id(user_id)
             if not u or u.get("auth_role") not in ("admin", "super_admin"):
                 raise APIError(403, ErrorCode.PERMISSION_DENIED, "无权访问此任务")
+            # Caller didn't pass is_admin but user is global admin — promote so
+            # the derived role below comes back as "admin", not None.
+            is_admin = True
     workspace = read_json(paths.task_workspace(task_id), default={})
     from . import agent_snapshot_svc
     snap = read_json(paths.task_snapshot(task_id)) or {
@@ -251,10 +275,18 @@ async def get_task(task_id: str, user_id: str, *, is_admin: bool = False) -> dic
             if current_version and current_version != snap.get("agent_source_version"):
                 agent_update_available = True
 
+    # 派生当前调用者在该任务上的角色，回给前端。前端不再自己算，避免和后端
+    # derive_task_role 漏档导致 viewer 拿到编辑态 UI、消息发到后端被 WS 拒掉
+    # 的情况。owner / editor / viewer / admin 之外（理论上不可达，因为前面
+    # 的访问校验已经放行）落到 None。
+    from ..core.deps import derive_task_role
+
+    role = derive_task_role(meta, collaborators, user_id=user_id, is_admin=is_admin)
     return {
         **meta,
         "workspace": workspace,
         "collaborators": collaborators,
+        "role": role.value if role is not None else None,
         "snapshot": snap,
         "agent_update_available": agent_update_available,
     }

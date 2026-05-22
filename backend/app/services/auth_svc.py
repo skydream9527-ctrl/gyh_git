@@ -397,6 +397,57 @@ async def _auto_provision_from_feishu(
     return await _issue_tokens_and_touch(profile)
 
 
+async def update_self(*, user_id: str, patch: dict) -> dict:
+    """普通用户自助修改账户信息。
+    允许字段：name / team / title / new_password（修改密码时必须同时提供 current_password）。
+    禁止字段：email / auth_role / status / feishu_user_id —— 由管理员渠道维护。
+    返回：更新后的 _to_public 视图。
+    """
+    paths = get_paths()
+    profile = read_json(paths.user_profile(user_id))
+    if not profile:
+        raise APIError(404, ErrorCode.RESOURCE_NOT_FOUND, "用户不存在")
+
+    new_name = patch.get("name")
+    if new_name is not None:
+        new_name = str(new_name).strip()
+        if not new_name:
+            raise APIError(400, ErrorCode.VALIDATION_ERROR, "姓名不能为空")
+        if len(new_name) > 60:
+            raise APIError(400, ErrorCode.VALIDATION_ERROR, "姓名最长 60 字")
+
+    new_password = patch.get("new_password")
+    if new_password:
+        # 必须先验证旧密码；飞书-only 用户没有可登录密码（password_hash 为随机值），
+        # 仍要求其先设置；这里直接拒绝，让管理员或飞书绑定流程处理。
+        if not profile.get("password_hash"):
+            raise APIError(400, ErrorCode.VALIDATION_ERROR, "当前账号未设置密码，无法修改")
+        current = patch.get("current_password") or ""
+        if not verify_password(current, profile["password_hash"]):
+            raise APIError(400, ErrorCode.INVALID_CREDENTIALS, "当前密码不正确")
+        _validate_password_strength(new_password)
+
+    # 应用修改
+    if new_name is not None:
+        profile["name"] = new_name
+    for k in ("team", "title"):
+        if k in patch:
+            v = patch[k]
+            profile[k] = (str(v).strip() or None) if v is not None else None
+    if new_password:
+        from ..core.security import hash_password
+        profile["password_hash"] = hash_password(new_password)
+
+    with file_transaction([paths.user_profile(user_id)]) as tx:
+        tx.write_json(paths.user_profile(user_id), profile)
+    db = get_index_db()
+    await db.execute(
+        "UPDATE users_index SET name = ?, password_hash = ? WHERE id = ?",
+        [profile["name"], profile.get("password_hash"), user_id],
+    )
+    return _to_public(profile)
+
+
 async def _issue_tokens_and_touch(user: dict) -> dict:
     s = get_settings()
     user["last_login_at"] = _now()

@@ -131,17 +131,19 @@ BUILTIN_TOOL_SCHEMAS: list[dict] = [
         "function": {
             "name": "execute_python",
             "description": (
-                "Execute Python code in a sandboxed subprocess for data "
-                "analysis (predictive modeling / statistical methods that SQL "
-                "cannot do). The sandbox has pandas, numpy, scipy, sklearn, "
-                "statsmodels, prophet, ruptures, matplotlib, seaborn pre-"
-                "installed. Network is BLOCKED — code must read inputs from "
-                "<task_workspace>/files/output/data/ (CSVs you previously "
-                "wrote with write_file or kyuubi_query) and write outputs to "
-                "data/ (CSV) or charts/ (PNG, matplotlib Agg). Wall-clock "
-                "timeout 60s, memory 1GB. ONLY use when the analysis cannot "
-                "be done in SQL — for aggregation/filtering, prefer "
-                "kyuubi_query first then process the smaller CSV here."
+                "Execute Python code in a sandboxed subprocess. Two main "
+                "uses: (1) data analysis with pandas / numpy / scipy / "
+                "sklearn / statsmodels / prophet / ruptures / matplotlib / "
+                "seaborn pre-installed; (2) driving CLI tools that an "
+                "agentic skill (feishu / kyuubi / datum / etc.) tells you "
+                "to run — call them with subprocess.run([...], "
+                "capture_output=True, text=True). Network is ON and the "
+                "host's CLI auth files are reachable (HOME inherited), so "
+                "`feishu fetch`, `kyuubi sql query`, `datum query` etc. "
+                "work. Wall-clock + CPU timeout 60s, memory 1GB, output "
+                "files captured under <task_workspace>/files/output/. cwd "
+                "is files/output/. Print key results to stdout for the "
+                "user; write artifacts to disk."
             ),
             "parameters": {
                 "type": "object",
@@ -1001,9 +1003,14 @@ async def _tool_execute_python(args: dict, ctx: dict | None = None) -> Any:
                 code,
                 task_dir=task_dir,
                 timeout_sec=timeout_sec,
+                # allow_cli=True disables RLIMIT_AS in preexec; Node-based
+                # CLIs (feishu / npx) reserve multi-GB virtual address space
+                # for V8 + Wasm even when RSS stays small. Wall-clock timeout
+                # + RLIMIT_CPU still bound runaway runs.
                 memory_mb=s.ICE_PYTHON_SANDBOX_MEMORY_MB,
                 fsize_mb=s.ICE_PYTHON_SANDBOX_FSIZE_MB,
                 description=str(args.get("description") or "")[:200],
+                allow_cli=True,
             )
     except Exception as exc:  # noqa: BLE001 — sandbox shouldn't crash the agent
         return {

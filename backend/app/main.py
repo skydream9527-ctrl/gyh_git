@@ -2,20 +2,28 @@
 from __future__ import annotations
 
 import logging
+import secrets
+import time
+from collections import OrderedDict, deque
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI, Request
+from fastapi import Depends, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.openapi.docs import get_redoc_html, get_swagger_ui_html
+from fastapi.openapi.utils import get_openapi
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from .api.v1 import api_router
+from .core.cli_path import widen_path_in_place
 from .core.config import get_settings
+from .core.deps import client_ip, require_admin
 from .core.errors import APIError, ErrorCode
 from .seed.runner import bootstrap
+from .services import event_log
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 log = logging.getLogger("ice")
@@ -62,12 +70,54 @@ def _validate_security_settings(s) -> None:
         )
 
 
-class SecurityHeadersMiddleware(BaseHTTPMiddleware):
-    """Conservative security headers for all responses.
+# Built CSP. Audited against frontend/dist/index.html — the production SPA
+# loads only its own /assets/*.{js,css} (same origin), Google Fonts CSS +
+# fonts (third-party hosts), and connects to /api/* and /api/v1/ws/* (same
+# origin). `'unsafe-inline'` for style-src is kept because React's inline
+# `style=` attributes (used widely in the SPA) and `react-syntax-highlighter`
+# need it; rendered markdown is sanitized by DOMPurify so XSS via inline style
+# requires defeating that first. ws:/wss: explicit because CSP3's `'self'`
+# does not cover ws-scheme URLs.
+_CSP_PROD = (
+    "default-src 'self'; "
+    "script-src 'self'; "
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+    "font-src 'self' https://fonts.gstatic.com data:; "
+    "img-src 'self' data: blob:; "
+    "media-src 'self' data: blob:; "
+    "connect-src 'self' ws: wss:; "
+    "frame-ancestors 'none'; "
+    "base-uri 'self'; "
+    "form-action 'self'; "
+    "object-src 'none'"
+)
 
-    Avoid setting CSP here because the SPA mounts in-line script for fast
-    initial paint; tightening CSP needs a separate audit. The headers below
-    are universally safe for an internal data tool.
+
+class RequestIdMiddleware(BaseHTTPMiddleware):
+    """给每个 HTTP 请求分配 8 字符 request_id，写进 contextvar + 响应头。
+
+    诊断时用户贴的 X-Request-Id 可以反查到这次请求触发的所有 events。
+    若客户端已带 X-Request-Id 则尊重传入值，便于网关链路追踪。
+    """
+
+    async def dispatch(self, request: Request, call_next):
+        rid = request.headers.get("x-request-id") or secrets.token_hex(4)
+        token = event_log.request_id_var.set(rid)
+        try:
+            response = await call_next(request)
+        finally:
+            event_log.request_id_var.reset(token)
+        response.headers.setdefault("X-Request-Id", rid)
+        return response
+
+
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    """Security headers for all responses.
+
+    The built SPA has no inline scripts, so a strict `script-src 'self'` is
+    safe. Style stays `'unsafe-inline'` because React inline-style attributes
+    are pervasive — DOMPurify protects rendered user markdown from script
+    injection there.
     """
 
     async def dispatch(self, request: Request, call_next):
@@ -77,8 +127,16 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         h.setdefault("X-Content-Type-Options", "nosniff")
         h.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
         h.setdefault("Permissions-Policy", "geolocation=(), microphone=(self), camera=()")
-        # Only emit HSTS over HTTPS (avoid the dev-localhost 6-month lock-in).
-        if request.url.scheme == "https":
+        h.setdefault("Content-Security-Policy", _CSP_PROD)
+        # Only emit HSTS over HTTPS (avoid locking dev-localhost into HTTPS).
+        # Behind a reverse proxy the X-Forwarded-Proto header reflects the
+        # original scheme; trust it because the proxy is the one we want to
+        # honor for HSTS decisions.
+        scheme = (
+            request.headers.get("x-forwarded-proto", "").lower()
+            or request.url.scheme
+        )
+        if scheme == "https":
             h.setdefault(
                 "Strict-Transport-Security",
                 "max-age=31536000; includeSubDomains",
@@ -86,11 +144,80 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         return response
 
 
+class GlobalRateLimitMiddleware(BaseHTTPMiddleware):
+    """Defense-in-depth per-IP rate limit on /api/*.
+
+    Counters are per-worker (no shared store). Under uvicorn -w N this means
+    the *worst-case* effective cap is N × MAX_PER_WINDOW (when traffic is
+    perfectly balanced). The constants below pick MAX_PER_WINDOW=60/60s,
+    which lands the global ceiling around 240/min for the default 4
+    workers — still aggressive enough to throttle a scrape while leaving
+    normal SPA traffic well clear.
+
+    Auth-specific limits in `rate_limit_svc` keep their own separate, much
+    tighter counters and are not affected by this middleware.
+    """
+
+    WINDOW_SEC = 60.0
+    MAX_PER_WINDOW = 60
+    _MAX_KEYS = 4096
+    _EVICT_TARGET = 3072
+
+    def __init__(self, app):
+        super().__init__(app)
+        # OrderedDict so we can LRU-evict cheaply: every touched IP is moved
+        # to the end; eviction pops from the front.
+        self._by_ip: OrderedDict[str, deque[float]] = OrderedDict()
+
+    def _evict_if_full(self) -> None:
+        # 旧实现是 dict.clear()，在 unique-IP 洪水时会把所有合法计数也清零，
+        # 等于把限速反向放大成"每 4096 次请求一次硬重置"。LRU 半量裁剪保住
+        # 活跃 IP 的窗口，被裁掉的最坏情况是丢失部分历史样本。
+        while len(self._by_ip) > self._EVICT_TARGET:
+            self._by_ip.popitem(last=False)
+
+    async def dispatch(self, request: Request, call_next):
+        path = request.url.path
+        # Only gate JSON API. Static assets / SPA shell / WS upgrades are
+        # not in scope. WS upgrades go through /api/v1/ws/* — exclude those
+        # too because a long-lived stream shouldn't count against a per-min
+        # request budget.
+        if path.startswith("/api/") and not path.startswith("/api/v1/ws"):
+            ip = client_ip(request)
+            if ip:
+                now = time.monotonic()
+                cutoff = now - self.WINDOW_SEC
+                dq = self._by_ip.get(ip)
+                if dq is None:
+                    dq = deque()
+                    self._by_ip[ip] = dq
+                else:
+                    self._by_ip.move_to_end(ip)
+                while dq and dq[0] < cutoff:
+                    dq.popleft()
+                if len(dq) >= self.MAX_PER_WINDOW:
+                    return JSONResponse(
+                        status_code=429,
+                        content={
+                            "code": 42901,
+                            "message": "请求过于频繁，请稍后再试",
+                            "error_code": "RATE_LIMITED",
+                            "data": None,
+                        },
+                        headers={"Retry-After": str(int(self.WINDOW_SEC))},
+                    )
+                dq.append(now)
+                if len(self._by_ip) > self._MAX_KEYS:
+                    self._evict_if_full()
+        return await call_next(request)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     from .services import scheduler_svc
 
     log.info("ICE backend starting up; running seed bootstrap…")
+    widen_path_in_place()
     await bootstrap()
     scheduler_svc.start_loop()
     log.info("ICE backend ready (scheduler loop active)")
@@ -100,7 +227,18 @@ async def lifespan(app: FastAPI):
         scheduler_svc.stop_loop()
 
 
-app = FastAPI(title="ICE Data Workbench v3 API", version="3.0.0", lifespan=lifespan)
+# OpenAPI / Swagger UI / ReDoc are admin-only. Anonymous probes hit 401
+# instead of receiving a 150 KB schema dump that maps every endpoint and
+# its parameters. We disable the default auto-mounted routes and re-add
+# our own gated copies below.
+app = FastAPI(
+    title="ICE Data Workbench v3 API",
+    version="3.0.0",
+    lifespan=lifespan,
+    docs_url=None,
+    redoc_url=None,
+    openapi_url=None,
+)
 
 settings = get_settings()
 _validate_security_settings(settings)
@@ -117,15 +255,86 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.add_middleware(SecurityHeadersMiddleware)
+app.add_middleware(GlobalRateLimitMiddleware)
+# Outermost — runs first on request, last on response. 这样 request_id 在所有
+# 处理链路（rate limit / CORS / 异常处理器）里都可见，并且响应一定带上头。
+app.add_middleware(RequestIdMiddleware)
+
+
+# ------------------------------------------------------------------
+# OpenAPI — admin only. Custom routes since FastAPI's defaults are off.
+# ------------------------------------------------------------------
+@app.get("/openapi.json", include_in_schema=False)
+async def _openapi(_: dict = Depends(require_admin)):
+    return get_openapi(
+        title=app.title,
+        version=app.version,
+        description=app.description,
+        routes=app.routes,
+    )
+
+
+@app.get("/docs", include_in_schema=False)
+async def _swagger_ui(_: dict = Depends(require_admin)):
+    return get_swagger_ui_html(openapi_url="/openapi.json", title=f"{app.title} — Swagger")
+
+
+@app.get("/redoc", include_in_schema=False)
+async def _redoc(_: dict = Depends(require_admin)):
+    return get_redoc_html(openapi_url="/openapi.json", title=f"{app.title} — ReDoc")
+
+
+def _extract_task_id(request: Request) -> str | None:
+    """从路径参数 / 查询串里捞 task_id，给异常 emit 时定位归属。"""
+    try:
+        params = request.path_params or {}
+        if "task_id" in params:
+            return str(params["task_id"])
+        if "tid" in params:
+            return str(params["tid"])
+    except Exception:
+        pass
+    try:
+        return request.query_params.get("task_id")
+    except Exception:
+        return None
 
 
 @app.exception_handler(APIError)
-async def _api_error_handler(_: Request, exc: APIError):
-    return JSONResponse(status_code=exc.status_code, content=exc.to_envelope())
+async def _api_error_handler(request: Request, exc: APIError):
+    rid = event_log.request_id_var.get()
+    envelope = exc.to_envelope()
+    envelope["request_id"] = rid
+    # 业务异常一般是已知错误码，仅 ≥500 才落 events 当作运维信号；
+    # 4xx 太常见（VALIDATION / PERMISSION 等），不噪。
+    if exc.status_code >= 500:
+        event_log.emit(
+            task_id=_extract_task_id(request),
+            source="api",
+            event_type="api_error",
+            level="ERROR",
+            request_id=rid,
+            code=exc.error_code,
+            message=f"{request.method} {request.url.path} → {exc.status_code} {exc.message}",
+            payload={"status": exc.status_code, "biz_code": exc.biz_code},
+        )
+    return JSONResponse(status_code=exc.status_code, content=envelope)
 
 
 @app.exception_handler(StarletteHTTPException)
-async def _http_handler(_: Request, exc: StarletteHTTPException):
+async def _http_handler(request: Request, exc: StarletteHTTPException):
+    rid = event_log.request_id_var.get()
+    if exc.status_code >= 500:
+        event_log.emit(
+            task_id=_extract_task_id(request),
+            source="api",
+            event_type="http_error",
+            level="ERROR",
+            request_id=rid,
+            code="HTTP_ERROR",
+            message=f"{request.method} {request.url.path} → {exc.status_code} {exc.detail}",
+            payload={"status": exc.status_code},
+        )
     return JSONResponse(
         status_code=exc.status_code,
         content={
@@ -133,13 +342,24 @@ async def _http_handler(_: Request, exc: StarletteHTTPException):
             "message": str(exc.detail),
             "error_code": ErrorCode.INTERNAL_ERROR if exc.status_code >= 500 else "HTTP_ERROR",
             "data": None,
+            "request_id": rid,
         },
     )
 
 
 @app.exception_handler(Exception)
-async def _fallback_handler(_: Request, exc: Exception):
+async def _fallback_handler(request: Request, exc: Exception):
     log.exception("unhandled exception")
+    rid = event_log.request_id_var.get()
+    event_log.emit(
+        task_id=_extract_task_id(request),
+        source="api",
+        event_type="unhandled_exception",
+        level="ERROR",
+        request_id=rid,
+        code="INTERNAL_ERROR",
+        message=f"{request.method} {request.url.path}: {type(exc).__name__}: {str(exc)[:300]}",
+    )
     return JSONResponse(
         status_code=500,
         content={
@@ -147,11 +367,12 @@ async def _fallback_handler(_: Request, exc: Exception):
             "message": str(exc),
             "error_code": ErrorCode.INTERNAL_ERROR,
             "data": None,
+            "request_id": rid,
         },
     )
 
 
-@app.get("/api/v1/health")
+@app.api_route("/api/v1/health", methods=["GET", "HEAD"])
 async def health():
     return {"code": 0, "message": "success", "data": {"status": "ok", "version": "3.0.0"}}
 
@@ -179,13 +400,16 @@ if _FRONTEND_DIST.is_dir() and (_FRONTEND_DIST / "index.html").exists():
     # 浏览器每次都校验 index.html 是否有更新；新 build 后自动失效旧缓存。
     _NO_CACHE_HEADERS = {"Cache-Control": "no-cache, must-revalidate"}
 
-    @app.get("/", include_in_schema=False)
+    # Accept HEAD too — health checks / CDN probes / link checkers commonly
+    # use it. FastAPI's `@app.get` rejects HEAD with 405 by default, so
+    # switch to `api_route` and list both methods.
+    @app.api_route("/", methods=["GET", "HEAD"], include_in_schema=False)
     async def _spa_root():
         return FileResponse(_index_path, headers=_NO_CACHE_HEADERS)
 
-    @app.get("/{full_path:path}", include_in_schema=False)
+    @app.api_route("/{full_path:path}", methods=["GET", "HEAD"], include_in_schema=False)
     async def _spa_fallback(full_path: str):
-        # API 路由已在前面注册；这里只接未命中任何 API 的 GET。
+        # API 路由已在前面注册；这里只接未命中任何 API 的 GET/HEAD。
         # /api/* 未命中的路径返回 JSON 404（交给 exception_handler）。
         if full_path.startswith("api/"):
             raise StarletteHTTPException(status_code=404, detail="Not Found")

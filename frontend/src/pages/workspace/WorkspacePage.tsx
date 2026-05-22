@@ -29,25 +29,12 @@ import type {
 } from "@/types/api";
 import "./Workspace.css";
 
-/**
- * 推导当前用户在任务中的角色。与后端 derive_task_role 对齐（见 spec §5）。
- * - admin / super_admin 全局管理员直接返回 "admin"
- * - owner_id 命中返回 "owner"
- * - collaborators 中 status==="active" 的条目按 role 返回
- * - 对公开任务返回 "viewer"（publish_status 判断交由后端）
- */
-function deriveRole(
+// task.role 由后端 derive_task_role 派生回传，前端绝不重算——一旦双源各算
+// 一份，viewer 拿到编辑态 UI 的漏档 BUG 就会重现。
+function readTaskRole(
   task: TaskDetail,
-  user: { id: string; auth_role?: string } | null,
 ): "owner" | "editor" | "viewer" | "admin" | null {
-  if (!user) return null;
-  if (user.auth_role === "admin" || user.auth_role === "super_admin") return "admin";
-  if (task.owner_id === user.id) return "owner";
-  const c = task.collaborators?.find((x) => x.user_id === user.id && x.status === "active");
-  if (c?.role === "owner") return "owner";
-  if (c?.role === "editor") return "editor";
-  if (task.visibility === "public") return "viewer";
-  return null;
+  return task.role ?? null;
 }
 
 export function WorkspacePage() {
@@ -522,7 +509,7 @@ export function WorkspacePage() {
   const wsErrCode = socket.errorCode;
   const wsCloseInfo = socket.closeInfo;
   const isStreaming = ["streaming", "tool", "typing"].includes(socket.phase);
-  const role = deriveRole(task, currentUser);
+  const role = readTaskRole(task);
   const canWrite = role === "editor" || role === "owner" || role === "admin";
   // owner/admin 才看到 ShareToggle 与 邀请协作 / 申请审批 等高权限按钮
   const isOwnerLike = role === "owner" || role === "admin";

@@ -20,6 +20,7 @@ interface Alerts {
   public_tasks: number;
   templates: number;
   scheduled_failed: number;
+  pending_users: number;
   budget_alert: "warning" | "exceeded" | null;
   budget: BudgetInfo | null;
 }
@@ -57,6 +58,7 @@ export function AdminOverview() {
       alerts.public_tasks +
       alerts.templates +
       alerts.scheduled_failed +
+      alerts.pending_users +
       (budgetAlert ? 1 : 0)
     : 0;
   const maxRank = Math.max(1, ...rank.map((r) => r.messages));
@@ -93,6 +95,15 @@ export function AdminOverview() {
                   : `本月 LLM 支出接近预算：$${alerts.budget.cost_usd.toFixed(2)} / $${alerts.budget.budget_usd.toFixed(2)}（${(alerts.budget.used_ratio * 100).toFixed(1)}%）`}
                 <Link to="/admin/settings" style={{ marginLeft: "auto" }}>
                   → 调整预算
+                </Link>
+              </div>
+            )}
+            {alerts!.pending_users > 0 && (
+              <div className="adm-alert-item">
+                <span>👥</span>
+                {alerts!.pending_users} 个账号注册申请待审批
+                <Link to="/admin/users?status=pending" style={{ marginLeft: "auto" }}>
+                  → 立即审批
                 </Link>
               </div>
             )}

@@ -2,6 +2,8 @@ export interface ApiEnvelope<T = unknown> {
   code: number;
   message: string;
   error_code?: string;
+  /** 后端中间件给每个请求分配的 8 字符 ID。出错时贴给 admin 反查事件流。 */
+  request_id?: string;
   data: T;
 }
 
@@ -83,11 +85,17 @@ export interface TaskSummary {
   role?: "owner" | "collaborator";
 }
 
-export interface TaskDetail extends TaskSummary {
+/** 详情接口里的 `role` 是后端 derive_task_role 派生的细粒度角色（owner/editor/viewer/admin），
+ *  与列表接口里 TaskSummary.role 的"owner|collaborator"粗粒度含义不同，故 Omit 后重新声明，
+ *  避免类型冲突，也提醒维护者两处含义不一样。 */
+export interface TaskDetail extends Omit<TaskSummary, "role"> {
   description?: string | null;
   initial_prompt?: string | null;
   skill_ids?: string[];
   collaborators?: Array<{ user_id: string; role: string; status: string }>;
+  /** 当前调用者在该任务上的角色，由后端 derive_task_role 派生回传，前端直接用——
+   *  前端再自己算一次 role 容易和后端漏档（曾出现 viewer 协作者拿到编辑态 UI 的 BUG）。 */
+  role?: "owner" | "editor" | "viewer" | "admin" | null;
   workspace?: { current_conversation_id?: string; model?: string };
   agent_update_available?: boolean;
   imported_file_count?: number;

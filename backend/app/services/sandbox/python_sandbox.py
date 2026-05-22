@@ -43,18 +43,52 @@ def _resolve_executable(custom: str | None = None) -> Path:
     return Path(sys.executable)
 
 
-def _build_clean_env(*, venv_python: Path, task_dir: Path) -> dict[str, str]:
-    """Strip the parent process env down to a minimal known set.
+# Vars the sandboxed code must never see, even when allow_cli=True. We
+# intentionally use both an explicit set (for full names that don't match the
+# generic *_TOKEN/_KEY/_SECRET pattern) and substring/prefix rules so a
+# future credential exported into the parent shell defaults to "blocked".
+_BLOCKED_ENV_KEYS = {
+    "ANTHROPIC_BASE_URL",
+    "MIFY_GATEWAY_BASE_URL",
+    "OPENAI_BASE_URL",
+    "ICE_SECRET_KEY",
+    "AEGIS_DEV_BYPASS_EMAIL",
+    "AEGIS_PUBLIC_KEYS",
+    "KUBECONFIG",
+    "GOOGLE_APPLICATION_CREDENTIALS",
+    "DOCKER_AUTH_CONFIG",
+}
+_BLOCKED_PREFIXES = ("SUDO_", "SSH_", "GPG_")
+_BLOCKED_SUBSTRINGS = ("TOKEN", "SECRET", "KEY", "PASSWORD", "PASSWD", "API_KEY")
 
-    Removed: HTTP_PROXY/HTTPS_PROXY/NO_PROXY, AWS_*, GCP_*, KYUUBI_*,
-    ANTHROPIC_*, MIFY_*, OPENAI_*, FEISHU_*, anything containing TOKEN/KEY/
-    SECRET/PASSWORD. The sandbox should never see service credentials.
+
+def _is_blocked_env_key(k: str) -> bool:
+    if k in _BLOCKED_ENV_KEYS:
+        return True
+    if any(k.startswith(p) for p in _BLOCKED_PREFIXES):
+        return True
+    up = k.upper()
+    return any(s in up for s in _BLOCKED_SUBSTRINGS)
+
+
+def _build_clean_env(
+    *, venv_python: Path, task_dir: Path, allow_cli: bool = False
+) -> dict[str, str]:
+    """Build env for the sandbox subprocess.
+
+    Default (allow_cli=False): minimal whitelist — original isolation. Used by
+    pure data-analysis Python that should never reach the network or read
+    service credentials.
+
+    allow_cli=True: inherit the parent env minus LLM-gateway secrets, so the
+    sandboxed Python can subprocess.run() CLI tools (feishu / kyuubi / datum)
+    that need their auth files (under real HOME) and service env vars. PATH is
+    widened to common install locations for those CLIs (npm-global / pipx /
+    /usr/local/bin). The sandbox still enforces CPU / memory / fsize / nproc
+    via RLIMIT — only the env-strip and network-block layers are relaxed.
     """
     venv_bin = str(venv_python.parent)
-    minimal = {
-        "PATH": f"{venv_bin}:/usr/bin:/bin",
-        "HOME": str(task_dir),
-        "TMPDIR": str(task_dir),
+    common_overrides = {
         "PYTHONUNBUFFERED": "1",
         # Force matplotlib non-interactive backend so it doesn't try to open
         # a GUI window in the sandbox (which would fail and waste time)
@@ -76,8 +110,33 @@ def _build_clean_env(*, venv_python: Path, task_dir: Path) -> dict[str, str]:
         "NUMEXPR_NUM_THREADS": "1",
         "VECLIB_MAXIMUM_THREADS": "1",
     }
-    # Carry over any safe vars the parent has explicitly opted in to
-    return minimal
+
+    if not allow_cli:
+        return {
+            "PATH": f"{venv_bin}:/usr/bin:/bin",
+            "HOME": str(task_dir),
+            "TMPDIR": str(task_dir),
+            **common_overrides,
+        }
+
+    parent = {k: v for k, v in os.environ.items() if not _is_blocked_env_key(k)}
+    parent_path = parent.get("PATH", "/usr/bin:/bin")
+    parent_home = parent.get("HOME") or str(task_dir)
+    from ...core.cli_path import cli_path_extras
+
+    seen: set[str] = set()
+    merged_path_parts: list[str] = []
+    for p in [venv_bin, *cli_path_extras(home=parent_home), *parent_path.split(":")]:
+        if not p or p in seen:
+            continue
+        seen.add(p)
+        merged_path_parts.append(p)
+    parent["PATH"] = ":".join(merged_path_parts)
+    parent["HOME"] = parent_home
+    parent["TMPDIR"] = parent.get("TMPDIR") or str(task_dir)
+    parent["SANDBOX_NETWORK_ALLOWED"] = "1"
+    parent.update(common_overrides)
+    return parent
 
 
 def _truncate(b: bytes, limit: int) -> tuple[str, bool]:
@@ -131,6 +190,7 @@ async def run_python(
     nofile: int = 1024,
     venv_python: str | None = None,
     description: str = "",
+    allow_cli: bool = False,
 ) -> SandboxResult:
     """Execute `code` in a sandboxed subprocess; return SandboxResult.
 
@@ -190,7 +250,9 @@ async def run_python(
     result_r, result_w = os.pipe()
     os.set_inheritable(result_w, True)
 
-    env = _build_clean_env(venv_python=venv_py, task_dir=task_dir)
+    env = _build_clean_env(
+        venv_python=venv_py, task_dir=task_dir, allow_cli=allow_cli
+    )
 
     preexec = make_preexec(
         cpu_sec=timeout_sec,
@@ -198,6 +260,7 @@ async def run_python(
         fsize_mb=fsize_mb,
         nproc=nproc,
         nofile=nofile,
+        apply_as=not allow_cli,
     ) if platform.system() in ("Linux", "Darwin") else None
 
     started = time.monotonic()

@@ -64,6 +64,19 @@ export interface ApiError extends Error {
   errorCode?: string;
   status?: number;
   detail?: unknown;
+  /** 后端中间件分配的 request_id（响应头 X-Request-Id 或 envelope.request_id）。
+   * 报错时贴这个 ID，admin 可在 /admin/diagnostics 反查到所有相关事件。 */
+  requestId?: string;
+}
+
+function pickRequestId(resp: AxiosResponse | undefined, body: unknown): string | undefined {
+  // axios 把响应头键统一小写化，所以只查小写形式即可。
+  const headerId = resp?.headers?.["x-request-id"] as string | undefined;
+  const bodyId =
+    body && typeof body === "object" && "request_id" in (body as Record<string, unknown>)
+      ? ((body as Record<string, unknown>).request_id as string | undefined)
+      : undefined;
+  return headerId || bodyId;
 }
 
 export async function api<T>(promise: Promise<AxiosResponse<ApiEnvelope<T>>>): Promise<T> {
@@ -72,6 +85,7 @@ export async function api<T>(promise: Promise<AxiosResponse<ApiEnvelope<T>>>): P
     if (resp.data.code !== 0) {
       const e = new Error(resp.data.message) as ApiError;
       e.errorCode = resp.data.error_code;
+      e.requestId = pickRequestId(resp, resp.data);
       throw e;
     }
     return resp.data.data;
@@ -82,6 +96,7 @@ export async function api<T>(promise: Promise<AxiosResponse<ApiEnvelope<T>>>): P
       e.errorCode = body?.error_code;
       e.status = err.response.status;
       e.detail = body?.data;
+      e.requestId = pickRequestId(err.response, body);
       throw e;
     }
     throw err;

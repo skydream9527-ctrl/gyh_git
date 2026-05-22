@@ -146,6 +146,11 @@ class StoragePaths:
     def task_bg_jobs(self, task_id: str) -> Path:
         return self.task_dir(task_id) / "bg_jobs.jsonl"
 
+    def task_events(self, task_id: str, ym: str) -> Path:
+        # 任务级运维时间轴：每条 emit 一行 JSON。按 YYYY-MM 滚动避免单文件过大。
+        # ym 由 event_log.py 的 _events_path() 注入；调用方读多月时 glob 即可。
+        return self.task_dir(task_id) / "events" / f"{ym}.jsonl"
+
     def task_files_imported(self, task_id: str) -> Path:
         return self.task_dir(task_id) / "files" / "imported"
 

@@ -27,6 +27,7 @@ const AdminUserTasks = lazy(() => import("@/pages/admin/AdminUserTasks").then((m
 const AdminAgents = lazy(() => import("@/pages/admin/AdminAgents").then((m) => ({ default: m.AdminAgents })));
 const AdminAgentEdit = lazy(() => import("@/pages/admin/AdminAgentEdit").then((m) => ({ default: m.AdminAgentEdit })));
 const AdminAuditLogs = lazy(() => import("@/pages/admin/AdminAuditLogs").then((m) => ({ default: m.AdminAuditLogs })));
+const AdminDiagnostics = lazy(() => import("@/pages/admin/AdminDiagnostics").then((m) => ({ default: m.AdminDiagnostics })));
 const AdminUsage = lazy(() => import("@/pages/admin/AdminUsage").then((m) => ({ default: m.AdminUsage })));
 const AdminSqlAudit = lazy(() => import("@/pages/admin/AdminSqlAudit").then((m) => ({ default: m.AdminSqlAudit })));
 const AdminSettings = lazy(() => import("@/pages/admin/AdminSettings").then((m) => ({ default: m.AdminSettings })));
@@ -81,6 +82,7 @@ export default function App() {
             <Route path="agents" element={<AdminAgents />} />
             <Route path="agents/:agentId" element={<AdminAgentEdit />} />
             <Route path="audit" element={<AdminAuditLogs />} />
+            <Route path="diagnostics" element={<AdminDiagnostics />} />
             <Route path="usage" element={<AdminUsage />} />
             <Route path="sql-audit" element={<AdminSqlAudit />} />
             <Route path="review-center" element={<AdminReviewCenter />} />

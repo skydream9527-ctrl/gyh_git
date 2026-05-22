@@ -23,18 +23,24 @@ def _is_linux() -> bool:
 
 
 def make_preexec(*, cpu_sec: int, memory_mb: int, fsize_mb: int,
-                 nproc: int, nofile: int):
+                 nproc: int, nofile: int, apply_as: bool = True):
     """Return a preexec_fn closure with the given limits baked in.
 
     Called in the forked child *before* exec(). Must be small and not
     touch async / asyncio internals.
+
+    `apply_as=False` skips RLIMIT_AS entirely. Use this when the sandboxed
+    code drives a Node-based CLI (V8 / Wasm pre-reserve multi-GB virtual
+    address space; even a generous RLIMIT_AS = 4 GB makes `feishu fetch`
+    crash with "Cannot allocate Wasm memory"). RLIMIT_CPU + wall-clock
+    timeout still bound runaway resource use.
     """
     cpu_hard = max(1, int(cpu_sec))
     mem_bytes = max(64, int(memory_mb)) * 1024 * 1024
     fsize_bytes = max(1, int(fsize_mb)) * 1024 * 1024
     nproc_v = max(8, int(nproc))
     nofile_v = max(16, int(nofile))
-    use_as = _is_linux()
+    use_as = _is_linux() and apply_as
 
     def _apply():
         # New process group → easy to kill the whole tree later

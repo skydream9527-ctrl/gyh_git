@@ -8,6 +8,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import secrets
 import uuid
 from datetime import datetime, timezone
 from typing import IO
@@ -24,6 +25,7 @@ from ...services import (
     agents_svc,
     compaction_svc,
     conversation_svc,
+    event_log,
     experience_card_svc,
     inflight_svc,
     llm_gateway,
@@ -271,6 +273,21 @@ async def ws_chat(
     conv_path = paths.task_conversation(task_id, conversation_id)
     tool_path = paths.task_tool_calls(task_id, conversation_id)
 
+    # WS 不走 HTTP 中间件，独立分配 ws_id 进 contextvar，让 _run_turn 里 emit
+    # 的事件都能带上同一个 request_id 便于反查。
+    ws_id = "ws-" + secrets.token_hex(4)
+    event_log.request_id_var.set(ws_id)
+    event_log.user_id_var.set(user["id"])
+    event_log.emit(
+        task_id=task_id,
+        conv_id=conversation_id,
+        source="ws",
+        event_type="ws_open",
+        request_id=ws_id,
+        user_id=user["id"],
+        message=f"role={getattr(ws_role, 'value', ws_role)}",
+    )
+
     # 回合执行放到后台任务里，主循环始终能读 `abort` / `set_plan_mode` 等控制消息。
     # `_inflight_turns` 是跨 WS 的共享注册表：用户退出 → WS close → 注册表里的 task
     # 不会被取消，继续跑到完成。同一 conv 同时只能有一个 turn。
@@ -340,6 +357,14 @@ async def ws_chat(
                 entry = _inflight_turns.get(inflight_key)
                 if entry is not None:
                     entry[1].set()
+                event_log.emit(
+                    task_id=task_id,
+                    conv_id=conversation_id,
+                    source="ws",
+                    event_type="turn_abort_requested",
+                    level="WARN",
+                    message="user requested abort",
+                )
                 continue
             if mtype == "set_plan_mode":
                 try:
@@ -437,6 +462,15 @@ async def ws_chat(
                     ErrorCode.CONVERSATION_INFLIGHT,
                     "该对话正在处理中，请稍候或点中断后再发新消息",
                 )
+                event_log.emit(
+                    task_id=task_id,
+                    conv_id=conversation_id,
+                    source="ws",
+                    event_type="inflight_blocked",
+                    level="WARN",
+                    code=ErrorCode.CONVERSATION_INFLIGHT,
+                    message="rejected new message: same-worker turn still running",
+                )
                 continue
 
             # Cross-worker check: another uvicorn worker may be running this
@@ -448,6 +482,15 @@ async def ws_chat(
                     ErrorCode.CONVERSATION_INFLIGHT,
                     "该对话正在处理中，请稍候或点中断后再发新消息",
                 )
+                event_log.emit(
+                    task_id=task_id,
+                    conv_id=conversation_id,
+                    source="ws",
+                    event_type="inflight_blocked",
+                    level="WARN",
+                    code=ErrorCode.CONVERSATION_INFLIGHT,
+                    message="rejected new message: cross-worker flock held",
+                )
                 continue
 
             new_cancel = asyncio.Event()
@@ -458,6 +501,14 @@ async def ws_chat(
         # 用户返回任务页时能直接看到持久化后的完整历史。
         heartbeat_task.cancel()
         _unregister_subscriber(task_id, conversation_id, websocket)
+        event_log.emit(
+            task_id=task_id,
+            conv_id=conversation_id,
+            source="ws",
+            event_type="ws_close",
+            request_id=ws_id,
+            message="ws closed",
+        )
         try:
             await websocket.close()
         except Exception:
@@ -516,6 +567,15 @@ async def _handle_user_message(
     if not content:
         await _send_error(ws, ErrorCode.VALIDATION_ERROR, "empty message")
         return
+    event_log.emit(
+        task_id=task_id,
+        conv_id=conversation_id,
+        source="ws",
+        event_type="turn_start",
+        user_id=user.get("id"),
+        message=f"len={len(content)}",
+        payload={"content_preview": content[:80]},
+    )
 
     user_record = {
         "id": user_msg_id,
@@ -671,6 +731,16 @@ async def _handle_user_message(
                                 tool_uses.append(block)
             except Exception as e:
                 log.exception("gateway stream failed")
+                event_log.emit(
+                    task_id=task_id,
+                    conv_id=conversation_id,
+                    source="llm_gateway",
+                    event_type="gateway_error",
+                    level="ERROR",
+                    code="GATEWAY_ERROR",
+                    message=f"{type(e).__name__}: {str(e)[:300]}",
+                    payload={"model": model_id, "round": round_idx},
+                )
                 from ...core.errors import APIError as _APIError
                 if isinstance(e, _APIError):
                     raise
@@ -828,6 +898,30 @@ async def _handle_user_message(
                         "error": outcome.get("error"),
                     },
                 )
+                # 工具调用失败入 events（成功的不记，避免噪音；完整调用流仍在
+                # tool_calls.jsonl 里，诊断页时间轴可合并展示）。
+                if not outcome.get("success"):
+                    err = outcome.get("error") or {}
+                    err_code = (
+                        err.get("error_code")
+                        if isinstance(err, dict)
+                        else None
+                    ) or "TOOL_ERROR"
+                    err_msg = (
+                        err.get("message")
+                        if isinstance(err, dict)
+                        else str(err)
+                    ) or "tool failed"
+                    event_log.emit(
+                        task_id=task_id,
+                        conv_id=conversation_id,
+                        source="tool_runner",
+                        event_type="tool_error",
+                        level="WARN",
+                        code=err_code,
+                        message=f"{tu_name}: {err_msg}",
+                        payload={"tool_call_id": tu_id, "status": outcome.get("status")},
+                    )
                 if (
                     tu_name == "write_file"
                     and outcome.get("success")
@@ -898,13 +992,39 @@ async def _handle_user_message(
         await _send(ws, {"type": "agent_message_done", "files_created": files_created})
     except APIError as e:
         await _send(ws, {"type": "error", "error_code": e.error_code, "message": e.message})
+        event_log.emit(
+            task_id=task_id,
+            conv_id=conversation_id,
+            source="ws",
+            event_type="turn_error",
+            level="ERROR",
+            code=e.error_code,
+            message=e.message,
+        )
     except Exception as e:
         log.exception("ws stream error")
         await _send(ws, {"type": "error", "error_code": "INTERNAL_ERROR", "message": str(e)})
+        event_log.emit(
+            task_id=task_id,
+            conv_id=conversation_id,
+            source="ws",
+            event_type="turn_error",
+            level="ERROR",
+            code="INTERNAL_ERROR",
+            message=f"{type(e).__name__}: {str(e)[:300]}",
+        )
     finally:
         await _send(ws, {"type": "agent_typing", "status": "stop"})
         if final_text:
             await task_svc.touch_task(task_id, last_message_preview=final_text)
+        event_log.emit(
+            task_id=task_id,
+            conv_id=conversation_id,
+            source="ws",
+            event_type="turn_end",
+            user_id=user.get("id"),
+            message=f"final_len={len(final_text)} files={len(files_created)}",
+        )
         keepalive_task.cancel()
         try:
             await keepalive_task

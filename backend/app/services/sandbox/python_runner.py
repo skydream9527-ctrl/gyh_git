@@ -34,7 +34,16 @@ import traceback
 # ---- network kill switch ---------------------------------------------------
 
 def _block_network() -> None:
-    """Monkey-patch socket.socket so any network attempt raises."""
+    """Monkey-patch socket.socket so any network attempt raises.
+
+    Skipped when env var SANDBOX_NETWORK_ALLOWED=1 is set by the parent — used
+    when the agent needs Python to drive an external CLI (feishu / kyuubi /
+    datum) that talks to the network. The CLI's own auth is the access gate;
+    the sandbox only protects the host filesystem and CPU/memory budget.
+    """
+    if os.environ.get("SANDBOX_NETWORK_ALLOWED") == "1":
+        return
+
     import socket
 
     class _Blocked(OSError):

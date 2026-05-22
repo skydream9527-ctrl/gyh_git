@@ -19,6 +19,7 @@ const NAV: NavItem[] = [
   { to: "/admin/usage", label: "用量与成本", icon: "💰", group: "monitor" },
   { to: "/admin/sql-audit", label: "SQL 审计", icon: "🔍", group: "monitor" },
   { to: "/admin/audit", label: "操作审计", icon: "📜", group: "monitor" },
+  { to: "/admin/diagnostics", label: "任务诊断", icon: "🩺", group: "monitor" },
   { to: "/admin/review-center", label: "审核中心", icon: "📥", group: "review" },
   { to: "/admin/experience-cards", label: "经验卡片", icon: "💡", group: "review" },
   { to: "/admin/public-tasks", label: "公共任务", icon: "🌐", group: "review" },

@@ -26,10 +26,11 @@ def _config_path() -> Path:
 
 DEFAULTS: dict = {
     "toggles": {
-        # Off by default — admins must opt in via /admin/settings/toggles. A
-        # public registration endpoint coupled with an admin who can self-
-        # approve is a known foot-gun (see security review 2026-05).
-        "enable_open_register": False,
+        # On by default — 注册接口写入的账号一律是 status=pending，必须管理员
+        # 在 /admin/users 显式批准后才能登录，所以"开放注册"开关只控制"是否
+        # 在登录页显示注册入口"，而非"任何人能直接登录"。如运营策略需要完全
+        # 屏蔽自助注册渠道，改回 False 即可（admin 仍可代建账号）。
+        "enable_open_register": True,
         "enable_public_task_review": False,
         "enable_feishu_strict_whitelist": False,
         # When true (default): a user logging in via Feishu for the first time

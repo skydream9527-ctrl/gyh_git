@@ -3,6 +3,7 @@ from fastapi import APIRouter
 
 from . import (
     admin,
+    admin_diagnostics,
     admin_resources,
     admin_review,
     admin_settings,
@@ -48,6 +49,7 @@ api_router.include_router(experience_cards.router, prefix="/experience-cards", t
 api_router.include_router(guide.router, tags=["guide"])
 api_router.include_router(kb.router, tags=["kb"])
 api_router.include_router(admin.router, prefix="/admin", tags=["admin"])
+api_router.include_router(admin_diagnostics.router, prefix="/admin/diagnostics", tags=["admin-diagnostics"])
 api_router.include_router(admin_settings.router, prefix="/admin/settings", tags=["admin-settings"])
 api_router.include_router(admin_usage.router, prefix="/admin/usage", tags=["admin-usage"])
 api_router.include_router(admin_sql_audit.router, prefix="/admin/sql-audit", tags=["admin-sql-audit"])

@@ -44,6 +44,7 @@ async def overview_alerts(_: dict = Depends(require_admin)):
         "public_tasks": 0,
         "templates": 0,
         "scheduled_failed": 0,
+        "pending_users": 0,
         # Budget alert — exposed so AdminOverview can render a banner. The
         # actual spend / ratio / budget are attached below under `budget` so
         # we don't have to re-query /admin/usage to render a meaningful line.
@@ -56,6 +57,10 @@ async def overview_alerts(_: dict = Depends(require_admin)):
         "SELECT COUNT(*) AS c FROM experience_cards_index WHERE status = 'draft'"
     )
     counts["experience_cards"] = int((row or {}).get("c") or 0)
+    row = await db.fetchone(
+        "SELECT COUNT(*) AS c FROM users_index WHERE status = 'pending'"
+    )
+    counts["pending_users"] = int((row or {}).get("c") or 0)
     tdir = paths.tasks / ".templates"
     if tdir.exists():
         for d in tdir.iterdir():

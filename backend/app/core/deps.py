@@ -151,6 +151,18 @@ def _is_loopback(client_host: str | None) -> bool:
     return h in _LOOPBACK_HOSTS
 
 
+def client_ip(request: Request) -> str:
+    """Best-effort caller IP. Trusts X-Forwarded-For only when set by an
+    upstream proxy — for a single-port deploy behind nginx/aegis the first
+    hop in XFF is the real client. Fallback to the direct connection peer."""
+    xff = request.headers.get("x-forwarded-for")
+    if xff:
+        head = xff.split(",")[0].strip()
+        if head:
+            return head
+    return request.client.host if request.client else ""
+
+
 async def _resolve_user(
     aegis_header: str | None,
     authorization: str | None,

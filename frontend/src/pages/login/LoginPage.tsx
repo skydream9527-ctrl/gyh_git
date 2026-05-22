@@ -58,7 +58,9 @@ export function LoginPage() {
         if (!m.aegis_enabled && m.password_enabled) setTab("password");
       })
       .catch(() => {
-        setMethods({ aegis_enabled: false, password_enabled: true, open_register_enabled: true });
+        // Conservative fallback when /auth/methods is unreachable: only
+        // password login, registration disabled. Matches backend default.
+        setMethods({ aegis_enabled: false, password_enabled: true, open_register_enabled: false });
         setTab("password");
       });
     sysApi.toggles().then(setToggles).catch(() => {});

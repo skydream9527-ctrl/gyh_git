@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { adminApi } from "@/api/endpoints";
 import type { AdminUser } from "@/api/endpoints";
 import { ConfirmModal } from "@/components/feedback/ConfirmModal";
@@ -12,12 +12,16 @@ export function AdminUsers() {
   const isSuper = me?.auth_role === "super_admin";
   const pushToast = useUIStore((s) => s.pushToast);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const [items, setItems] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
   const [role, setRole] = useState<string>("");
-  const [statusFilter, setStatusFilter] = useState<string>("");
+  // 从 URL ?status=pending 进入时（概览页"立即审批"入口），默认筛选待审批列表
+  const [statusFilter, setStatusFilter] = useState<string>(
+    searchParams.get("status") || "",
+  );
   const [showCreate, setShowCreate] = useState(false);
   const [editing, setEditing] = useState<AdminUser | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<AdminUser | null>(null);
@@ -57,12 +61,19 @@ export function AdminUsers() {
     }
   };
 
+  // 审批通过/驳回后跳回 /admin/users（清掉 ?status=pending 与本地筛选），
+  // 让管理员看到完整用户列表，包含刚处理的这一条。
+  const goBackToUserList = () => {
+    setStatusFilter("");
+    navigate("/admin/users", { replace: true });
+  };
+
   const handleApprove = async (u: AdminUser) => {
     setReviewBusy(u.id);
     try {
       await adminApi.reviewRegistration(u.id, "approved");
       pushToast("success", `已批准 ${u.name}，该账号可以登录`);
-      await reload();
+      goBackToUserList();
     } catch (err) {
       pushToast("error", (err as Error).message);
     } finally {
@@ -78,7 +89,7 @@ export function AdminUsers() {
       pushToast("success", `已驳回 ${rejecting.name}`);
       setRejecting(null);
       setRejectReason("");
-      await reload();
+      goBackToUserList();
     } catch (err) {
       pushToast("error", (err as Error).message);
     } finally {

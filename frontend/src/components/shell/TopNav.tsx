@@ -3,6 +3,7 @@ import { ReactNode, useEffect, useRef, useState } from "react";
 import { useAuthStore } from "@/stores/authStore";
 import { useUIStore } from "@/stores/uiStore";
 import { InviteInbox } from "./InviteInbox";
+import { AccountModal } from "./AccountModal";
 import "./TopNav.css";
 
 type Mode = "dashboard" | "workspace" | "admin" | "introduce";
@@ -21,6 +22,7 @@ export function TopNav({ mode, crumb, agentChip, rightActions }: Props) {
   const toggleTheme = useUIStore((s) => s.toggleTheme);
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -93,6 +95,16 @@ export function TopNav({ mode, crumb, agentChip, rightActions }: Props) {
                 <button
                   className="umi-item"
                   onClick={() => {
+                    setMenuOpen(false);
+                    setAccountOpen(true);
+                  }}
+                  role="menuitem"
+                >
+                  ✏ 编辑账户
+                </button>
+                <button
+                  className="umi-item"
+                  onClick={() => {
                     toggleTheme();
                   }}
                   role="menuitem"
@@ -108,6 +120,7 @@ export function TopNav({ mode, crumb, agentChip, rightActions }: Props) {
           </div>
         )}
       </div>
+      <AccountModal open={accountOpen} onClose={() => setAccountOpen(false)} />
     </nav>
   );
 }

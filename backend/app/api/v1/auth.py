@@ -16,23 +16,13 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends, Request
 
 from ...core.config import get_settings
-from ...core.deps import get_current_user
+from ...core.deps import client_ip as _client_ip, get_current_user
 from ...core.errors import APIError, ErrorCode, ok
 from ...core.security import create_access_token, create_refresh_token, decode_token
 from ...schemas.auth import LoginRequest, RefreshRequest, RegisterRequest
 from ...services import auth_svc, feishu, rate_limit_svc, sysconfig_svc
 
 router = APIRouter()
-
-
-def _client_ip(request: Request) -> str:
-    """Best-effort caller IP. Trusts X-Forwarded-For only when set by an
-    upstream proxy — for a single-port deploy behind nginx/aegis the first
-    hop in XFF is the real client."""
-    xff = request.headers.get("x-forwarded-for")
-    if xff:
-        return xff.split(",")[0].strip() or (request.client.host if request.client else "")
-    return request.client.host if request.client else ""
 
 
 @router.post("/login")

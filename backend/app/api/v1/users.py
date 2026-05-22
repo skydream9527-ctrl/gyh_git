@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, Query
 from ...core.deps import get_current_user
 from ...core.errors import ok
 from ...core.storage import get_index_db
+from ...services import auth_svc
 from ...services.auth_svc import _to_public
 
 router = APIRouter()
@@ -13,6 +14,12 @@ router = APIRouter()
 @router.get("/me")
 async def me(user: dict = Depends(get_current_user)):
     return ok(_to_public(user))
+
+
+@router.patch("/me")
+async def update_me(body: dict, user: dict = Depends(get_current_user)):
+    """普通用户自助修改账户信息：name / team / title / new_password（需 current_password）。"""
+    return ok(await auth_svc.update_self(user_id=user["id"], patch=body or {}))
 
 
 @router.get("/search")

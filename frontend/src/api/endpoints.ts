@@ -41,6 +41,14 @@ export const authApi = {
 export const userApi = {
   search: (q: string) =>
     api<PageData<UserPublic>>(http.get("/users/search", { params: { q } })),
+  /** 普通用户自助修改账户信息。修改密码时必须传 current_password + new_password。 */
+  updateMe: (body: {
+    name?: string;
+    team?: string | null;
+    title?: string | null;
+    current_password?: string;
+    new_password?: string;
+  }) => api<UserPublic>(http.patch("/users/me", body)),
 };
 
 export const taskApi = {
@@ -358,6 +366,7 @@ export const adminApi = {
       public_tasks: number;
       templates: number;
       scheduled_failed: number;
+      pending_users: number;
       budget_alert: "warning" | "exceeded" | null;
       budget: {
         month: string;
@@ -551,6 +560,78 @@ export const usageApi = {
       http.get("/admin/usage/by-dimension", { params: { dimension, days, limit } }),
     ),
   exportCsvUrl: (days = 30) => `/api/v1/admin/usage/export.csv?days=${days}`,
+};
+
+// ---- /admin/diagnostics ----（任务+会话粒度的运维事件流）
+
+export type DiagLevel = "INFO" | "WARN" | "ERROR";
+
+export interface DiagEventRecord {
+  ts: string;
+  level: DiagLevel;
+  source: string;
+  task_id: string;
+  conv_id: string | null;
+  run_id: string | null;
+  request_id: string | null;
+  user_id: string | null;
+  event_type: string;
+  code: string | null;
+  message: string;
+  payload?: Record<string, unknown> | null;
+}
+
+export interface DiagTimelineRow {
+  ts: string;
+  kind: "event" | "message" | "tool_call";
+  level?: DiagLevel | null;
+  source?: string;
+  event_type?: string;
+  role?: string;
+  code?: string | null;
+  task_id?: string;
+  conv_id?: string | null;
+  summary: string;
+  ref: unknown;
+}
+
+export interface DiagTaskEntry {
+  task_id: string;
+  task_name: string;
+  owner_id: string;
+  last_event_at: string | null;
+}
+
+export const diagnosticsApi = {
+  taskList: (limit = 50) =>
+    api<{ items: DiagTaskEntry[] }>(
+      http.get("/admin/diagnostics/tasks-with-events", { params: { limit } }),
+    ),
+  events: (params: {
+    task_id: string;
+    conv_id?: string;
+    request_id?: string;
+    level?: DiagLevel;
+    source?: string;
+    event_type?: string;
+    since_ym?: string;
+    limit?: number;
+  }) => {
+    const { task_id, ...q } = params;
+    return api<{ items: DiagEventRecord[]; total: number }>(
+      http.get(`/admin/diagnostics/tasks/${task_id}/events`, { params: q }),
+    );
+  },
+  timeline: (taskId: string, convId: string, limit = 500) =>
+    api<{ items: DiagTimelineRow[]; total: number }>(
+      http.get(`/admin/diagnostics/tasks/${taskId}/timeline`, {
+        params: { conv_id: convId, limit },
+      }),
+    ),
+  byRequest: (requestId: string, limit = 200) =>
+    api<{ items: DiagTimelineRow[]; total: number }>(
+      http.get(`/admin/diagnostics/by-request/${requestId}`, { params: { limit } }),
+    ),
 };
 
 // ---- /admin/sql-audit ----

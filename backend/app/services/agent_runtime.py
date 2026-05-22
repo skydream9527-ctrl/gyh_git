@@ -20,7 +20,7 @@ from pathlib import Path
 from typing import Any
 
 from ..core.storage import append_jsonl
-from . import llm_gateway, tool_runner
+from . import event_log, llm_gateway, tool_runner
 
 
 def _now() -> str:
@@ -57,6 +57,20 @@ async def run_agent_turn(
     resolved_model = llm_gateway.resolve_model(model)
     last_round = 0
 
+    # ctx 由调用方注入（spawn_subagent / run_background）；带上 task_id / run_id
+    # 让 events 时间轴能定位到具体子任务。run_id 不存在时只记 task_id。
+    _evt_task_id = (ctx or {}).get("task_id")
+    _evt_run_id = (ctx or {}).get("run_id") or (ctx or {}).get("subagent_run_id")
+    _evt_conv_id = (ctx or {}).get("conversation_id")
+    event_log.emit(
+        task_id=_evt_task_id,
+        conv_id=_evt_conv_id,
+        run_id=_evt_run_id,
+        source="agent_runtime",
+        event_type="sub_run_start",
+        message=f"model={resolved_model} max_rounds={max_rounds}",
+    )
+
     for round_idx in range(max_rounds + 1):
         last_round = round_idx
         text_buf: list[str] = []
@@ -80,6 +94,17 @@ async def run_agent_turn(
         except Exception as exc:
             if transcript_sink is not None:
                 append_jsonl(transcript_sink, {"event": "llm_error", "at": _now(), "message": str(exc)[:500]})
+            event_log.emit(
+                task_id=_evt_task_id,
+                conv_id=_evt_conv_id,
+                run_id=_evt_run_id,
+                source="agent_runtime",
+                event_type="sub_run_llm_error",
+                level="ERROR",
+                code="LLM_ERROR",
+                message=f"{type(exc).__name__}: {str(exc)[:300]}",
+                payload={"round": round_idx, "model": resolved_model},
+            )
             stop_reason = "llm_error"
             break
 
@@ -163,6 +188,19 @@ async def run_agent_turn(
             stop_reason = "plan_proposed"
             break
 
+    # llm_error 已在循环里以 ERROR 级别 emit 过 sub_run_llm_error，这里 INFO 即可。
+    event_log.emit(
+        task_id=_evt_task_id,
+        conv_id=_evt_conv_id,
+        run_id=_evt_run_id,
+        source="agent_runtime",
+        event_type="sub_run_end",
+        message=f"stop={stop_reason} rounds={last_round + 1} tools={len(tool_uses_log)}",
+        payload={
+            "input_tokens": usage_total["input_tokens"],
+            "output_tokens": usage_total["output_tokens"],
+        },
+    )
     return {
         "final_text": final_text,
         "tool_uses_log": tool_uses_log,
