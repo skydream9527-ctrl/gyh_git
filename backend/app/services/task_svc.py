@@ -8,6 +8,15 @@ from ..core.errors import APIError, ErrorCode
 from ..core.storage import file_transaction, get_index_db, get_paths, read_json, write_json
 from . import agent_snapshot_svc
 
+# 新建任务默认内置的 4 个 skill；调用方未传或传空数组时注入。
+# 显式传入非空数组的高级调用方（如管理员脚本）不受影响。
+DEFAULT_SKILL_IDS: tuple[str, ...] = (
+    "kyuubi",
+    "feishu",
+    "nl-mapping-table-sql",
+    "nl-python",
+)
+
 
 def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
@@ -32,6 +41,8 @@ async def create_task(
     db = get_index_db()
     tid = _new_id()
     cid = _new_id()
+    # 未指定 skill_ids 或传空数组时注入 DEFAULT_SKILL_IDS；显式给定非空数组按用户意图执行。
+    effective_skills = list(skill_ids) if skill_ids else list(DEFAULT_SKILL_IDS)
     meta = {
         "id": tid,
         "name": name,
@@ -40,7 +51,7 @@ async def create_task(
         "owner_id": owner_id,
         "description": description,
         "initial_prompt": initial_prompt,
-        "skill_ids": skill_ids or [],
+        "skill_ids": effective_skills,
         "visibility": visibility,
         "publish_status": "draft",
         "status": "active",
@@ -101,7 +112,7 @@ async def create_task(
         # Agent files are plain shutil copies (not transactional) because they
         # live outside the tx's managed paths; the tx still holds the meta lock.
         agent_snapshot_svc.snapshot_agent_into_task(task_id=tid, agent_id=agent_id)
-        agent_snapshot_svc.snapshot_skills_into_task(task_id=tid, skill_ids=skill_ids or [])
+        agent_snapshot_svc.snapshot_skills_into_task(task_id=tid, skill_ids=effective_skills)
         snap = {
             "mode": "live",
             "agent_source_version": agent_snapshot_svc.compute_agent_version(agent_id) if agent_id else None,
@@ -184,23 +195,44 @@ async def list_public_tasks(limit: int = 50) -> list[dict]:
         "SELECT * FROM tasks_index WHERE visibility = 'public' AND publish_status = 'published' ORDER BY updated_at DESC LIMIT ?",
         [limit],
     )
-    out = []
+    out: list[dict] = []
     for r in rows:
         meta = read_json(get_paths().task_meta(r["id"]))
         if meta:
             out.append(meta)
+    # Batch-resolve owner names so the dashboard 公共任务 cards can display
+    # who shared each task. One SQL with `IN (?, ?, …)` keeps the per-row N+1
+    # cost out of the hot path even with 50 tasks.
+    owner_ids = sorted({m.get("owner_id") for m in out if m.get("owner_id")})
+    if owner_ids:
+        placeholders = ",".join("?" * len(owner_ids))
+        urows = await db.fetchall(
+            f"SELECT id, name FROM users_index WHERE id IN ({placeholders})",
+            list(owner_ids),
+        )
+        name_by_id = {u["id"]: u["name"] for u in urows}
+        for m in out:
+            m["owner_name"] = name_by_id.get(m.get("owner_id")) or ""
     return out
 
 
-async def get_task(task_id: str, user_id: str) -> dict:
+async def get_task(task_id: str, user_id: str, *, is_admin: bool = False) -> dict:
     paths = get_paths()
     meta = read_json(paths.task_meta(task_id))
     if not meta:
         raise APIError(404, ErrorCode.RESOURCE_NOT_FOUND, "任务不存在")
     collaborators = read_json(paths.task_collaborators(task_id), default=[])
-    if meta.get("owner_id") != user_id and meta.get("visibility") != "public":
+    if not is_admin and meta.get("owner_id") != user_id and meta.get("visibility") != "public":
         if not any(c["user_id"] == user_id and c.get("status") == "active" for c in collaborators):
-            raise APIError(403, ErrorCode.PERMISSION_DENIED, "无权访问此任务")
+            # Cross-cutting admin bypass: admin / super_admin can read any task
+            # even when the caller forgot to pass is_admin=True. Keeps every
+            # /tasks/* and /files/task/* route admin-aware without threading
+            # the flag through 15+ call sites.
+            from . import auth_svc
+
+            u = await auth_svc.load_user_by_id(user_id)
+            if not u or u.get("auth_role") not in ("admin", "super_admin"):
+                raise APIError(403, ErrorCode.PERMISSION_DENIED, "无权访问此任务")
     workspace = read_json(paths.task_workspace(task_id), default={})
     from . import agent_snapshot_svc
     snap = read_json(paths.task_snapshot(task_id)) or {
@@ -228,7 +260,9 @@ async def get_task(task_id: str, user_id: str) -> dict:
     }
 
 
-async def update_skills(task_id: str, user_id: str, skill_ids: list[str]) -> dict:
+async def update_skills(
+    task_id: str, user_id: str, skill_ids: list[str], *, is_admin: bool = False
+) -> dict:
     """Update a task's bound skills (add / remove). Only owner or global admin
     can modify. Re-snapshots every listed skill into the task folder so the
     agent-runtime picks it up on next turn without restart.
@@ -237,7 +271,7 @@ async def update_skills(task_id: str, user_id: str, skill_ids: list[str]) -> dic
     meta = read_json(paths.task_meta(task_id))
     if not meta:
         raise APIError(404, ErrorCode.RESOURCE_NOT_FOUND, "任务不存在")
-    if meta.get("owner_id") != user_id:
+    if not is_admin and meta.get("owner_id") != user_id:
         # allow global admin / super_admin
         from . import auth_svc
         u = await auth_svc.load_user_by_id(user_id)
@@ -274,11 +308,12 @@ async def update_skills(task_id: str, user_id: str, skill_ids: list[str]) -> dic
     return {"task_id": task_id, "skill_ids": clean}
 
 
-async def delete_task(task_id: str, user_id: str) -> None:
+async def delete_task(task_id: str, user_id: str, *, is_admin: bool = False) -> None:
     """Hard-delete a task: filesystem dir + index rows + user index entry.
 
-    Only the owner can delete. Files / conversations / tool_calls / experience
-    cards under the task are wiped from disk; index tables are scrubbed.
+    Only the owner (or an admin invoking from the admin surface) can delete.
+    Files / conversations / tool_calls / experience cards under the task are
+    wiped from disk; index tables are scrubbed.
     """
     import shutil
 
@@ -286,7 +321,7 @@ async def delete_task(task_id: str, user_id: str) -> None:
     meta = read_json(paths.task_meta(task_id))
     if not meta:
         raise APIError(404, ErrorCode.RESOURCE_NOT_FOUND, "任务不存在")
-    if meta.get("owner_id") != user_id:
+    if not is_admin and meta.get("owner_id") != user_id:
         raise APIError(403, ErrorCode.PERMISSION_DENIED, "仅创建者可删除任务")
 
     owner_id = meta["owner_id"]

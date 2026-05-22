@@ -34,7 +34,7 @@ export function InviteCollaboratorsDialog({
   const [hits, setHits] = useState<UserHit[]>([]);
   const [searching, setSearching] = useState(false);
   const [picked, setPicked] = useState<UserHit[]>([]);
-  const [role, setRole] = useState<"viewer" | "editor">("editor");
+  const [role, setRole] = useState<"viewer" | "editor" | "owner">("editor");
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [invites, setInvites] = useState<TaskInvite[]>([]);
@@ -264,6 +264,7 @@ export function InviteCollaboratorsDialog({
               <select value={role} onChange={(e) => setRole(e.target.value as any)}>
                 <option value="editor">编辑（可发消息、改文件）</option>
                 <option value="viewer">只看（只读）</option>
+                <option value="owner">所有者（含删除任务、调整协作者）</option>
               </select>
             </div>
             <div className="inv-field inv-field-msg">
@@ -322,7 +323,13 @@ export function InviteCollaboratorsDialog({
                         {STATUS_TEXT[inv.status]}
                       </span>
                       <span>·</span>
-                      <span>{inv.role === "editor" ? "编辑" : "只看"}</span>
+                      <span>
+                        {inv.role === "owner"
+                          ? "所有者"
+                          : inv.role === "editor"
+                            ? "编辑"
+                            : "只看"}
+                      </span>
                       <span>·</span>
                       <span>{formatRelative(inv.created_at)}</span>
                     </div>

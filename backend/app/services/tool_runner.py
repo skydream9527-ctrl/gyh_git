@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import asyncio
 import os
+import uuid
 from datetime import datetime, timezone
 from typing import Any
 
@@ -749,11 +750,11 @@ async def _tool_kyuubi(args: dict, ctx: dict | None = None) -> Any:
                     env=env,
                 )
                 try:
-                    stdout_b, stderr_b = await asyncio.wait_for(proc.communicate(), timeout=120.0)
+                    stdout_b, stderr_b = await asyncio.wait_for(proc.communicate(), timeout=300.0)
                 except asyncio.TimeoutError:
                     proc.kill()
                     await proc.wait()
-                    error_message = "kyuubi CLI timeout (120s)"
+                    error_message = "kyuubi CLI timeout (300s)"
                     out = {"error_code": "KYUUBI_TIMEOUT", "message": error_message, "context": conn_ctx}
                 else:
                     stdout_s = stdout_b.decode(errors="replace")
@@ -792,6 +793,37 @@ async def _tool_kyuubi(args: dict, ctx: dict | None = None) -> Any:
         except Exception as e:
             error_message = str(e)[:300]
             out = {"error_code": "KYUUBI_CLI_ERROR", "message": error_message, "context": conn_ctx}
+
+    # 默认保存 SQL 文本与查询数据到任务工作区，供用户复用与审计。
+    # 仅在查询成功且有行返回时保存；失败保存绝不影响主链路。
+    if (
+        rows_returned and rows_returned > 0
+        and (ctx or {}).get("task_id") and (ctx or {}).get("user_id")
+        and isinstance(out, dict) and "error_code" not in out
+    ):
+        try:
+            from . import file_svc as _file_svc
+            import csv as _csv
+            import io as _io
+            ts_str = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+            short_uid = uuid.uuid4().hex[:6]
+            sql_name = f"query_{ts_str}_{short_uid}.sql"
+            csv_name = f"query_{ts_str}_{short_uid}.csv"
+            await _file_svc.upload_task_file(
+                task_id=ctx["task_id"], owner_id=ctx["user_id"],
+                filename=sql_name, data=sql.encode("utf-8"), scope="output",
+            )
+            buf = _io.StringIO()
+            writer = _csv.writer(buf)
+            writer.writerow(out.get("columns") or [])
+            for row in (out.get("rows") or []):
+                writer.writerow(["" if v is None else v for v in row])
+            await _file_svc.upload_task_file(
+                task_id=ctx["task_id"], owner_id=ctx["user_id"],
+                filename=csv_name, data=buf.getvalue().encode("utf-8"), scope="output",
+            )
+        except Exception:
+            pass  # 静默：保存失败绝不阻塞 LLM 主链路
 
     try:
         await sql_audit_svc.record(

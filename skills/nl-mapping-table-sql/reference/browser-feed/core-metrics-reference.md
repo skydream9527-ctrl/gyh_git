@@ -7,8 +7,8 @@
 | Table | Full Name | Database |
 |-------|-----------|----------|
 | dm_browser_multi_dimension_indicators_di | 多维指标聚合表 | iceberg_zjyprc_hadoop.browser |
-| dm_browser_user_type_core_indicators_di | 用户类型核心指标表 | iceberg_zjyprc_hadoop.browser |
-| dm_browser_multi_dimension_retain_indicators_di | 多维留存指标表 | iceberg_zjyprc_hadoop.browser |
+| ads_browser_user_type_core_indicators_di | 用户类型核心指标表 | iceberg_zjyprc_hadoop.browser |
+| dm_browser_multi_dimension_retain_indicators_di | 留存计算用did粒度指标表 | iceberg_zjyprc_hadoop.browser |
 
 ---
 
@@ -72,103 +72,88 @@ GROUP BY date
 ### BF-006: 信息流次日留存
 
 ```sql
-SELECT  date,
-        SUM(retain_2d) AS retain_2d
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-        AND history_user_type = '整体(ALL)'
-        AND active_user_type = '整体(ALL)'
-        AND feed_valid_user_type = '整体(ALL)'
-        AND consume_user_type = '整体(ALL)'
-        AND duration_user_type = '整体(ALL)'
-        AND browser_valid_user_type = '整体(ALL)'
-GROUP BY date
+SELECT  a.date,
+        COUNT(DISTINCT a.did) AS base_dau,
+        COUNT(DISTINCT b.did) AS retain_2d
+FROM    iceberg_zjyprc_hadoop.browser.dm_browser_multi_dimension_retain_indicators_di a
+LEFT JOIN iceberg_zjyprc_hadoop.browser.dm_browser_multi_dimension_retain_indicators_di b
+    ON a.did = b.did AND b.date = a.date + 1 AND b.is_dau_feed_dapan_2024 = 1
+WHERE   a.date = '${DATE}'
+        AND a.is_dau_feed_dapan_2024 = 1
+GROUP BY a.date
 ```
 
 ### BF-007: 信息流7日留存
 
 ```sql
-SELECT  date,
-        SUM(retain_7d) AS retain_7d
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-        AND history_user_type = '整体(ALL)'
-        AND active_user_type = '整体(ALL)'
-        AND feed_valid_user_type = '整体(ALL)'
-        AND consume_user_type = '整体(ALL)'
-        AND duration_user_type = '整体(ALL)'
-        AND browser_valid_user_type = '整体(ALL)'
-GROUP BY date
+SELECT  a.date,
+        COUNT(DISTINCT a.did) AS base_dau,
+        COUNT(DISTINCT b.did) AS retain_7d
+FROM    iceberg_zjyprc_hadoop.browser.dm_browser_multi_dimension_retain_indicators_di a
+LEFT JOIN iceberg_zjyprc_hadoop.browser.dm_browser_multi_dimension_retain_indicators_di b
+    ON a.did = b.did AND b.date = a.date + 7 AND b.is_dau_feed_dapan_2024 = 1
+WHERE   a.date = '${DATE}'
+        AND a.is_dau_feed_dapan_2024 = 1
+GROUP BY a.date
 ```
 
 ### BF-008: 信息流30日留存
 
 ```sql
-SELECT  date,
-        SUM(retain_30d) AS retain_30d
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-        AND history_user_type = '整体(ALL)'
-        AND active_user_type = '整体(ALL)'
-        AND feed_valid_user_type = '整体(ALL)'
-        AND consume_user_type = '整体(ALL)'
-        AND duration_user_type = '整体(ALL)'
-        AND browser_valid_user_type = '整体(ALL)'
-GROUP BY date
+SELECT  a.date,
+        COUNT(DISTINCT a.did) AS base_dau,
+        COUNT(DISTINCT b.did) AS retain_30d
+FROM    iceberg_zjyprc_hadoop.browser.dm_browser_multi_dimension_retain_indicators_di a
+LEFT JOIN iceberg_zjyprc_hadoop.browser.dm_browser_multi_dimension_retain_indicators_di b
+    ON a.did = b.did AND b.date = a.date + 30 AND b.is_dau_feed_dapan_2024 = 1
+WHERE   a.date = '${DATE}'
+        AND a.is_dau_feed_dapan_2024 = 1
+GROUP BY a.date
 ```
 
 ### BF-009: 信息流曝光-曝光次留
 
 ```sql
-SELECT  date,
-        SUM(e2e_retain_2d) AS e2e_retain_2d
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-        AND history_user_type = '整体(ALL)'
-        AND active_user_type = '整体(ALL)'
-        AND feed_valid_user_type = '整体(ALL)'
-        AND consume_user_type = '整体(ALL)'
-        AND duration_user_type = '整体(ALL)'
-        AND browser_valid_user_type = '整体(ALL)'
-GROUP BY date
+SELECT  a.date,
+        COUNT(DISTINCT a.did) AS base_uv,
+        COUNT(DISTINCT b.did) AS e2e_retain_2d
+FROM    iceberg_zjyprc_hadoop.browser.dm_browser_multi_dimension_retain_indicators_di a
+LEFT JOIN iceberg_zjyprc_hadoop.browser.dm_browser_multi_dimension_retain_indicators_di b
+    ON a.did = b.did AND b.date = a.date + 1 AND b.expose_pv > 0
+WHERE   a.date = '${DATE}'
+        AND a.is_dau_feed_dapan_2024 = 1
+        AND a.expose_pv > 0
+GROUP BY a.date
 ```
 
 ### BF-010: 信息流曝光-有效次留
 
 ```sql
-SELECT  date,
-        SUM(e2v_retain_2d) AS e2v_retain_2d
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-        AND history_user_type = '整体(ALL)'
-        AND active_user_type = '整体(ALL)'
-        AND feed_valid_user_type = '整体(ALL)'
-        AND consume_user_type = '整体(ALL)'
-        AND duration_user_type = '整体(ALL)'
-        AND browser_valid_user_type = '整体(ALL)'
-GROUP BY date
+SELECT  a.date,
+        COUNT(DISTINCT a.did) AS base_uv,
+        COUNT(DISTINCT b.did) AS e2v_retain_2d
+FROM    iceberg_zjyprc_hadoop.browser.dm_browser_multi_dimension_retain_indicators_di a
+LEFT JOIN iceberg_zjyprc_hadoop.browser.dm_browser_multi_dimension_retain_indicators_di b
+    ON a.did = b.did AND b.date = a.date + 1 AND b.is_valid_dapan_2024 = 1
+WHERE   a.date = '${DATE}'
+        AND a.is_dau_feed_dapan_2024 = 1
+        AND a.expose_pv > 0
+GROUP BY a.date
 ```
 
 ### BF-011: 信息流有效-有效次留
 
 ```sql
-SELECT  date,
-        SUM(v2v_retain_2d) AS v2v_retain_2d
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-        AND history_user_type = '整体(ALL)'
-        AND active_user_type = '整体(ALL)'
-        AND feed_valid_user_type = '整体(ALL)'
-        AND consume_user_type = '整体(ALL)'
-        AND duration_user_type = '整体(ALL)'
-        AND browser_valid_user_type = '整体(ALL)'
-GROUP BY date
+SELECT  a.date,
+        COUNT(DISTINCT a.did) AS base_uv,
+        COUNT(DISTINCT b.did) AS v2v_retain_2d
+FROM    iceberg_zjyprc_hadoop.browser.dm_browser_multi_dimension_retain_indicators_di a
+LEFT JOIN iceberg_zjyprc_hadoop.browser.dm_browser_multi_dimension_retain_indicators_di b
+    ON a.did = b.did AND b.date = a.date + 1 AND b.is_valid_dapan_2024 = 1
+WHERE   a.date = '${DATE}'
+        AND a.is_dau_feed_dapan_2024 = 1
+        AND a.is_valid_dapan_2024 = 1
+GROUP BY a.date
 ```
 
 ---
@@ -533,310 +518,145 @@ GROUP BY date, feed_channel
 ORDER BY click_pv DESC
 ```
 
-### BF-DIM-028: 信息流次日留存 — 按用户类型
+### BF-DIM-028: 信息流次日留存 — 按新老用户
 
 ```sql
-SELECT  date,
-        history_user_type,
-        SUM(retain_2d) AS retain_2d
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-        AND active_user_type = '整体(ALL)'
-        AND feed_valid_user_type = '整体(ALL)'
-        AND consume_user_type = '整体(ALL)'
-        AND duration_user_type = '整体(ALL)'
-        AND browser_valid_user_type = '整体(ALL)'
-GROUP BY date, history_user_type
+SELECT  a.date,
+        a.is_new_2024,
+        COUNT(DISTINCT a.did) AS base_dau,
+        COUNT(DISTINCT b.did) AS retain_2d
+FROM    iceberg_zjyprc_hadoop.browser.dm_browser_multi_dimension_retain_indicators_di a
+LEFT JOIN iceberg_zjyprc_hadoop.browser.dm_browser_multi_dimension_retain_indicators_di b
+    ON a.did = b.did AND b.date = a.date + 1 AND b.is_dau_feed_dapan_2024 = 1
+WHERE   a.date = '${DATE}'
+        AND a.is_dau_feed_dapan_2024 = 1
+GROUP BY a.date, a.is_new_2024
 ```
 
-### BF-DIM-029: 信息流次日留存 — 按活跃类型
+### BF-DIM-029: 信息流次日留存 — 按启动方式
 
 ```sql
-SELECT  date,
-        active_user_type,
-        SUM(retain_2d) AS retain_2d
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-        AND history_user_type = '整体(ALL)'
-        AND feed_valid_user_type = '整体(ALL)'
-        AND consume_user_type = '整体(ALL)'
-        AND duration_user_type = '整体(ALL)'
-        AND browser_valid_user_type = '整体(ALL)'
-GROUP BY date, active_user_type
+SELECT  a.date,
+        a.app_launch_way,
+        COUNT(DISTINCT a.did) AS base_dau,
+        COUNT(DISTINCT b.did) AS retain_2d
+FROM    iceberg_zjyprc_hadoop.browser.dm_browser_multi_dimension_retain_indicators_di a
+LEFT JOIN iceberg_zjyprc_hadoop.browser.dm_browser_multi_dimension_retain_indicators_di b
+    ON a.did = b.did AND b.date = a.date + 1 AND b.is_dau_feed_dapan_2024 = 1
+WHERE   a.date = '${DATE}'
+        AND a.is_dau_feed_dapan_2024 = 1
+GROUP BY a.date, a.app_launch_way
+ORDER BY base_dau DESC
 ```
 
-### BF-DIM-030: 信息流次日留存 — 按信息流有效类型
+### BF-DIM-030: 信息流次日留存 — 按体裁
 
 ```sql
-SELECT  date,
-        feed_valid_user_type,
-        SUM(retain_2d) AS retain_2d
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-        AND history_user_type = '整体(ALL)'
-        AND active_user_type = '整体(ALL)'
-        AND consume_user_type = '整体(ALL)'
-        AND duration_user_type = '整体(ALL)'
-        AND browser_valid_user_type = '整体(ALL)'
-GROUP BY date, feed_valid_user_type
+SELECT  a.date,
+        a.item_type,
+        COUNT(DISTINCT a.did) AS base_dau,
+        COUNT(DISTINCT b.did) AS retain_2d
+FROM    iceberg_zjyprc_hadoop.browser.dm_browser_multi_dimension_retain_indicators_di a
+LEFT JOIN iceberg_zjyprc_hadoop.browser.dm_browser_multi_dimension_retain_indicators_di b
+    ON a.did = b.did AND b.date = a.date + 1 AND b.is_dau_feed_dapan_2024 = 1
+WHERE   a.date = '${DATE}'
+        AND a.is_dau_feed_dapan_2024 = 1
+GROUP BY a.date, a.item_type
+ORDER BY base_dau DESC
 ```
 
-### BF-DIM-031: 信息流次日留存 — 按消费类型
+### BF-DIM-031: 信息流7日留存 — 按新老用户
 
 ```sql
-SELECT  date,
-        consume_user_type,
-        SUM(retain_2d) AS retain_2d
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-        AND history_user_type = '整体(ALL)'
-        AND active_user_type = '整体(ALL)'
-        AND feed_valid_user_type = '整体(ALL)'
-        AND duration_user_type = '整体(ALL)'
-        AND browser_valid_user_type = '整体(ALL)'
-GROUP BY date, consume_user_type
+SELECT  a.date,
+        a.is_new_2024,
+        COUNT(DISTINCT a.did) AS base_dau,
+        COUNT(DISTINCT b.did) AS retain_7d
+FROM    iceberg_zjyprc_hadoop.browser.dm_browser_multi_dimension_retain_indicators_di a
+LEFT JOIN iceberg_zjyprc_hadoop.browser.dm_browser_multi_dimension_retain_indicators_di b
+    ON a.did = b.did AND b.date = a.date + 7 AND b.is_dau_feed_dapan_2024 = 1
+WHERE   a.date = '${DATE}'
+        AND a.is_dau_feed_dapan_2024 = 1
+GROUP BY a.date, a.is_new_2024
 ```
 
-### BF-DIM-032: 信息流次日留存 — 按时长类型
+### BF-DIM-032: 信息流7日留存 — 按启动方式
 
 ```sql
-SELECT  date,
-        duration_user_type,
-        SUM(retain_2d) AS retain_2d
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-        AND history_user_type = '整体(ALL)'
-        AND active_user_type = '整体(ALL)'
-        AND feed_valid_user_type = '整体(ALL)'
-        AND consume_user_type = '整体(ALL)'
-        AND browser_valid_user_type = '整体(ALL)'
-GROUP BY date, duration_user_type
+SELECT  a.date,
+        a.app_launch_way,
+        COUNT(DISTINCT a.did) AS base_dau,
+        COUNT(DISTINCT b.did) AS retain_7d
+FROM    iceberg_zjyprc_hadoop.browser.dm_browser_multi_dimension_retain_indicators_di a
+LEFT JOIN iceberg_zjyprc_hadoop.browser.dm_browser_multi_dimension_retain_indicators_di b
+    ON a.did = b.did AND b.date = a.date + 7 AND b.is_dau_feed_dapan_2024 = 1
+WHERE   a.date = '${DATE}'
+        AND a.is_dau_feed_dapan_2024 = 1
+GROUP BY a.date, a.app_launch_way
+ORDER BY base_dau DESC
 ```
 
-### BF-DIM-033: 信息流次日留存 — 按浏览器有效类型
+### BF-DIM-033: 信息流7日留存 — 按体裁
 
 ```sql
-SELECT  date,
-        browser_valid_user_type,
-        SUM(retain_2d) AS retain_2d
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-        AND history_user_type = '整体(ALL)'
-        AND active_user_type = '整体(ALL)'
-        AND feed_valid_user_type = '整体(ALL)'
-        AND consume_user_type = '整体(ALL)'
-        AND duration_user_type = '整体(ALL)'
-GROUP BY date, browser_valid_user_type
+SELECT  a.date,
+        a.item_type,
+        COUNT(DISTINCT a.did) AS base_dau,
+        COUNT(DISTINCT b.did) AS retain_7d
+FROM    iceberg_zjyprc_hadoop.browser.dm_browser_multi_dimension_retain_indicators_di a
+LEFT JOIN iceberg_zjyprc_hadoop.browser.dm_browser_multi_dimension_retain_indicators_di b
+    ON a.did = b.did AND b.date = a.date + 7 AND b.is_dau_feed_dapan_2024 = 1
+WHERE   a.date = '${DATE}'
+        AND a.is_dau_feed_dapan_2024 = 1
+GROUP BY a.date, a.item_type
+ORDER BY base_dau DESC
 ```
 
-### BF-DIM-034: 信息流7日留存 — 按用户类型
+### BF-DIM-034: 信息流30日留存 — 按新老用户
 
 ```sql
-SELECT  date,
-        history_user_type,
-        SUM(retain_7d) AS retain_7d
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-        AND active_user_type = '整体(ALL)'
-        AND feed_valid_user_type = '整体(ALL)'
-        AND consume_user_type = '整体(ALL)'
-        AND duration_user_type = '整体(ALL)'
-        AND browser_valid_user_type = '整体(ALL)'
-GROUP BY date, history_user_type
+SELECT  a.date,
+        a.is_new_2024,
+        COUNT(DISTINCT a.did) AS base_dau,
+        COUNT(DISTINCT b.did) AS retain_30d
+FROM    iceberg_zjyprc_hadoop.browser.dm_browser_multi_dimension_retain_indicators_di a
+LEFT JOIN iceberg_zjyprc_hadoop.browser.dm_browser_multi_dimension_retain_indicators_di b
+    ON a.did = b.did AND b.date = a.date + 30 AND b.is_dau_feed_dapan_2024 = 1
+WHERE   a.date = '${DATE}'
+        AND a.is_dau_feed_dapan_2024 = 1
+GROUP BY a.date, a.is_new_2024
 ```
 
-### BF-DIM-035: 信息流7日留存 — 按活跃类型
+### BF-DIM-035: 信息流30日留存 — 按启动方式
 
 ```sql
-SELECT  date,
-        active_user_type,
-        SUM(retain_7d) AS retain_7d
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-        AND history_user_type = '整体(ALL)'
-        AND feed_valid_user_type = '整体(ALL)'
-        AND consume_user_type = '整体(ALL)'
-        AND duration_user_type = '整体(ALL)'
-        AND browser_valid_user_type = '整体(ALL)'
-GROUP BY date, active_user_type
+SELECT  a.date,
+        a.app_launch_way,
+        COUNT(DISTINCT a.did) AS base_dau,
+        COUNT(DISTINCT b.did) AS retain_30d
+FROM    iceberg_zjyprc_hadoop.browser.dm_browser_multi_dimension_retain_indicators_di a
+LEFT JOIN iceberg_zjyprc_hadoop.browser.dm_browser_multi_dimension_retain_indicators_di b
+    ON a.did = b.did AND b.date = a.date + 30 AND b.is_dau_feed_dapan_2024 = 1
+WHERE   a.date = '${DATE}'
+        AND a.is_dau_feed_dapan_2024 = 1
+GROUP BY a.date, a.app_launch_way
+ORDER BY base_dau DESC
 ```
 
-### BF-DIM-036: 信息流7日留存 — 按信息流有效类型
+### BF-DIM-036: 信息流30日留存 — 按体裁
 
 ```sql
-SELECT  date,
-        feed_valid_user_type,
-        SUM(retain_7d) AS retain_7d
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-        AND history_user_type = '整体(ALL)'
-        AND active_user_type = '整体(ALL)'
-        AND consume_user_type = '整体(ALL)'
-        AND duration_user_type = '整体(ALL)'
-        AND browser_valid_user_type = '整体(ALL)'
-GROUP BY date, feed_valid_user_type
-```
-
-### BF-DIM-037: 信息流7日留存 — 按消费类型
-
-```sql
-SELECT  date,
-        consume_user_type,
-        SUM(retain_7d) AS retain_7d
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-        AND history_user_type = '整体(ALL)'
-        AND active_user_type = '整体(ALL)'
-        AND feed_valid_user_type = '整体(ALL)'
-        AND duration_user_type = '整体(ALL)'
-        AND browser_valid_user_type = '整体(ALL)'
-GROUP BY date, consume_user_type
-```
-
-### BF-DIM-038: 信息流7日留存 — 按时长类型
-
-```sql
-SELECT  date,
-        duration_user_type,
-        SUM(retain_7d) AS retain_7d
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-        AND history_user_type = '整体(ALL)'
-        AND active_user_type = '整体(ALL)'
-        AND feed_valid_user_type = '整体(ALL)'
-        AND consume_user_type = '整体(ALL)'
-        AND browser_valid_user_type = '整体(ALL)'
-GROUP BY date, duration_user_type
-```
-
-### BF-DIM-039: 信息流7日留存 — 按浏览器有效类型
-
-```sql
-SELECT  date,
-        browser_valid_user_type,
-        SUM(retain_7d) AS retain_7d
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-        AND history_user_type = '整体(ALL)'
-        AND active_user_type = '整体(ALL)'
-        AND feed_valid_user_type = '整体(ALL)'
-        AND consume_user_type = '整体(ALL)'
-        AND duration_user_type = '整体(ALL)'
-GROUP BY date, browser_valid_user_type
-```
-
-### BF-DIM-040: 信息流30日留存 — 按用户类型
-
-```sql
-SELECT  date,
-        history_user_type,
-        SUM(retain_30d) AS retain_30d
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-        AND active_user_type = '整体(ALL)'
-        AND feed_valid_user_type = '整体(ALL)'
-        AND consume_user_type = '整体(ALL)'
-        AND duration_user_type = '整体(ALL)'
-        AND browser_valid_user_type = '整体(ALL)'
-GROUP BY date, history_user_type
-```
-
-### BF-DIM-041: 信息流30日留存 — 按活跃类型
-
-```sql
-SELECT  date,
-        active_user_type,
-        SUM(retain_30d) AS retain_30d
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-        AND history_user_type = '整体(ALL)'
-        AND feed_valid_user_type = '整体(ALL)'
-        AND consume_user_type = '整体(ALL)'
-        AND duration_user_type = '整体(ALL)'
-        AND browser_valid_user_type = '整体(ALL)'
-GROUP BY date, active_user_type
-```
-
-### BF-DIM-042: 信息流30日留存 — 按信息流有效类型
-
-```sql
-SELECT  date,
-        feed_valid_user_type,
-        SUM(retain_30d) AS retain_30d
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-        AND history_user_type = '整体(ALL)'
-        AND active_user_type = '整体(ALL)'
-        AND consume_user_type = '整体(ALL)'
-        AND duration_user_type = '整体(ALL)'
-        AND browser_valid_user_type = '整体(ALL)'
-GROUP BY date, feed_valid_user_type
-```
-
-### BF-DIM-043: 信息流30日留存 — 按消费类型
-
-```sql
-SELECT  date,
-        consume_user_type,
-        SUM(retain_30d) AS retain_30d
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-        AND history_user_type = '整体(ALL)'
-        AND active_user_type = '整体(ALL)'
-        AND feed_valid_user_type = '整体(ALL)'
-        AND duration_user_type = '整体(ALL)'
-        AND browser_valid_user_type = '整体(ALL)'
-GROUP BY date, consume_user_type
-```
-
-### BF-DIM-044: 信息流30日留存 — 按时长类型
-
-```sql
-SELECT  date,
-        duration_user_type,
-        SUM(retain_30d) AS retain_30d
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-        AND history_user_type = '整体(ALL)'
-        AND active_user_type = '整体(ALL)'
-        AND feed_valid_user_type = '整体(ALL)'
-        AND consume_user_type = '整体(ALL)'
-        AND browser_valid_user_type = '整体(ALL)'
-GROUP BY date, duration_user_type
-```
-
-### BF-DIM-045: 信息流30日留存 — 按浏览器有效类型
-
-```sql
-SELECT  date,
-        browser_valid_user_type,
-        SUM(retain_30d) AS retain_30d
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-        AND history_user_type = '整体(ALL)'
-        AND active_user_type = '整体(ALL)'
-        AND feed_valid_user_type = '整体(ALL)'
-        AND consume_user_type = '整体(ALL)'
-        AND duration_user_type = '整体(ALL)'
-GROUP BY date, browser_valid_user_type
+SELECT  a.date,
+        a.item_type,
+        COUNT(DISTINCT a.did) AS base_dau,
+        COUNT(DISTINCT b.did) AS retain_30d
+FROM    iceberg_zjyprc_hadoop.browser.dm_browser_multi_dimension_retain_indicators_di a
+LEFT JOIN iceberg_zjyprc_hadoop.browser.dm_browser_multi_dimension_retain_indicators_di b
+    ON a.did = b.did AND b.date = a.date + 30 AND b.is_dau_feed_dapan_2024 = 1
+WHERE   a.date = '${DATE}'
+        AND a.is_dau_feed_dapan_2024 = 1
+GROUP BY a.date, a.item_type
+ORDER BY base_dau DESC
 ```
 
 ---

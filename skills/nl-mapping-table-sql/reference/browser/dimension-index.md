@@ -38,22 +38,23 @@
 
 ---
 
-### dm_browser_multi_dimension_retain_indicators_di（多维留存指标表）
+### dm_browser_multi_dimension_retain_indicators_di（留存计算用did粒度指标表）
 
 | Dimension | Field | Type | Description | Query Type |
 |-----------|-------|------|-------------|------------|
 | 日期 | date | INT | 分区字段 | 必选筛选 |
-| 应用端口 | app_port | STRING | 应用端口 | 枚举值查询 |
-| 用户类型 | history_user_type | STRING | 整体/新用户/老用户 | 枚举值查询 |
-| 活跃类型 | active_user_type | STRING | 整体/信息流活跃/非信息流活跃 | 枚举值查询 |
-| 信息流有效类型 | feed_valid_user_type | STRING | 整体/信息流有效/非信息流有效 | 枚举值查询 |
-| 消费类型 | consume_user_type | STRING | 整体/信息流消费/非信息流消费 | 枚举值查询 |
-| 时长类型 | duration_user_type | STRING | 整体/深度用户/非深度用户 | 枚举值查询 |
-| 浏览器有效类型 | browser_valid_user_type | STRING | 整体/浏览器有效/非浏览器有效 | 枚举值查询 |
+| 浏览器DAU | is_app_dau_2024 | INT | 是否浏览器DAU用户 | 常用筛选(=1) |
+| 新老用户 | is_new_2024 | INT | 是否新用户 | 常用筛选/分组 |
+| 信息流大盘DAU | is_dau_feed_dapan_2024 | INT | 是否信息流大盘DAU用户 | 常用筛选(=1) |
+| 大盘有效用户 | is_valid_dapan_2024 | INT | 是否大盘有效用户 | 常用筛选(=1) |
+| 信息流消费用户 | is_feed_consume_2025 | INT | 是否信息流消费用户 | 常用筛选(=1) |
+| 浏览器有效用户 | is_valid_browser_2025 | INT | 是否浏览器有效用户 | 常用筛选(=1) |
+| 启动方式 | app_launch_way | STRING | 启动方式 | 枚举值查询 |
+| 体裁 | item_type | STRING | 内容类型 | 枚举值查询 |
 
 ---
 
-### dm_browser_user_type_core_indicators_di（用户类型核心指标表）
+### ads_browser_user_type_core_indicators_di（用户类型核心指标表）
 
 | Dimension | Field | Type | Description | Query Type |
 |-----------|-------|------|-------------|------------|
@@ -62,7 +63,7 @@
 
 ---
 
-### dm_browser_item_type_core_indicators_di（内容转化主题核心指标表）
+### ads_browser_item_type_core_indicators_di（内容转化主题核心指标表）
 
 | Dimension | Field | Type | Description | Query Type |
 |-----------|-------|------|-------------|------------|
@@ -71,7 +72,7 @@
 
 ---
 
-### dm_browser_page_indicators_di（小场景指标表）
+### ads_browser_page_indicators_di（小场景指标表）
 
 | Dimension | Field | Type | Description | Query Type |
 |-----------|-------|------|-------------|------------|
@@ -80,14 +81,13 @@
 
 ---
 
-### dm_browser_finance_core_indicators_di（财收核心指标表）
+### ads_browser_finance_core_indicators_di（财收核心指标表）
 
 | Dimension | Field | Type | Description | Query Type |
 |-----------|-------|------|-------------|------------|
 | 日期 | date | INT | 分区字段 | 必选筛选 |
-| 应用端口 | app_port | STRING | 浏览器/浏览器信息流/浏览器非信息流 | 枚举值查询 |
 | 广告位场景 | ad_position_scene | STRING | 图文详情页/视频详情页/小视频详情页/短视频频道 | 枚举值查询 |
-| 广告位 | tag_id | STRING | 广告位标识 | 枚举值查询 |
+| 广告位 | tag_id | STRING | 广告位标识 | 枚举值查询(TOP50) |
 
 ---
 
@@ -101,16 +101,10 @@
 | "按系统版本" | 系统版本 | os_version |
 | "按机型" | 机型 | phone_model |
 | "按频道" | 频道 | feed_channel |
-| "按用户类型" | 用户类型 | user_type / history_user_type |
+| "按用户类型" | 新老用户 | is_new_2024 |
 | "按页面" | 页面 | page |
 | "按广告位场景" | 广告位场景 | ad_position_scene |
 | "按广告位" | 广告位 | tag_id |
-| "按应用端口" | 应用端口 | app_port |
-| "按活跃类型" | 活跃类型 | active_user_type |
-| "按消费类型" | 消费类型 | consume_user_type |
-| "按时长类型" | 时长类型 | duration_user_type |
-| "按浏览器有效类型" | 浏览器有效类型 | browser_valid_user_type |
-| "按信息流有效类型" | 信息流有效类型 | feed_valid_user_type |
 
 ---
 

@@ -535,9 +535,22 @@
   .login-tabs {
     margin: 0 0 12px;
   }
+  /* 移动端 tabs 平分父宽，避免按钮挤在左侧、右侧大片留白。
+     非移动端不动：宽屏 right 列本就有限宽，紧凑左对齐更克制。 */
   .login-tab {
+    flex: 1;
     padding: 9px 12px;
     font-size: 13px;
+    text-align: center;
+  }
+  /* 同理：登录/注册 segment 在移动端撑满整行，桌面保持 inline-flex 收缩。 */
+  .login-mode-switch {
+    display: flex;
+    width: 100%;
+  }
+  .login-mode-btn {
+    flex: 1;
+    text-align: center;
   }
   .login-hint {
     padding: 12px;

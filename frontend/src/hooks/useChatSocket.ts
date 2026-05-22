@@ -47,6 +47,14 @@ export interface PlanProposal {
   plan_text: string;
 }
 
+/** 后端 `inflight_status` 事件：当前对话是否正在被某用户的 turn 占用。
+ *  WS 连上瞬间会推一次初始状态；之后每次 turn 起止 / 每 10s 心跳都会推。 */
+export interface InflightUser {
+  id: string;
+  name: string;
+  started_at: string | null;
+}
+
 interface UseChatSocketOpts {
   taskId: string;
   conversationId: string | null;
@@ -71,6 +79,13 @@ interface SocketState {
   rejectPlan: (planId: string) => void;
   clearError: () => void;
   errorCode: string | null;
+  /** 上次 onclose 的诊断信息：close code (1000/1006/1011 …) + reason
+   *  string。STREAM_INTERRUPTED 时 banner 拼上去，方便区分通道断（1006/1001）
+   *  vs 服务端报错（1011）vs 正常关（1000）。 */
+  closeInfo: { code: number; reason: string } | null;
+  /** 该对话当前被谁的 turn 占用（同一用户在另一标签页/设备发起也算）。
+   *  null = 空闲，可发新消息；非 null = 显示锁定 banner、置灰 ChatInput。 */
+  inflightUser: InflightUser | null;
 }
 
 export function useChatSocket({ taskId, conversationId, onError, onFileCreated, onTodosUpdated }: UseChatSocketOpts): SocketState {
@@ -79,10 +94,12 @@ export function useChatSocket({ taskId, conversationId, onError, onFileCreated, 
   const [partial, setPartial] = useState<PartialAssistant | null>(null);
   const [finalized, setFinalized] = useState<ChatMessage[]>([]);
   const [errorCode, setErrorCode] = useState<string | null>(null);
+  const [closeInfo, setCloseInfo] = useState<{ code: number; reason: string } | null>(null);
   const [todos, setTodos] = useState<TodoItem[]>([]);
   const [todosUpdatedAt, setTodosUpdatedAt] = useState<string | null>(null);
   const [planMode, setPlanModeState] = useState<boolean>(false);
   const [pendingPlan, setPendingPlan] = useState<PlanProposal | null>(null);
+  const [inflightUser, setInflightUser] = useState<InflightUser | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const retryRef = useRef<number>(0);
   const retryTimerRef = useRef<number | null>(null);
@@ -125,6 +142,11 @@ export function useChatSocket({ taskId, conversationId, onError, onFileCreated, 
       wsRef.current = ws;
 
       ws.onopen = () => {
+        // 切换对话/重连导致 wsRef.current 已指向新 ws，旧 ws 的 onopen 回调不要污染状态
+        if (wsRef.current !== ws) {
+          try { ws.close(); } catch {/* ignore */}
+          return;
+        }
         setStatus("open");
         retryRef.current = 0;
         // 连上立刻清掉之前的 WS_DISCONNECTED 提示，别让 banner 赖着不走
@@ -141,6 +163,8 @@ export function useChatSocket({ taskId, conversationId, onError, onFileCreated, 
         }
       };
       ws.onmessage = (ev) => {
+        // 切换对话后旧 ws 收到滞后的消息，不应再注入新对话的 UI
+        if (wsRef.current !== ws) return;
         try {
           const data = JSON.parse(ev.data);
           handleEvent(data);
@@ -149,7 +173,14 @@ export function useChatSocket({ taskId, conversationId, onError, onFileCreated, 
         }
       };
       ws.onclose = (ev) => {
+        // 切换对话/重连导致 wsRef.current 已指向新 ws：旧 ws 的 close 是
+        // useEffect cleanup 主动关的，此时不应触发 STREAM_INTERRUPTED 也不应再排重连。
+        if (wsRef.current !== ws) return;
         setStatus("closed");
+        // 记录 close code/reason：1006 = 异常断（反代/网络/server crash）、
+        // 1011 = 服务端报错、1000 = 正常、4401/4403 = 认证。让 banner 把
+        // code 显示出来，下次再断时一眼就知道排查哪块。
+        setCloseInfo({ code: ev.code, reason: ev.reason || "" });
         // 流到一半 WS 断了：phase 还卡在 streaming/tool/typing，UI 会一直显示
         // 「暂停生成」按钮把发送框锁住。把已经流出来的 partial 落地保留，phase
         // 切成 error 让按钮恢复成「发送」。后端 task 仍在跑（见 ws.py 的 detach
@@ -325,6 +356,17 @@ export function useChatSocket({ taskId, conversationId, onError, onFileCreated, 
       case "plan_resolved":
         setPendingPlan(null);
         break;
+      case "inflight_status":
+        if (ev.busy && ev.user?.id) {
+          setInflightUser({
+            id: ev.user.id,
+            name: ev.user.name || "用户",
+            started_at: ev.started_at || null,
+          });
+        } else {
+          setInflightUser(null);
+        }
+        break;
       case "error":
         setErrorCode(ev.error_code || "ERROR");
         setPhase("error");
@@ -343,10 +385,12 @@ export function useChatSocket({ taskId, conversationId, onError, onFileCreated, 
     setPartial(null);
     setPhase("idle");
     setErrorCode(null);
+    setCloseInfo(null);
     setTodos([]);
     setTodosUpdatedAt(null);
     setPlanModeState(false);
     setPendingPlan(null);
+    setInflightUser(null);
     pendingQueueRef.current = [];
     partialRef.current = null;
   }, [conversationId]);
@@ -466,6 +510,8 @@ export function useChatSocket({ taskId, conversationId, onError, onFileCreated, 
     approvePlan,
     rejectPlan,
     errorCode,
+    closeInfo,
+    inflightUser,
     clearError: () => setErrorCode(null),
   };
 }

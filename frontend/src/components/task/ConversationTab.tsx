@@ -11,6 +11,8 @@ export interface ConversationTabProps {
   onSelect: (convId: string) => void;
   canWrite: boolean;
   reloadKey?: number;
+  /** 列表加载/轮询完成后回调；父组件用它推导「当前 conv 是否还在后台生成」 */
+  onItemsLoaded?: (items: ConversationSummary[]) => void;
 }
 
 function formatRelative(iso?: string): string {
@@ -40,6 +42,7 @@ function ConversationTab({
   onSelect,
   canWrite,
   reloadKey,
+  onItemsLoaded,
 }: ConversationTabProps) {
   const pushToast = useUIStore((s) => s.pushToast);
   const [items, setItems] = useState<ConversationSummary[]>([]);
@@ -69,6 +72,7 @@ function ConversationTab({
         return tb - ta;
       });
       setItems(sorted);
+      onItemsLoaded?.(sorted);
     } catch (err: unknown) {
       setError(extractErrMsg(err, "加载对话失败"));
     } finally {
@@ -80,6 +84,19 @@ function ConversationTab({
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [taskId, reloadKey]);
+
+  // 任意 conv 处于 inflight（后台还在跑回复）时，每 5s 轮询一次拉刷新——
+  // 切走对话后，仅靠 reloadKey 不会再 bump（finalized 不变），但用户希望能
+  // 看到「⏳ 后台正在生成」实时变化以及完成后的最终消息数。
+  const hasInflight = items.some((c) => c.inflight);
+  useEffect(() => {
+    if (!hasInflight) return;
+    const t = window.setInterval(() => {
+      load();
+    }, 5000);
+    return () => window.clearInterval(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasInflight, taskId]);
 
   useEffect(() => {
     if (creating) newInputRef.current?.focus();
@@ -233,6 +250,15 @@ function ConversationTab({
                   />
                 ) : (
                   <div className="conv-item-title" title={c.title}>
+                    {c.inflight && (
+                      <span
+                        className="conv-inflight-badge"
+                        title="后台正在生成回复"
+                        aria-label="后台正在生成回复"
+                      >
+                        ⏳
+                      </span>
+                    )}
                     {c.title || "未命名对话"}
                   </div>
                 )}

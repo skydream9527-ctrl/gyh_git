@@ -15,6 +15,11 @@ async def list_convs(
     role: TaskRole = Depends(require_task_role(TaskRole.VIEWER, TaskRole.EDITOR, TaskRole.OWNER, TaskRole.ADMIN)),
 ):
     items = await conversation_svc.list_conversations(task_id=task_id)
+    # 注入 inflight：本 worker 内是否还有正在跑的回合。前端用这个角标 ⏳
+    # 提示用户「这个对话后台还在生成」，避免切走后误以为任务停了。
+    from . import ws as ws_module
+    for c in items:
+        c["inflight"] = ws_module.is_inflight(task_id, c["id"])
     return ok({"items": items, "total": len(items)})
 
 
@@ -83,3 +88,19 @@ async def get_conv(
         raise APIError(404, ErrorCode.RESOURCE_NOT_FOUND, "对话不存在")
     messages = task_svc.load_conversation_messages(task_id, conv_id)
     return ok({"conversation_id": conv_id, "messages": messages})
+
+
+@router.post("/tasks/{task_id}/conversations/{conv_id}/abort")
+async def abort_conv(
+    task_id: str,
+    conv_id: str,
+    role: TaskRole = Depends(require_task_role(TaskRole.EDITOR, TaskRole.OWNER, TaskRole.ADMIN)),
+):
+    """HTTP-level 终止后台回合。
+
+    用户在 WS 已断开（如 STREAM_INTERRUPTED）时仍能取消正在跑的 LLM 回合。
+    单 worker 部署下 100% 生效；多 worker 部署仅本 worker 内回合可达。
+    """
+    from . import ws as ws_module
+    cancelled = await ws_module.cancel_inflight_turn(task_id, conv_id)
+    return ok({"cancelled": cancelled})

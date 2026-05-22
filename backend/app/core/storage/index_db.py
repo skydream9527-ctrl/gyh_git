@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import asyncio
+from contextlib import asynccontextmanager
 from functools import lru_cache
 from pathlib import Path
 from typing import Any, Iterable
@@ -9,6 +10,17 @@ from typing import Any, Iterable
 import aiosqlite
 
 from ..config import get_settings
+
+
+# WAL lets readers proceed concurrently with a single writer; synchronous=NORMAL
+# trades a tiny crash-recovery window for a large throughput win on the hot
+# write path; busy_timeout=5000 makes the rare contention case wait instead of
+# raising "database is locked" up to the request handler.
+_PRAGMAS = (
+    "PRAGMA journal_mode=WAL;",
+    "PRAGMA synchronous=NORMAL;",
+    "PRAGMA busy_timeout=5000;",
+)
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS users_index (
@@ -115,36 +127,43 @@ class IndexDB:
         self.path = path
         self._lock = asyncio.Lock()
 
+    @asynccontextmanager
+    async def _connect(self):
+        async with aiosqlite.connect(self.path) as db:
+            for pragma in _PRAGMAS:
+                await db.execute(pragma)
+            yield db
+
     async def init(self) -> None:
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        async with aiosqlite.connect(self.path) as db:
+        async with self._connect() as db:
             await db.executescript(SCHEMA)
             await db.commit()
 
     async def execute(self, sql: str, params: Iterable[Any] | None = None) -> None:
-        async with self._lock, aiosqlite.connect(self.path) as db:
+        async with self._lock, self._connect() as db:
             await db.execute(sql, tuple(params or ()))
             await db.commit()
 
     async def executescript(self, script: str) -> None:
-        async with self._lock, aiosqlite.connect(self.path) as db:
+        async with self._lock, self._connect() as db:
             await db.executescript(script)
             await db.commit()
 
     async def executemany(self, sql: str, rows: Iterable[Iterable[Any]]) -> None:
-        async with self._lock, aiosqlite.connect(self.path) as db:
+        async with self._lock, self._connect() as db:
             await db.executemany(sql, [tuple(r) for r in rows])
             await db.commit()
 
     async def fetchone(self, sql: str, params: Iterable[Any] | None = None) -> dict | None:
-        async with aiosqlite.connect(self.path) as db:
+        async with self._connect() as db:
             db.row_factory = aiosqlite.Row
             cur = await db.execute(sql, tuple(params or ()))
             row = await cur.fetchone()
             return dict(row) if row else None
 
     async def fetchall(self, sql: str, params: Iterable[Any] | None = None) -> list[dict]:
-        async with aiosqlite.connect(self.path) as db:
+        async with self._connect() as db:
             db.row_factory = aiosqlite.Row
             cur = await db.execute(sql, tuple(params or ()))
             rows = await cur.fetchall()

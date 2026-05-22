@@ -142,6 +142,8 @@ export const conversationApi = {
     api<{ conversation_id: string; messages: ChatMessage[] }>(
       http.get(`/tasks/${taskId}/conversations/${convId}`),
     ),
+  abort: (taskId: string, convId: string) =>
+    api<{ cancelled: boolean }>(http.post(`/tasks/${taskId}/conversations/${convId}/abort`)),
 };
 
 // ---- join requests (W3 collaboration) ----
@@ -411,6 +413,29 @@ export const adminApi = {
     api<AdminAgent>(http.post(`/admin/agents/${aid}/prompt-rollback`, { history_id })),
   testChat: (aid: string, body: { content: string; system_prompt?: string }) =>
     api<{ response: string }>(http.post(`/admin/agents/${aid}/test-chat`, body)),
+  // ---- per-user task management ----
+  listUserTasks: (uid: string, limit = 100) =>
+    api<PageData<TaskDetail>>(
+      http.get(`/admin/users/${uid}/tasks`, { params: { limit } }),
+    ),
+  updateTask: (
+    tid: string,
+    body: Partial<{
+      name: string;
+      description: string;
+      visibility: "private" | "public";
+      publish_status: "draft" | "pending" | "published" | "rejected";
+      status: "active" | "archived";
+      agent_id: string | null;
+      initial_prompt: string;
+    }>,
+  ) => api<TaskDetail>(http.patch(`/admin/tasks/${tid}`, body)),
+  updateTaskSkills: (tid: string, skill_ids: string[]) =>
+    api<{ task_id: string; skill_ids: string[] }>(
+      http.patch(`/admin/tasks/${tid}/skills`, { skill_ids }),
+    ),
+  deleteTask: (tid: string) =>
+    api<{ deleted: boolean; task_id: string }>(http.delete(`/admin/tasks/${tid}`)),
 };
 
 // ---- /admin/settings ----
@@ -614,7 +639,7 @@ export interface TaskInvite {
   inviter_name: string;
   invitee_id: string;
   invitee_name: string;
-  role: "viewer" | "editor";
+  role: "viewer" | "editor" | "owner";
   message: string;
   status: "pending" | "accepted" | "declined" | "cancelled";
   created_at: string;
@@ -629,7 +654,7 @@ export interface MyInviteEntry {
   task_paradigm: string;
   inviter_id: string;
   inviter_name: string;
-  role: "viewer" | "editor";
+  role: "viewer" | "editor" | "owner";
   message: string;
   created_at: string;
 }
@@ -645,7 +670,7 @@ export const invitationApi = {
     api<PageData<TaskInvite>>(http.get(`/tasks/${taskId}/invitations`)),
   create: (
     taskId: string,
-    body: { invitee_ids: string[]; role?: "viewer" | "editor"; message?: string },
+    body: { invitee_ids: string[]; role?: "viewer" | "editor" | "owner"; message?: string },
   ) => api<InviteCreateResult>(http.post(`/tasks/${taskId}/invitations`, body)),
   cancel: (taskId: string, inviteId: string) =>
     api<{ id: string; status: string }>(

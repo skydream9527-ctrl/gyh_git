@@ -70,9 +70,9 @@ _DEFAULT_AGENTS = [
         "paradigm": "gray",
         "icon": "🌐",
         "color": "#9b8ec4",
-        "description": "待上线，敬请期待",
-        "publish_status": "coming_soon",
-        "system_prompt": "你是一名灰度发布分析助手，关注版本间的关键指标差异。",
+        "description": "版本灰度 SOP · 决策矩阵 · AI 下钻 · 放量决策（V1.2）",
+        "publish_status": "published",
+        "system_prompt": "你是一名 APP 版本灰度发布数据分析专家（V1.2），按对照包 vs 业务包模式分析（分组依据 app_version，通常免 AA）。严格按六阶段 SOP 推进。",
     },
     {
         "id": "know",

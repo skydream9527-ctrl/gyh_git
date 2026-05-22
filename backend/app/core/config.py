@@ -93,7 +93,7 @@ class Settings(BaseSettings):
     ICE_PYTHON_SANDBOX_TIMEOUT_SEC: int = 60
     ICE_PYTHON_SANDBOX_MEMORY_MB: int = 1024
     ICE_PYTHON_SANDBOX_FSIZE_MB: int = 50
-    ICE_PYTHON_SANDBOX_CONCURRENCY: int = 2
+    ICE_PYTHON_SANDBOX_CONCURRENCY: int = 8
 
     # Voice (mobile PTT). Reuses MIFY_GATEWAY_BASE_URL + MIFY_GATEWAY_API_KEY;
     # zero new secret. Off by default — flip on after Mify rate-limit confirmed.

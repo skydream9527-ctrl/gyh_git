@@ -30,19 +30,25 @@ const PARADIGM_NAME: Record<string, string> = {
   open: "开放任务",
 };
 
-// 与 Dashboard 快速开始 保持一致：前 4 个已上线，后 3 个待上线
+// 与 Dashboard 快速开始 保持一致：已上线在前，待上线在后
 const AGENT_ORDER = [
+  // 已上线
   "general",
   "data-analysis",
   "ab-experiment",
   "know",
   "gray-release",
+  "volcano-abtest",
+  // 待上线
   "biz-insight",
   "wave-attribution",
 ];
 
 function sortAgents(list: AgentCard[]): AgentCard[] {
   return [...list].sort((a, b) => {
+    const sa = a.publish_status === "coming_soon" ? 1 : 0;
+    const sb = b.publish_status === "coming_soon" ? 1 : 0;
+    if (sa !== sb) return sa - sb;
     const ia = AGENT_ORDER.indexOf(a.id);
     const ib = AGENT_ORDER.indexOf(b.id);
     return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib);
@@ -186,38 +192,56 @@ export function CreateTaskPage() {
               <h3 className="ct-step1-title">选择一个 Agent 作为起点</h3>
               <p className="ct-step1-hint">点击即进入下一步；后续可在工作空间里继续增减 Skill</p>
             </div>
-            <div className="ct-agent-grid">
-              {agentsLoading
-                ? Array.from({ length: 6 }).map((_, i) => (
-                    <div key={i} className="ct-agent-card ct-agent-card-skel">
-                      <Skeleton lines={3} />
-                    </div>
-                  ))
-                : agents.map((a) => {
-                    const comingSoon = a.publish_status === "coming_soon";
-                    const selected = form.agent_id === a.id;
-                    return (
-                      <button
-                        key={a.id}
-                        type="button"
-                        className={`ct-agent-card${comingSoon ? " ct-agent-card-soon" : ""}${selected ? " selected" : ""}`}
-                        onClick={() => pickAgent(a)}
-                        style={{ borderTopColor: a.color }}
-                        title={comingSoon ? "待上线，敬请期待" : `以 ${a.name} 作为起点`}
+            {agentsLoading ? (
+              <div className="ct-agent-grid">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="ct-agent-card ct-agent-card-skel">
+                    <Skeleton lines={3} />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              (() => {
+                const renderCard = (a: AgentCard) => {
+                  const comingSoon = a.publish_status === "coming_soon";
+                  const selected = form.agent_id === a.id;
+                  return (
+                    <button
+                      key={a.id}
+                      type="button"
+                      className={`ct-agent-card${comingSoon ? " ct-agent-card-soon" : ""}${selected ? " selected" : ""}`}
+                      onClick={() => pickAgent(a)}
+                      style={{ borderTopColor: a.color }}
+                      title={comingSoon ? "待上线，敬请期待" : `以 ${a.name} 作为起点`}
+                    >
+                      {comingSoon && <span className="ct-agent-badge-soon">待上线</span>}
+                      <div
+                        className="ct-agent-icon"
+                        style={{ background: `${a.color}22`, color: a.color }}
                       >
-                        {comingSoon && <span className="ct-agent-badge-soon">待上线</span>}
-                        <div
-                          className="ct-agent-icon"
-                          style={{ background: `${a.color}22`, color: a.color }}
-                        >
-                          {a.icon}
-                        </div>
-                        <div className="ct-agent-name">{a.name}</div>
-                        <div className="ct-agent-desc">{a.description}</div>
-                      </button>
-                    );
-                  })}
-            </div>
+                        {a.icon}
+                      </div>
+                      <div className="ct-agent-name">{a.name}</div>
+                      <div className="ct-agent-desc">{a.description}</div>
+                    </button>
+                  );
+                };
+                const published = agents.filter((a) => a.publish_status !== "coming_soon");
+                const upcoming = agents.filter((a) => a.publish_status === "coming_soon");
+                return (
+                  <>
+                    {published.length > 0 && (
+                      <div className="ct-agent-grid">{published.map(renderCard)}</div>
+                    )}
+                    {upcoming.length > 0 && (
+                      <div className="ct-agent-grid ct-agent-grid-upcoming">
+                        {upcoming.map(renderCard)}
+                      </div>
+                    )}
+                  </>
+                );
+              })()
+            )}
           </section>
         )}
 

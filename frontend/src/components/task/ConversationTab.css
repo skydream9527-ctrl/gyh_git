@@ -91,6 +91,18 @@
   text-overflow: ellipsis;
 }
 
+/* 后台正在生成的 ⏳ 角标 — 一格脉冲提醒 */
+.conv-inflight-badge {
+  display: inline-block;
+  margin-right: 4px;
+  font-size: 12px;
+  animation: conv-inflight-pulse 1.4s ease-in-out infinite;
+}
+@keyframes conv-inflight-pulse {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+
 .conv-item-meta {
   margin-top: 2px;
   font-size: 11px;

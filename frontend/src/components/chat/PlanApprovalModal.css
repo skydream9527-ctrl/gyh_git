@@ -113,6 +113,50 @@
   background: #fde68a;
 }
 
+/* 同一对话同时只能一个用户跑 turn；其他人 / 其他端的 ChatInput 置灰，
+   并在上方显示 banner 说明谁在占用、给「新建对话」出口。沿用 plan-mode-banner
+   的视觉，但用红/灰区分两种状态（别人占 vs 自己另一端占）。 */
+.conv-locked-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  margin: 0 16px 12px;
+}
+.conv-locked-banner--other {
+  background: #fef2f2;
+  border: 1px solid #fca5a5;
+  color: #b91c1c;
+}
+.conv-locked-banner--self {
+  background: var(--surface-2, #f1f5f9);
+  border: 1px solid var(--border, #cbd5e1);
+  color: var(--text-dim, #475569);
+}
+.conv-locked-banner__action {
+  background: transparent;
+  border: 1px solid #b91c1c;
+  color: #b91c1c;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.conv-locked-banner__action:hover {
+  background: #fee2e2;
+}
+@media (max-width: 640px) {
+  .conv-locked-banner {
+    margin: 0 12px 10px;
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
 @media (max-width: 640px) {
   .plan-modal__backdrop {
     align-items: flex-end;

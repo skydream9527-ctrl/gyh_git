@@ -122,15 +122,20 @@
   max-width: 100%;
   overflow-x: auto;
 }
+/* 流式时的 lite code block：跟随主题，浅色白底深色黑底 */
 .md-code-plain {
   margin: 0;
   padding: 12px 14px;
-  background: #1e1e1e;
-  color: #d4d4d4;
+  background: var(--surface-2);
+  color: var(--text);
   font-family: var(--font-mono);
   font-size: 12.5px;
   line-height: 1.55;
   overflow-x: auto;
+}
+:root[data-theme="dark"] .md-code-plain {
+  background: #1e1e1e;
+  color: #d4d4d4;
 }
 .md-code-plain code {
   background: none;

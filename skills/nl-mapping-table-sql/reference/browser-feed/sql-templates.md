@@ -9,11 +9,11 @@
 | Table | Full Name | Database |
 |-------|-----------|----------|
 | dm_browser_multi_dimension_indicators_di | 多维指标聚合表 | iceberg_zjyprc_hadoop.browser |
-| dm_browser_multi_dimension_retain_indicators_di | 多维留存指标表 | iceberg_zjyprc_hadoop.browser |
-| dm_browser_user_type_core_indicators_di | 用户类型核心指标表 | iceberg_zjyprc_hadoop.browser |
-| dm_browser_item_type_core_indicators_di | 内容转化主题核心指标表 | iceberg_zjyprc_hadoop.browser |
-| dm_browser_page_indicators_di | 小场景指标表 | iceberg_zjyprc_hadoop.browser |
-| dm_browser_finance_core_indicators_di | 财收核心指标表 | iceberg_zjyprc_hadoop.browser |
+| dm_browser_multi_dimension_retain_indicators_di | 留存计算用did粒度指标表 | iceberg_zjyprc_hadoop.browser |
+| ads_browser_user_type_core_indicators_di | 用户类型核心指标表 | iceberg_zjyprc_hadoop.browser |
+| ads_browser_item_type_core_indicators_di | 内容转化主题核心指标表 | iceberg_zjyprc_hadoop.browser |
+| ads_browser_page_indicators_di | 小场景指标表 | iceberg_zjyprc_hadoop.browser |
+| ads_browser_finance_core_indicators_di | 财收核心指标表 | doris_c3prc_xiaomi.browser |
 
 ---
 
@@ -132,14 +132,14 @@ ORDER BY dau DESC;
 
 ### BF-DIM-007: 用户类型核心指标表 — 用户类型枚举值
 
-**Table**: dm_browser_user_type_core_indicators_di
+**Table**: ads_browser_user_type_core_indicators_di
 **Field**: user_type
 
 ```sql
 SELECT
     user_type,
     dau
-FROM iceberg_zjyprc_hadoop.browser.dm_browser_user_type_core_indicators_di
+FROM iceberg_zjyprc_hadoop.browser.ads_browser_user_type_core_indicators_di
 WHERE date = '${DATE}'
 ORDER BY dau DESC;
 ```
@@ -148,7 +148,7 @@ ORDER BY dau DESC;
 
 ### BF-DIM-008: 内容转化主题核心指标表 — 体裁枚举值
 
-**Table**: dm_browser_item_type_core_indicators_di
+**Table**: ads_browser_item_type_core_indicators_di
 **Field**: item_type
 
 ```sql
@@ -157,7 +157,7 @@ SELECT
     expose_pv,
     click_pv,
     view_pv
-FROM iceberg_zjyprc_hadoop.browser.dm_browser_item_type_core_indicators_di
+FROM iceberg_zjyprc_hadoop.browser.ads_browser_item_type_core_indicators_di
 WHERE date = '${DATE}'
 ORDER BY expose_pv DESC;
 ```
@@ -166,7 +166,7 @@ ORDER BY expose_pv DESC;
 
 ### BF-DIM-009: 小场景指标表 — 页面枚举值
 
-**Table**: dm_browser_page_indicators_di
+**Table**: ads_browser_page_indicators_di
 **Field**: page
 
 ```sql
@@ -174,150 +174,101 @@ SELECT
     page,
     expose_uv,
     expose_pv
-FROM iceberg_zjyprc_hadoop.browser.dm_browser_page_indicators_di
+FROM iceberg_zjyprc_hadoop.browser.ads_browser_page_indicators_di
 WHERE date = '${DATE}'
 ORDER BY expose_uv DESC;
 ```
 
 ---
 
-### BF-DIM-010: 多维留存指标表 — 应用端口枚举值
+### BF-DIM-010: 留存计算用did粒度指标表 — 启动方式枚举值
 
 **Table**: dm_browser_multi_dimension_retain_indicators_di
-**Field**: app_port
+**Field**: app_launch_way
 
 ```sql
 SELECT
-    app_port,
-    SUM(retain_2d) AS retain_2d
+    app_launch_way,
+    COUNT(DISTINCT CASE WHEN da_pv > 0 THEN did END) AS dau
 FROM iceberg_zjyprc_hadoop.browser.dm_browser_multi_dimension_retain_indicators_di
 WHERE date = '${DATE}'
-    AND history_user_type = '整体(ALL)'
-GROUP BY app_port;
+    AND is_dau_feed_dapan_2024 = 1
+GROUP BY app_launch_way
+ORDER BY dau DESC;
 ```
 
 ---
 
-### BF-DIM-011: 多维留存指标表 — 用户类型枚举值
+### BF-DIM-011: 留存计算用did粒度指标表 — 体裁枚举值
 
 **Table**: dm_browser_multi_dimension_retain_indicators_di
-**Field**: history_user_type
+**Field**: item_type
 
 ```sql
-SELECT DISTINCT
-    history_user_type
+SELECT
+    item_type,
+    COUNT(DISTINCT CASE WHEN da_pv > 0 THEN did END) AS dau
 FROM iceberg_zjyprc_hadoop.browser.dm_browser_multi_dimension_retain_indicators_di
 WHERE date = '${DATE}'
-ORDER BY history_user_type;
+    AND is_dau_feed_dapan_2024 = 1
+GROUP BY item_type
+ORDER BY dau DESC;
 ```
 
 ---
 
-### BF-DIM-012: 多维留存指标表 — 活跃类型枚举值
+### BF-DIM-012: 财收核心指标表 — 广告位场景枚举值
 
-**Table**: dm_browser_multi_dimension_retain_indicators_di
-**Field**: active_user_type
-
-```sql
-SELECT DISTINCT
-    active_user_type
-FROM iceberg_zjyprc_hadoop.browser.dm_browser_multi_dimension_retain_indicators_di
-WHERE date = '${DATE}'
-ORDER BY active_user_type;
-```
-
----
-
-### BF-DIM-013: 多维留存指标表 — 信息流有效类型枚举值
-
-**Table**: dm_browser_multi_dimension_retain_indicators_di
-**Field**: feed_valid_user_type
-
-```sql
-SELECT DISTINCT
-    feed_valid_user_type
-FROM iceberg_zjyprc_hadoop.browser.dm_browser_multi_dimension_retain_indicators_di
-WHERE date = '${DATE}'
-ORDER BY feed_valid_user_type;
-```
-
----
-
-### BF-DIM-014: 多维留存指标表 — 消费类型枚举值
-
-**Table**: dm_browser_multi_dimension_retain_indicators_di
-**Field**: consume_user_type
-
-```sql
-SELECT DISTINCT
-    consume_user_type
-FROM iceberg_zjyprc_hadoop.browser.dm_browser_multi_dimension_retain_indicators_di
-WHERE date = '${DATE}'
-ORDER BY consume_user_type;
-```
-
----
-
-### BF-DIM-015: 多维留存指标表 — 时长类型枚举值
-
-**Table**: dm_browser_multi_dimension_retain_indicators_di
-**Field**: duration_user_type
-
-```sql
-SELECT DISTINCT
-    duration_user_type
-FROM iceberg_zjyprc_hadoop.browser.dm_browser_multi_dimension_retain_indicators_di
-WHERE date = '${DATE}'
-ORDER BY duration_user_type;
-```
-
----
-
-### BF-DIM-016: 多维留存指标表 — 浏览器有效类型枚举值
-
-**Table**: dm_browser_multi_dimension_retain_indicators_di
-**Field**: browser_valid_user_type
-
-```sql
-SELECT DISTINCT
-    browser_valid_user_type
-FROM iceberg_zjyprc_hadoop.browser.dm_browser_multi_dimension_retain_indicators_di
-WHERE date = '${DATE}'
-ORDER BY browser_valid_user_type;
-```
-
----
-
-### BF-DIM-017: 财收核心指标表 — 广告位场景枚举值
-
-**Table**: dm_browser_finance_core_indicators_di
+**Table**: ads_browser_finance_core_indicators_di
 **Field**: ad_position_scene
 
 ```sql
 SELECT
     ad_position_scene,
     SUM(revenue) AS total_revenue
-FROM iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
+FROM doris_c3prc_xiaomi.browser.ads_browser_finance_core_indicators_di
 WHERE date = '${DATE}'
-    AND app_port = '浏览器信息流'
+    AND tag_id IN (
+        '1.13.c.1', '1.13.c.2', '1.13.c.3', '1.13.c.4', '1.13.c.5',
+        '1.13.c.7', '1.13.c.8', '1.13.c.9', '1.13.c.10', '1.13.c.11',
+        '1.13.c.12', '1.13.c.13', '1.13.c.16', '1.13.c.17', '1.13.c.19',
+        '1.13.c.20', '1.13.c.22', '1.13.c.23', '1.13.c.24', '1.13.c.25',
+        '1.13.c.26', '1.13.c.27', '1.13.c.28', '1.13.c.30',
+        '1.13.f.13', '1.13.f.20',
+        '1.13.g.4', '1.13.g.5', '1.13.g.6', '1.13.g.7', '1.13.g.9',
+        '1.13.g.18', '1.13.g.23', '1.13.g.24', '1.13.g.25', '1.13.g.29',
+        '1.13.g.30',
+        '1.13.1.3', '1.13.1.4', '1.13.1.6', '1.13.1.9'
+    )
 GROUP BY ad_position_scene
 ORDER BY total_revenue DESC;
 ```
 
 ---
 
-### BF-DIM-018: 财收核心指标表 — 广告位枚举值
+### BF-DIM-013: 财收核心指标表 — 广告位枚举值
 
-**Table**: dm_browser_finance_core_indicators_di
+**Table**: ads_browser_finance_core_indicators_di
 **Field**: tag_id
 
 ```sql
 SELECT
     tag_id,
     SUM(revenue) AS total_revenue
-FROM iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
+FROM doris_c3prc_xiaomi.browser.ads_browser_finance_core_indicators_di
 WHERE date = '${DATE}'
-    AND app_port = '浏览器信息流'
+    AND tag_id IN (
+        '1.13.c.1', '1.13.c.2', '1.13.c.3', '1.13.c.4', '1.13.c.5',
+        '1.13.c.7', '1.13.c.8', '1.13.c.9', '1.13.c.10', '1.13.c.11',
+        '1.13.c.12', '1.13.c.13', '1.13.c.16', '1.13.c.17', '1.13.c.19',
+        '1.13.c.20', '1.13.c.22', '1.13.c.23', '1.13.c.24', '1.13.c.25',
+        '1.13.c.26', '1.13.c.27', '1.13.c.28', '1.13.c.30',
+        '1.13.f.13', '1.13.f.20',
+        '1.13.g.4', '1.13.g.5', '1.13.g.6', '1.13.g.7', '1.13.g.9',
+        '1.13.g.18', '1.13.g.23', '1.13.g.24', '1.13.g.25', '1.13.g.29',
+        '1.13.g.30',
+        '1.13.1.3', '1.13.1.4', '1.13.1.6', '1.13.1.9'
+    )
 GROUP BY tag_id
 ORDER BY total_revenue DESC;
 ```

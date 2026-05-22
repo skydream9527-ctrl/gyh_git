@@ -116,7 +116,11 @@ export function InviteInbox() {
                         <span className="ii-from-name">{inv.inviter_name}</span>
                       </span>
                       <span className="ii-role">
-                        {inv.role === "editor" ? "编辑" : "只看"}
+                        {inv.role === "owner"
+                          ? "所有者"
+                          : inv.role === "editor"
+                            ? "编辑"
+                            : "只看"}
                       </span>
                     </div>
                     <div className="ii-task">

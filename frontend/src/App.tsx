@@ -23,6 +23,7 @@ const PublicFilePage = lazy(() => import("@/pages/public_file/PublicFilePage").t
 const AdminLayout = lazy(() => import("@/pages/admin/AdminLayout").then((m) => ({ default: m.AdminLayout })));
 const AdminOverview = lazy(() => import("@/pages/admin/AdminOverview").then((m) => ({ default: m.AdminOverview })));
 const AdminUsers = lazy(() => import("@/pages/admin/AdminUsers").then((m) => ({ default: m.AdminUsers })));
+const AdminUserTasks = lazy(() => import("@/pages/admin/AdminUserTasks").then((m) => ({ default: m.AdminUserTasks })));
 const AdminAgents = lazy(() => import("@/pages/admin/AdminAgents").then((m) => ({ default: m.AdminAgents })));
 const AdminAgentEdit = lazy(() => import("@/pages/admin/AdminAgentEdit").then((m) => ({ default: m.AdminAgentEdit })));
 const AdminAuditLogs = lazy(() => import("@/pages/admin/AdminAuditLogs").then((m) => ({ default: m.AdminAuditLogs })));
@@ -76,6 +77,7 @@ export default function App() {
           <Route path="/admin" element={admined(<AdminLayout />)}>
             <Route index element={<AdminOverview />} />
             <Route path="users" element={<AdminUsers />} />
+            <Route path="users/:userId/tasks" element={<AdminUserTasks />} />
             <Route path="agents" element={<AdminAgents />} />
             <Route path="agents/:agentId" element={<AdminAgentEdit />} />
             <Route path="audit" element={<AdminAuditLogs />} />

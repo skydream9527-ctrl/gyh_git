@@ -5,8 +5,8 @@ from fastapi import APIRouter, Depends, Query
 
 from ...core.deps import get_current_user, require_admin, require_super_admin
 from ...core.errors import APIError, ErrorCode, ok
-from ...core.storage import get_index_db, get_paths, read_json
-from ...services import admin_svc, agents_svc
+from ...core.storage import file_transaction, get_index_db, get_paths, read_json, write_json
+from ...services import admin_svc, agents_svc, task_svc
 
 router = APIRouter()
 
@@ -166,6 +166,124 @@ async def review_registration(
 async def delete_user(uid: str, op: dict = Depends(require_super_admin)):
     await admin_svc.delete_user(operator=op, uid=uid)
     return ok({"deleted": True})
+
+
+# ---- per-user tasks (admin) ----
+
+
+@router.get("/users/{uid}/tasks")
+async def admin_list_user_tasks(
+    uid: str,
+    limit: int = Query(100, ge=1, le=500),
+    _: dict = Depends(require_admin),
+):
+    """List a user's tasks (owner or active collaborator). Returns task meta
+    plus role hint so the admin UI can show ownership context."""
+    paths = get_paths()
+    if not read_json(paths.user_profile(uid)):
+        raise APIError(404, ErrorCode.RESOURCE_NOT_FOUND, "用户不存在")
+    items = await task_svc.list_user_tasks(uid, limit=limit)
+    return ok({"items": items, "total": len(items)})
+
+
+_TASK_META_EDITABLE = {
+    "name",
+    "description",
+    "visibility",
+    "publish_status",
+    "status",
+    "agent_id",
+    "initial_prompt",
+}
+
+
+@router.patch("/tasks/{tid}")
+async def admin_update_task(tid: str, body: dict, op: dict = Depends(require_admin)):
+    """Edit a task's meta on behalf of any user. Allowed keys:
+    name / description / visibility / publish_status / status / agent_id /
+    initial_prompt. Other fields are ignored. Audited as `admin_update_task`."""
+    paths = get_paths()
+    meta_path = paths.task_meta(tid)
+    meta = read_json(meta_path)
+    if not meta:
+        raise APIError(404, ErrorCode.RESOURCE_NOT_FOUND, "任务不存在")
+    diff = {"before": {}, "after": {}}
+    for k in _TASK_META_EDITABLE:
+        if k not in body:
+            continue
+        new_val = body[k]
+        if new_val == meta.get(k):
+            continue
+        diff["before"][k] = meta.get(k)
+        diff["after"][k] = new_val
+        meta[k] = new_val
+    if not diff["after"]:
+        return ok(meta)
+    from datetime import datetime, timezone
+
+    meta["updated_at"] = datetime.now(timezone.utc).isoformat()
+    with file_transaction([meta_path]) as tx:
+        tx.write_json(meta_path, meta)
+
+    db = get_index_db()
+    await db.execute(
+        "UPDATE tasks_index SET name = ?, agent_id = ?, visibility = ?, publish_status = ?, status = ?, updated_at = ? WHERE id = ?",
+        [
+            meta.get("name"),
+            meta.get("agent_id"),
+            meta.get("visibility"),
+            meta.get("publish_status"),
+            meta.get("status"),
+            meta["updated_at"],
+            tid,
+        ],
+    )
+    await admin_svc.audit(
+        admin_id=op["id"],
+        action="admin_update_task",
+        target_type="task",
+        target_id=tid,
+        diff=diff,
+    )
+    return ok(meta)
+
+
+@router.patch("/tasks/{tid}/skills")
+async def admin_update_task_skills(
+    tid: str, body: dict, op: dict = Depends(require_admin)
+):
+    """Replace the task's bound skill_ids on behalf of any user."""
+    skill_ids = body.get("skill_ids")
+    if not isinstance(skill_ids, list):
+        raise APIError(400, ErrorCode.VALIDATION_ERROR, "skill_ids 必须是数组")
+    res = await task_svc.update_skills(tid, op["id"], skill_ids, is_admin=True)
+    await admin_svc.audit(
+        admin_id=op["id"],
+        action="admin_update_task_skills",
+        target_type="task",
+        target_id=tid,
+        diff={"after": {"skill_ids": res["skill_ids"]}},
+    )
+    return ok(res)
+
+
+@router.delete("/tasks/{tid}")
+async def admin_delete_task(tid: str, op: dict = Depends(require_admin)):
+    """Hard-delete any user's task. Audited as `admin_delete_task`."""
+    paths = get_paths()
+    meta = read_json(paths.task_meta(tid))
+    if not meta:
+        raise APIError(404, ErrorCode.RESOURCE_NOT_FOUND, "任务不存在")
+    owner_id = meta.get("owner_id") or op["id"]
+    await task_svc.delete_task(tid, op["id"], is_admin=True)
+    await admin_svc.audit(
+        admin_id=op["id"],
+        action="admin_delete_task",
+        target_type="task",
+        target_id=tid,
+        diff={"before": {"owner_id": owner_id, "name": meta.get("name")}},
+    )
+    return ok({"deleted": True, "task_id": tid})
 
 
 # ---- audit ----

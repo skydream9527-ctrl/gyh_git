@@ -1,5 +1,5 @@
-version: "2.3"
-description: AB实验分析知识库全局索引（信息流业务 V2.3）
+version: "2.4"
+description: AB实验分析知识库全局索引（信息流业务 V2.4）
 
 directories:
   - name: rules

@@ -5,8 +5,8 @@
 | Table | Full Name | Database |
 |-------|-----------|----------|
 | dm_newhome_multi_dimension_indicators_di | 多维指标聚合表 | iceberg_zjyprc_hadoop.newhome |
-| dm_newhome_user_type_core_indicators_di | 用户类型核心指标表 | iceberg_zjyprc_hadoop.newhome |
-| dm_newhome_multi_dimension_retain_indicators_di | 多维留存指标表 | iceberg_zjyprc_hadoop.newhome |
+| ads_newhome_user_type_core_indicators_di | 用户类型核心指标表 | iceberg_zjyprc_hadoop.newhome |
+| dm_newhome_multi_dimension_retain_indicators_di | 多维留存指标表（did粒度） | iceberg_zjyprc_hadoop.newhome |
 
 ---
 
@@ -81,103 +81,85 @@ GROUP BY date
 ### CM-007: 次日留存
 
 ```sql
-SELECT  date,
-        SUM(retain_2d) AS retain_2d
-FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '内容中心'
-        AND history_user_type = '整体(ALL)'
-        AND active_user_type = '整体(ALL)'
-        AND feed_valid_user_type = '整体(ALL)'
-        AND consume_user_type = '整体(ALL)'
-        AND duration_user_type = '整体(ALL)'
-        AND browser_valid_user_type = '整体(ALL)'
-GROUP BY date
+SELECT  a.date,
+        COUNT(DISTINCT a.did) AS base_dau,
+        COUNT(DISTINCT b.did) AS retain_2d
+FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di a
+LEFT JOIN iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di b
+    ON a.did = b.did AND b.date = a.date + 1 AND b.is_dau_2024 = 1
+WHERE   a.date = '${DATE}'
+        AND a.is_dau_2024 = 1
+GROUP BY a.date
 ```
 
 ### CM-008: 7日留存
 
 ```sql
-SELECT  date,
-        SUM(retain_7d) AS retain_7d
-FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '内容中心'
-        AND history_user_type = '整体(ALL)'
-        AND active_user_type = '整体(ALL)'
-        AND feed_valid_user_type = '整体(ALL)'
-        AND consume_user_type = '整体(ALL)'
-        AND duration_user_type = '整体(ALL)'
-        AND browser_valid_user_type = '整体(ALL)'
-GROUP BY date
+SELECT  a.date,
+        COUNT(DISTINCT a.did) AS base_dau,
+        COUNT(DISTINCT b.did) AS retain_7d
+FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di a
+LEFT JOIN iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di b
+    ON a.did = b.did AND b.date = a.date + 7 AND b.is_dau_2024 = 1
+WHERE   a.date = '${DATE}'
+        AND a.is_dau_2024 = 1
+GROUP BY a.date
 ```
 
 ### CM-009: 30日留存
 
 ```sql
-SELECT  date,
-        SUM(retain_30d) AS retain_30d
-FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '内容中心'
-        AND history_user_type = '整体(ALL)'
-        AND active_user_type = '整体(ALL)'
-        AND feed_valid_user_type = '整体(ALL)'
-        AND consume_user_type = '整体(ALL)'
-        AND duration_user_type = '整体(ALL)'
-        AND browser_valid_user_type = '整体(ALL)'
-GROUP BY date
+SELECT  a.date,
+        COUNT(DISTINCT a.did) AS base_dau,
+        COUNT(DISTINCT b.did) AS retain_30d
+FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di a
+LEFT JOIN iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di b
+    ON a.did = b.did AND b.date = a.date + 30 AND b.is_dau_2024 = 1
+WHERE   a.date = '${DATE}'
+        AND a.is_dau_2024 = 1
+GROUP BY a.date
 ```
 
 ### CM-010: 曝光-曝光次留
 
 ```sql
-SELECT  date,
-        SUM(e2e_retain_2d) AS e2e_retain_2d
-FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '内容中心'
-        AND history_user_type = '整体(ALL)'
-        AND active_user_type = '整体(ALL)'
-        AND feed_valid_user_type = '整体(ALL)'
-        AND consume_user_type = '整体(ALL)'
-        AND duration_user_type = '整体(ALL)'
-        AND browser_valid_user_type = '整体(ALL)'
-GROUP BY date
+SELECT  a.date,
+        COUNT(DISTINCT a.did) AS base_uv,
+        COUNT(DISTINCT b.did) AS e2e_retain_2d
+FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di a
+LEFT JOIN iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di b
+    ON a.did = b.did AND b.date = a.date + 1 AND b.expose_pv > 0
+WHERE   a.date = '${DATE}'
+        AND a.expose_pv > 0
+GROUP BY a.date
 ```
 
 ### CM-011: 曝光-有效次留
 
 ```sql
-SELECT  date,
-        SUM(e2v_retain_2d) AS e2v_retain_2d
-FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '内容中心'
-        AND history_user_type = '整体(ALL)'
-        AND active_user_type = '整体(ALL)'
-        AND feed_valid_user_type = '整体(ALL)'
-        AND consume_user_type = '整体(ALL)'
-        AND duration_user_type = '整体(ALL)'
-        AND browser_valid_user_type = '整体(ALL)'
-GROUP BY date
+SELECT  a.date,
+        COUNT(DISTINCT a.did) AS base_uv,
+        COUNT(DISTINCT b.did) AS e2v_retain_2d
+FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di a
+LEFT JOIN iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di b
+    ON a.did = b.did AND b.date = a.date + 1 AND b.is_valid_newhome_2025 = 1
+WHERE   a.date = '${DATE}'
+        AND a.expose_pv > 0
+GROUP BY a.date
 ```
 
 ### CM-012: 有效-有效次留
 
 ```sql
-SELECT  date,
-        SUM(v2v_retain_2d) AS v2v_retain_2d
-FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '内容中心'
-        AND history_user_type = '整体(ALL)'
-        AND active_user_type = '整体(ALL)'
-        AND feed_valid_user_type = '整体(ALL)'
-        AND consume_user_type = '整体(ALL)'
-        AND duration_user_type = '整体(ALL)'
-        AND browser_valid_user_type = '整体(ALL)'
-GROUP BY date
+SELECT  a.date,
+        COUNT(DISTINCT a.did) AS base_uv,
+        COUNT(DISTINCT b.did) AS v2v_retain_2d
+FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di a
+LEFT JOIN iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di b
+    ON a.did = b.did AND b.date = a.date + 1 AND b.is_valid_newhome_2025 = 1
+WHERE   a.date = '${DATE}'
+        AND a.is_valid_newhome_2025 = 1
+GROUP BY a.date
 ```
 
 ---
@@ -658,616 +640,364 @@ WHERE   date = '${DATE}'
 GROUP BY date, feed_channel
 ```
 
-### CM-DIM-038: 次日留存 — 按用户类型
+### CM-DIM-038: 次日留存 — 按新老用户
 
 ```sql
-SELECT  date,
-        history_user_type,
-        SUM(retain_2d) AS retain_2d
-FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '内容中心'
-        AND active_user_type = '整体(ALL)'
-        AND feed_valid_user_type = '整体(ALL)'
-        AND consume_user_type = '整体(ALL)'
-        AND duration_user_type = '整体(ALL)'
-        AND browser_valid_user_type = '整体(ALL)'
-GROUP BY date, history_user_type
+SELECT  a.date,
+        a.is_new_2024,
+        COUNT(DISTINCT a.did) AS base_dau,
+        COUNT(DISTINCT b.did) AS retain_2d
+FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di a
+LEFT JOIN iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di b
+    ON a.did = b.did AND b.date = a.date + 1 AND b.is_dau_2024 = 1
+WHERE   a.date = '${DATE}'
+        AND a.is_dau_2024 = 1
+GROUP BY a.date, a.is_new_2024
 ```
 
-### CM-DIM-039: 次日留存 — 按活跃类型
+### CM-DIM-039: 次日留存 — 按信息流活跃类型
 
 ```sql
-SELECT  date,
-        active_user_type,
-        SUM(retain_2d) AS retain_2d
-FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '内容中心'
-        AND history_user_type = '整体(ALL)'
-        AND feed_valid_user_type = '整体(ALL)'
-        AND consume_user_type = '整体(ALL)'
-        AND duration_user_type = '整体(ALL)'
-        AND browser_valid_user_type = '整体(ALL)'
-GROUP BY date, active_user_type
+SELECT  a.date,
+        a.is_feed_active_2025,
+        COUNT(DISTINCT a.did) AS base_dau,
+        COUNT(DISTINCT b.did) AS retain_2d
+FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di a
+LEFT JOIN iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di b
+    ON a.did = b.did AND b.date = a.date + 1 AND b.is_dau_2024 = 1
+WHERE   a.date = '${DATE}'
+        AND a.is_dau_2024 = 1
+GROUP BY a.date, a.is_feed_active_2025
 ```
 
-### CM-DIM-040: 次日留存 — 按信息流有效类型
+### CM-DIM-040: 次日留存 — 按内容中心有效类型
 
 ```sql
-SELECT  date,
-        feed_valid_user_type,
-        SUM(retain_2d) AS retain_2d
-FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '内容中心'
-        AND history_user_type = '整体(ALL)'
-        AND active_user_type = '整体(ALL)'
-        AND consume_user_type = '整体(ALL)'
-        AND duration_user_type = '整体(ALL)'
-        AND browser_valid_user_type = '整体(ALL)'
-GROUP BY date, feed_valid_user_type
+SELECT  a.date,
+        a.is_valid_newhome_2025,
+        COUNT(DISTINCT a.did) AS base_dau,
+        COUNT(DISTINCT b.did) AS retain_2d
+FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di a
+LEFT JOIN iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di b
+    ON a.did = b.did AND b.date = a.date + 1 AND b.is_dau_2024 = 1
+WHERE   a.date = '${DATE}'
+        AND a.is_dau_2024 = 1
+GROUP BY a.date, a.is_valid_newhome_2025
 ```
 
 ### CM-DIM-041: 次日留存 — 按消费类型
 
 ```sql
-SELECT  date,
-        consume_user_type,
-        SUM(retain_2d) AS retain_2d
-FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '内容中心'
-        AND history_user_type = '整体(ALL)'
-        AND active_user_type = '整体(ALL)'
-        AND feed_valid_user_type = '整体(ALL)'
-        AND duration_user_type = '整体(ALL)'
-        AND browser_valid_user_type = '整体(ALL)'
-GROUP BY date, consume_user_type
+SELECT  a.date,
+        a.is_feed_consume_2025,
+        COUNT(DISTINCT a.did) AS base_dau,
+        COUNT(DISTINCT b.did) AS retain_2d
+FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di a
+LEFT JOIN iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di b
+    ON a.did = b.did AND b.date = a.date + 1 AND b.is_dau_2024 = 1
+WHERE   a.date = '${DATE}'
+        AND a.is_dau_2024 = 1
+GROUP BY a.date, a.is_feed_consume_2025
 ```
 
-### CM-DIM-042: 次日留存 — 按时长类型
+### CM-DIM-042: 7日留存 — 按新老用户
 
 ```sql
-SELECT  date,
-        duration_user_type,
-        SUM(retain_2d) AS retain_2d
-FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '内容中心'
-        AND history_user_type = '整体(ALL)'
-        AND active_user_type = '整体(ALL)'
-        AND feed_valid_user_type = '整体(ALL)'
-        AND consume_user_type = '整体(ALL)'
-        AND browser_valid_user_type = '整体(ALL)'
-GROUP BY date, duration_user_type
+SELECT  a.date,
+        a.is_new_2024,
+        COUNT(DISTINCT a.did) AS base_dau,
+        COUNT(DISTINCT b.did) AS retain_7d
+FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di a
+LEFT JOIN iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di b
+    ON a.did = b.did AND b.date = a.date + 7 AND b.is_dau_2024 = 1
+WHERE   a.date = '${DATE}'
+        AND a.is_dau_2024 = 1
+GROUP BY a.date, a.is_new_2024
 ```
 
-### CM-DIM-043: 次日留存 — 按浏览器有效类型
+### CM-DIM-043: 7日留存 — 按信息流活跃类型
 
 ```sql
-SELECT  date,
-        browser_valid_user_type,
-        SUM(retain_2d) AS retain_2d
-FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '内容中心'
-        AND history_user_type = '整体(ALL)'
-        AND active_user_type = '整体(ALL)'
-        AND feed_valid_user_type = '整体(ALL)'
-        AND consume_user_type = '整体(ALL)'
-        AND duration_user_type = '整体(ALL)'
-GROUP BY date, browser_valid_user_type
+SELECT  a.date,
+        a.is_feed_active_2025,
+        COUNT(DISTINCT a.did) AS base_dau,
+        COUNT(DISTINCT b.did) AS retain_7d
+FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di a
+LEFT JOIN iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di b
+    ON a.did = b.did AND b.date = a.date + 7 AND b.is_dau_2024 = 1
+WHERE   a.date = '${DATE}'
+        AND a.is_dau_2024 = 1
+GROUP BY a.date, a.is_feed_active_2025
 ```
 
-### CM-DIM-044: 7日留存 — 按用户类型
+### CM-DIM-044: 7日留存 — 按内容中心有效类型
 
 ```sql
-SELECT  date,
-        history_user_type,
-        SUM(retain_7d) AS retain_7d
-FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '内容中心'
-        AND active_user_type = '整体(ALL)'
-        AND feed_valid_user_type = '整体(ALL)'
-        AND consume_user_type = '整体(ALL)'
-        AND duration_user_type = '整体(ALL)'
-        AND browser_valid_user_type = '整体(ALL)'
-GROUP BY date, history_user_type
+SELECT  a.date,
+        a.is_valid_newhome_2025,
+        COUNT(DISTINCT a.did) AS base_dau,
+        COUNT(DISTINCT b.did) AS retain_7d
+FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di a
+LEFT JOIN iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di b
+    ON a.did = b.did AND b.date = a.date + 7 AND b.is_dau_2024 = 1
+WHERE   a.date = '${DATE}'
+        AND a.is_dau_2024 = 1
+GROUP BY a.date, a.is_valid_newhome_2025
 ```
 
-### CM-DIM-045: 7日留存 — 按活跃类型
+### CM-DIM-045: 7日留存 — 按消费类型
 
 ```sql
-SELECT  date,
-        active_user_type,
-        SUM(retain_7d) AS retain_7d
-FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '内容中心'
-        AND history_user_type = '整体(ALL)'
-        AND feed_valid_user_type = '整体(ALL)'
-        AND consume_user_type = '整体(ALL)'
-        AND duration_user_type = '整体(ALL)'
-        AND browser_valid_user_type = '整体(ALL)'
-GROUP BY date, active_user_type
+SELECT  a.date,
+        a.is_feed_consume_2025,
+        COUNT(DISTINCT a.did) AS base_dau,
+        COUNT(DISTINCT b.did) AS retain_7d
+FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di a
+LEFT JOIN iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di b
+    ON a.did = b.did AND b.date = a.date + 7 AND b.is_dau_2024 = 1
+WHERE   a.date = '${DATE}'
+        AND a.is_dau_2024 = 1
+GROUP BY a.date, a.is_feed_consume_2025
 ```
 
-### CM-DIM-046: 7日留存 — 按信息流有效类型
+### CM-DIM-046: 30日留存 — 按新老用户
 
 ```sql
-SELECT  date,
-        feed_valid_user_type,
-        SUM(retain_7d) AS retain_7d
-FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '内容中心'
-        AND history_user_type = '整体(ALL)'
-        AND active_user_type = '整体(ALL)'
-        AND consume_user_type = '整体(ALL)'
-        AND duration_user_type = '整体(ALL)'
-        AND browser_valid_user_type = '整体(ALL)'
-GROUP BY date, feed_valid_user_type
+SELECT  a.date,
+        a.is_new_2024,
+        COUNT(DISTINCT a.did) AS base_dau,
+        COUNT(DISTINCT b.did) AS retain_30d
+FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di a
+LEFT JOIN iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di b
+    ON a.did = b.did AND b.date = a.date + 30 AND b.is_dau_2024 = 1
+WHERE   a.date = '${DATE}'
+        AND a.is_dau_2024 = 1
+GROUP BY a.date, a.is_new_2024
 ```
 
-### CM-DIM-047: 7日留存 — 按消费类型
+### CM-DIM-047: 30日留存 — 按信息流活跃类型
 
 ```sql
-SELECT  date,
-        consume_user_type,
-        SUM(retain_7d) AS retain_7d
-FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '内容中心'
-        AND history_user_type = '整体(ALL)'
-        AND active_user_type = '整体(ALL)'
-        AND feed_valid_user_type = '整体(ALL)'
-        AND duration_user_type = '整体(ALL)'
-        AND browser_valid_user_type = '整体(ALL)'
-GROUP BY date, consume_user_type
+SELECT  a.date,
+        a.is_feed_active_2025,
+        COUNT(DISTINCT a.did) AS base_dau,
+        COUNT(DISTINCT b.did) AS retain_30d
+FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di a
+LEFT JOIN iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di b
+    ON a.did = b.did AND b.date = a.date + 30 AND b.is_dau_2024 = 1
+WHERE   a.date = '${DATE}'
+        AND a.is_dau_2024 = 1
+GROUP BY a.date, a.is_feed_active_2025
 ```
 
-### CM-DIM-048: 7日留存 — 按时长类型
+### CM-DIM-048: 30日留存 — 按内容中心有效类型
 
 ```sql
-SELECT  date,
-        duration_user_type,
-        SUM(retain_7d) AS retain_7d
-FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '内容中心'
-        AND history_user_type = '整体(ALL)'
-        AND active_user_type = '整体(ALL)'
-        AND feed_valid_user_type = '整体(ALL)'
-        AND consume_user_type = '整体(ALL)'
-        AND browser_valid_user_type = '整体(ALL)'
-GROUP BY date, duration_user_type
+SELECT  a.date,
+        a.is_valid_newhome_2025,
+        COUNT(DISTINCT a.did) AS base_dau,
+        COUNT(DISTINCT b.did) AS retain_30d
+FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di a
+LEFT JOIN iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di b
+    ON a.did = b.did AND b.date = a.date + 30 AND b.is_dau_2024 = 1
+WHERE   a.date = '${DATE}'
+        AND a.is_dau_2024 = 1
+GROUP BY a.date, a.is_valid_newhome_2025
 ```
 
-### CM-DIM-049: 7日留存 — 按浏览器有效类型
+### CM-DIM-049: 30日留存 — 按消费类型
 
 ```sql
-SELECT  date,
-        browser_valid_user_type,
-        SUM(retain_7d) AS retain_7d
-FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '内容中心'
-        AND history_user_type = '整体(ALL)'
-        AND active_user_type = '整体(ALL)'
-        AND feed_valid_user_type = '整体(ALL)'
-        AND consume_user_type = '整体(ALL)'
-        AND duration_user_type = '整体(ALL)'
-GROUP BY date, browser_valid_user_type
+SELECT  a.date,
+        a.is_feed_consume_2025,
+        COUNT(DISTINCT a.did) AS base_dau,
+        COUNT(DISTINCT b.did) AS retain_30d
+FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di a
+LEFT JOIN iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di b
+    ON a.did = b.did AND b.date = a.date + 30 AND b.is_dau_2024 = 1
+WHERE   a.date = '${DATE}'
+        AND a.is_dau_2024 = 1
+GROUP BY a.date, a.is_feed_consume_2025
 ```
 
-### CM-DIM-050: 30日留存 — 按用户类型
+### CM-DIM-050: 曝光-曝光次留 — 按新老用户
 
 ```sql
-SELECT  date,
-        history_user_type,
-        SUM(retain_30d) AS retain_30d
-FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '内容中心'
-        AND active_user_type = '整体(ALL)'
-        AND feed_valid_user_type = '整体(ALL)'
-        AND consume_user_type = '整体(ALL)'
-        AND duration_user_type = '整体(ALL)'
-        AND browser_valid_user_type = '整体(ALL)'
-GROUP BY date, history_user_type
+SELECT  a.date,
+        a.is_new_2024,
+        COUNT(DISTINCT a.did) AS base_uv,
+        COUNT(DISTINCT b.did) AS e2e_retain_2d
+FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di a
+LEFT JOIN iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di b
+    ON a.did = b.did AND b.date = a.date + 1 AND b.expose_pv > 0
+WHERE   a.date = '${DATE}'
+        AND a.expose_pv > 0
+GROUP BY a.date, a.is_new_2024
 ```
 
-### CM-DIM-051: 30日留存 — 按活跃类型
+### CM-DIM-051: 曝光-曝光次留 — 按信息流活跃类型
 
 ```sql
-SELECT  date,
-        active_user_type,
-        SUM(retain_30d) AS retain_30d
-FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '内容中心'
-        AND history_user_type = '整体(ALL)'
-        AND feed_valid_user_type = '整体(ALL)'
-        AND consume_user_type = '整体(ALL)'
-        AND duration_user_type = '整体(ALL)'
-        AND browser_valid_user_type = '整体(ALL)'
-GROUP BY date, active_user_type
+SELECT  a.date,
+        a.is_feed_active_2025,
+        COUNT(DISTINCT a.did) AS base_uv,
+        COUNT(DISTINCT b.did) AS e2e_retain_2d
+FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di a
+LEFT JOIN iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di b
+    ON a.did = b.did AND b.date = a.date + 1 AND b.expose_pv > 0
+WHERE   a.date = '${DATE}'
+        AND a.expose_pv > 0
+GROUP BY a.date, a.is_feed_active_2025
 ```
 
-### CM-DIM-052: 30日留存 — 按信息流有效类型
+### CM-DIM-052: 曝光-曝光次留 — 按内容中心有效类型
 
 ```sql
-SELECT  date,
-        feed_valid_user_type,
-        SUM(retain_30d) AS retain_30d
-FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '内容中心'
-        AND history_user_type = '整体(ALL)'
-        AND active_user_type = '整体(ALL)'
-        AND consume_user_type = '整体(ALL)'
-        AND duration_user_type = '整体(ALL)'
-        AND browser_valid_user_type = '整体(ALL)'
-GROUP BY date, feed_valid_user_type
+SELECT  a.date,
+        a.is_valid_newhome_2025,
+        COUNT(DISTINCT a.did) AS base_uv,
+        COUNT(DISTINCT b.did) AS e2e_retain_2d
+FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di a
+LEFT JOIN iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di b
+    ON a.did = b.did AND b.date = a.date + 1 AND b.expose_pv > 0
+WHERE   a.date = '${DATE}'
+        AND a.expose_pv > 0
+GROUP BY a.date, a.is_valid_newhome_2025
 ```
 
-### CM-DIM-053: 30日留存 — 按消费类型
+### CM-DIM-053: 曝光-曝光次留 — 按消费类型
 
 ```sql
-SELECT  date,
-        consume_user_type,
-        SUM(retain_30d) AS retain_30d
-FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '内容中心'
-        AND history_user_type = '整体(ALL)'
-        AND active_user_type = '整体(ALL)'
-        AND feed_valid_user_type = '整体(ALL)'
-        AND duration_user_type = '整体(ALL)'
-        AND browser_valid_user_type = '整体(ALL)'
-GROUP BY date, consume_user_type
+SELECT  a.date,
+        a.is_feed_consume_2025,
+        COUNT(DISTINCT a.did) AS base_uv,
+        COUNT(DISTINCT b.did) AS e2e_retain_2d
+FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di a
+LEFT JOIN iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di b
+    ON a.did = b.did AND b.date = a.date + 1 AND b.expose_pv > 0
+WHERE   a.date = '${DATE}'
+        AND a.expose_pv > 0
+GROUP BY a.date, a.is_feed_consume_2025
 ```
 
-### CM-DIM-054: 30日留存 — 按时长类型
+### CM-DIM-054: 曝光-有效次留 — 按新老用户
 
 ```sql
-SELECT  date,
-        duration_user_type,
-        SUM(retain_30d) AS retain_30d
-FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '内容中心'
-        AND history_user_type = '整体(ALL)'
-        AND active_user_type = '整体(ALL)'
-        AND feed_valid_user_type = '整体(ALL)'
-        AND consume_user_type = '整体(ALL)'
-        AND browser_valid_user_type = '整体(ALL)'
-GROUP BY date, duration_user_type
+SELECT  a.date,
+        a.is_new_2024,
+        COUNT(DISTINCT a.did) AS base_uv,
+        COUNT(DISTINCT b.did) AS e2v_retain_2d
+FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di a
+LEFT JOIN iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di b
+    ON a.did = b.did AND b.date = a.date + 1 AND b.is_valid_newhome_2025 = 1
+WHERE   a.date = '${DATE}'
+        AND a.expose_pv > 0
+GROUP BY a.date, a.is_new_2024
 ```
 
-### CM-DIM-055: 30日留存 — 按浏览器有效类型
+### CM-DIM-055: 曝光-有效次留 — 按信息流活跃类型
 
 ```sql
-SELECT  date,
-        browser_valid_user_type,
-        SUM(retain_30d) AS retain_30d
-FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '内容中心'
-        AND history_user_type = '整体(ALL)'
-        AND active_user_type = '整体(ALL)'
-        AND feed_valid_user_type = '整体(ALL)'
-        AND consume_user_type = '整体(ALL)'
-        AND duration_user_type = '整体(ALL)'
-GROUP BY date, browser_valid_user_type
+SELECT  a.date,
+        a.is_feed_active_2025,
+        COUNT(DISTINCT a.did) AS base_uv,
+        COUNT(DISTINCT b.did) AS e2v_retain_2d
+FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di a
+LEFT JOIN iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di b
+    ON a.did = b.did AND b.date = a.date + 1 AND b.is_valid_newhome_2025 = 1
+WHERE   a.date = '${DATE}'
+        AND a.expose_pv > 0
+GROUP BY a.date, a.is_feed_active_2025
 ```
 
-### CM-DIM-056: 曝光-曝光次留 — 按用户类型
+### CM-DIM-056: 曝光-有效次留 — 按内容中心有效类型
 
 ```sql
-SELECT  date,
-        history_user_type,
-        SUM(e2e_retain_2d) AS e2e_retain_2d
-FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '内容中心'
-        AND active_user_type = '整体(ALL)'
-        AND feed_valid_user_type = '整体(ALL)'
-        AND consume_user_type = '整体(ALL)'
-        AND duration_user_type = '整体(ALL)'
-        AND browser_valid_user_type = '整体(ALL)'
-GROUP BY date, history_user_type
+SELECT  a.date,
+        a.is_valid_newhome_2025,
+        COUNT(DISTINCT a.did) AS base_uv,
+        COUNT(DISTINCT b.did) AS e2v_retain_2d
+FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di a
+LEFT JOIN iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di b
+    ON a.did = b.did AND b.date = a.date + 1 AND b.is_valid_newhome_2025 = 1
+WHERE   a.date = '${DATE}'
+        AND a.expose_pv > 0
+GROUP BY a.date, a.is_valid_newhome_2025
 ```
 
-### CM-DIM-057: 曝光-曝光次留 — 按活跃类型
+### CM-DIM-057: 曝光-有效次留 — 按消费类型
 
 ```sql
-SELECT  date,
-        active_user_type,
-        SUM(e2e_retain_2d) AS e2e_retain_2d
-FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '内容中心'
-        AND history_user_type = '整体(ALL)'
-        AND feed_valid_user_type = '整体(ALL)'
-        AND consume_user_type = '整体(ALL)'
-        AND duration_user_type = '整体(ALL)'
-        AND browser_valid_user_type = '整体(ALL)'
-GROUP BY date, active_user_type
+SELECT  a.date,
+        a.is_feed_consume_2025,
+        COUNT(DISTINCT a.did) AS base_uv,
+        COUNT(DISTINCT b.did) AS e2v_retain_2d
+FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di a
+LEFT JOIN iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di b
+    ON a.did = b.did AND b.date = a.date + 1 AND b.is_valid_newhome_2025 = 1
+WHERE   a.date = '${DATE}'
+        AND a.expose_pv > 0
+GROUP BY a.date, a.is_feed_consume_2025
 ```
 
-### CM-DIM-058: 曝光-曝光次留 — 按信息流有效类型
+### CM-DIM-058: 有效-有效次留 — 按新老用户
 
 ```sql
-SELECT  date,
-        feed_valid_user_type,
-        SUM(e2e_retain_2d) AS e2e_retain_2d
-FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '内容中心'
-        AND history_user_type = '整体(ALL)'
-        AND active_user_type = '整体(ALL)'
-        AND consume_user_type = '整体(ALL)'
-        AND duration_user_type = '整体(ALL)'
-        AND browser_valid_user_type = '整体(ALL)'
-GROUP BY date, feed_valid_user_type
+SELECT  a.date,
+        a.is_new_2024,
+        COUNT(DISTINCT a.did) AS base_uv,
+        COUNT(DISTINCT b.did) AS v2v_retain_2d
+FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di a
+LEFT JOIN iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di b
+    ON a.did = b.did AND b.date = a.date + 1 AND b.is_valid_newhome_2025 = 1
+WHERE   a.date = '${DATE}'
+        AND a.is_valid_newhome_2025 = 1
+GROUP BY a.date, a.is_new_2024
 ```
 
-### CM-DIM-059: 曝光-曝光次留 — 按消费类型
+### CM-DIM-059: 有效-有效次留 — 按信息流活跃类型
 
 ```sql
-SELECT  date,
-        consume_user_type,
-        SUM(e2e_retain_2d) AS e2e_retain_2d
-FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '内容中心'
-        AND history_user_type = '整体(ALL)'
-        AND active_user_type = '整体(ALL)'
-        AND feed_valid_user_type = '整体(ALL)'
-        AND duration_user_type = '整体(ALL)'
-        AND browser_valid_user_type = '整体(ALL)'
-GROUP BY date, consume_user_type
+SELECT  a.date,
+        a.is_feed_active_2025,
+        COUNT(DISTINCT a.did) AS base_uv,
+        COUNT(DISTINCT b.did) AS v2v_retain_2d
+FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di a
+LEFT JOIN iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di b
+    ON a.did = b.did AND b.date = a.date + 1 AND b.is_valid_newhome_2025 = 1
+WHERE   a.date = '${DATE}'
+        AND a.is_valid_newhome_2025 = 1
+GROUP BY a.date, a.is_feed_active_2025
 ```
 
-### CM-DIM-060: 曝光-曝光次留 — 按时长类型
+### CM-DIM-060: 有效-有效次留 — 按内容中心有效类型
 
 ```sql
-SELECT  date,
-        duration_user_type,
-        SUM(e2e_retain_2d) AS e2e_retain_2d
-FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '内容中心'
-        AND history_user_type = '整体(ALL)'
-        AND active_user_type = '整体(ALL)'
-        AND feed_valid_user_type = '整体(ALL)'
-        AND consume_user_type = '整体(ALL)'
-        AND browser_valid_user_type = '整体(ALL)'
-GROUP BY date, duration_user_type
+SELECT  a.date,
+        a.is_valid_newhome_2025,
+        COUNT(DISTINCT a.did) AS base_uv,
+        COUNT(DISTINCT b.did) AS v2v_retain_2d
+FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di a
+LEFT JOIN iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di b
+    ON a.did = b.did AND b.date = a.date + 1 AND b.is_valid_newhome_2025 = 1
+WHERE   a.date = '${DATE}'
+        AND a.is_valid_newhome_2025 = 1
+GROUP BY a.date, a.is_valid_newhome_2025
 ```
 
-### CM-DIM-061: 曝光-曝光次留 — 按浏览器有效类型
+### CM-DIM-061: 有效-有效次留 — 按消费类型
 
 ```sql
-SELECT  date,
-        browser_valid_user_type,
-        SUM(e2e_retain_2d) AS e2e_retain_2d
-FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '内容中心'
-        AND history_user_type = '整体(ALL)'
-        AND active_user_type = '整体(ALL)'
-        AND feed_valid_user_type = '整体(ALL)'
-        AND consume_user_type = '整体(ALL)'
-        AND duration_user_type = '整体(ALL)'
-GROUP BY date, browser_valid_user_type
-```
-
-### CM-DIM-062: 曝光-有效次留 — 按用户类型
-
-```sql
-SELECT  date,
-        history_user_type,
-        SUM(e2v_retain_2d) AS e2v_retain_2d
-FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '内容中心'
-        AND active_user_type = '整体(ALL)'
-        AND feed_valid_user_type = '整体(ALL)'
-        AND consume_user_type = '整体(ALL)'
-        AND duration_user_type = '整体(ALL)'
-        AND browser_valid_user_type = '整体(ALL)'
-GROUP BY date, history_user_type
-```
-
-### CM-DIM-063: 曝光-有效次留 — 按活跃类型
-
-```sql
-SELECT  date,
-        active_user_type,
-        SUM(e2v_retain_2d) AS e2v_retain_2d
-FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '内容中心'
-        AND history_user_type = '整体(ALL)'
-        AND feed_valid_user_type = '整体(ALL)'
-        AND consume_user_type = '整体(ALL)'
-        AND duration_user_type = '整体(ALL)'
-        AND browser_valid_user_type = '整体(ALL)'
-GROUP BY date, active_user_type
-```
-
-### CM-DIM-064: 曝光-有效次留 — 按信息流有效类型
-
-```sql
-SELECT  date,
-        feed_valid_user_type,
-        SUM(e2v_retain_2d) AS e2v_retain_2d
-FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '内容中心'
-        AND history_user_type = '整体(ALL)'
-        AND active_user_type = '整体(ALL)'
-        AND consume_user_type = '整体(ALL)'
-        AND duration_user_type = '整体(ALL)'
-        AND browser_valid_user_type = '整体(ALL)'
-GROUP BY date, feed_valid_user_type
-```
-
-### CM-DIM-065: 曝光-有效次留 — 按消费类型
-
-```sql
-SELECT  date,
-        consume_user_type,
-        SUM(e2v_retain_2d) AS e2v_retain_2d
-FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '内容中心'
-        AND history_user_type = '整体(ALL)'
-        AND active_user_type = '整体(ALL)'
-        AND feed_valid_user_type = '整体(ALL)'
-        AND duration_user_type = '整体(ALL)'
-        AND browser_valid_user_type = '整体(ALL)'
-GROUP BY date, consume_user_type
-```
-
-### CM-DIM-066: 曝光-有效次留 — 按时长类型
-
-```sql
-SELECT  date,
-        duration_user_type,
-        SUM(e2v_retain_2d) AS e2v_retain_2d
-FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '内容中心'
-        AND history_user_type = '整体(ALL)'
-        AND active_user_type = '整体(ALL)'
-        AND feed_valid_user_type = '整体(ALL)'
-        AND consume_user_type = '整体(ALL)'
-        AND browser_valid_user_type = '整体(ALL)'
-GROUP BY date, duration_user_type
-```
-
-### CM-DIM-067: 曝光-有效次留 — 按浏览器有效类型
-
-```sql
-SELECT  date,
-        browser_valid_user_type,
-        SUM(e2v_retain_2d) AS e2v_retain_2d
-FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '内容中心'
-        AND history_user_type = '整体(ALL)'
-        AND active_user_type = '整体(ALL)'
-        AND feed_valid_user_type = '整体(ALL)'
-        AND consume_user_type = '整体(ALL)'
-        AND duration_user_type = '整体(ALL)'
-GROUP BY date, browser_valid_user_type
-```
-
-### CM-DIM-068: 有效-有效次留 — 按用户类型
-
-```sql
-SELECT  date,
-        history_user_type,
-        SUM(v2v_retain_2d) AS v2v_retain_2d
-FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '内容中心'
-        AND active_user_type = '整体(ALL)'
-        AND feed_valid_user_type = '整体(ALL)'
-        AND consume_user_type = '整体(ALL)'
-        AND duration_user_type = '整体(ALL)'
-        AND browser_valid_user_type = '整体(ALL)'
-GROUP BY date, history_user_type
-```
-
-### CM-DIM-069: 有效-有效次留 — 按活跃类型
-
-```sql
-SELECT  date,
-        active_user_type,
-        SUM(v2v_retain_2d) AS v2v_retain_2d
-FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '内容中心'
-        AND history_user_type = '整体(ALL)'
-        AND feed_valid_user_type = '整体(ALL)'
-        AND consume_user_type = '整体(ALL)'
-        AND duration_user_type = '整体(ALL)'
-        AND browser_valid_user_type = '整体(ALL)'
-GROUP BY date, active_user_type
-```
-
-### CM-DIM-070: 有效-有效次留 — 按信息流有效类型
-
-```sql
-SELECT  date,
-        feed_valid_user_type,
-        SUM(v2v_retain_2d) AS v2v_retain_2d
-FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '内容中心'
-        AND history_user_type = '整体(ALL)'
-        AND active_user_type = '整体(ALL)'
-        AND consume_user_type = '整体(ALL)'
-        AND duration_user_type = '整体(ALL)'
-        AND browser_valid_user_type = '整体(ALL)'
-GROUP BY date, feed_valid_user_type
-```
-
-### CM-DIM-071: 有效-有效次留 — 按消费类型
-
-```sql
-SELECT  date,
-        consume_user_type,
-        SUM(v2v_retain_2d) AS v2v_retain_2d
-FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '内容中心'
-        AND history_user_type = '整体(ALL)'
-        AND active_user_type = '整体(ALL)'
-        AND feed_valid_user_type = '整体(ALL)'
-        AND duration_user_type = '整体(ALL)'
-        AND browser_valid_user_type = '整体(ALL)'
-GROUP BY date, consume_user_type
-```
-
-### CM-DIM-072: 有效-有效次留 — 按时长类型
-
-```sql
-SELECT  date,
-        duration_user_type,
-        SUM(v2v_retain_2d) AS v2v_retain_2d
-FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '内容中心'
-        AND history_user_type = '整体(ALL)'
-        AND active_user_type = '整体(ALL)'
-        AND feed_valid_user_type = '整体(ALL)'
-        AND consume_user_type = '整体(ALL)'
-        AND browser_valid_user_type = '整体(ALL)'
-GROUP BY date, duration_user_type
-```
-
-### CM-DIM-073: 有效-有效次留 — 按浏览器有效类型
-
-```sql
-SELECT  date,
-        browser_valid_user_type,
-        SUM(v2v_retain_2d) AS v2v_retain_2d
-FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '内容中心'
-        AND history_user_type = '整体(ALL)'
-        AND active_user_type = '整体(ALL)'
-        AND feed_valid_user_type = '整体(ALL)'
-        AND consume_user_type = '整体(ALL)'
-        AND duration_user_type = '整体(ALL)'
-GROUP BY date, browser_valid_user_type
+SELECT  a.date,
+        a.is_feed_consume_2025,
+        COUNT(DISTINCT a.did) AS base_uv,
+        COUNT(DISTINCT b.did) AS v2v_retain_2d
+FROM    iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di a
+LEFT JOIN iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di b
+    ON a.did = b.did AND b.date = a.date + 1 AND b.is_valid_newhome_2025 = 1
+WHERE   a.date = '${DATE}'
+        AND a.is_valid_newhome_2025 = 1
+GROUP BY a.date, a.is_feed_consume_2025
 ```
 
 ---

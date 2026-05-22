@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { adminApi } from "@/api/endpoints";
 import type { AdminUser } from "@/api/endpoints";
 import { ConfirmModal } from "@/components/feedback/ConfirmModal";
@@ -10,6 +11,7 @@ export function AdminUsers() {
   const me = useAuthStore((s) => s.user);
   const isSuper = me?.auth_role === "super_admin";
   const pushToast = useUIStore((s) => s.pushToast);
+  const navigate = useNavigate();
 
   const [items, setItems] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
@@ -198,6 +200,12 @@ export function AdminUsers() {
                     </>
                   ) : (
                     <>
+                      <button
+                        onClick={() => navigate(`/admin/users/${u.id}/tasks`)}
+                        title="查看 / 编辑该用户的任务"
+                      >
+                        📋 任务
+                      </button>
                       <button onClick={() => setEditing(u)}>✏ 编辑</button>
                       {u.status === "rejected" && (
                         <button

@@ -7,6 +7,13 @@ PKG_NAME = ice-workbench-$(VERSION).zip
 PROD_PORT ?= $(if $(ICE_BIND_PORT),$(ICE_BIND_PORT),8000)
 # 绑定地址：0.0.0.0 让公网 / 局域网可达
 PROD_HOST ?= 0.0.0.0
+# uvicorn worker 数。多 worker 提升 CPU 密集场景吞吐（流式 JSON、markdown）；
+# scheduler/WS inflight 已加文件锁，多 worker 安全。可 ICE_WORKERS=N 覆盖。
+PROD_WORKERS ?= $(if $(ICE_WORKERS),$(ICE_WORKERS),4)
+# WebSocket ping/pong：默认 20/20s 太紧——长会话/多会话并发时 event loop
+# 偶尔被同步 IO 卡 >20s，服务端就会把 ws 关掉触发 STREAM_INTERRUPTED。
+# 给 30/60 留够缓冲。同时后端在 _handle_user_message 里有应用层 keepalive。
+UVICORN_WS_FLAGS = --ws-ping-interval 30 --ws-ping-timeout 60
 
 help:
 	@echo "ICE Data Workbench v3 — local dev + deploy"
@@ -36,14 +43,14 @@ install-sandbox:
 	bash backend/scripts/bootstrap_sandbox_venv.sh
 
 backend:
-	cd backend && . .venv/bin/activate && uvicorn app.main:app --reload --port 8000
+	cd backend && . .venv/bin/activate && uvicorn app.main:app --reload --port 8000 $(UVICORN_WS_FLAGS)
 
 frontend:
 	cd frontend && npm run dev
 
 dev:
 	@echo "Starting backend (8000) + frontend (5173) — Ctrl-C to stop both"
-	@(cd backend && . .venv/bin/activate && uvicorn app.main:app --reload --port 8000) & \
+	@(cd backend && . .venv/bin/activate && uvicorn app.main:app --reload --port 8000 $(UVICORN_WS_FLAGS)) & \
 	 (cd frontend && npm run dev) ; \
 	 wait
 
@@ -53,9 +60,9 @@ prod-build:
 	@echo "  ✓ frontend/dist/ ready"
 
 prod-run:
-	@echo "Starting backend on $(PROD_HOST):$(PROD_PORT) (single-port, serves SPA + API + WS)"
+	@echo "Starting backend on $(PROD_HOST):$(PROD_PORT) (single-port, serves SPA + API + WS) — $(PROD_WORKERS) workers"
 	cd backend && . .venv/bin/activate && \
-	  uvicorn app.main:app --host $(PROD_HOST) --port $(PROD_PORT) --workers 1
+	  uvicorn app.main:app --host $(PROD_HOST) --port $(PROD_PORT) --workers $(PROD_WORKERS) $(UVICORN_WS_FLAGS)
 
 prod: prod-build prod-run
 

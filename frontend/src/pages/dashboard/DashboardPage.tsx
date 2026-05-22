@@ -9,25 +9,31 @@ import { MobileBottomBar } from "@/components/shell/MobileBottomBar";
 import { EmptyState } from "@/components/feedback/ErrorState";
 import { Skeleton } from "@/components/feedback/Skeleton";
 import { ConfirmModal } from "@/components/feedback/ConfirmModal";
+import { MarkdownRenderer } from "@/components/markdown/MarkdownRenderer";
 import type { AgentCard, FileMeta, SkillCard, TaskSummary } from "@/types/api";
 import "./Dashboard.css";
 
 type PublicTab = "tasks" | "agents" | "skills" | "files" | "kb";
 
 const AGENT_ORDER = [
-  // 前 4 个已上线
+  // 已上线
   "general",
   "data-analysis",
   "ab-experiment",
   "know",
-  // 后 3 个待上线
   "gray-release",
+  "volcano-abtest",
+  // 待上线
   "biz-insight",
   "wave-attribution",
 ];
 
 function sortAgents(list: AgentCard[]): AgentCard[] {
   return [...list].sort((a, b) => {
+    // 已上线在前、待上线在后；同组内按 AGENT_ORDER 排序，未登记的排末尾
+    const sa = a.publish_status === "coming_soon" ? 1 : 0;
+    const sb = b.publish_status === "coming_soon" ? 1 : 0;
+    if (sa !== sb) return sa - sb;
     const ia = AGENT_ORDER.indexOf(a.id);
     const ib = AGENT_ORDER.indexOf(b.id);
     return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib);
@@ -207,39 +213,57 @@ export function DashboardPage() {
 
         <section className="dash-section">
           <h2>⚡ 快速开始</h2>
-          <div className="paradigm-grid">
-            {loading
-              ? Array.from({ length: 5 }).map((_, i) => (
-                  <div key={i} className="paradigm-card">
-                    <Skeleton lines={3} />
-                  </div>
-                ))
-              : agents.map((a) => {
-                  const comingSoon = a.publish_status === "coming_soon";
-                  const isStarting = starting === a.id;
-                  return (
-                    <button
-                      key={a.id}
-                      type="button"
-                      className={`paradigm-card${comingSoon ? " paradigm-card-soon" : ""}${isStarting ? " paradigm-card-starting" : ""}`}
-                      onClick={() => startWith(a)}
-                      aria-busy={isStarting || undefined}
-                      style={{ borderTopColor: a.color }}
-                      title={comingSoon ? "待上线，敬请期待" : `一键以 ${a.name} 创建任务`}
-                    >
-                      {comingSoon && <span className="pc-badge-soon">待上线</span>}
-                      <div className="pc-icon" style={{ background: `${a.color}22`, color: a.color }}>
-                        {a.icon}
-                      </div>
-                      <div className="pc-name">
-                        {a.name}
-                        {isStarting && <span className="pc-starting"> 创建中…</span>}
-                      </div>
-                      <div className="pc-desc">{a.description}</div>
-                    </button>
-                  );
-                })}
-          </div>
+          {loading ? (
+            <div className="paradigm-grid">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="paradigm-card">
+                  <Skeleton lines={3} />
+                </div>
+              ))}
+            </div>
+          ) : (
+            (() => {
+              const renderCard = (a: AgentCard) => {
+                const comingSoon = a.publish_status === "coming_soon";
+                const isStarting = starting === a.id;
+                return (
+                  <button
+                    key={a.id}
+                    type="button"
+                    className={`paradigm-card${comingSoon ? " paradigm-card-soon" : ""}${isStarting ? " paradigm-card-starting" : ""}`}
+                    onClick={() => startWith(a)}
+                    aria-busy={isStarting || undefined}
+                    style={{ borderTopColor: a.color }}
+                    title={comingSoon ? "待上线，敬请期待" : `一键以 ${a.name} 创建任务`}
+                  >
+                    {comingSoon && <span className="pc-badge-soon">待上线</span>}
+                    <div className="pc-icon" style={{ background: `${a.color}22`, color: a.color }}>
+                      {a.icon}
+                    </div>
+                    <div className="pc-name">
+                      {a.name}
+                      {isStarting && <span className="pc-starting"> 创建中…</span>}
+                    </div>
+                    <div className="pc-desc">{a.description}</div>
+                  </button>
+                );
+              };
+              const published = agents.filter((a) => a.publish_status !== "coming_soon");
+              const upcoming = agents.filter((a) => a.publish_status === "coming_soon");
+              return (
+                <>
+                  {published.length > 0 && (
+                    <div className="paradigm-grid">{published.map(renderCard)}</div>
+                  )}
+                  {upcoming.length > 0 && (
+                    <div className="paradigm-grid paradigm-grid-upcoming">
+                      {upcoming.map(renderCard)}
+                    </div>
+                  )}
+                </>
+              );
+            })()
+          )}
         </section>
 
         <section className="dash-section">
@@ -339,6 +363,11 @@ export function DashboardPage() {
                     <div className="ptc-meta">
                       {t.paradigm} · {t.last_message_preview ? "💬 已展开" : "📭 空"}
                     </div>
+                    {t.owner_name && (
+                      <div className="ptc-owner" title={`所有者：${t.owner_name}`}>
+                        👤 {t.owner_name}
+                      </div>
+                    )}
                   </button>
                 ))
               )}
@@ -566,7 +595,21 @@ export function DashboardPage() {
         aria-label="新建任务"
         onClick={() => navigate("/create-task")}
       >
-        ＋
+        {/* SVG 而非字符 + ：中文字体里 + / ＋ 字形 baseline 偏移会让图标
+            视觉上偏离圆心；SVG 是几何居中，配合 .m-fab 的 place-items:center
+            就稳了。 */}
+        <svg
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.4"
+          strokeLinecap="round"
+          aria-hidden="true"
+        >
+          <path d="M12 5v14M5 12h14" />
+        </svg>
       </button>
       <MobileBottomBar />
     </div>
@@ -689,23 +732,23 @@ function BrowseKBModal({ kb, onClose }: { kb: KBSummary; onClose: () => void }) 
                 </div>
                 {detailLoading ? (
                   <Skeleton lines={8} />
-                ) : (
-                  <pre
+                ) : selected.content ? (
+                  <div
                     style={{
-                      whiteSpace: "pre-wrap",
-                      wordBreak: "break-word",
-                      fontSize: 12,
-                      lineHeight: 1.6,
                       background: "var(--surface-2)",
                       border: "1px solid var(--border)",
                       borderRadius: 6,
-                      padding: 12,
-                      margin: 0,
-                      fontFamily: "var(--font-mono)",
+                      padding: "12px 16px",
+                      fontSize: 13,
+                      lineHeight: 1.65,
                     }}
                   >
-                    {selected.content ?? "(暂无正文)"}
-                  </pre>
+                    <MarkdownRenderer content={selected.content} />
+                  </div>
+                ) : (
+                  <div style={{ color: "var(--text-muted)", padding: 12, fontSize: 12 }}>
+                    (暂无正文)
+                  </div>
                 )}
               </>
             )}

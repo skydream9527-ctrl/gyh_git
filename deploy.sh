@@ -28,6 +28,8 @@ section() { printf "\n%s── %s ──%s\n" "$YELLOW" "$*" "$RESET"; }
 MODE="${1:-install}"
 BIND_PORT="${ICE_BIND_PORT:-8000}"
 BIND_HOST="${ICE_BIND_HOST:-0.0.0.0}"
+# uvicorn 多 worker：默认 4，1 核小机器可设 ICE_WORKERS=2
+WORKERS="${ICE_WORKERS:-4}"
 
 # ---- 1. environment checks ----
 section "Environment"
@@ -146,7 +148,10 @@ if [ "$MODE" = "--prod" ]; then
 
 EOF
   cd backend && source .venv/bin/activate
-  exec uvicorn app.main:app --host "$BIND_HOST" --port "$BIND_PORT" --workers 1
+  # 与 Makefile 的 UVICORN_WS_FLAGS 保持一致：放宽 ws ping 阈值，避免长会话/
+  # 多会话并发时 event loop 偶发阻塞 → 服务端误关 ws → STREAM_INTERRUPTED。
+  exec uvicorn app.main:app --host "$BIND_HOST" --port "$BIND_PORT" --workers "$WORKERS" \
+    --ws-ping-interval 30 --ws-ping-timeout 60
 elif [ "$MODE" = "--run" ]; then
   section "Starting dev servers"
   exec make dev

@@ -3,11 +3,15 @@
   display: flex;
   flex-direction: column;
 }
-/* 移动端给底部 MobileBottomBar 让出 60px + safe-area，否则 ws-body
-   会被底栏盖住底部（包括 ChatInput）。桌面端保持 100vh 不变。 */
+/* 移动端：本页不渲染全局 MobileBottomBar，所以 .ws 直接占满视口，
+   底部由内嵌的 .ws-mobile-segs 自己负责 safe-area 让位。
+   小屏优先 svh：Android Chrome 的 100vh 会包含系统手势条区域（svh
+   则保证最小可见高度），ws-mobile-segs 才不会被画到手势条后面。 */
 @media (max-width: 800px) {
-  .ws {
-    height: calc(100vh - var(--m-bottombar-h, 60px) - env(safe-area-inset-bottom, 0px));
+  @supports (height: 100svh) {
+    .ws {
+      height: 100svh;
+    }
   }
 }
 .ws-loading,
@@ -133,13 +137,70 @@
   border-radius: 6px;
   text-align: center;
 }
+.ws-file-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ws-file-group {
+  display: flex;
+  flex-direction: column;
+}
+.ws-file-group-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 6px;
+  background: transparent;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-2, var(--text-muted));
+  text-align: left;
+  width: 100%;
+}
+.ws-file-group-head:hover {
+  background: var(--surface-2);
+}
+.ws-fg-caret {
+  font-size: 10px;
+  width: 10px;
+  display: inline-block;
+  color: var(--text-muted);
+}
+.ws-fg-icon {
+  font-size: 13px;
+  width: 16px;
+  flex-shrink: 0;
+}
+.ws-fg-label {
+  flex: 1;
+  font-weight: 500;
+}
+.ws-fg-count {
+  font-size: 10px;
+  color: var(--text-muted);
+  background: var(--surface-2);
+  padding: 1px 6px;
+  border-radius: 8px;
+  min-width: 18px;
+  text-align: center;
+}
+.ws-file-group.is-collapsed .ws-fg-count {
+  background: transparent;
+}
 .ws-file-list {
   list-style: none;
   margin: 0;
-  padding: 0;
+  padding: 0 0 0 12px;
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+.ws-file-list.ws-upload-list {
+  padding-left: 0;
+  margin-top: 4px;
 }
 .ws-file-list li {
   display: flex;
@@ -199,6 +260,17 @@
   padding: 0 4px;
 }
 .fl-download:hover {
+  color: var(--primary);
+}
+.fl-cite {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 13px;
+  padding: 0 4px;
+}
+.fl-cite:hover {
   color: var(--primary);
 }
 
@@ -327,6 +399,7 @@
 .ws-main > .ws-chat-head,
 .ws-main > .ws-banner,
 .ws-main > .plan-mode-banner,
+.ws-main > .conv-locked-banner,
 .ws-main > .chat-input,
 .ws-main > .plan-toggle-row {
   flex: 0 0 auto;
@@ -438,16 +511,22 @@
   color: var(--text-muted);
 }
 
-/* ---- mobile 3-segment 顶部 tab + 单栏切换（design_v4 mobile workspace） ---- */
+/* ---- mobile 3-segment 底部 tab + 单栏切换（design_v4 mobile workspace） ----
+   原本放在 TopNav 下方；现挪到 .ws 最末，作为本页专属底栏，替代全局
+   MobileBottomBar（agent 对话场景下不需要任务/定时/指南/管理那 4 个入口）。
+   贴底布局靠 .ws 的 flex column 自然落位，外加 safe-area padding。 */
 .ws-mobile-segs {
   display: none;
 }
 @media (max-width: 800px) {
   .ws-mobile-segs {
     display: flex;
-    background: var(--bg);
-    border-bottom: 1px solid var(--border-soft);
-    padding: 0 8px;
+    background: var(--surface);
+    border-top: 1px solid var(--border-soft);
+    /* Android Chrome 经常把 env(safe-area-inset-bottom) 返回 0，结果手势条
+       会盖住整个底栏。用 max() 兜底强制至少 10px 视觉留白；iOS 上 env() 通常
+       返回 ≥34px 时仍按真值生效。 */
+    padding: 0 8px max(env(safe-area-inset-bottom, 0px), 10px);
     flex-shrink: 0;
   }
   .ws-mobile-segs button {
@@ -457,11 +536,10 @@
     color: var(--text-muted);
     font-size: 13px;
     font-weight: 500;
-    /* 提到 12-14px 让 button 总高 ≥44px (font 13×1.2 + 14×2 + 2px border)，
-       接近 iOS HIG 推荐的最小触控目标。 */
-    padding: 14px 6px 12px;
+    /* 让 button 总高 ≥44px，接近 iOS HIG 推荐的最小触控目标。 */
+    padding: 10px 6px 8px;
     cursor: pointer;
-    border-bottom: 2px solid transparent;
+    border-top: 2px solid transparent;
     text-align: center;
     font-family: inherit;
     line-height: 1.2;
@@ -469,7 +547,7 @@
   }
   .ws-mobile-segs button.active {
     color: var(--text);
-    border-bottom-color: var(--accent);
+    border-top-color: var(--accent);
   }
 }
 
@@ -1035,15 +1113,14 @@
     white-space: nowrap;
   }
   /* Plan Mode 在手机端已经移进 TopNav 的 ⋯ 菜单（参见 WorkspacePage.tsx）。
-     这里整块隐藏 plan-toggle-row，把空间还给 chat-input —— 否则 ws-main 的
-     overflow:hidden 在内容紧凑时会把这一行裁掉，造成「发送按钮被底栏挤压」
-     的视觉问题。chat-input 自己负担 safe-area + 给底部 Tab Bar 的呼吸空间。 */
+     整块隐藏 plan-toggle-row，把空间还给 chat-input —— 否则 ws-main 的
+     overflow:hidden 在内容紧凑时会把这一行裁掉。 */
   .plan-toggle-row {
     display: none !important;
   }
   .chat-input {
-    /* 8px 视觉间距 + iPhone home indicator 的 safe-area；底部 m-bottombar 已经
-       在 .ws 的 height calc 里减掉了 60px，所以这里只补 safe-area + 8px。 */
-    padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px)) !important;
+    /* 8px 视觉间距即可：底部的 .ws-mobile-segs 是 .ws 的 flex 子元素，
+       自己负担 safe-area，chat-input 上方不再被任何 fixed bar 遮挡。 */
+    padding-bottom: 8px !important;
   }
 }

@@ -53,7 +53,7 @@
 
 ---
 
-### dm_newhome_user_type_core_indicators_di（用户类型核心指标表）
+### ads_newhome_user_type_core_indicators_di（用户类型核心指标表）
 
 | Dimension | Field | Type | Description | Query Type |
 |-----------|-------|------|-------------|------------|
@@ -62,7 +62,7 @@
 
 ---
 
-### dm_newhome_item_type_core_indicators_di（内容转化主题核心指标表）
+### ads_newhome_item_type_core_indicators_di（内容转化主题核心指标表）
 
 | Dimension | Field | Type | Description | Query Type |
 |-----------|-------|------|-------------|------------|
@@ -71,7 +71,7 @@
 
 ---
 
-### dm_newhome_page_indicators_di（小场景指标表）
+### ads_newhome_page_indicators_di（小场景指标表）
 
 | Dimension | Field | Type | Description | Query Type |
 |-----------|-------|------|-------------|------------|
@@ -80,12 +80,11 @@
 
 ---
 
-### dm_newhome_finance_core_indicators_di（财收核心指标表）
+### ads_newhome_finance_core_indicators_di（财收核心指标表）
 
 | Dimension | Field | Type | Description | Query Type |
 |-----------|-------|------|-------------|------------|
 | 日期 | date | INT | 分区字段 | 必选筛选 |
-| 应用端口 | app_port | STRING | 应用端口 | 枚举值查询 |
 | 广告位场景 | ad_position_scene | STRING | 广告位场景 | 枚举值查询 |
 | 广告位 | tag_id | STRING | 广告位标识 | 枚举值查询 |
 
@@ -105,7 +104,6 @@
 | "按页面" | 页面 | page |
 | "按广告位场景" | 广告位场景 | ad_position_scene |
 | "按广告位" | 广告位 | tag_id |
-| "按应用端口" | 应用端口 | app_port |
 | "按活跃类型" | 活跃类型 | active_user_type |
 | "按消费类型" | 消费类型 | consume_user_type |
 | "按时长类型" | 时长类型 | duration_user_type |

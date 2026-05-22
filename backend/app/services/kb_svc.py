@@ -145,6 +145,23 @@ def list_articles(kb_id: str, *, limit: int = 200) -> list[dict]:
     return (snap.get("articles") or [])[:limit]
 
 
+def _strip_feishu_cli_envelope(content: str) -> str:
+    """`feishu fetch` returns `{type,title,token,modified_time,markdown}` JSON.
+    Older snapshots cached the raw envelope; unwrap it on read so the preview
+    UI shows actual markdown."""
+    if not content or not content.lstrip().startswith("{"):
+        return content
+    try:
+        payload = json.loads(content)
+    except json.JSONDecodeError:
+        return content
+    if isinstance(payload, dict):
+        md = payload.get("markdown")
+        if isinstance(md, str) and md.strip():
+            return md
+    return content
+
+
 async def get_article(kb_id: str, article_id: str) -> dict:
     kb = get_kb(kb_id)
     if not kb:
@@ -160,6 +177,8 @@ async def get_article(kb_id: str, article_id: str) -> dict:
                     raise
                 except Exception as e:  # noqa: BLE001
                     a["content"] = f"[获取正文失败] {e}"
+            else:
+                a["content"] = _strip_feishu_cli_envelope(a["content"])
             return a
     raise APIError(404, ErrorCode.RESOURCE_NOT_FOUND, "文档不存在（可能需要先同步）")
 
@@ -483,7 +502,11 @@ async def _fetch_article_body(kb: dict, article: dict) -> str:
 
 async def _fetch_feishu_doc_body(article: dict) -> str:
     """Use the CLI's `feishu fetch` when available (it already handles OAuth
-    + markdown conversion). Falls back to the URL."""
+    + markdown conversion). Falls back to the URL.
+
+    `feishu fetch` returns a JSON envelope `{type, title, token, modified_time,
+    markdown}` — only the `markdown` field is meant for display. Returning the
+    raw envelope would dump JSON into the preview UI."""
     s = get_settings()
     url = article.get("url")
     if not url:
@@ -499,7 +522,19 @@ async def _fetch_feishu_doc_body(article: dict) -> str:
             )
             out, err = await asyncio.wait_for(proc.communicate(), timeout=30)
             if proc.returncode == 0 and out:
-                return out.decode("utf-8", errors="replace")
+                text = out.decode("utf-8", errors="replace")
+                try:
+                    payload = json.loads(text)
+                except json.JSONDecodeError:
+                    return text  # CLI returned plain text already
+                if isinstance(payload, dict):
+                    md = payload.get("markdown")
+                    if isinstance(md, str) and md.strip():
+                        return md
+                    content = payload.get("content")
+                    if isinstance(content, str) and content.strip():
+                        return content
+                return text
             return f"[feishu fetch 失败] {(err or b'').decode('utf-8', errors='replace')[:300]}"
         except asyncio.TimeoutError:
             return "[feishu fetch 超时（30s）]"

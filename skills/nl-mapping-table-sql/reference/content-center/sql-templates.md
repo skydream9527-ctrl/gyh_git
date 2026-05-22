@@ -9,10 +9,10 @@
 | dim_newhome_did_label_di | did标签表 | iceberg_zjyprc_hadoop.newhome |
 | dm_newhome_multi_dimension_indicators_di | 多维指标聚合表 | iceberg_zjyprc_hadoop.newhome |
 | dm_newhome_multi_dimension_retain_indicators_di | 多维留存指标表 | iceberg_zjyprc_hadoop.newhome |
-| dm_newhome_user_type_core_indicators_di | 用户类型核心指标表 | iceberg_zjyprc_hadoop.newhome |
-| dm_newhome_item_type_core_indicators_di | 内容转化主题核心指标表 | iceberg_zjyprc_hadoop.newhome |
-| dm_newhome_page_indicators_di | 小场景指标表 | iceberg_zjyprc_hadoop.newhome |
-| dm_newhome_finance_core_indicators_di | 财收核心指标表 | iceberg_zjyprc_hadoop.newhome |
+| ads_newhome_user_type_core_indicators_di | 用户类型核心指标表 | iceberg_zjyprc_hadoop.newhome |
+| ads_newhome_item_type_core_indicators_di | 内容转化主题核心指标表 | iceberg_zjyprc_hadoop.newhome |
+| ads_newhome_page_indicators_di | 小场景指标表 | iceberg_zjyprc_hadoop.newhome |
+| ads_newhome_finance_core_indicators_di | 财收核心指标表 | doris_c3prc_xiaomi.newhome |
 
 ---
 
@@ -131,14 +131,14 @@ ORDER BY dau DESC;
 
 ### CM-DIM-007: 用户类型核心指标表 — 用户类型枚举值
 
-**Table**: dm_newhome_user_type_core_indicators_di
+**Table**: ads_newhome_user_type_core_indicators_di
 **Field**: user_type
 
 ```sql
 SELECT
     user_type,
     dau
-FROM iceberg_zjyprc_hadoop.newhome.dm_newhome_user_type_core_indicators_di
+FROM iceberg_zjyprc_hadoop.newhome.ads_newhome_user_type_core_indicators_di
 WHERE date = '${DATE}'
 ORDER BY dau DESC;
 ```
@@ -147,7 +147,7 @@ ORDER BY dau DESC;
 
 ### CM-DIM-008: 内容转化主题核心指标表 — 体裁枚举值
 
-**Table**: dm_newhome_item_type_core_indicators_di
+**Table**: ads_newhome_item_type_core_indicators_di
 **Field**: item_type
 
 ```sql
@@ -156,7 +156,7 @@ SELECT
     expose_pv,
     click_pv,
     view_pv
-FROM iceberg_zjyprc_hadoop.newhome.dm_newhome_item_type_core_indicators_di
+FROM iceberg_zjyprc_hadoop.newhome.ads_newhome_item_type_core_indicators_di
 WHERE date = '${DATE}'
 ORDER BY expose_pv DESC;
 ```
@@ -165,7 +165,7 @@ ORDER BY expose_pv DESC;
 
 ### CM-DIM-009: 小场景指标表 — 页面枚举值
 
-**Table**: dm_newhome_page_indicators_di
+**Table**: ads_newhome_page_indicators_di
 **Field**: page
 
 ```sql
@@ -173,7 +173,7 @@ SELECT
     page,
     expose_uv,
     expose_pv
-FROM iceberg_zjyprc_hadoop.newhome.dm_newhome_page_indicators_di
+FROM iceberg_zjyprc_hadoop.newhome.ads_newhome_page_indicators_di
 WHERE date = '${DATE}'
 ORDER BY expose_uv DESC;
 ```
@@ -289,14 +289,14 @@ ORDER BY browser_valid_user_type;
 
 ### CM-DIM-017: 财收核心指标表 — 广告位场景枚举值
 
-**Table**: dm_newhome_finance_core_indicators_di
+**Table**: ads_newhome_finance_core_indicators_di
 **Field**: ad_position_scene
 
 ```sql
 SELECT
     ad_position_scene,
     SUM(revenue) AS total_revenue
-FROM iceberg_zjyprc_hadoop.newhome.dm_newhome_finance_core_indicators_di
+FROM doris_c3prc_xiaomi.newhome.ads_newhome_finance_core_indicators_di
 WHERE date = '${DATE}'
 GROUP BY ad_position_scene
 ORDER BY total_revenue DESC;
@@ -306,33 +306,16 @@ ORDER BY total_revenue DESC;
 
 ### CM-DIM-018: 财收核心指标表 — 广告位枚举值
 
-**Table**: dm_newhome_finance_core_indicators_di
+**Table**: ads_newhome_finance_core_indicators_di
 **Field**: tag_id
 
 ```sql
 SELECT
     tag_id,
     SUM(revenue) AS total_revenue
-FROM iceberg_zjyprc_hadoop.newhome.dm_newhome_finance_core_indicators_di
+FROM doris_c3prc_xiaomi.newhome.ads_newhome_finance_core_indicators_di
 WHERE date = '${DATE}'
 GROUP BY tag_id
-ORDER BY total_revenue DESC;
-```
-
----
-
-### CM-DIM-019: 财收核心指标表 — 应用端口枚举值
-
-**Table**: dm_newhome_finance_core_indicators_di
-**Field**: app_port
-
-```sql
-SELECT
-    app_port,
-    SUM(revenue) AS total_revenue
-FROM iceberg_zjyprc_hadoop.newhome.dm_newhome_finance_core_indicators_di
-WHERE date = '${DATE}'
-GROUP BY app_port
 ORDER BY total_revenue DESC;
 ```
 

@@ -10,6 +10,9 @@ import json
 import logging
 import uuid
 from datetime import datetime, timezone
+from typing import IO
+
+import portalocker
 
 from fastapi import APIRouter, Query, WebSocket, WebSocketDisconnect
 
@@ -22,6 +25,7 @@ from ...services import (
     compaction_svc,
     conversation_svc,
     experience_card_svc,
+    inflight_svc,
     llm_gateway,
     sysconfig_svc,
     task_svc,
@@ -50,7 +54,155 @@ def _new_id() -> str:
 #
 # Explicit `abort` messages from the client still flip the cancel event; only
 # the implicit "user navigated away → WS closed" path stops cancelling.
+#
+# This dict is per-process. With uvicorn --workers=N a second message landing on
+# a different worker would slip past it, so we ALSO acquire a non-blocking
+# advisory flock on a per-conversation lock file: cross-worker requests for the
+# same conv_id observe each other through the kernel and get rejected the same
+# way. Cross-worker `abort` is best-effort — only the worker running the turn
+# can flip its cancel_event; others just refuse to start a competing turn.
 _inflight_turns: dict[tuple[str, str], tuple[asyncio.Task, asyncio.Event]] = {}
+
+
+def is_inflight(task_id: str, conv_id: str) -> bool:
+    """Return True iff a turn for (task_id, conv_id) is currently running in this worker.
+
+    跨 uvicorn worker 仅可见本 worker 的 inflight。前端用这个信号给对话角标
+    显示 ⏳，避免切走后用户以为后台任务停了。
+    """
+    entry = _inflight_turns.get((task_id, conv_id))
+    return entry is not None and not entry[0].done()
+
+
+async def cancel_inflight_turn(task_id: str, conv_id: str) -> bool:
+    """强制终止同 worker 内 (task_id, conv_id) 回合，等待任务清理完毕。
+
+    返回 True = 找到并已结束，False = 当前 worker 内没在跑该回合。
+
+    分三档：
+      1. set cancel_event（合作式）— LLM stream 下一拍会观察到并退出
+      2. task.cancel()（强制式）— 任务挂在 await 时立即抛 CancelledError
+      3. 等任务跑完 finally（释放 inflight flock）；超时则强行 pop registry，
+         以防卡死的 task 永远占着锁让后续消息全部被 INFLIGHT 拒掉。
+
+    跨 uvicorn worker 部署下只能取消落在本 worker 的回合；其余 worker 的回合靠
+    自身 WS 收到 abort 消息时 set。HTTP-level abort 兜底用，单 worker 场景可达。
+    """
+    entry = _inflight_turns.get((task_id, conv_id))
+    if entry is None:
+        return False
+    task, cancel = entry
+    cancel.set()
+    if not task.done():
+        task.cancel()
+        try:
+            await asyncio.wait_for(asyncio.shield(task), timeout=3.0)
+        except (asyncio.TimeoutError, asyncio.CancelledError, Exception):
+            pass
+    # 兜底：task 自身 finally 里会用 `is cancel` 检查后 pop；这里强制 pop 防止
+    # 卡死的 task 永远占着 registry 让所有新消息被 INFLIGHT 拒绝。
+    cur = _inflight_turns.get((task_id, conv_id))
+    if cur is not None and cur[1] is cancel:
+        _inflight_turns.pop((task_id, conv_id), None)
+    return True
+
+
+# Per-conv WebSocket subscribers (same-worker only). When user A's turn starts
+# we mark_busy + broadcast `inflight_status` to every WS already connected to
+# this conv in this worker, so user B's send button greys out within ms. For
+# users on a *different* worker we rely on the per-WS heartbeat below — it
+# re-reads the JSON state file every HEARTBEAT_SEC and sends if changed.
+_conv_subscribers: dict[tuple[str, str], set[WebSocket]] = {}
+_INFLIGHT_HEARTBEAT_SEC = 10
+
+
+def _register_subscriber(task_id: str, conv_id: str, ws: WebSocket) -> None:
+    _conv_subscribers.setdefault((task_id, conv_id), set()).add(ws)
+
+
+def _unregister_subscriber(task_id: str, conv_id: str, ws: WebSocket) -> None:
+    s = _conv_subscribers.get((task_id, conv_id))
+    if not s:
+        return
+    s.discard(ws)
+    if not s:
+        _conv_subscribers.pop((task_id, conv_id), None)
+
+
+def _inflight_status_payload(state: dict | None) -> dict:
+    if not state:
+        return {"type": "inflight_status", "busy": False, "user": None, "started_at": None}
+    return {
+        "type": "inflight_status",
+        "busy": True,
+        "user": {
+            "id": state.get("user_id"),
+            "name": state.get("user_name") or "用户",
+        },
+        "started_at": state.get("started_at"),
+    }
+
+
+async def _broadcast_inflight(task_id: str, conv_id: str, state: dict | None) -> None:
+    payload = _inflight_status_payload(state)
+    for sub in list(_conv_subscribers.get((task_id, conv_id), ())):
+        try:
+            await sub.send_text(json.dumps(payload, ensure_ascii=False))
+        except Exception:
+            # 死连接清理交给该 WS 自己的 finally；这里别中断广播
+            pass
+
+
+def _state_signature(state: dict | None) -> tuple:
+    if not state:
+        return ("idle",)
+    return ("busy", state.get("user_id"), state.get("started_at"))
+
+
+async def _inflight_heartbeat(ws: WebSocket, task_id: str, conv_id: str) -> None:
+    """每 N 秒读 JSON 状态文件，状态变化时推送 inflight_status。补全 same-worker
+    广播覆盖不到的场景（多 worker 部署 / 锁主在另一个 worker 上）。"""
+    last_sig: tuple | None = None
+    try:
+        while True:
+            state = inflight_svc.read_state(task_id, conv_id)
+            sig = _state_signature(state)
+            if sig != last_sig:
+                last_sig = sig
+                try:
+                    await ws.send_text(json.dumps(_inflight_status_payload(state), ensure_ascii=False))
+                except Exception:
+                    return
+            await asyncio.sleep(_INFLIGHT_HEARTBEAT_SEC)
+    except asyncio.CancelledError:
+        return
+
+
+def _conv_inflight_lock_path(task_id: str, conv_id: str):
+    paths = get_paths()
+    p = paths.task_dir(task_id) / "conversations" / f"{conv_id}.inflight.lock"
+    p.parent.mkdir(parents=True, exist_ok=True)
+    return p
+
+
+def _try_acquire_conv_inflight(task_id: str, conv_id: str) -> IO | None:
+    """Cross-worker conv-level lock. None ⇒ another worker is mid-turn."""
+    fh = open(_conv_inflight_lock_path(task_id, conv_id), "a+")
+    try:
+        portalocker.lock(fh, portalocker.LOCK_EX | portalocker.LOCK_NB)
+    except portalocker.LockException:
+        fh.close()
+        return None
+    return fh
+
+
+def _release_conv_inflight(fh: IO | None) -> None:
+    if fh is None:
+        return
+    try:
+        portalocker.unlock(fh)
+    finally:
+        fh.close()
 
 
 @router.websocket("/ws/conversations/{conversation_id}")
@@ -100,6 +252,17 @@ async def ws_chat(
         await websocket.close(code=4403)
         return
 
+    # 推导角色：viewer 允许进 WS（看历史 + 收 stream），但不允许 send user_message
+    from ...core.deps import TaskRole as _TaskRole, derive_task_role
+    from ...core.storage import read_json
+    _paths = get_paths()
+    _meta = read_json(_paths.task_meta(task_id)) or {}
+    _collabs = read_json(_paths.task_collaborators(task_id), default=[]) or []
+    ws_role = derive_task_role(
+        _meta, _collabs, user_id=user["id"], is_admin=bool(user.get("is_admin"))
+    )
+    is_viewer_ws = ws_role == _TaskRole.VIEWER
+
     if chosen_proto:
         await websocket.accept(subprotocol=chosen_proto)
     else:
@@ -113,7 +276,39 @@ async def ws_chat(
     # 不会被取消，继续跑到完成。同一 conv 同时只能有一个 turn。
     inflight_key = (task_id, conversation_id)
 
-    async def _run_turn(msg: dict, cancel: asyncio.Event) -> None:
+    # 注册 inflight 订阅 + 推一次当前状态：用户 B 打开页面那一刻就能看到 A 是否
+    # 正在对话，发送按钮立即正确置灰；后续状态变化由 _broadcast_inflight 同 worker
+    # 推送、由 _inflight_heartbeat 跨 worker 兜底。
+    _register_subscriber(task_id, conversation_id, websocket)
+    initial_state = inflight_svc.read_state(task_id, conversation_id)
+    try:
+        await websocket.send_text(
+            json.dumps(_inflight_status_payload(initial_state), ensure_ascii=False)
+        )
+    except Exception:
+        pass
+    heartbeat_task = asyncio.create_task(
+        _inflight_heartbeat(websocket, task_id, conversation_id),
+        name=f"inflight-hb:{task_id}:{conversation_id}",
+    )
+
+    user_display_name = (
+        user.get("display_name")
+        or user.get("name")
+        or user.get("email")
+        or "用户"
+    )
+
+    async def _run_turn(msg: dict, cancel: asyncio.Event, lock_fh: IO | None) -> None:
+        # mark_busy + 广播必须在 turn 真正开始执行 *之前*，且失败也要走 finally
+        # 清理。先写状态再 broadcast：心跳 worker 即使 race 也只会读到合法 JSON。
+        state = inflight_svc.mark_busy(
+            task_id,
+            conversation_id,
+            user_id=user["id"],
+            user_name=user_display_name,
+        )
+        await _broadcast_inflight(task_id, conversation_id, state)
         try:
             await _handle_user_message(
                 websocket, msg, user, task_id, conversation_id, conv_path, tool_path, cancel
@@ -124,6 +319,9 @@ async def ws_chat(
             entry = _inflight_turns.get(inflight_key)
             if entry is not None and entry[1] is cancel:
                 _inflight_turns.pop(inflight_key, None)
+            _release_conv_inflight(lock_fh)
+            inflight_svc.mark_idle(task_id, conversation_id)
+            await _broadcast_inflight(task_id, conversation_id, None)
 
     try:
         while True:
@@ -195,14 +393,39 @@ async def ws_chat(
                                 await existing[0]
                             except (asyncio.CancelledError, Exception):
                                 pass
+                    # Cross-worker flock — try a few times since the prior turn
+                    # might still be releasing its lock in another worker.
+                    lock_fh = None
+                    for _ in range(20):
+                        lock_fh = _try_acquire_conv_inflight(task_id, conversation_id)
+                        if lock_fh is not None:
+                            break
+                        await asyncio.sleep(0.1)
+                    if lock_fh is None:
+                        await _send_error(
+                            websocket,
+                            ErrorCode.CONVERSATION_INFLIGHT,
+                            "该对话另一端正在处理，无法注入审批后续",
+                        )
+                        continue
                     new_cancel = asyncio.Event()
                     new_task = asyncio.create_task(
-                        _run_turn({"type": "user_message", "content": synthetic}, new_cancel)
+                        _run_turn({"type": "user_message", "content": synthetic}, new_cancel, lock_fh)
                     )
                     _inflight_turns[inflight_key] = (new_task, new_cancel)
                 continue
             if mtype != "user_message":
                 await _send_error(websocket, "UNKNOWN_TYPE", f"unknown type {mtype}")
+                continue
+
+            # 只读视角：拒绝发送消息——前端已置灰输入框，这里是兜底防止
+            # 用户绕过 UI 直接 ws.send。
+            if is_viewer_ws:
+                await _send_error(
+                    websocket,
+                    ErrorCode.PERMISSION_DENIED,
+                    "您仅有查看权限，如需对话请申请编辑权限",
+                )
                 continue
 
             # 同一对话已经有在跑的 turn（可能是本 WS 启动的，也可能是上次退出后残留的），
@@ -216,12 +439,25 @@ async def ws_chat(
                 )
                 continue
 
+            # Cross-worker check: another uvicorn worker may be running this
+            # conv. Non-blocking flock fails ⇒ reject without starting a turn.
+            lock_fh = _try_acquire_conv_inflight(task_id, conversation_id)
+            if lock_fh is None:
+                await _send_error(
+                    websocket,
+                    ErrorCode.CONVERSATION_INFLIGHT,
+                    "该对话正在处理中，请稍候或点中断后再发新消息",
+                )
+                continue
+
             new_cancel = asyncio.Event()
-            new_task = asyncio.create_task(_run_turn(msg, new_cancel))
+            new_task = asyncio.create_task(_run_turn(msg, new_cancel, lock_fh))
             _inflight_turns[inflight_key] = (new_task, new_cancel)
     finally:
         # 关键行为：WS 断开不再取消 task。让它继续跑完、把结果写进 JSONL，
         # 用户返回任务页时能直接看到持久化后的完整历史。
+        heartbeat_task.cancel()
+        _unregister_subscriber(task_id, conversation_id, websocket)
         try:
             await websocket.close()
         except Exception:
@@ -237,6 +473,31 @@ async def _send(ws: WebSocket, payload: dict) -> None:
 
 async def _send_error(ws: WebSocket, code: str, message: str) -> None:
     await _send(ws, {"type": "error", "error_code": code, "message": message})
+
+
+async def _ws_keepalive_loop(ws: WebSocket, interval: float = 20.0) -> None:
+    """每 interval 秒发一帧应用层 keepalive，给反代/底层 ws 一个非 idle 信号。
+
+    解决场景：LLM stream 静默期、tool 执行期、history 压缩期——这些时段下行
+    没有自然字节流出，nginx/cloudflare/ALB 这类反代会按 idle timeout (60-100s)
+    主动切连接，前端就看到 STREAM_INTERRUPTED。
+
+    前端 handleEvent 的 switch 没有匹配 keepalive，会被静默忽略——发了不会
+    污染 partial / phase / errorCode。
+
+    注意：这只能治"通道 idle"。如果 event loop 真被同步 IO 阻塞 30s+，
+    keepalive 自身也调度不上——那是 _to_api_messages / append_jsonl 这种
+    sync 调用要 to_thread 化的事，见 step 3。
+    """
+    try:
+        while True:
+            await asyncio.sleep(interval)
+            try:
+                await ws.send_text('{"type":"keepalive"}')
+            except Exception:
+                return
+    except asyncio.CancelledError:
+        return
 
 
 async def _handle_user_message(
@@ -263,7 +524,9 @@ async def _handle_user_message(
         "user_id": user["id"],
         "created_at": _now(),
     }
-    append_jsonl(conv_path, user_record)
+    # 同步 IO 全部走线程池——多 session 并行时不能让一个会话的 jsonl 写阻塞
+    # 整个 worker 的 event loop（否则其它会话的 ws ping 会超时被误关）。
+    await asyncio.to_thread(append_jsonl, conv_path, user_record)
     await conversation_svc.touch_last_message(task_id=task_id, conv_id=conversation_id)
     await _send(ws, {"type": "user_message_ack", "message_id": user_msg_id})
     await task_svc.touch_task(task_id, last_message_preview=content)
@@ -283,8 +546,14 @@ async def _handle_user_message(
     # a banner on /admin/overview when month_summary().budget_state is
     # "warning" or "exceeded"; we intentionally do NOT block chat here.
 
-    history = task_svc.load_conversation_messages(task_id, conversation_id)
-    api_messages = _to_api_messages(history, task_id=task_id, conversation_id=conversation_id)
+    # load_conversation_messages 读 jsonl 是 sync IO，长会话能耗几十毫秒到几秒。
+    # _to_api_messages 内部还会读 tool_calls.jsonl 一次。两个一起 to_thread。
+    history = await asyncio.to_thread(
+        task_svc.load_conversation_messages, task_id, conversation_id
+    )
+    api_messages = await asyncio.to_thread(
+        _to_api_messages, history, task_id=task_id, conversation_id=conversation_id
+    )
     if s.ICE_COMPACTION_ENABLED:
         try:
             api_messages = await compaction_svc.maybe_compact(
@@ -348,6 +617,10 @@ async def _handle_user_message(
 
     final_text = ""
     files_created: list[dict] = []
+    # keepalive sidecar：每 20s 发一帧 {"type":"keepalive"}，给反代和底层 ws
+    # 协议一个非 idle 信号。多会话并行时——某个会话在压缩/工具/慢 LLM
+    # 期间没有自然下行字节，原本会让 ws ping 超时被误关。
+    keepalive_task = asyncio.create_task(_ws_keepalive_loop(ws))
     try:
         for round_idx in range(max_rounds + 1):
             if cancel_event.is_set():
@@ -406,7 +679,8 @@ async def _handle_user_message(
                 # 保留已经生成的部分到对话历史，便于用户接着追问。
                 partial_text = "".join(text_buf)
                 if partial_text or tool_uses:
-                    append_jsonl(
+                    await asyncio.to_thread(
+                        append_jsonl,
                         conv_path,
                         {
                             "id": assistant_msg_id,
@@ -436,7 +710,7 @@ async def _handle_user_message(
                 "usage": usage,
                 "created_at": _now(),
             }
-            append_jsonl(conv_path, assistant_record)
+            await asyncio.to_thread(append_jsonl, conv_path, assistant_record)
             await conversation_svc.touch_last_message(task_id=task_id, conv_id=conversation_id)
             try:
                 await usage_svc.record_usage(
@@ -570,7 +844,8 @@ async def _handle_user_message(
                     }
                     files_created.append(file_meta)
                     await _send(ws, {"type": "file_created", "file": file_meta})
-                append_jsonl(
+                await asyncio.to_thread(
+                    append_jsonl,
                     tool_path,
                     {
                         "id": tu_id,
@@ -630,6 +905,11 @@ async def _handle_user_message(
         await _send(ws, {"type": "agent_typing", "status": "stop"})
         if final_text:
             await task_svc.touch_task(task_id, last_message_preview=final_text)
+        keepalive_task.cancel()
+        try:
+            await keepalive_task
+        except BaseException:
+            pass
 
 
 def _to_api_messages(

@@ -1,5 +1,17 @@
 # Knowledge 知识库变更日志
 
+## v2.4 (2026-05-21) — 部分对齐「AB 实验 Skill V2.4」
+
+- SOP Phase 3 Step 4「假设确认」加强为「触发下钻后必须暂停确认」，用户确认前不得擅自执行下钻 SQL（同步 V2.4 SKILL.md）
+- 版本号 V2.3 → V2.4（agent.json / prompt/system.md / index.yaml）
+- 知识库文件内容**未变化**（与 V2.3 一致），仅 SOP 文案微调
+- **未引入** V2.4 新机制（与 ice-workbench 架构冲突）：
+  - ❌ 远程 git 同步知识库（V2.4 要求每次启动 `git clone/pull git@git.n.xiaomi.com:zhaoyida/feed.git` 到 `~/.ab-experiment-knowledge/`）
+    - 原因：违反 G3 file-first 架构（知识库应在 `agents/<id>/knowledge/`）；多用户共用后端时引入 SSH key / 认证信任链问题；与 admin 后台知识库编辑路径冲突
+  - ❌ 反馈闭环回写后 `git push origin main` 自动推送
+    - 原因：ice-workbench 知识库更新走 admin 后台 / 前端编辑器，不在 agent 进程里执行 git 写操作
+- ice-workbench 中知识库读取路径仍为 `read_agent_knowledge("<相对 agents/ab-experiment/knowledge/>")`，**不使用 `$KB`**
+
 ## v2.3 (2026-05-14) — 同步「信息流业务 AB 实验 Skill V2.3」
 
 - 新增 `metrics/data_dictionary.yaml`（表别名、唯一用户ID、实验字段、DAU/新老用户/消费标记、查询经验 tips）

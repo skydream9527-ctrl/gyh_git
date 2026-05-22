@@ -2,11 +2,51 @@
 
 ## Source Tables
 
-浏览器信息流复用浏览器整体的财收表，通过 `app_port = '浏览器信息流'` 筛选信息流数据。
+浏览器信息流复用浏览器整体的财收表，通过 `tag_id IN (...)` 筛选信息流广告位数据。
 
 | Table | Full Name | Database |
 |-------|-----------|----------|
-| dm_browser_finance_core_indicators_di | 财收核心指标表 | iceberg_zjyprc_hadoop.browser |
+| ads_browser_finance_core_indicators_di | 财收核心指标表 | doris_c3prc_xiaomi.browser |
+
+### 信息流广告位筛选条件
+
+信息流广告通过以下 tag_id 限定（来源：【浏览器】广告位逻辑梳理）：
+
+| 分类 | tag_id | 说明 |
+|------|--------|------|
+| 主页各频道 | 1.13.c.1, 1.13.c.2, 1.13.c.24, 1.13.c.22, 1.13.c.23 | 要闻（原推荐） |
+| 主页各频道 | 1.13.c.7, 1.13.c.30, 1.13.c.22 | 推荐（原热点）&热榜 |
+| 主页各频道 | 1.13.c.3, 1.13.c.5 | 视频 |
+| 主页各频道 | 1.13.c.27, 1.13.c.28 | 游戏/情感/汽车等垂类频道 |
+| 主页各频道 | 1.13.c.25, 1.13.c.26 | 本地 |
+| 主页各频道 | 1.13.c.12, 1.13.c.13 | 体育 |
+| 主页各频道 | 1.13.c.17, 1.13.c.19 | 科技 |
+| 主页各频道 | 1.13.c.10, 1.13.c.11 | 军事 |
+| 主页各频道 | 1.13.c.8, 1.13.c.9 | 娱乐 |
+| 主页各频道 | 1.13.c.16, 1.13.c.20 | 财经 |
+| 图文详情页 | 1.13.g.4, 1.13.g.18, 1.13.1.4, 1.13.1.3 | 图文详情页广告位 |
+| 视频详情页 | 1.13.g.7, 1.13.g.5, 1.13.g.9, 1.13.g.6 | 视频详情页广告位 |
+| 小视频详情页 | 1.13.g.23 | 小视频详情页广告位 |
+| 短视频频道 | 1.13.g.25, 1.13.g.29, 1.13.g.30 | 短视频频道广告位 |
+| 短剧&小说 | 1.13.g.24, 1.13.1.9, 1.13.c.4, 1.13.f.20, 1.13.f.13 | 短剧吸底/中插、小说插页/吸底、短故事解锁 |
+| 灵活广告位 | 1.13.1.6 | 主页各频道及图文/视频详情页兜底 |
+
+SQL 中使用以下条件筛选信息流数据：
+
+```sql
+AND tag_id IN (
+    '1.13.c.1', '1.13.c.2', '1.13.c.3', '1.13.c.4', '1.13.c.5',
+    '1.13.c.7', '1.13.c.8', '1.13.c.9', '1.13.c.10', '1.13.c.11',
+    '1.13.c.12', '1.13.c.13', '1.13.c.16', '1.13.c.17', '1.13.c.19',
+    '1.13.c.20', '1.13.c.22', '1.13.c.23', '1.13.c.24', '1.13.c.25',
+    '1.13.c.26', '1.13.c.27', '1.13.c.28', '1.13.c.30',
+    '1.13.f.13', '1.13.f.20',
+    '1.13.g.4', '1.13.g.5', '1.13.g.6', '1.13.g.7', '1.13.g.9',
+    '1.13.g.18', '1.13.g.23', '1.13.g.24', '1.13.g.25', '1.13.g.29',
+    '1.13.g.30',
+    '1.13.1.3', '1.13.1.4', '1.13.1.6', '1.13.1.9'
+)
+```
 
 ---
 
@@ -17,9 +57,20 @@
 ```sql
 SELECT  date,
         SUM(revenue) AS revenue
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
+FROM    doris_c3prc_xiaomi.browser.ads_browser_finance_core_indicators_di
 WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
+        AND tag_id IN (
+            '1.13.c.1', '1.13.c.2', '1.13.c.3', '1.13.c.4', '1.13.c.5',
+            '1.13.c.7', '1.13.c.8', '1.13.c.9', '1.13.c.10', '1.13.c.11',
+            '1.13.c.12', '1.13.c.13', '1.13.c.16', '1.13.c.17', '1.13.c.19',
+            '1.13.c.20', '1.13.c.22', '1.13.c.23', '1.13.c.24', '1.13.c.25',
+            '1.13.c.26', '1.13.c.27', '1.13.c.28', '1.13.c.30',
+            '1.13.f.13', '1.13.f.20',
+            '1.13.g.4', '1.13.g.5', '1.13.g.6', '1.13.g.7', '1.13.g.9',
+            '1.13.g.18', '1.13.g.23', '1.13.g.24', '1.13.g.25', '1.13.g.29',
+            '1.13.g.30',
+            '1.13.1.3', '1.13.1.4', '1.13.1.6', '1.13.1.9'
+        )
 GROUP BY date
 ```
 
@@ -28,9 +79,20 @@ GROUP BY date
 ```sql
 SELECT  date,
         SUM(gmv) AS gmv
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
+FROM    doris_c3prc_xiaomi.browser.ads_browser_finance_core_indicators_di
 WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
+        AND tag_id IN (
+            '1.13.c.1', '1.13.c.2', '1.13.c.3', '1.13.c.4', '1.13.c.5',
+            '1.13.c.7', '1.13.c.8', '1.13.c.9', '1.13.c.10', '1.13.c.11',
+            '1.13.c.12', '1.13.c.13', '1.13.c.16', '1.13.c.17', '1.13.c.19',
+            '1.13.c.20', '1.13.c.22', '1.13.c.23', '1.13.c.24', '1.13.c.25',
+            '1.13.c.26', '1.13.c.27', '1.13.c.28', '1.13.c.30',
+            '1.13.f.13', '1.13.f.20',
+            '1.13.g.4', '1.13.g.5', '1.13.g.6', '1.13.g.7', '1.13.g.9',
+            '1.13.g.18', '1.13.g.23', '1.13.g.24', '1.13.g.25', '1.13.g.29',
+            '1.13.g.30',
+            '1.13.1.3', '1.13.1.4', '1.13.1.6', '1.13.1.9'
+        )
 GROUP BY date
 ```
 
@@ -39,9 +101,20 @@ GROUP BY date
 ```sql
 SELECT  date,
         SUM(expose_cnt) AS expose_cnt
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
+FROM    doris_c3prc_xiaomi.browser.ads_browser_finance_core_indicators_di
 WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
+        AND tag_id IN (
+            '1.13.c.1', '1.13.c.2', '1.13.c.3', '1.13.c.4', '1.13.c.5',
+            '1.13.c.7', '1.13.c.8', '1.13.c.9', '1.13.c.10', '1.13.c.11',
+            '1.13.c.12', '1.13.c.13', '1.13.c.16', '1.13.c.17', '1.13.c.19',
+            '1.13.c.20', '1.13.c.22', '1.13.c.23', '1.13.c.24', '1.13.c.25',
+            '1.13.c.26', '1.13.c.27', '1.13.c.28', '1.13.c.30',
+            '1.13.f.13', '1.13.f.20',
+            '1.13.g.4', '1.13.g.5', '1.13.g.6', '1.13.g.7', '1.13.g.9',
+            '1.13.g.18', '1.13.g.23', '1.13.g.24', '1.13.g.25', '1.13.g.29',
+            '1.13.g.30',
+            '1.13.1.3', '1.13.1.4', '1.13.1.6', '1.13.1.9'
+        )
 GROUP BY date
 ```
 
@@ -50,9 +123,20 @@ GROUP BY date
 ```sql
 SELECT  date,
         SUM(click_cnt) AS click_cnt
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
+FROM    doris_c3prc_xiaomi.browser.ads_browser_finance_core_indicators_di
 WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
+        AND tag_id IN (
+            '1.13.c.1', '1.13.c.2', '1.13.c.3', '1.13.c.4', '1.13.c.5',
+            '1.13.c.7', '1.13.c.8', '1.13.c.9', '1.13.c.10', '1.13.c.11',
+            '1.13.c.12', '1.13.c.13', '1.13.c.16', '1.13.c.17', '1.13.c.19',
+            '1.13.c.20', '1.13.c.22', '1.13.c.23', '1.13.c.24', '1.13.c.25',
+            '1.13.c.26', '1.13.c.27', '1.13.c.28', '1.13.c.30',
+            '1.13.f.13', '1.13.f.20',
+            '1.13.g.4', '1.13.g.5', '1.13.g.6', '1.13.g.7', '1.13.g.9',
+            '1.13.g.18', '1.13.g.23', '1.13.g.24', '1.13.g.25', '1.13.g.29',
+            '1.13.g.30',
+            '1.13.1.3', '1.13.1.4', '1.13.1.6', '1.13.1.9'
+        )
 GROUP BY date
 ```
 
@@ -61,9 +145,20 @@ GROUP BY date
 ```sql
 SELECT  date,
         SUM(download_cnt) AS download_cnt
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
+FROM    doris_c3prc_xiaomi.browser.ads_browser_finance_core_indicators_di
 WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
+        AND tag_id IN (
+            '1.13.c.1', '1.13.c.2', '1.13.c.3', '1.13.c.4', '1.13.c.5',
+            '1.13.c.7', '1.13.c.8', '1.13.c.9', '1.13.c.10', '1.13.c.11',
+            '1.13.c.12', '1.13.c.13', '1.13.c.16', '1.13.c.17', '1.13.c.19',
+            '1.13.c.20', '1.13.c.22', '1.13.c.23', '1.13.c.24', '1.13.c.25',
+            '1.13.c.26', '1.13.c.27', '1.13.c.28', '1.13.c.30',
+            '1.13.f.13', '1.13.f.20',
+            '1.13.g.4', '1.13.g.5', '1.13.g.6', '1.13.g.7', '1.13.g.9',
+            '1.13.g.18', '1.13.g.23', '1.13.g.24', '1.13.g.25', '1.13.g.29',
+            '1.13.g.30',
+            '1.13.1.3', '1.13.1.4', '1.13.1.6', '1.13.1.9'
+        )
 GROUP BY date
 ```
 
@@ -72,9 +167,20 @@ GROUP BY date
 ```sql
 SELECT  date,
         SUM(ad_request_cnt) AS ad_request_cnt
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
+FROM    doris_c3prc_xiaomi.browser.ads_browser_finance_core_indicators_di
 WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
+        AND tag_id IN (
+            '1.13.c.1', '1.13.c.2', '1.13.c.3', '1.13.c.4', '1.13.c.5',
+            '1.13.c.7', '1.13.c.8', '1.13.c.9', '1.13.c.10', '1.13.c.11',
+            '1.13.c.12', '1.13.c.13', '1.13.c.16', '1.13.c.17', '1.13.c.19',
+            '1.13.c.20', '1.13.c.22', '1.13.c.23', '1.13.c.24', '1.13.c.25',
+            '1.13.c.26', '1.13.c.27', '1.13.c.28', '1.13.c.30',
+            '1.13.f.13', '1.13.f.20',
+            '1.13.g.4', '1.13.g.5', '1.13.g.6', '1.13.g.7', '1.13.g.9',
+            '1.13.g.18', '1.13.g.23', '1.13.g.24', '1.13.g.25', '1.13.g.29',
+            '1.13.g.30',
+            '1.13.1.3', '1.13.1.4', '1.13.1.6', '1.13.1.9'
+        )
 GROUP BY date
 ```
 
@@ -83,9 +189,20 @@ GROUP BY date
 ```sql
 SELECT  date,
         SUM(ad_response_cnt) AS ad_response_cnt
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
+FROM    doris_c3prc_xiaomi.browser.ads_browser_finance_core_indicators_di
 WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
+        AND tag_id IN (
+            '1.13.c.1', '1.13.c.2', '1.13.c.3', '1.13.c.4', '1.13.c.5',
+            '1.13.c.7', '1.13.c.8', '1.13.c.9', '1.13.c.10', '1.13.c.11',
+            '1.13.c.12', '1.13.c.13', '1.13.c.16', '1.13.c.17', '1.13.c.19',
+            '1.13.c.20', '1.13.c.22', '1.13.c.23', '1.13.c.24', '1.13.c.25',
+            '1.13.c.26', '1.13.c.27', '1.13.c.28', '1.13.c.30',
+            '1.13.f.13', '1.13.f.20',
+            '1.13.g.4', '1.13.g.5', '1.13.g.6', '1.13.g.7', '1.13.g.9',
+            '1.13.g.18', '1.13.g.23', '1.13.g.24', '1.13.g.25', '1.13.g.29',
+            '1.13.g.30',
+            '1.13.1.3', '1.13.1.4', '1.13.1.6', '1.13.1.9'
+        )
 GROUP BY date
 ```
 
@@ -99,915 +216,341 @@ GROUP BY date
 SELECT  date,
         ad_position_scene,
         SUM(revenue) AS revenue
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
+FROM    doris_c3prc_xiaomi.browser.ads_browser_finance_core_indicators_di
 WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
+        AND tag_id IN (
+            '1.13.c.1', '1.13.c.2', '1.13.c.3', '1.13.c.4', '1.13.c.5',
+            '1.13.c.7', '1.13.c.8', '1.13.c.9', '1.13.c.10', '1.13.c.11',
+            '1.13.c.12', '1.13.c.13', '1.13.c.16', '1.13.c.17', '1.13.c.19',
+            '1.13.c.20', '1.13.c.22', '1.13.c.23', '1.13.c.24', '1.13.c.25',
+            '1.13.c.26', '1.13.c.27', '1.13.c.28', '1.13.c.30',
+            '1.13.f.13', '1.13.f.20',
+            '1.13.g.4', '1.13.g.5', '1.13.g.6', '1.13.g.7', '1.13.g.9',
+            '1.13.g.18', '1.13.g.23', '1.13.g.24', '1.13.g.25', '1.13.g.29',
+            '1.13.g.30',
+            '1.13.1.3', '1.13.1.4', '1.13.1.6', '1.13.1.9'
+        )
 GROUP BY date, ad_position_scene
 ORDER BY revenue DESC
 ```
 
-### BF-ADV-DIM-002: 信息流财收 — 按广告位类型
+### BF-ADV-DIM-002: 信息流财收 — 按广告位
 
 ```sql
 SELECT  date,
-        ad_position_type,
+        tag_id,
         SUM(revenue) AS revenue
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
+FROM    doris_c3prc_xiaomi.browser.ads_browser_finance_core_indicators_di
 WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_type
-ORDER BY revenue DESC
-```
-
-### BF-ADV-DIM-003: 信息流财收 — 按广告位ID
-
-```sql
-SELECT  date,
-        ad_position_id,
-        SUM(revenue) AS revenue
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_id
+        AND tag_id IN (
+            '1.13.c.1', '1.13.c.2', '1.13.c.3', '1.13.c.4', '1.13.c.5',
+            '1.13.c.7', '1.13.c.8', '1.13.c.9', '1.13.c.10', '1.13.c.11',
+            '1.13.c.12', '1.13.c.13', '1.13.c.16', '1.13.c.17', '1.13.c.19',
+            '1.13.c.20', '1.13.c.22', '1.13.c.23', '1.13.c.24', '1.13.c.25',
+            '1.13.c.26', '1.13.c.27', '1.13.c.28', '1.13.c.30',
+            '1.13.f.13', '1.13.f.20',
+            '1.13.g.4', '1.13.g.5', '1.13.g.6', '1.13.g.7', '1.13.g.9',
+            '1.13.g.18', '1.13.g.23', '1.13.g.24', '1.13.g.25', '1.13.g.29',
+            '1.13.g.30',
+            '1.13.1.3', '1.13.1.4', '1.13.1.6', '1.13.1.9'
+        )
+GROUP BY date, tag_id
 ORDER BY revenue DESC
 LIMIT 50
 ```
 
-### BF-ADV-DIM-004: 信息流财收 — 按广告位来源
-
-```sql
-SELECT  date,
-        ad_position_source,
-        SUM(revenue) AS revenue
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_source
-ORDER BY revenue DESC
-```
-
-### BF-ADV-DIM-005: 信息流财收 — 按广告位状态
-
-```sql
-SELECT  date,
-        ad_position_status,
-        SUM(revenue) AS revenue
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_status
-ORDER BY revenue DESC
-```
-
-### BF-ADV-DIM-006: 信息流财收 — 按广告位标签
-
-```sql
-SELECT  date,
-        ad_position_label,
-        SUM(revenue) AS revenue
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_label
-ORDER BY revenue DESC
-```
-
-### BF-ADV-DIM-007: 信息流财收 — 按广告位子标签
-
-```sql
-SELECT  date,
-        ad_position_sub_label,
-        SUM(revenue) AS revenue
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_sub_label
-ORDER BY revenue DESC
-```
-
-### BF-ADV-DIM-008: 信息流财收 — 按广告位子类型
-
-```sql
-SELECT  date,
-        ad_position_sub_type,
-        SUM(revenue) AS revenue
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_sub_type
-ORDER BY revenue DESC
-```
-
-### BF-ADV-DIM-009: 信息流财收 — 按广告位子来源
-
-```sql
-SELECT  date,
-        ad_position_sub_source,
-        SUM(revenue) AS revenue
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_sub_source
-ORDER BY revenue DESC
-```
-
-### BF-ADV-DIM-010: 信息流财收 — 按广告位子状态
-
-```sql
-SELECT  date,
-        ad_position_sub_status,
-        SUM(revenue) AS revenue
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_sub_status
-ORDER BY revenue DESC
-```
-
-### BF-ADV-DIM-011: 信息流流水 — 按广告位场景
+### BF-ADV-DIM-003: 信息流流水 — 按广告位场景
 
 ```sql
 SELECT  date,
         ad_position_scene,
         SUM(gmv) AS gmv
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
+FROM    doris_c3prc_xiaomi.browser.ads_browser_finance_core_indicators_di
 WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
+        AND tag_id IN (
+            '1.13.c.1', '1.13.c.2', '1.13.c.3', '1.13.c.4', '1.13.c.5',
+            '1.13.c.7', '1.13.c.8', '1.13.c.9', '1.13.c.10', '1.13.c.11',
+            '1.13.c.12', '1.13.c.13', '1.13.c.16', '1.13.c.17', '1.13.c.19',
+            '1.13.c.20', '1.13.c.22', '1.13.c.23', '1.13.c.24', '1.13.c.25',
+            '1.13.c.26', '1.13.c.27', '1.13.c.28', '1.13.c.30',
+            '1.13.f.13', '1.13.f.20',
+            '1.13.g.4', '1.13.g.5', '1.13.g.6', '1.13.g.7', '1.13.g.9',
+            '1.13.g.18', '1.13.g.23', '1.13.g.24', '1.13.g.25', '1.13.g.29',
+            '1.13.g.30',
+            '1.13.1.3', '1.13.1.4', '1.13.1.6', '1.13.1.9'
+        )
 GROUP BY date, ad_position_scene
 ORDER BY gmv DESC
 ```
 
-### BF-ADV-DIM-012: 信息流流水 — 按广告位类型
+### BF-ADV-DIM-004: 信息流流水 — 按广告位
 
 ```sql
 SELECT  date,
-        ad_position_type,
+        tag_id,
         SUM(gmv) AS gmv
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
+FROM    doris_c3prc_xiaomi.browser.ads_browser_finance_core_indicators_di
 WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_type
-ORDER BY gmv DESC
-```
-
-### BF-ADV-DIM-013: 信息流流水 — 按广告位ID
-
-```sql
-SELECT  date,
-        ad_position_id,
-        SUM(gmv) AS gmv
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_id
+        AND tag_id IN (
+            '1.13.c.1', '1.13.c.2', '1.13.c.3', '1.13.c.4', '1.13.c.5',
+            '1.13.c.7', '1.13.c.8', '1.13.c.9', '1.13.c.10', '1.13.c.11',
+            '1.13.c.12', '1.13.c.13', '1.13.c.16', '1.13.c.17', '1.13.c.19',
+            '1.13.c.20', '1.13.c.22', '1.13.c.23', '1.13.c.24', '1.13.c.25',
+            '1.13.c.26', '1.13.c.27', '1.13.c.28', '1.13.c.30',
+            '1.13.f.13', '1.13.f.20',
+            '1.13.g.4', '1.13.g.5', '1.13.g.6', '1.13.g.7', '1.13.g.9',
+            '1.13.g.18', '1.13.g.23', '1.13.g.24', '1.13.g.25', '1.13.g.29',
+            '1.13.g.30',
+            '1.13.1.3', '1.13.1.4', '1.13.1.6', '1.13.1.9'
+        )
+GROUP BY date, tag_id
 ORDER BY gmv DESC
 LIMIT 50
 ```
 
-### BF-ADV-DIM-014: 信息流流水 — 按广告位来源
-
-```sql
-SELECT  date,
-        ad_position_source,
-        SUM(gmv) AS gmv
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_source
-ORDER BY gmv DESC
-```
-
-### BF-ADV-DIM-015: 信息流流水 — 按广告位状态
-
-```sql
-SELECT  date,
-        ad_position_status,
-        SUM(gmv) AS gmv
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_status
-ORDER BY gmv DESC
-```
-
-### BF-ADV-DIM-016: 信息流流水 — 按广告位标签
-
-```sql
-SELECT  date,
-        ad_position_label,
-        SUM(gmv) AS gmv
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_label
-ORDER BY gmv DESC
-```
-
-### BF-ADV-DIM-017: 信息流流水 — 按广告位子标签
-
-```sql
-SELECT  date,
-        ad_position_sub_label,
-        SUM(gmv) AS gmv
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_sub_label
-ORDER BY gmv DESC
-```
-
-### BF-ADV-DIM-018: 信息流流水 — 按广告位子类型
-
-```sql
-SELECT  date,
-        ad_position_sub_type,
-        SUM(gmv) AS gmv
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_sub_type
-ORDER BY gmv DESC
-```
-
-### BF-ADV-DIM-019: 信息流流水 — 按广告位子来源
-
-```sql
-SELECT  date,
-        ad_position_sub_source,
-        SUM(gmv) AS gmv
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_sub_source
-ORDER BY gmv DESC
-```
-
-### BF-ADV-DIM-020: 信息流流水 — 按广告位子状态
-
-```sql
-SELECT  date,
-        ad_position_sub_status,
-        SUM(gmv) AS gmv
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_sub_status
-ORDER BY gmv DESC
-```
-
-### BF-ADV-DIM-021: 信息流计费曝光 — 按广告位场景
+### BF-ADV-DIM-005: 信息流计费曝光 — 按广告位场景
 
 ```sql
 SELECT  date,
         ad_position_scene,
         SUM(expose_cnt) AS expose_cnt
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
+FROM    doris_c3prc_xiaomi.browser.ads_browser_finance_core_indicators_di
 WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
+        AND tag_id IN (
+            '1.13.c.1', '1.13.c.2', '1.13.c.3', '1.13.c.4', '1.13.c.5',
+            '1.13.c.7', '1.13.c.8', '1.13.c.9', '1.13.c.10', '1.13.c.11',
+            '1.13.c.12', '1.13.c.13', '1.13.c.16', '1.13.c.17', '1.13.c.19',
+            '1.13.c.20', '1.13.c.22', '1.13.c.23', '1.13.c.24', '1.13.c.25',
+            '1.13.c.26', '1.13.c.27', '1.13.c.28', '1.13.c.30',
+            '1.13.f.13', '1.13.f.20',
+            '1.13.g.4', '1.13.g.5', '1.13.g.6', '1.13.g.7', '1.13.g.9',
+            '1.13.g.18', '1.13.g.23', '1.13.g.24', '1.13.g.25', '1.13.g.29',
+            '1.13.g.30',
+            '1.13.1.3', '1.13.1.4', '1.13.1.6', '1.13.1.9'
+        )
 GROUP BY date, ad_position_scene
 ORDER BY expose_cnt DESC
 ```
 
-### BF-ADV-DIM-022: 信息流计费曝光 — 按广告位类型
+### BF-ADV-DIM-006: 信息流计费曝光 — 按广告位
 
 ```sql
 SELECT  date,
-        ad_position_type,
+        tag_id,
         SUM(expose_cnt) AS expose_cnt
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
+FROM    doris_c3prc_xiaomi.browser.ads_browser_finance_core_indicators_di
 WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_type
-ORDER BY expose_cnt DESC
-```
-
-### BF-ADV-DIM-023: 信息流计费曝光 — 按广告位ID
-
-```sql
-SELECT  date,
-        ad_position_id,
-        SUM(expose_cnt) AS expose_cnt
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_id
+        AND tag_id IN (
+            '1.13.c.1', '1.13.c.2', '1.13.c.3', '1.13.c.4', '1.13.c.5',
+            '1.13.c.7', '1.13.c.8', '1.13.c.9', '1.13.c.10', '1.13.c.11',
+            '1.13.c.12', '1.13.c.13', '1.13.c.16', '1.13.c.17', '1.13.c.19',
+            '1.13.c.20', '1.13.c.22', '1.13.c.23', '1.13.c.24', '1.13.c.25',
+            '1.13.c.26', '1.13.c.27', '1.13.c.28', '1.13.c.30',
+            '1.13.f.13', '1.13.f.20',
+            '1.13.g.4', '1.13.g.5', '1.13.g.6', '1.13.g.7', '1.13.g.9',
+            '1.13.g.18', '1.13.g.23', '1.13.g.24', '1.13.g.25', '1.13.g.29',
+            '1.13.g.30',
+            '1.13.1.3', '1.13.1.4', '1.13.1.6', '1.13.1.9'
+        )
+GROUP BY date, tag_id
 ORDER BY expose_cnt DESC
 LIMIT 50
 ```
 
-### BF-ADV-DIM-024: 信息流计费曝光 — 按广告位来源
-
-```sql
-SELECT  date,
-        ad_position_source,
-        SUM(expose_cnt) AS expose_cnt
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_source
-ORDER BY expose_cnt DESC
-```
-
-### BF-ADV-DIM-025: 信息流计费曝光 — 按广告位状态
-
-```sql
-SELECT  date,
-        ad_position_status,
-        SUM(expose_cnt) AS expose_cnt
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_status
-ORDER BY expose_cnt DESC
-```
-
-### BF-ADV-DIM-026: 信息流计费曝光 — 按广告位标签
-
-```sql
-SELECT  date,
-        ad_position_label,
-        SUM(expose_cnt) AS expose_cnt
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_label
-ORDER BY expose_cnt DESC
-```
-
-### BF-ADV-DIM-027: 信息流计费曝光 — 按广告位子标签
-
-```sql
-SELECT  date,
-        ad_position_sub_label,
-        SUM(expose_cnt) AS expose_cnt
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_sub_label
-ORDER BY expose_cnt DESC
-```
-
-### BF-ADV-DIM-028: 信息流计费曝光 — 按广告位子类型
-
-```sql
-SELECT  date,
-        ad_position_sub_type,
-        SUM(expose_cnt) AS expose_cnt
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_sub_type
-ORDER BY expose_cnt DESC
-```
-
-### BF-ADV-DIM-029: 信息流计费曝光 — 按广告位子来源
-
-```sql
-SELECT  date,
-        ad_position_sub_source,
-        SUM(expose_cnt) AS expose_cnt
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_sub_source
-ORDER BY expose_cnt DESC
-```
-
-### BF-ADV-DIM-030: 信息流计费曝光 — 按广告位子状态
-
-```sql
-SELECT  date,
-        ad_position_sub_status,
-        SUM(expose_cnt) AS expose_cnt
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_sub_status
-ORDER BY expose_cnt DESC
-```
-
-### BF-ADV-DIM-031: 信息流计费点击 — 按广告位场景
+### BF-ADV-DIM-007: 信息流计费点击 — 按广告位场景
 
 ```sql
 SELECT  date,
         ad_position_scene,
         SUM(click_cnt) AS click_cnt
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
+FROM    doris_c3prc_xiaomi.browser.ads_browser_finance_core_indicators_di
 WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
+        AND tag_id IN (
+            '1.13.c.1', '1.13.c.2', '1.13.c.3', '1.13.c.4', '1.13.c.5',
+            '1.13.c.7', '1.13.c.8', '1.13.c.9', '1.13.c.10', '1.13.c.11',
+            '1.13.c.12', '1.13.c.13', '1.13.c.16', '1.13.c.17', '1.13.c.19',
+            '1.13.c.20', '1.13.c.22', '1.13.c.23', '1.13.c.24', '1.13.c.25',
+            '1.13.c.26', '1.13.c.27', '1.13.c.28', '1.13.c.30',
+            '1.13.f.13', '1.13.f.20',
+            '1.13.g.4', '1.13.g.5', '1.13.g.6', '1.13.g.7', '1.13.g.9',
+            '1.13.g.18', '1.13.g.23', '1.13.g.24', '1.13.g.25', '1.13.g.29',
+            '1.13.g.30',
+            '1.13.1.3', '1.13.1.4', '1.13.1.6', '1.13.1.9'
+        )
 GROUP BY date, ad_position_scene
 ORDER BY click_cnt DESC
 ```
 
-### BF-ADV-DIM-032: 信息流计费点击 — 按广告位类型
+### BF-ADV-DIM-008: 信息流计费点击 — 按广告位
 
 ```sql
 SELECT  date,
-        ad_position_type,
+        tag_id,
         SUM(click_cnt) AS click_cnt
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
+FROM    doris_c3prc_xiaomi.browser.ads_browser_finance_core_indicators_di
 WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_type
-ORDER BY click_cnt DESC
-```
-
-### BF-ADV-DIM-033: 信息流计费点击 — 按广告位ID
-
-```sql
-SELECT  date,
-        ad_position_id,
-        SUM(click_cnt) AS click_cnt
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_id
+        AND tag_id IN (
+            '1.13.c.1', '1.13.c.2', '1.13.c.3', '1.13.c.4', '1.13.c.5',
+            '1.13.c.7', '1.13.c.8', '1.13.c.9', '1.13.c.10', '1.13.c.11',
+            '1.13.c.12', '1.13.c.13', '1.13.c.16', '1.13.c.17', '1.13.c.19',
+            '1.13.c.20', '1.13.c.22', '1.13.c.23', '1.13.c.24', '1.13.c.25',
+            '1.13.c.26', '1.13.c.27', '1.13.c.28', '1.13.c.30',
+            '1.13.f.13', '1.13.f.20',
+            '1.13.g.4', '1.13.g.5', '1.13.g.6', '1.13.g.7', '1.13.g.9',
+            '1.13.g.18', '1.13.g.23', '1.13.g.24', '1.13.g.25', '1.13.g.29',
+            '1.13.g.30',
+            '1.13.1.3', '1.13.1.4', '1.13.1.6', '1.13.1.9'
+        )
+GROUP BY date, tag_id
 ORDER BY click_cnt DESC
 LIMIT 50
 ```
 
-### BF-ADV-DIM-034: 信息流计费点击 — 按广告位来源
-
-```sql
-SELECT  date,
-        ad_position_source,
-        SUM(click_cnt) AS click_cnt
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_source
-ORDER BY click_cnt DESC
-```
-
-### BF-ADV-DIM-035: 信息流计费点击 — 按广告位状态
-
-```sql
-SELECT  date,
-        ad_position_status,
-        SUM(click_cnt) AS click_cnt
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_status
-ORDER BY click_cnt DESC
-```
-
-### BF-ADV-DIM-036: 信息流计费点击 — 按广告位标签
-
-```sql
-SELECT  date,
-        ad_position_label,
-        SUM(click_cnt) AS click_cnt
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_label
-ORDER BY click_cnt DESC
-```
-
-### BF-ADV-DIM-037: 信息流计费点击 — 按广告位子标签
-
-```sql
-SELECT  date,
-        ad_position_sub_label,
-        SUM(click_cnt) AS click_cnt
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_sub_label
-ORDER BY click_cnt DESC
-```
-
-### BF-ADV-DIM-038: 信息流计费点击 — 按广告位子类型
-
-```sql
-SELECT  date,
-        ad_position_sub_type,
-        SUM(click_cnt) AS click_cnt
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_sub_type
-ORDER BY click_cnt DESC
-```
-
-### BF-ADV-DIM-039: 信息流计费点击 — 按广告位子来源
-
-```sql
-SELECT  date,
-        ad_position_sub_source,
-        SUM(click_cnt) AS click_cnt
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_sub_source
-ORDER BY click_cnt DESC
-```
-
-### BF-ADV-DIM-040: 信息流计费点击 — 按广告位子状态
-
-```sql
-SELECT  date,
-        ad_position_sub_status,
-        SUM(click_cnt) AS click_cnt
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_sub_status
-ORDER BY click_cnt DESC
-```
-
-### BF-ADV-DIM-041: 信息流广告下载量 — 按广告位场景
+### BF-ADV-DIM-009: 信息流广告下载量 — 按广告位场景
 
 ```sql
 SELECT  date,
         ad_position_scene,
         SUM(download_cnt) AS download_cnt
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
+FROM    doris_c3prc_xiaomi.browser.ads_browser_finance_core_indicators_di
 WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
+        AND tag_id IN (
+            '1.13.c.1', '1.13.c.2', '1.13.c.3', '1.13.c.4', '1.13.c.5',
+            '1.13.c.7', '1.13.c.8', '1.13.c.9', '1.13.c.10', '1.13.c.11',
+            '1.13.c.12', '1.13.c.13', '1.13.c.16', '1.13.c.17', '1.13.c.19',
+            '1.13.c.20', '1.13.c.22', '1.13.c.23', '1.13.c.24', '1.13.c.25',
+            '1.13.c.26', '1.13.c.27', '1.13.c.28', '1.13.c.30',
+            '1.13.f.13', '1.13.f.20',
+            '1.13.g.4', '1.13.g.5', '1.13.g.6', '1.13.g.7', '1.13.g.9',
+            '1.13.g.18', '1.13.g.23', '1.13.g.24', '1.13.g.25', '1.13.g.29',
+            '1.13.g.30',
+            '1.13.1.3', '1.13.1.4', '1.13.1.6', '1.13.1.9'
+        )
 GROUP BY date, ad_position_scene
 ORDER BY download_cnt DESC
 ```
 
-### BF-ADV-DIM-042: 信息流广告下载量 — 按广告位类型
+### BF-ADV-DIM-010: 信息流广告下载量 — 按广告位
 
 ```sql
 SELECT  date,
-        ad_position_type,
+        tag_id,
         SUM(download_cnt) AS download_cnt
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
+FROM    doris_c3prc_xiaomi.browser.ads_browser_finance_core_indicators_di
 WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_type
-ORDER BY download_cnt DESC
-```
-
-### BF-ADV-DIM-043: 信息流广告下载量 — 按广告位ID
-
-```sql
-SELECT  date,
-        ad_position_id,
-        SUM(download_cnt) AS download_cnt
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_id
+        AND tag_id IN (
+            '1.13.c.1', '1.13.c.2', '1.13.c.3', '1.13.c.4', '1.13.c.5',
+            '1.13.c.7', '1.13.c.8', '1.13.c.9', '1.13.c.10', '1.13.c.11',
+            '1.13.c.12', '1.13.c.13', '1.13.c.16', '1.13.c.17', '1.13.c.19',
+            '1.13.c.20', '1.13.c.22', '1.13.c.23', '1.13.c.24', '1.13.c.25',
+            '1.13.c.26', '1.13.c.27', '1.13.c.28', '1.13.c.30',
+            '1.13.f.13', '1.13.f.20',
+            '1.13.g.4', '1.13.g.5', '1.13.g.6', '1.13.g.7', '1.13.g.9',
+            '1.13.g.18', '1.13.g.23', '1.13.g.24', '1.13.g.25', '1.13.g.29',
+            '1.13.g.30',
+            '1.13.1.3', '1.13.1.4', '1.13.1.6', '1.13.1.9'
+        )
+GROUP BY date, tag_id
 ORDER BY download_cnt DESC
 LIMIT 50
 ```
 
-### BF-ADV-DIM-044: 信息流广告下载量 — 按广告位来源
-
-```sql
-SELECT  date,
-        ad_position_source,
-        SUM(download_cnt) AS download_cnt
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_source
-ORDER BY download_cnt DESC
-```
-
-### BF-ADV-DIM-045: 信息流广告下载量 — 按广告位状态
-
-```sql
-SELECT  date,
-        ad_position_status,
-        SUM(download_cnt) AS download_cnt
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_status
-ORDER BY download_cnt DESC
-```
-
-### BF-ADV-DIM-046: 信息流广告下载量 — 按广告位标签
-
-```sql
-SELECT  date,
-        ad_position_label,
-        SUM(download_cnt) AS download_cnt
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_label
-ORDER BY download_cnt DESC
-```
-
-### BF-ADV-DIM-047: 信息流广告下载量 — 按广告位子标签
-
-```sql
-SELECT  date,
-        ad_position_sub_label,
-        SUM(download_cnt) AS download_cnt
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_sub_label
-ORDER BY download_cnt DESC
-```
-
-### BF-ADV-DIM-048: 信息流广告下载量 — 按广告位子类型
-
-```sql
-SELECT  date,
-        ad_position_sub_type,
-        SUM(download_cnt) AS download_cnt
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_sub_type
-ORDER BY download_cnt DESC
-```
-
-### BF-ADV-DIM-049: 信息流广告下载量 — 按广告位子来源
-
-```sql
-SELECT  date,
-        ad_position_sub_source,
-        SUM(download_cnt) AS download_cnt
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_sub_source
-ORDER BY download_cnt DESC
-```
-
-### BF-ADV-DIM-050: 信息流广告下载量 — 按广告位子状态
-
-```sql
-SELECT  date,
-        ad_position_sub_status,
-        SUM(download_cnt) AS download_cnt
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_sub_status
-ORDER BY download_cnt DESC
-```
-
-### BF-ADV-DIM-051: 信息流广告请求次数 — 按广告位场景
+### BF-ADV-DIM-011: 信息流广告请求次数 — 按广告位场景
 
 ```sql
 SELECT  date,
         ad_position_scene,
         SUM(ad_request_cnt) AS ad_request_cnt
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
+FROM    doris_c3prc_xiaomi.browser.ads_browser_finance_core_indicators_di
 WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
+        AND tag_id IN (
+            '1.13.c.1', '1.13.c.2', '1.13.c.3', '1.13.c.4', '1.13.c.5',
+            '1.13.c.7', '1.13.c.8', '1.13.c.9', '1.13.c.10', '1.13.c.11',
+            '1.13.c.12', '1.13.c.13', '1.13.c.16', '1.13.c.17', '1.13.c.19',
+            '1.13.c.20', '1.13.c.22', '1.13.c.23', '1.13.c.24', '1.13.c.25',
+            '1.13.c.26', '1.13.c.27', '1.13.c.28', '1.13.c.30',
+            '1.13.f.13', '1.13.f.20',
+            '1.13.g.4', '1.13.g.5', '1.13.g.6', '1.13.g.7', '1.13.g.9',
+            '1.13.g.18', '1.13.g.23', '1.13.g.24', '1.13.g.25', '1.13.g.29',
+            '1.13.g.30',
+            '1.13.1.3', '1.13.1.4', '1.13.1.6', '1.13.1.9'
+        )
 GROUP BY date, ad_position_scene
 ORDER BY ad_request_cnt DESC
 ```
 
-### BF-ADV-DIM-052: 信息流广告请求次数 — 按广告位类型
+### BF-ADV-DIM-012: 信息流广告请求次数 — 按广告位
 
 ```sql
 SELECT  date,
-        ad_position_type,
+        tag_id,
         SUM(ad_request_cnt) AS ad_request_cnt
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
+FROM    doris_c3prc_xiaomi.browser.ads_browser_finance_core_indicators_di
 WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_type
-ORDER BY ad_request_cnt DESC
-```
-
-### BF-ADV-DIM-053: 信息流广告请求次数 — 按广告位ID
-
-```sql
-SELECT  date,
-        ad_position_id,
-        SUM(ad_request_cnt) AS ad_request_cnt
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_id
+        AND tag_id IN (
+            '1.13.c.1', '1.13.c.2', '1.13.c.3', '1.13.c.4', '1.13.c.5',
+            '1.13.c.7', '1.13.c.8', '1.13.c.9', '1.13.c.10', '1.13.c.11',
+            '1.13.c.12', '1.13.c.13', '1.13.c.16', '1.13.c.17', '1.13.c.19',
+            '1.13.c.20', '1.13.c.22', '1.13.c.23', '1.13.c.24', '1.13.c.25',
+            '1.13.c.26', '1.13.c.27', '1.13.c.28', '1.13.c.30',
+            '1.13.f.13', '1.13.f.20',
+            '1.13.g.4', '1.13.g.5', '1.13.g.6', '1.13.g.7', '1.13.g.9',
+            '1.13.g.18', '1.13.g.23', '1.13.g.24', '1.13.g.25', '1.13.g.29',
+            '1.13.g.30',
+            '1.13.1.3', '1.13.1.4', '1.13.1.6', '1.13.1.9'
+        )
+GROUP BY date, tag_id
 ORDER BY ad_request_cnt DESC
 LIMIT 50
 ```
 
-### BF-ADV-DIM-054: 信息流广告请求次数 — 按广告位来源
-
-```sql
-SELECT  date,
-        ad_position_source,
-        SUM(ad_request_cnt) AS ad_request_cnt
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_source
-ORDER BY ad_request_cnt DESC
-```
-
-### BF-ADV-DIM-055: 信息流广告请求次数 — 按广告位状态
-
-```sql
-SELECT  date,
-        ad_position_status,
-        SUM(ad_request_cnt) AS ad_request_cnt
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_status
-ORDER BY ad_request_cnt DESC
-```
-
-### BF-ADV-DIM-056: 信息流广告请求次数 — 按广告位标签
-
-```sql
-SELECT  date,
-        ad_position_label,
-        SUM(ad_request_cnt) AS ad_request_cnt
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_label
-ORDER BY ad_request_cnt DESC
-```
-
-### BF-ADV-DIM-057: 信息流广告请求次数 — 按广告位子标签
-
-```sql
-SELECT  date,
-        ad_position_sub_label,
-        SUM(ad_request_cnt) AS ad_request_cnt
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_sub_label
-ORDER BY ad_request_cnt DESC
-```
-
-### BF-ADV-DIM-058: 信息流广告请求次数 — 按广告位子类型
-
-```sql
-SELECT  date,
-        ad_position_sub_type,
-        SUM(ad_request_cnt) AS ad_request_cnt
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_sub_type
-ORDER BY ad_request_cnt DESC
-```
-
-### BF-ADV-DIM-059: 信息流广告请求次数 — 按广告位子来源
-
-```sql
-SELECT  date,
-        ad_position_sub_source,
-        SUM(ad_request_cnt) AS ad_request_cnt
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_sub_source
-ORDER BY ad_request_cnt DESC
-```
-
-### BF-ADV-DIM-060: 信息流广告请求次数 — 按广告位子状态
-
-```sql
-SELECT  date,
-        ad_position_sub_status,
-        SUM(ad_request_cnt) AS ad_request_cnt
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_sub_status
-ORDER BY ad_request_cnt DESC
-```
-
-### BF-ADV-DIM-061: 信息流广告填充次数 — 按广告位场景
+### BF-ADV-DIM-013: 信息流广告填充次数 — 按广告位场景
 
 ```sql
 SELECT  date,
         ad_position_scene,
         SUM(ad_response_cnt) AS ad_response_cnt
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
+FROM    doris_c3prc_xiaomi.browser.ads_browser_finance_core_indicators_di
 WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
+        AND tag_id IN (
+            '1.13.c.1', '1.13.c.2', '1.13.c.3', '1.13.c.4', '1.13.c.5',
+            '1.13.c.7', '1.13.c.8', '1.13.c.9', '1.13.c.10', '1.13.c.11',
+            '1.13.c.12', '1.13.c.13', '1.13.c.16', '1.13.c.17', '1.13.c.19',
+            '1.13.c.20', '1.13.c.22', '1.13.c.23', '1.13.c.24', '1.13.c.25',
+            '1.13.c.26', '1.13.c.27', '1.13.c.28', '1.13.c.30',
+            '1.13.f.13', '1.13.f.20',
+            '1.13.g.4', '1.13.g.5', '1.13.g.6', '1.13.g.7', '1.13.g.9',
+            '1.13.g.18', '1.13.g.23', '1.13.g.24', '1.13.g.25', '1.13.g.29',
+            '1.13.g.30',
+            '1.13.1.3', '1.13.1.4', '1.13.1.6', '1.13.1.9'
+        )
 GROUP BY date, ad_position_scene
 ORDER BY ad_response_cnt DESC
 ```
 
-### BF-ADV-DIM-062: 信息流广告填充次数 — 按广告位类型
+### BF-ADV-DIM-014: 信息流广告填充次数 — 按广告位
 
 ```sql
 SELECT  date,
-        ad_position_type,
+        tag_id,
         SUM(ad_response_cnt) AS ad_response_cnt
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
+FROM    doris_c3prc_xiaomi.browser.ads_browser_finance_core_indicators_di
 WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_type
-ORDER BY ad_response_cnt DESC
-```
-
-### BF-ADV-DIM-063: 信息流广告填充次数 — 按广告位ID
-
-```sql
-SELECT  date,
-        ad_position_id,
-        SUM(ad_response_cnt) AS ad_response_cnt
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_id
+        AND tag_id IN (
+            '1.13.c.1', '1.13.c.2', '1.13.c.3', '1.13.c.4', '1.13.c.5',
+            '1.13.c.7', '1.13.c.8', '1.13.c.9', '1.13.c.10', '1.13.c.11',
+            '1.13.c.12', '1.13.c.13', '1.13.c.16', '1.13.c.17', '1.13.c.19',
+            '1.13.c.20', '1.13.c.22', '1.13.c.23', '1.13.c.24', '1.13.c.25',
+            '1.13.c.26', '1.13.c.27', '1.13.c.28', '1.13.c.30',
+            '1.13.f.13', '1.13.f.20',
+            '1.13.g.4', '1.13.g.5', '1.13.g.6', '1.13.g.7', '1.13.g.9',
+            '1.13.g.18', '1.13.g.23', '1.13.g.24', '1.13.g.25', '1.13.g.29',
+            '1.13.g.30',
+            '1.13.1.3', '1.13.1.4', '1.13.1.6', '1.13.1.9'
+        )
+GROUP BY date, tag_id
 ORDER BY ad_response_cnt DESC
 LIMIT 50
-```
-
-### BF-ADV-DIM-064: 信息流广告填充次数 — 按广告位来源
-
-```sql
-SELECT  date,
-        ad_position_source,
-        SUM(ad_response_cnt) AS ad_response_cnt
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_source
-ORDER BY ad_response_cnt DESC
-```
-
-### BF-ADV-DIM-065: 信息流广告填充次数 — 按广告位状态
-
-```sql
-SELECT  date,
-        ad_position_status,
-        SUM(ad_response_cnt) AS ad_response_cnt
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_status
-ORDER BY ad_response_cnt DESC
-```
-
-### BF-ADV-DIM-066: 信息流广告填充次数 — 按广告位标签
-
-```sql
-SELECT  date,
-        ad_position_label,
-        SUM(ad_response_cnt) AS ad_response_cnt
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_label
-ORDER BY ad_response_cnt DESC
-```
-
-### BF-ADV-DIM-067: 信息流广告填充次数 — 按广告位子标签
-
-```sql
-SELECT  date,
-        ad_position_sub_label,
-        SUM(ad_response_cnt) AS ad_response_cnt
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_sub_label
-ORDER BY ad_response_cnt DESC
-```
-
-### BF-ADV-DIM-068: 信息流广告填充次数 — 按广告位子类型
-
-```sql
-SELECT  date,
-        ad_position_sub_type,
-        SUM(ad_response_cnt) AS ad_response_cnt
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_sub_type
-ORDER BY ad_response_cnt DESC
-```
-
-### BF-ADV-DIM-069: 信息流广告填充次数 — 按广告位子来源
-
-```sql
-SELECT  date,
-        ad_position_sub_source,
-        SUM(ad_response_cnt) AS ad_response_cnt
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_sub_source
-ORDER BY ad_response_cnt DESC
-```
-
-### BF-ADV-DIM-070: 信息流广告填充次数 — 按广告位子状态
-
-```sql
-SELECT  date,
-        ad_position_sub_status,
-        SUM(ad_response_cnt) AS ad_response_cnt
-FROM    iceberg_zjyprc_hadoop.browser.dm_browser_finance_core_indicators_di
-WHERE   date = '${DATE}'
-        AND app_port = '浏览器信息流'
-GROUP BY date, ad_position_sub_status
-ORDER BY ad_response_cnt DESC
 ```
 
 ---

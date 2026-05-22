@@ -3,10 +3,15 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import os
 import uuid
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from typing import IO
 
+import portalocker
+
+from ..core.config import get_settings
 from ..core.errors import APIError, ErrorCode
 from ..core.storage import append_jsonl, get_paths, read_json, read_jsonl, write_json
 
@@ -268,6 +273,48 @@ async def _execute_run(task_id: str, rec: dict, *, trigger: str) -> dict:
 # ---- background loop ----
 
 _loop_task: asyncio.Task | None = None
+# Leader-election state. With uvicorn --workers=N each worker calls start_loop()
+# at lifespan startup; without coordination the same scheduled task fires N
+# times. We use a non-blocking flock on .cache/scheduler.leader.lock — only the
+# worker that grabs it runs the loop. The lock is held for the worker's
+# lifetime; if that process dies, the kernel releases it and another worker
+# takes over on its next start_loop() call (today: only at restart).
+_leader_fh: IO | None = None
+
+
+def _try_become_leader() -> bool:
+    """Acquire the cross-process scheduler lock. True = this worker leads."""
+    global _leader_fh
+    if _leader_fh is not None:
+        return True
+    lock_path = get_settings().cache_dir / "scheduler.leader.lock"
+    lock_path.parent.mkdir(parents=True, exist_ok=True)
+    fh = open(lock_path, "a+")
+    try:
+        portalocker.lock(fh, portalocker.LOCK_EX | portalocker.LOCK_NB)
+    except portalocker.LockException:
+        fh.close()
+        return False
+    try:
+        fh.seek(0)
+        fh.truncate()
+        fh.write(f"{os.getpid()}\n")
+        fh.flush()
+    except Exception:
+        pass
+    _leader_fh = fh
+    return True
+
+
+def _release_leader() -> None:
+    global _leader_fh
+    if _leader_fh is None:
+        return
+    try:
+        portalocker.unlock(_leader_fh)
+    finally:
+        _leader_fh.close()
+        _leader_fh = None
 
 
 async def scheduler_loop() -> None:
@@ -306,8 +353,13 @@ async def scheduler_loop() -> None:
 
 def start_loop() -> None:
     global _loop_task
-    if _loop_task is None:
-        _loop_task = asyncio.create_task(scheduler_loop(), name="scheduler-loop")
+    if _loop_task is not None:
+        return
+    if not _try_become_leader():
+        log.info("scheduler: another worker holds the leader lock; this worker stays follower")
+        return
+    log.info("scheduler: acquired leader lock pid=%s", os.getpid())
+    _loop_task = asyncio.create_task(scheduler_loop(), name="scheduler-loop")
 
 
 def stop_loop() -> None:
@@ -315,3 +367,4 @@ def stop_loop() -> None:
     if _loop_task:
         _loop_task.cancel()
         _loop_task = None
+    _release_leader()

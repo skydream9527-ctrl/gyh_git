@@ -21,12 +21,19 @@ async def submit(*, task_id: str, user_id: str, message: str) -> dict:
     meta = read_json(paths.task_meta(task_id))
     if not meta:
         raise APIError(404, ErrorCode.RESOURCE_NOT_FOUND, "任务不存在")
-    if meta.get("visibility") != "public" or meta.get("publish_status") != "published":
-        raise APIError(400, ErrorCode.VALIDATION_ERROR, "仅对已公开的任务可申请加入")
 
     collabs = read_json(paths.task_collaborators(task_id), default=[]) or []
-    if any(c.get("user_id") == user_id and c.get("status") == "active" for c in collabs):
+    # 现有协作者：viewer 允许提申请（语义=申请升级为 editor），editor / owner 不需要再申请
+    existing = next(
+        (c for c in collabs if c.get("user_id") == user_id and c.get("status") == "active"),
+        None,
+    )
+    if existing and existing.get("role") in ("editor", "owner"):
         raise APIError(400, ErrorCode.JOIN_ALREADY_MEMBER, "已是任务成员")
+    if not existing:
+        # 完全的外部用户：仅允许公开发布的任务，避免任意人扫描 task_id 申请加入
+        if meta.get("visibility") != "public" or meta.get("publish_status") != "published":
+            raise APIError(400, ErrorCode.VALIDATION_ERROR, "仅对已公开的任务可申请加入")
 
     jr_path = paths.task_join_requests(task_id)
     with file_transaction([jr_path]) as tx:
@@ -80,12 +87,22 @@ async def review(
 
         if new_status == "approved":
             collabs = tx.read_json(collab_path, default=[])
-            collabs.append({
-                "user_id": target["user_id"],
-                "role": "editor",
-                "joined_at": _now(),
-                "status": "active",
-            })
+            # viewer 升级语义：原条目改为 editor，而不是再追加一条新条目
+            existing_idx = next(
+                (i for i, c in enumerate(collabs)
+                 if c.get("user_id") == target["user_id"] and c.get("status") == "active"),
+                None,
+            )
+            if existing_idx is not None:
+                collabs[existing_idx]["role"] = "editor"
+                collabs[existing_idx]["joined_at"] = _now()
+            else:
+                collabs.append({
+                    "user_id": target["user_id"],
+                    "role": "editor",
+                    "joined_at": _now(),
+                    "status": "active",
+                })
             tx.write_json(collab_path, collabs)
 
     try:

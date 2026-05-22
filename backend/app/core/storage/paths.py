@@ -72,6 +72,11 @@ class StoragePaths:
     def task_tool_calls(self, task_id: str, conv_id: str) -> Path:
         return self.task_dir(task_id) / "tool_calls" / f"{conv_id}.jsonl"
 
+    def task_conv_inflight_state(self, task_id: str, conv_id: str) -> Path:
+        # `.inflight.lock` 旁边的状态 JSON：记录正在跑 turn 的 user_id / 名字 /
+        # 起始时间，给前端禁用其他人的发送按钮用。读不依赖 flock。
+        return self.task_dir(task_id) / "conversations" / f"{conv_id}.inflight.json"
+
     def task_files_input(self, task_id: str) -> Path:
         return self.task_dir(task_id) / "files" / "input"
 

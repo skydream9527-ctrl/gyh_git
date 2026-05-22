@@ -40,12 +40,16 @@ async def create_task(body: TaskCreate, user: dict = Depends(get_current_user)):
 
 @router.get("/{task_id}")
 async def get_task(task_id: str, user: dict = Depends(get_current_user)):
-    return ok(await task_svc.get_task(task_id, user["id"]))
+    return ok(
+        await task_svc.get_task(
+            task_id, user["id"], is_admin=bool(user.get("is_admin"))
+        )
+    )
 
 
 @router.get("/{task_id}/conversation")
 async def task_conversation(task_id: str, user: dict = Depends(get_current_user)):
-    await task_svc.get_task(task_id, user["id"])
+    await task_svc.get_task(task_id, user["id"], is_admin=bool(user.get("is_admin")))
     cid = await task_svc.get_or_create_default_conversation(task_id)
     messages = task_svc.load_conversation_messages(task_id, cid)
     return ok({"conversation_id": cid, "messages": messages})
@@ -53,7 +57,9 @@ async def task_conversation(task_id: str, user: dict = Depends(get_current_user)
 
 @router.delete("/{task_id}")
 async def delete_task(task_id: str, user: dict = Depends(get_current_user)):
-    await task_svc.delete_task(task_id, user["id"])
+    await task_svc.delete_task(
+        task_id, user["id"], is_admin=bool(user.get("is_admin"))
+    )
     return ok({"deleted": True, "task_id": task_id})
 
 
@@ -148,7 +154,7 @@ async def remove_collaborator(
 async def get_task_todos(task_id: str, user: dict = Depends(get_current_user)):
     """Agent v2 — return the latest todo list for this task (empty list for
     tasks that have never called todo_write)."""
-    await task_svc.get_task(task_id, user["id"])
+    await task_svc.get_task(task_id, user["id"], is_admin=bool(user.get("is_admin")))
     payload = read_json(get_paths().task_todos(task_id), default=None)
     if not isinstance(payload, dict):
         return ok({"task_id": task_id, "items": [], "updated_at": None})
@@ -161,5 +167,5 @@ async def get_plan_state(
 ):
     """Agent v2 — return plan_mode + pending_plan for a conversation. Used by
     the frontend on page load to restore the banner / approval modal state."""
-    await task_svc.get_task(task_id, user["id"])
+    await task_svc.get_task(task_id, user["id"], is_admin=bool(user.get("is_admin")))
     return ok(await conversation_svc.get_plan_mode(task_id=task_id, conv_id=conv_id))

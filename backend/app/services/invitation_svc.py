@@ -26,7 +26,7 @@ def _new_id() -> str:
     return "inv_" + uuid.uuid4().hex
 
 
-VALID_ROLES = {"viewer", "editor"}
+VALID_ROLES = {"viewer", "editor", "owner"}
 
 
 async def invite(

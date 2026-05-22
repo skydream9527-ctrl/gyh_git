@@ -7,6 +7,8 @@ import tempfile
 from pathlib import Path
 from typing import Any, Iterable
 
+from .lock import file_lock
+
 
 def read_json(path: Path | str, default: Any = None) -> Any:
     p = Path(path)
@@ -36,12 +38,17 @@ def write_json(path: Path | str, data: Any, *, ensure_dir: bool = True) -> None:
 
 
 def append_jsonl(path: Path | str, record: dict | Iterable[dict]) -> None:
+    # POSIX guarantees atomic writes only up to PIPE_BUF for a single write()
+    # syscall — JSONL records routinely exceed that, so two concurrent appenders
+    # can interleave bytes inside one record. Wrap the whole append under the
+    # same advisory lock that file_transaction uses elsewhere.
     p = Path(path)
     p.parent.mkdir(parents=True, exist_ok=True)
     rows = [record] if isinstance(record, dict) else list(record)
-    with p.open("a", encoding="utf-8") as f:
-        for r in rows:
-            f.write(json.dumps(r, ensure_ascii=False) + "\n")
+    with file_lock(p):
+        with p.open("a", encoding="utf-8") as f:
+            for r in rows:
+                f.write(json.dumps(r, ensure_ascii=False) + "\n")
 
 
 def read_jsonl(path: Path | str) -> list[dict]:

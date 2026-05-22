@@ -133,6 +133,11 @@ async def _try_bearer(authorization: str | None) -> dict | None:
     return user
 
 
+def _stamp_is_admin(user: dict) -> dict:
+    user["is_admin"] = user.get("auth_role") in ("admin", "super_admin")
+    return user
+
+
 async def _resolve_user(
     aegis_header: str | None,
     authorization: str | None,
@@ -142,17 +147,17 @@ async def _resolve_user(
     settings = get_settings()
     u = await _try_aegis(aegis_header)
     if u:
-        return u
+        return _stamp_is_admin(u)
     u = await _try_bearer(authorization)
     if u:
-        return u
+        return _stamp_is_admin(u)
     # Dev bypass: only fire when the request EXPLICITLY opts in via the
     # X-Dev-Bypass header. Without that, bootstrapMe() / /auth/me without a
     # valid Bearer must 401 — otherwise wrong-password "logins" silently
     # succeed because the frontend's follow-up /auth/me hits dev_bypass.
     if settings.AEGIS_DEV_BYPASS_EMAIL and dev_bypass_opt_in:
         log.debug("aegis: dev bypass active as %s", settings.AEGIS_DEV_BYPASS_EMAIL)
-        return await _dev_bypass_user(settings.AEGIS_DEV_BYPASS_EMAIL)
+        return _stamp_is_admin(await _dev_bypass_user(settings.AEGIS_DEV_BYPASS_EMAIL))
     raise APIError(
         401,
         ErrorCode.TOKEN_INVALID,
@@ -234,6 +239,10 @@ def derive_task_role(
                 return TaskRole.OWNER
             if role == "editor":
                 return TaskRole.EDITOR
+            # viewer 协作者：邀请时可选 viewer/editor 两档，没收尾这档会让被邀请的
+            # viewer 在 private 任务 / public-pending 任务上拿不到角色 → 对话列表 403。
+            if role == "viewer":
+                return TaskRole.VIEWER
     if (
         task_meta.get("visibility") == "public"
         and task_meta.get("publish_status") == "published"

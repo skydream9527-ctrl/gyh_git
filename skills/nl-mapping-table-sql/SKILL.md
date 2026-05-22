@@ -9,6 +9,26 @@ description: 根据用户自然语言输入生成映射表（dim/dm/ads）相关
 
 ---
 
+## 公共原则：时间范围分窗（重要）
+
+生成 SQL 前先评估时间窗口，以适配 Kyuubi 工具运行时硬上限（300 秒）：
+
+| 用户给定的时间范围 | 处理方式 |
+|---|---|
+| 未指定 | 默认查最近 7 天，并在回复里明确告知用户 |
+| ≤ 7 天 | 单次查询 |
+| > 7 天 | **必须分窗**：按 7 天滚动循环，每窗一条 SQL，逐次调用 kyuubi_query |
+
+分窗时使用半开区间避免重叠：
+```sql
+WHERE date >= '{start_date}' AND date < '{end_date}'
+```
+
+**严禁**用 `UNION ALL` 把多个 7 天拼成一条大 SQL —— 仍是单次执行，没省扫描量。
+**严禁**对聚合结果（SUM/COUNT/AVG）做简单跨窗相加 —— 同一用户跨窗去重等场景会算错；正确做法是把每窗的明细取出后在 LLM 端二次聚合。
+
+---
+
 ## 标准执行流程
 
 严格按以下顺序逐步执行，每步等待用户回复后再继续。
@@ -68,8 +88,8 @@ description: 根据用户自然语言输入生成映射表（dim/dm/ads）相关
 | 用户输入 | 映射表 | 映射字段 |
 |----------|--------|---------|
 | "多维指标表的启动方式" | dm_browser_multi_dimension_indicators_di | app_launch_way |
-| "留存表的用户类型" | dm_browser_multi_dimension_retain_indicators_di | history_user_type |
-| "财收表的广告位场景" | dm_browser_finance_core_indicators_di | ad_position_scene |
+| "留存表的新老用户" | dm_browser_multi_dimension_retain_indicators_di | is_new_2024 |
+| "财收表的广告位场景" | ads_browser_finance_core_indicators_di | ad_position_scene |
 
 > [!WARNING]
 > **表与字段范围约束（强制执行）**

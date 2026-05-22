@@ -72,6 +72,8 @@ export interface TaskSummary {
   paradigm: string;
   agent_id?: string | null;
   owner_id: string;
+  /** 后端 list_public_tasks 批量从 users_index 注入；个人任务列表不含此字段。 */
+  owner_name?: string;
   status: string;
   visibility: string;
   file_count: number;
@@ -134,6 +136,9 @@ export interface ConversationSummary {
   created_at: string;
   last_message_at: string;
   message_count: number;
+  /** 当前 worker 内是否有正在跑的回合（后端 _inflight_turns）。
+   * 前端用它给对话项加 ⏳ 角标，提示「切走后后台还在生成」。 */
+  inflight?: boolean;
 }
 
 export interface JoinRequest {

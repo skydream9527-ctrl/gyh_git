@@ -4,7 +4,7 @@ import json
 
 from fastapi import APIRouter, Depends, File, Form, UploadFile
 
-from ...core.deps import TaskRole, derive_task_role, get_current_user
+from ...core.deps import TaskRole, derive_task_role, get_current_user, require_task_role
 from ...core.errors import APIError, ErrorCode, ok
 from ...core.storage import get_paths, read_json
 from ...services import file_svc, task_svc
@@ -97,8 +97,13 @@ async def download_file(task_id: str, file_id: str, user: dict = Depends(get_cur
 
 
 @router.delete("/task/{task_id}/{file_id}")
-async def delete_file(task_id: str, file_id: str, user: dict = Depends(get_current_user)):
-    await task_svc.get_task(task_id, user["id"])
+async def delete_file(
+    task_id: str,
+    file_id: str,
+    role: TaskRole = Depends(require_task_role(TaskRole.OWNER, TaskRole.ADMIN)),
+):
+    """删除任务文件——仅 owner / admin 可操作。editor 可上传但不可删，
+    避免协作者误删交付物；viewer 走前置 require_task_role 自然 403。"""
     await file_svc.delete_task_file(task_id, file_id)
     return ok({"deleted": True})
 

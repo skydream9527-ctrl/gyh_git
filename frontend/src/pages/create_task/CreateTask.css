@@ -94,6 +94,14 @@
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 14px;
 }
+/* 已上线 / 待上线 分组：第二组与第一组之间留空隙 */
+.ct-agent-grid + .ct-agent-grid-upcoming {
+  margin-top: 18px;
+}
+/* 待上线 grid 用 auto-fill 保留空轨道，卡片维持与已上线 grid 同宽 */
+.ct-agent-grid-upcoming {
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+}
 .ct-agent-card {
   position: relative;
   background: var(--surface);
