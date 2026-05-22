@@ -16,7 +16,7 @@ async def test_ws_subprotocol_auth(isolated_data_root):
     from app.services import auth_svc, task_svc
 
     client = TestClient(app)
-    creds = await auth_svc.password_login("admin", "admin123")
+    creds = await auth_svc.password_login("admin", "Test-Admin-Pw-2026!")
     token = creds["tokens"]["access_token"]
     uid = creds["user"]["id"]
     task = await task_svc.create_task(name="WS test", paradigm="biz", owner_id=uid)

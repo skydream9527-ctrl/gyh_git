@@ -26,7 +26,10 @@ def _config_path() -> Path:
 
 DEFAULTS: dict = {
     "toggles": {
-        "enable_open_register": True,
+        # Off by default — admins must opt in via /admin/settings/toggles. A
+        # public registration endpoint coupled with an admin who can self-
+        # approve is a known foot-gun (see security review 2026-05).
+        "enable_open_register": False,
         "enable_public_task_review": False,
         "enable_feishu_strict_whitelist": False,
         # When true (default): a user logging in via Feishu for the first time

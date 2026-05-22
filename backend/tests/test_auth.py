@@ -9,7 +9,7 @@ from app.services import auth_svc
 @pytest.mark.asyncio
 async def test_password_login_success(isolated_data_root):
     await bootstrap()
-    result = await auth_svc.password_login("admin", "admin123")
+    result = await auth_svc.password_login("admin", "Test-Admin-Pw-2026!")
     assert result["user"]["auth_role"] == "super_admin"
     assert result["tokens"]["access_token"]
 

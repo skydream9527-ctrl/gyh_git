@@ -13,6 +13,38 @@ def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
+# Common-password rejection list. Tiny on purpose — bcrypt + rate-limit
+# already raise the cost; this just catches the most embarrassing choices.
+_BANNED_PASSWORDS = {
+    "12345678", "123456789", "1234567890", "qwerty", "password", "admin123",
+    "test1234", "letmein", "welcome", "abc12345", "iloveyou", "passw0rd",
+    "11111111", "00000000", "password1",
+}
+
+
+def _validate_password_strength(password: str | None) -> None:
+    """Reject weak/short/common passwords. Min 10 chars + at least 3 of:
+    lowercase, uppercase, digit, symbol. Rule of thumb consistent with
+    NIST SP 800-63B "memorized secret" guidance for non-MFA systems."""
+    if password is None or len(password) < 10:
+        raise APIError(400, ErrorCode.WEAK_PASSWORD, "密码至少 10 位")
+    if len(password) > 128:
+        raise APIError(400, ErrorCode.WEAK_PASSWORD, "密码最长 128 位")
+    if password.lower() in _BANNED_PASSWORDS:
+        raise APIError(400, ErrorCode.WEAK_PASSWORD, "密码过于常见，请重新设置")
+    classes = sum([
+        any(c.islower() for c in password),
+        any(c.isupper() for c in password),
+        any(c.isdigit() for c in password),
+        any(not c.isalnum() for c in password),
+    ])
+    if classes < 3:
+        raise APIError(
+            400, ErrorCode.WEAK_PASSWORD,
+            "密码需包含大小写字母 / 数字 / 符号中的任意 3 类",
+        )
+
+
 async def load_user_by_id(user_id: str) -> dict | None:
     p = get_paths().user_profile(user_id)
     return read_json(p) or None
@@ -132,10 +164,7 @@ async def register(email: str, name: str, password: str) -> dict:
         raise APIError(400, ErrorCode.VALIDATION_ERROR, "账号或姓名过长")
     if any(c.isspace() for c in email_clean):
         raise APIError(400, ErrorCode.VALIDATION_ERROR, "账号不能包含空格")
-    if password is None or len(password) < 6:
-        raise APIError(400, ErrorCode.WEAK_PASSWORD, "密码至少 6 位")
-    if len(password) > 128:
-        raise APIError(400, ErrorCode.WEAK_PASSWORD, "密码最长 128 位")
+    _validate_password_strength(password)
 
     existing = await load_user_by_email(email_clean)
     if existing:

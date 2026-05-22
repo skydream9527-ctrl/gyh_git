@@ -20,15 +20,52 @@ from ...core.deps import get_current_user
 from ...core.errors import APIError, ErrorCode, ok
 from ...core.security import create_access_token, create_refresh_token, decode_token
 from ...schemas.auth import LoginRequest, RefreshRequest, RegisterRequest
-from ...services import auth_svc, feishu, sysconfig_svc
+from ...services import auth_svc, feishu, rate_limit_svc, sysconfig_svc
 
 router = APIRouter()
 
 
+def _client_ip(request: Request) -> str:
+    """Best-effort caller IP. Trusts X-Forwarded-For only when set by an
+    upstream proxy — for a single-port deploy behind nginx/aegis the first
+    hop in XFF is the real client."""
+    xff = request.headers.get("x-forwarded-for")
+    if xff:
+        return xff.split(",")[0].strip() or (request.client.host if request.client else "")
+    return request.client.host if request.client else ""
+
+
 @router.post("/login")
-async def login(body: LoginRequest):
-    """Password login — issues a JWT. Still available alongside Aegis."""
-    result = await auth_svc.password_login(body.email, body.password)
+async def login(body: LoginRequest, request: Request):
+    """Password login — issues a JWT. Still available alongside Aegis.
+
+    Per-email and per-IP rate limits are checked before bcrypt to keep the
+    cost of a brute-force attempt low. Both clear on a successful login.
+    """
+    email = (body.email or "").strip()
+    ip = _client_ip(request)
+
+    for scope, ident, cfg in (
+        ("login_email", email, rate_limit_svc.LOGIN_LIMIT),
+        ("login_ip", ip, rate_limit_svc.LOGIN_IP_LIMIT),
+    ):
+        wait = rate_limit_svc.check(scope, ident, cfg)
+        if wait:
+            raise APIError(
+                429,
+                ErrorCode.LOGIN_RATE_LIMITED,
+                f"登录尝试过多，请 {int(wait) + 1} 秒后再试",
+            )
+
+    try:
+        result = await auth_svc.password_login(email, body.password)
+    except APIError as e:
+        if e.error_code == ErrorCode.INVALID_CREDENTIALS:
+            rate_limit_svc.record_failure("login_email", email, rate_limit_svc.LOGIN_LIMIT)
+            rate_limit_svc.record_failure("login_ip", ip, rate_limit_svc.LOGIN_IP_LIMIT)
+        raise
+    rate_limit_svc.clear("login_email", email)
+    rate_limit_svc.clear("login_ip", ip)
     return ok(result)
 
 

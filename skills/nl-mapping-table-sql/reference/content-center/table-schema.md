@@ -89,37 +89,38 @@ PARTITIONED BY (date)
 ## 3. dm_newhome_multi_dimension_retain_indicators_di（多维留存指标表）
 
 **Database**: `iceberg_zjyprc_hadoop.newhome`
-**粒度**: date + did 唯一
-**说明**: did粒度的标签+行为表，留存需通过 did 自关联计算
+**说明**: 在多维指标聚合表基础上，抹掉 app_version、os_version、phone_model、feed_channel 这几个维度
 
 ```sql
 CREATE TABLE iceberg_zjyprc_hadoop.newhome.dm_newhome_multi_dimension_retain_indicators_di (
   date INT COMMENT '日期',
-  did STRING COMMENT '设备id',
-  is_dau_2024 INT COMMENT '是否内容中心DAU用户，1：是，0：否',
-  is_valid_newhome_2025 INT COMMENT '是否内容中心有效用户，1：是，0：否',
-  is_new_2024 INT COMMENT '是否新用户，1：是，0：否',
-  is_valid_dapan_live_2024 INT COMMENT '是否大盘有效用户(直播)，1：是，0：否',
-  app_dura_1d BIGINT COMMENT '1天app总时长（毫秒）',
-  is_feed_consume_2025 INT COMMENT '是否信息流消费用户，1：是，0：否',
-  is_feed_active_2025 INT COMMENT '是否信息流活跃用户，1：是，0：否',
-  app_launch_way STRING COMMENT '启动方式',
-  item_type STRING COMMENT '体裁',
-  da_pv BIGINT COMMENT '日活pv',
-  app_duration_s BIGINT COMMENT '应用使用总时长（秒）',
-  feed_duration_s BIGINT COMMENT '信息流使用时长（秒）',
-  consum_duration_s BIGINT COMMENT '信息流消费时长（秒）',
-  expose_pv BIGINT COMMENT '曝光量',
-  click_pv BIGINT COMMENT '点击量',
-  view_pv BIGINT COMMENT '浏览量',
-  view_duration_s BIGINT COMMENT '浏览时长（秒）',
-  play_pv BIGINT COMMENT '开始播放量',
-  play_duration_s BIGINT COMMENT '播放时长（秒）',
-  finish_play_pv BIGINT COMMENT '完成播放量',
-  like_pv BIGINT COMMENT '点赞量',
-  share_pv BIGINT COMMENT '分享量',
-  collect_pv BIGINT COMMENT '收藏量',
-  comment_pv BIGINT COMMENT '评论量'
+  app_port STRING COMMENT '应用端口，仅内容中心',
+  history_user_type STRING COMMENT '用户类型：整体(ALL)、新用户、老用户',
+  active_user_type STRING COMMENT '活跃类型：整体(ALL)、信息流活跃用户、非信息流活跃用户',
+  feed_valid_user_type STRING COMMENT '信息流有效类型：整体(ALL)、信息流有效用户、非信息流有效用户',
+  consume_user_type STRING COMMENT '消费类型：整体(ALL)、信息流消费用户、非信息流消费用户',
+  duration_user_type STRING COMMENT '时长类型：整体(ALL)、深度用户、非深度用户',
+  browser_valid_user_type STRING COMMENT '浏览器有效类型：整体(ALL)、浏览器有效用户、非浏览器有效用户',
+  retain_2d BIGINT COMMENT '次日留存',
+  retain_3d BIGINT COMMENT '3日留存',
+  retain_7d BIGINT COMMENT '7日留存',
+  retain_14d BIGINT COMMENT '14日留存',
+  retain_30d BIGINT COMMENT '30日留存',
+  e2e_retain_2d BIGINT COMMENT '曝光-曝光次留',
+  e2e_retain_3d BIGINT COMMENT '曝光-曝光3留',
+  e2e_retain_7d BIGINT COMMENT '曝光-曝光7留',
+  e2e_retain_14d BIGINT COMMENT '曝光-曝光14留',
+  e2e_retain_30d BIGINT COMMENT '曝光-曝光30留',
+  e2v_retain_2d BIGINT COMMENT '曝光-有效次留',
+  e2v_retain_3d BIGINT COMMENT '曝光-有效3留',
+  e2v_retain_7d BIGINT COMMENT '曝光-有效7留',
+  e2v_retain_14d BIGINT COMMENT '曝光-有效14留',
+  e2v_retain_30d BIGINT COMMENT '曝光-有效30留',
+  v2v_retain_2d BIGINT COMMENT '有效-有效次留',
+  v2v_retain_3d BIGINT COMMENT '有效-有效3留',
+  v2v_retain_7d BIGINT COMMENT '有效-有效7留',
+  v2v_retain_14d BIGINT COMMENT '有效-有效14留',
+  v2v_retain_30d BIGINT COMMENT '有效-有效30留'
 )
 USING iceberg
 PARTITIONED BY (date)

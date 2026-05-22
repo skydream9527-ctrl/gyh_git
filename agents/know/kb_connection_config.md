@@ -46,27 +46,23 @@ Token 自动刷新，refresh token 有效期 30 天。过期需重新 `feishu au
 
 | 字段 | 值 |
 |------|-----|
-| 知识库名称 | GYH AI学习 |
-| space_id | `7631112709378935772` |
-| 描述 | 帮助GYH提升工作技能 |
+| 知识库名称 | 内容生态数据产品知识库 |
+| space_id | `7560912865739997187` |
+| 用途 | 内容生态部门数据产品方向的文档、规范、SQL、案例、复盘等知识资产沉淀 |
 
 ### 1.5 知识库目录结构
 
+目录结构在飞书侧持续变动，**不要把树状图固化在本文件里**。需要时按下列方式实时获取：
+
+```bash
+# 列出根节点
+feishu wiki nodes 7560912865739997187
+
+# 进入指定节点查看子节点
+feishu wiki nodes 7560912865739997187 --parent <node_token>
 ```
-GYH AI学习（space_id: 7631112709378935772）
-├── 技术提升（node: FMzywY49iiCUpZkUo9FcZI8Gnfg, obj: TijtdO1CBo8EImxJAkIcPaVpnjh）
-│   ├── 学习资源共享（node: LQ7IwCVwlik6kQk5Bn1cjQQFnwh, obj: MQhNs28GBhRrpltO4oXc5s1Jnnc, type: sheet）
-│   ├── 经验分享（node: EmdawoD94ipkJXkxILlc1FAsn7d, obj: KyiAd6KYpodJSWxMw75cNE1vnGh）
-│   ├── 小组讨论（node: PRYJwOmagi7EGjkKvJMcehcxnOb, obj: PEFbdX8KGopDswxJNPXcF5Dpndc）
-│   ├── 🛠️ AI 工具入门（node: GqLBwq5a8ipqqrkDmGRczcZunUg, obj: SeVDdeo27olSOnxlP5EcbMImn1B）
-│   ├── 🔬 AI 实践与案例（node: N9Jywe6v3iy4u1k6hDDcCkJxnAe, obj: NQw2dDpbIoYP3nxkHloctF5GnSg）
-│   ├── 🧰 Skill 工具箱（node: MgQUwooTyiuja8kndyIc6z4unaf, obj: PxZQdQAUUoeqMFx0vS4c8pgNncb）
-│   ├── 📊 数据与埋点（node: GsJXwFW4Yii6dakAMCscLkWMnfb, obj: Nihad9z2PoCF5nxJQJ9cGu9OnDR）
-│   │   └── 📱 浏览器接入小部件二期需求（node: AljTwCHpwiksmNkv32MccWDcnIg, obj: F8LIdsf32oUgiYxNg6ccGMGenae）
-│   ├── 🤖 AI 知识库管理（node: Frqpwf9B1izGA8kiy2RcQDlHnYd, obj: AqqGdiX6toTjTixmvlNcskhWneZ）
-│   └── 📋 团队工作记录（node: BXt3wYVaoiNntKkXZrgcKGzanvf, obj: Shead2PuUoqdkIxaYZVccrCdngb）
-└── 团队学习分享记录（node: VLIJwkYQCilMq3kSVEGceAaSnZv, obj: C4hlbKHLfawuZPsTjpMcLyCbnrc, type: bitable）
-```
+
+高频访问的 wiki_token 写入 agent memory `reference_frequent_tokens.md`（参见 `prompt/system.md` 中的 Context 机制约定）。
 
 ### 1.6 常用操作速查
 
@@ -183,10 +179,7 @@ API Key 获取地址：https://mify.mioffice.cn/datasets?category=api
 
 ### 2.4 当前知识库信息
 
-| 知识库名称 | ID | 文档数 | 描述 |
-|-----------|-----|--------|------|
-| 数据产品SQL | `a04075ee-8270-4c30-bd7d-1329bb0aad51` | 10 | SQL 相关知识 |
-| 数据产品知识库beta | `220c4b24-2575-4f39-aade-e594f8ae5323` | 7 | 数据产品知识 |
+本 agent **默认不绑定任何 Mify RAG 知识库**——唯一目标是飞书空间「内容生态数据产品知识库」。Mify 工具（`mify_search` / `mify_upload`）保留为可选语义检索能力，调用时必须显式传 `kb_name`。如果团队后续需要把内容生态空间同步到 Mify，再到 `agents/know/config.py` 的 `MIFY_KNOWLEDGE_BASES` 中登记。
 
 ### 2.5 操作前必须执行预检
 
@@ -326,12 +319,13 @@ python3 "$SKILL_DIR/scripts/search_knowledge_base.py" --kb "名称" --query "关
 
 - [ ] 检查 `feishu` CLI 是否可用：`feishu --version`
 - [ ] 检查认证状态：`feishu auth status`（`logged_in: true`）
-- [ ] 验证知识库可访问：`feishu wiki nodes 7631112709378935772`
-- [ ] 测试读取文档：`feishu fetch https://mi.feishu.cn/wiki/FMzywY49iiCUpZkUo9FcZI8Gnfg`
+- [ ] 验证知识库可访问：`feishu wiki nodes 7560912865739997187`
+- [ ] 测试搜索：`feishu search "数据产品"`（应能命中至少一篇空间内文档）
 
-### Mify 知识库
+### Mify 知识库（可选，本 agent 默认不绑定）
+
+仅在团队登记了与本空间对应的 Mify KB 后才需校验：
 
 - [ ] 检查全局配置：`cat ~/.mify/config.json`（需含 email 和 api_key）
 - [ ] 检查项目配置：`cat .mify/config.json`（需含 default_profile 和 search_profiles）
 - [ ] 运行预检：`python3 ~/.trae-cn/skills/mify-knowledge-base/scripts/preflight.py`（`ready: true`）
-- [ ] 测试搜索：`python3 ~/.trae-cn/skills/mify-knowledge-base/scripts/search_knowledge_base.py --kb "数据产品SQL" --query "测试"`

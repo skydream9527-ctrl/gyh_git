@@ -1,0 +1,24 @@
+version: "1.0"
+description: 自建数据分析（都江堰自建信息流）知识库索引
+
+directories:
+  - name: sql
+    description: 取数模板与示例
+    load_strategy: required
+    files:
+      - model.sql        # 都江堰 DAU 用户消费明细底表 SELECT 模板（CTE 主体）
+      - cte_template.md  # CTE 拼接模式说明 + 使用规则
+      - examples.md      # 三条标准示例 SQL（实验组 / 体裁 / DAU）
+
+  - name: metrics
+    description: 维度与指标字典（dimensions / indexes 的 CSV 原文）
+    load_strategy: required
+    files:
+      - dimensions.csv   # 60 个维度，含 fieldType=5 计算维度
+      - indexes.csv      # 100+ 指标，含 fieldType=4 派生指标
+
+  - name: tables
+    description: 主底表与字段说明
+    load_strategy: on_demand
+    files:
+      - djy_dau_user_consum_index_di.md

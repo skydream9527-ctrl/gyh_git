@@ -101,7 +101,7 @@ async def test_me_with_jwt_works(isolated_data_root, dev_bypass_env):
     await bootstrap()
     from app.main import app
 
-    creds = await auth_svc.password_login("admin", "admin123")
+    creds = await auth_svc.password_login("admin", "Test-Admin-Pw-2026!")
     token = creds["tokens"]["access_token"]
     client = TestClient(app)
     r = client.get("/api/v1/auth/me", headers={"Authorization": f"Bearer {token}"})
@@ -118,7 +118,7 @@ async def test_login_with_correct_password_still_works(
 
     client = TestClient(app)
     r = client.post(
-        "/api/v1/auth/login", json={"email": "admin", "password": "admin123"}
+        "/api/v1/auth/login", json={"email": "admin", "password": "Test-Admin-Pw-2026!"}
     )
     assert r.status_code == 200
     body = r.json()["data"]

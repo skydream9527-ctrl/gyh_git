@@ -15,31 +15,31 @@
 - **实验 ID**：纯数字
 - **日期范围**：起止日期（支持 `4.9` / `2026-04-09` / `20260409`）
 
-### 2. 执行分析脚本
+### 2. 调用 volcano_abtest_analyze 工具
 
-参数齐全后**立即执行**，不要二次确认：
+参数齐全后**立即调用工具**，不要二次确认：
 
-```bash
-python3 agents/volcano-abtest/scripts/analyze.py \
-  -m <媒体> -e <实验ID> -s <开始日期> -d <结束日期>
+```
+volcano_abtest_analyze(
+  media="browser" | "newhome",   # 也接受 浏览器/内容中心/桌面内容中心/nh/mcc
+  exp_id="<实验ID>",
+  start_date="<开始>",
+  end_date="<结束>"
+)
 ```
 
-参数说明：
-- `-m`：浏览器/browser、内容中心/newhome/nh/mcc
-- `-e`：实验 ID
-- `-s`：开始日期（4.9 / 2026-04-09 / 20260409）
-- `-d`：结束日期（同上）
-
-脚本自动完成：
+工具内部完成：
 - 切换 datum 工作空间「数据研发」
 - 查加权平均指标（含有效用户率）
 - 查 p 值表获取显著性
 - 查逐日趋势
 - 输出 markdown 报告
 
+返回字段 `report_md` 即完整 markdown 报告，已自动保存到任务工作区文件 `abtest_<media>_<exp_id>_<起>-<止>.md`。
+
 ### 3. 撰写实验分析
 
-脚本输出表格后，**必须**在末尾追加 `### 实验分析` 章节：
+把 `report_md` 原样粘到回复里，然后**必须**在末尾追加 `### 实验分析` 章节：
 
 1. **整体判断**：一句话总结哪个组最优、组间排序
 2. **逐组分析**：每个实验组的核心变化与背后逻辑
@@ -64,13 +64,17 @@ python3 agents/volcano-abtest/scripts/analyze.py \
 
 ## 依赖
 
-- datum CLI（`~/bin/datum`），已配置「数据研发」工作空间
+- 后端宿主机已安装 datum CLI 并配置「数据研发」工作空间
 - 表权限：
   - 原始表：`doris_zjyprc_hadoop.browser.ads_browser_toutiao_abtest_common_1d` / `ads_newhome_toutiao_abtest_common_1d`
   - P 值表：`doris_zjyprc_hadoop.browser.dm_browser_toutiao_abtest_pvalue_df` / `dm_newhome_toutiao_abtest_pvalue_df`
 
-## 注意
+## 错误处理
 
-- 脚本超时 300 秒，正常查询 30-60 秒
-- 脚本报错时依次检查：1) datum 是否在 `~/bin/datum`；2) 网络连通性；3) 表权限
-- p 值表可能没有最新日期数据，此时显著性列为空
+工具返回的 `error_code` → 用户可读提示：
+- `DATUM_NOT_INSTALLED`：告知管理员后端环境缺 datum CLI
+- `VOLCANO_ABTEST_TIMEOUT`：查询超时（>320s），通常是 datum 排队或权限受限
+- `VOLCANO_ABTEST_FAILED`：脚本非零退出，把 `message` 中的 stderr 反馈给用户
+- `VOLCANO_ABTEST_EMPTY`：该实验在该日期范围无数据，请用户核对实验 ID / 日期
+- `VALIDATION_ERROR`：参数不合法，按 `message` 重新与用户确认
+- p 值表可能没有最新日期数据，此时 `report_md` 中显著性列为空，属于正常情况

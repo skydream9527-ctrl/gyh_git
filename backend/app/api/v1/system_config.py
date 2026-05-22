@@ -11,15 +11,23 @@ router = APIRouter()
 
 @router.get("/global-toggles")
 async def global_toggles():
+    """Public toggles consumed by the login screen and the upload widget.
+
+    The response is intentionally narrow: it only carries flags the
+    pre-auth UI needs to decide which login methods to render, plus the
+    upload caps which are non-sensitive (and an attacker would learn them
+    from a single failed upload anyway). Internal toggles such as Feishu
+    auto-register / strict-whitelist are NOT exposed here — admins can
+    read the full set via /admin/settings/toggles.
+    """
     s = get_settings()
     toggles = sysconfig_svc.get_toggles()
     params = sysconfig_svc.get_system_params()
     return ok(
         {
-            **toggles,
+            "enable_open_register": bool(toggles.get("enable_open_register", False)),
             "feishu_enabled": s.feishu_enabled,
             "llm_enabled": s.llm_enabled,
-            "kyuubi_enabled": s.kyuubi_enabled,
             "voice_enabled": s.voice_enabled,
             "upload_max_size_mb": params["upload_max_size_mb"],
             "upload_max_size_hard_cap_mb": params["upload_max_size_hard_cap_mb"],

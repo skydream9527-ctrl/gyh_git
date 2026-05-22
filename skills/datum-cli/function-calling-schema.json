@@ -1,0 +1,563 @@
+[
+  {
+    "name": "datum_catalog_list",
+    "description": "列出当前工作空间下所有可用的 Catalog。Catalog 是数据资产的顶层组织单位，查询数据库或表之前通常先调用此接口确认 Catalog 名称。",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "service": {
+          "type": "string",
+          "description": "按表类型过滤（可选）"
+        },
+        "engine": {
+          "type": "string",
+          "description": "按执行引擎过滤（可选）"
+        }
+      },
+      "required": []
+    },
+    "implementation": "datum catalog list -o json"
+  },
+  {
+    "name": "datum_database_list",
+    "description": "列出指定 Catalog 下的所有数据库。需要提供 Catalog 名称，可通过 datum_catalog_list 获取。",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "catalog": {
+          "type": "string",
+          "description": "Catalog 名称（必填），可通过 datum_catalog_list 获取"
+        },
+        "keyword": {
+          "type": "string",
+          "description": "搜索关键词（可选）"
+        },
+        "has_permission": {
+          "type": "boolean",
+          "description": "设为 true 只返回当前 Token 有权限的数据库（可选）"
+        }
+      },
+      "required": ["catalog"]
+    },
+    "implementation": "datum database list --catalog {catalog} -o json"
+  },
+  {
+    "name": "datum_table_list",
+    "description": "搜索或列出工作空间中的表。支持按 catalog、database、关键词、owner、类型等多维度筛选。不知道表位置时用 keyword 搜索。",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "catalog": {
+          "type": "string",
+          "description": "Catalog 名称（可选）"
+        },
+        "database": {
+          "type": "string",
+          "description": "数据库名称（可选）"
+        },
+        "keyword": {
+          "type": "string",
+          "description": "搜索关键词（可选），匹配表名"
+        },
+        "owner": {
+          "type": "string",
+          "description": "按表 Owner 过滤（可选）"
+        },
+        "type": {
+          "type": "string",
+          "description": "表类型（可选），如 hive、iceberg、doris"
+        },
+        "page": {
+          "type": "integer",
+          "description": "页码，默认 1"
+        },
+        "page_size": {
+          "type": "integer",
+          "description": "每页数量，默认 20"
+        }
+      },
+      "required": []
+    },
+    "implementation": "datum table list -o json"
+  },
+  {
+    "name": "datum_table_get",
+    "description": "获取指定表的详细信息，包括表类型、Owner、创建时间、存储位置等元数据。调用前请确认 catalog 和 database 名称正确，可通过 datum_catalog_list 和 datum_database_list 获取。",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "catalog": {
+          "type": "string",
+          "description": "Catalog 名称，可通过 datum_catalog_list 获取"
+        },
+        "database": {
+          "type": "string",
+          "description": "数据库名称，可通过 datum_database_list 获取"
+        },
+        "table": {
+          "type": "string",
+          "description": "表的英文名称"
+        }
+      },
+      "required": ["catalog", "database", "table"]
+    },
+    "implementation": "datum table get --catalog {catalog} --db {database} --table {table} -o json"
+  },
+  {
+    "name": "datum_table_columns",
+    "description": "获取表的字段列表，包括字段名、数据类型和注释说明。用于了解表结构时调用。",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "catalog": {
+          "type": "string",
+          "description": "Catalog 名称"
+        },
+        "database": {
+          "type": "string",
+          "description": "数据库名称"
+        },
+        "table": {
+          "type": "string",
+          "description": "表的英文名称"
+        }
+      },
+      "required": ["catalog", "database", "table"]
+    },
+    "implementation": "datum table columns --catalog {catalog} --db {database} --table {table} -o json"
+  },
+  {
+    "name": "datum_table_ddl",
+    "description": "获取表的建表 DDL 语句（CREATE TABLE ...）。用于了解完整表结构定义、字段约束、分区设置等。",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "catalog": {
+          "type": "string",
+          "description": "Catalog 名称"
+        },
+        "database": {
+          "type": "string",
+          "description": "数据库名称"
+        },
+        "table": {
+          "type": "string",
+          "description": "表的英文名称"
+        }
+      },
+      "required": ["catalog", "database", "table"]
+    },
+    "implementation": "datum table ddl --catalog {catalog} --db {database} --table {table} -o json"
+  },
+  {
+    "name": "datum_partition_list",
+    "description": "列出表的分区信息。支持过滤表达式（如 dateint>=20240101）筛选特定分区范围。",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "catalog": {
+          "type": "string",
+          "description": "Catalog 名称"
+        },
+        "database": {
+          "type": "string",
+          "description": "数据库名称"
+        },
+        "table": {
+          "type": "string",
+          "description": "表的英文名称"
+        },
+        "filter": {
+          "type": "string",
+          "description": "分区过滤表达式（可选），如 \"dateint>=20240101\" 或 \"dt=2024-01-01\""
+        }
+      },
+      "required": ["catalog", "database", "table"]
+    },
+    "implementation": "datum partition list --catalog {catalog} --db {database} --table {table} -o json"
+  },
+  {
+    "name": "datum_job_list",
+    "description": "列出当前工作空间中的单节点任务。支持按关键词、任务类型筛选。常见类型：spark-sql、flink-sql、shell 等。",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "keyword": {
+          "type": "string",
+          "description": "搜索关键词（可选），匹配任务名称"
+        },
+        "type": {
+          "type": "string",
+          "description": "任务类型（可选），如 spark-sql、flink-sql、shell、notebook 等"
+        },
+        "page": {
+          "type": "integer",
+          "description": "页码，默认 1"
+        },
+        "page_size": {
+          "type": "integer",
+          "description": "每页数量，默认 20"
+        }
+      },
+      "required": []
+    },
+    "implementation": "datum job list -o json"
+  },
+  {
+    "name": "datum_job_get",
+    "description": "获取指定任务的详细信息，包括任务类型、状态、配置、调度设置等。",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "job_id": {
+          "type": "string",
+          "description": "任务 ID"
+        }
+      },
+      "required": ["job_id"]
+    },
+    "implementation": "datum job get --job-id {job_id} -o json"
+  },
+  {
+    "name": "datum_job_start",
+    "description": "手动启动（触发一次运行）指定任务。请先确认任务已处于上线状态，否则启动会失败。",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "job_id": {
+          "type": "string",
+          "description": "任务 ID"
+        }
+      },
+      "required": ["job_id"]
+    },
+    "implementation": "datum job start --job-id {job_id} -o json"
+  },
+  {
+    "name": "datum_job_stop",
+    "description": "停止正在运行中的任务。该操作为破坏性操作，执行前建议先用 datum_job_get 确认任务状态。",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "job_id": {
+          "type": "string",
+          "description": "任务 ID"
+        }
+      },
+      "required": ["job_id"]
+    },
+    "implementation": "datum job stop --job-id {job_id} -o json"
+  },
+  {
+    "name": "datum_workflow_list",
+    "description": "列出当前工作空间中的工作流（多节点任务编排）。支持关键词搜索。",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "keyword": {
+          "type": "string",
+          "description": "搜索关键词（可选），匹配工作流名称"
+        },
+        "page": {
+          "type": "integer",
+          "description": "页码，默认 1"
+        },
+        "page_size": {
+          "type": "integer",
+          "description": "每页数量，默认 20"
+        }
+      },
+      "required": []
+    },
+    "implementation": "datum workflow list -o json"
+  },
+  {
+    "name": "datum_workflow_run",
+    "description": "运行工作流的所有节点。该操作会触发完整的工作流执行，请确认工作流已上线。",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "workflow_id": {
+          "type": "string",
+          "description": "工作流 ID"
+        }
+      },
+      "required": ["workflow_id"]
+    },
+    "implementation": "datum workflow run --id {workflow_id} -o json"
+  },
+  {
+    "name": "datum_dag_overview",
+    "description": "获取当前工作空间所有 DAG 的全局状态概览，包括各状态（运行中、成功、失败、停止）的数量汇总。",
+    "parameters": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    },
+    "implementation": "datum dag overview -o json"
+  },
+  {
+    "name": "datum_dag_list",
+    "description": "列出 DAG 运行记录。可按状态筛选，常用于查看失败的 DAG 进行排查。",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "description": "按状态筛选（可选）：RUNNING、FAILED、SUCCESS、STOPPED"
+        },
+        "page": {
+          "type": "integer",
+          "description": "页码，默认 1"
+        },
+        "page_size": {
+          "type": "integer",
+          "description": "每页数量，默认 20"
+        }
+      },
+      "required": []
+    },
+    "implementation": "datum dag list -o json"
+  },
+  {
+    "name": "datum_dag_get",
+    "description": "获取指定 DAG 运行的详情，包括所有节点的执行状态、开始/结束时间等。可用于找到失败节点的 task-id。",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "dag_id": {
+          "type": "string",
+          "description": "DAG 运行 ID"
+        }
+      },
+      "required": ["dag_id"]
+    },
+    "implementation": "datum dag get --dag-id {dag_id} -o json"
+  },
+  {
+    "name": "datum_dag_retry_failed",
+    "description": "重试 DAG 中所有失败的节点，无需重跑整个 DAG，已成功的节点不会重复执行。",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "dag_id": {
+          "type": "string",
+          "description": "DAG 运行 ID"
+        }
+      },
+      "required": ["dag_id"]
+    },
+    "implementation": "datum dag retry-failed --dag-id {dag_id} -o json"
+  },
+  {
+    "name": "datum_dag_task_log",
+    "description": "获取 DAG 中某个任务实例的运行日志文本，用于排查失败原因。task_id 可从 datum_dag_get 的返回结果中获取。",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "task_id": {
+          "type": "string",
+          "description": "DAG 任务实例 ID，可从 datum_dag_get 返回结果中获取"
+        }
+      },
+      "required": ["task_id"]
+    },
+    "implementation": "datum dag task log --task-id {task_id} -o json"
+  },
+  {
+    "name": "datum_kestra_flow_get",
+    "description": "获取指定 Kestra Flow 的完整定义（YAML/JSON 格式）。需要提供 namespace 和 flow ID。",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "namespace": {
+          "type": "string",
+          "description": "Kestra 命名空间"
+        },
+        "flow_id": {
+          "type": "string",
+          "description": "Flow ID"
+        }
+      },
+      "required": ["namespace", "flow_id"]
+    },
+    "implementation": "datum kestra flow get --namespace {namespace} --id {flow_id} -o json"
+  },
+  {
+    "name": "datum_kestra_flow_search",
+    "description": "搜索 Kestra Flow，支持按关键词和 namespace 过滤。",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "q": {
+          "type": "string",
+          "description": "搜索关键词（可选）"
+        },
+        "namespace": {
+          "type": "string",
+          "description": "命名空间过滤（可选）"
+        },
+        "page": {
+          "type": "integer",
+          "description": "页码，默认 1"
+        },
+        "size": {
+          "type": "integer",
+          "description": "每页数量，默认 20"
+        }
+      },
+      "required": []
+    },
+    "implementation": "datum kestra flow search -o json"
+  },
+  {
+    "name": "datum_kestra_execution_trigger",
+    "description": "手动触发指定 Kestra Flow 执行一次，不等待调度时间。返回新创建的 Execution 详情。",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "namespace": {
+          "type": "string",
+          "description": "Kestra 命名空间"
+        },
+        "flow_id": {
+          "type": "string",
+          "description": "Flow ID"
+        }
+      },
+      "required": ["namespace", "flow_id"]
+    },
+    "implementation": "datum kestra execution trigger --namespace {namespace} --id {flow_id} -o json"
+  },
+  {
+    "name": "datum_kestra_execution_get",
+    "description": "获取 Kestra Execution 的详细状态，包括各 Task 的运行情况、开始/结束时间、状态等。",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "execution_id": {
+          "type": "string",
+          "description": "Execution ID"
+        }
+      },
+      "required": ["execution_id"]
+    },
+    "implementation": "datum kestra execution get --execution-id {execution_id} -o json"
+  },
+  {
+    "name": "datum_kestra_execution_search",
+    "description": "搜索 Kestra Execution 记录，支持按 namespace、flow ID、执行状态等条件过滤。",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "namespace": {
+          "type": "string",
+          "description": "命名空间过滤（可选）"
+        },
+        "flow_id": {
+          "type": "string",
+          "description": "Flow ID 过滤（可选）"
+        },
+        "state": {
+          "type": "string",
+          "description": "执行状态过滤（可选）：RUNNING、FAILED、SUCCESS、WARNING"
+        },
+        "page": {
+          "type": "integer",
+          "description": "页码，默认 1"
+        },
+        "size": {
+          "type": "integer",
+          "description": "每页数量，默认 20"
+        }
+      },
+      "required": []
+    },
+    "implementation": "datum kestra execution search -o json"
+  },
+  {
+    "name": "datum_kestra_log_get",
+    "description": "获取 Kestra Execution 的运行日志。可指定最低日志级别过滤，如只看 WARN 及以上级别。",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "execution_id": {
+          "type": "string",
+          "description": "Execution ID"
+        },
+        "min_level": {
+          "type": "string",
+          "description": "最低日志级别（可选）：TRACE、DEBUG、INFO、WARN、ERROR"
+        }
+      },
+      "required": ["execution_id"]
+    },
+    "implementation": "datum kestra log get --execution-id {execution_id} -o json"
+  },
+  {
+    "name": "datum_workspace_info",
+    "description": "获取当前工作空间的基本信息，包括工作空间名称、ID、区域、所有者等。",
+    "parameters": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    },
+    "implementation": "datum workspace info -o json"
+  },
+  {
+    "name": "datum_token_info",
+    "description": "获取当前使用的 Token 的详情，包括归属工作空间、创建时间、权限范围等。",
+    "parameters": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    },
+    "implementation": "datum token info -o json"
+  },
+  {
+    "name": "datum_permission_check",
+    "description": "检查指定表的访问权限控制状态，返回当前权限配置信息。",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "catalog": {
+          "type": "string",
+          "description": "Catalog 名称"
+        },
+        "database": {
+          "type": "string",
+          "description": "数据库名称"
+        },
+        "table": {
+          "type": "string",
+          "description": "表的英文名称"
+        }
+      },
+      "required": ["catalog", "database", "table"]
+    },
+    "implementation": "datum permission check --catalog {catalog} --db {database} --table {table} -o json"
+  },
+  {
+    "name": "datum_token_check",
+    "description": "检查当前 Token 对指定表的权限关系。返回空数组表示无权限问题，返回权限详情表示存在限制。",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "catalog": {
+          "type": "string",
+          "description": "Catalog 名称"
+        },
+        "database": {
+          "type": "string",
+          "description": "数据库名称"
+        },
+        "table": {
+          "type": "string",
+          "description": "表的英文名称"
+        }
+      },
+      "required": ["catalog", "database", "table"]
+    },
+    "implementation": "datum token check --catalog {catalog} --db {database} --table {table} -o json"
+  }
+]

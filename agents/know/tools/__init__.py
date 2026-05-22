@@ -4,12 +4,16 @@ from __future__ import annotations
 import json
 import subprocess
 import logging
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from config import FEISHU_SPACE_ID  # noqa: E402
 
 logger = logging.getLogger(__name__)
 
 FEISHU_CLI = "feishu"
 MIFY_SKILL_DIR = "~/.trae-cn/skills/mify-knowledge-base"
-DEFAULT_KB = "数据产品知识库beta"
 
 
 def handle_feishu_read(url: str) -> str:
@@ -32,7 +36,7 @@ def handle_feishu_write(title: str, content: str, parent_node: str = "") -> str:
     if parent_node:
         cmd.extend(["--wiki-node", parent_node])
     else:
-        cmd.extend(["--wiki-space", "7631112709378935772"])
+        cmd.extend(["--wiki-space", FEISHU_SPACE_ID])
     try:
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
         if result.returncode in (0, 2, 3):
@@ -59,7 +63,7 @@ def handle_feishu_search(query: str) -> str:
         return json.dumps({"success": False, "error": "feishu CLI not installed"})
 
 
-def handle_mify_search(query: str, kb_name: str = DEFAULT_KB, top_k: int = 5) -> str:
+def handle_mify_search(query: str, kb_name: str, top_k: int = 5) -> str:
     import os
     skill_dir = os.path.expanduser(MIFY_SKILL_DIR)
     script = f"{skill_dir}/scripts/search_knowledge_base.py"

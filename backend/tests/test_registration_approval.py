@@ -27,7 +27,7 @@ async def _prepare():
 @pytest.mark.asyncio
 async def test_register_creates_pending_user_without_tokens(isolated_data_root):
     await _prepare()
-    result = await auth_svc.register("alice@example.com", "Alice", "secret123")
+    result = await auth_svc.register("alice@example.com", "Alice", "Test-Pw-2026!")
     assert result["status"] == "pending"
     # Backend returns the public user summary but NO tokens.
     assert "tokens" not in result
@@ -43,9 +43,9 @@ async def test_register_creates_pending_user_without_tokens(isolated_data_root):
 @pytest.mark.asyncio
 async def test_password_login_blocked_when_pending(isolated_data_root):
     await _prepare()
-    await auth_svc.register("bob@example.com", "Bob", "secret123")
+    await auth_svc.register("bob@example.com", "Bob", "Test-Pw-2026!")
     with pytest.raises(APIError) as exc:
-        await auth_svc.password_login("bob@example.com", "secret123")
+        await auth_svc.password_login("bob@example.com", "Test-Pw-2026!")
     assert exc.value.error_code == "ACCOUNT_PENDING_APPROVAL"
     assert exc.value.status_code == 403
 
@@ -56,7 +56,7 @@ async def test_pending_account_wrong_password_still_invalid_credentials(isolated
     attempts; they should see INVALID_CREDENTIALS just like a non-existent
     account."""
     await _prepare()
-    await auth_svc.register("carol@example.com", "Carol", "secret123")
+    await auth_svc.register("carol@example.com", "Carol", "Test-Pw-2026!")
     with pytest.raises(APIError) as exc:
         await auth_svc.password_login("carol@example.com", "wrongwrong")
     assert exc.value.error_code == "INVALID_CREDENTIALS"
@@ -66,7 +66,7 @@ async def test_pending_account_wrong_password_still_invalid_credentials(isolated
 async def test_admin_approve_unlocks_login(isolated_data_root):
     await _prepare()
     admin = await auth_svc.load_user_by_email("admin")
-    await auth_svc.register("dave@example.com", "Dave", "secret123")
+    await auth_svc.register("dave@example.com", "Dave", "Test-Pw-2026!")
     dave = await auth_svc.load_user_by_email("dave@example.com")
     reviewed = await admin_svc.review_registration(
         operator=admin, uid=dave["id"], decision="approved"
@@ -74,7 +74,7 @@ async def test_admin_approve_unlocks_login(isolated_data_root):
     assert reviewed["status"] == "active"
     assert reviewed["reviewed_by"] == admin["id"]
     # Now login works.
-    result = await auth_svc.password_login("dave@example.com", "secret123")
+    result = await auth_svc.password_login("dave@example.com", "Test-Pw-2026!")
     assert result["tokens"]["access_token"]
 
 
@@ -82,7 +82,7 @@ async def test_admin_approve_unlocks_login(isolated_data_root):
 async def test_admin_reject_sets_status_and_reason(isolated_data_root):
     await _prepare()
     admin = await auth_svc.load_user_by_email("admin")
-    await auth_svc.register("eve@example.com", "Eve", "secret123")
+    await auth_svc.register("eve@example.com", "Eve", "Test-Pw-2026!")
     eve = await auth_svc.load_user_by_email("eve@example.com")
     reviewed = await admin_svc.review_registration(
         operator=admin,
@@ -94,7 +94,7 @@ async def test_admin_reject_sets_status_and_reason(isolated_data_root):
     assert reviewed["reject_reason"] == "non-business email"
     # Login now shows ACCOUNT_REJECTED with the reason.
     with pytest.raises(APIError) as exc:
-        await auth_svc.password_login("eve@example.com", "secret123")
+        await auth_svc.password_login("eve@example.com", "Test-Pw-2026!")
     assert exc.value.error_code == "ACCOUNT_REJECTED"
     assert "non-business email" in exc.value.message
 
@@ -105,7 +105,7 @@ async def test_rejected_account_can_be_re_approved(isolated_data_root):
     to active without re-registration."""
     await _prepare()
     admin = await auth_svc.load_user_by_email("admin")
-    await auth_svc.register("frank@example.com", "Frank", "secret123")
+    await auth_svc.register("frank@example.com", "Frank", "Test-Pw-2026!")
     frank = await auth_svc.load_user_by_email("frank@example.com")
     await admin_svc.review_registration(operator=admin, uid=frank["id"], decision="rejected")
     reviewed = await admin_svc.review_registration(
@@ -113,7 +113,7 @@ async def test_rejected_account_can_be_re_approved(isolated_data_root):
     )
     assert reviewed["status"] == "active"
     assert reviewed["reject_reason"] is None
-    result = await auth_svc.password_login("frank@example.com", "secret123")
+    result = await auth_svc.password_login("frank@example.com", "Test-Pw-2026!")
     assert result["tokens"]["access_token"]
 
 
@@ -134,7 +134,7 @@ async def test_resubmit_same_email_returns_pending_error(isolated_data_root):
     """If a user re-submits while still pending, they see a specific error
     (not the generic EMAIL_ALREADY_EXISTS) so the UI can prompt them to wait."""
     await _prepare()
-    await auth_svc.register("grace@example.com", "Grace", "secret123")
+    await auth_svc.register("grace@example.com", "Grace", "Test-Pw-2026!")
     with pytest.raises(APIError) as exc:
-        await auth_svc.register("grace@example.com", "Grace", "secret456")
+        await auth_svc.register("grace@example.com", "Grace", "Other-Pw-2026!")
     assert exc.value.error_code == "ACCOUNT_PENDING_APPROVAL"

@@ -7,10 +7,9 @@ Per-request resolution order:
   2. `Authorization: Bearer <jwt>` header present → decode JWT and load user
      from the local users index.
   3. Dev escape hatch: `AEGIS_DEV_BYPASS_EMAIL` set AND the request opts in
-     by sending `X-Dev-Bypass: 1` → synthesize that user. Without the
-     header the bypass is INERT — that prevents the SPA's bootstrapMe()
-     from silently auto-logging anyone in as the bypass account, which would
-     defeat the password gate on /auth/login.
+     by sending `X-Dev-Bypass: 1` AND the request originates from a loopback
+     address → synthesize that user. Loopback gate keeps a leaked .env from
+     turning a LAN-exposed dev server into anyone-is-admin.
   4. Neither → 401.
 
 Either path is optional; admins choose per deployment (米盾-only prod, mixed,
@@ -22,7 +21,7 @@ from __future__ import annotations
 import enum
 import logging
 
-from fastapi import Depends, Header, Query, WebSocket
+from fastapi import Depends, Header, Query, Request, WebSocket
 
 from ..services.auth_svc import ensure_user_for_email, load_user_by_id
 from .aegis import AegisUser, AegisVerifyError, verify
@@ -138,11 +137,26 @@ def _stamp_is_admin(user: dict) -> dict:
     return user
 
 
+# `testclient` is the hardcoded host Starlette's TestClient injects in
+# request.client. It cannot be set by a real network caller, so accepting it
+# here just means the in-process test harness participates in the same
+# loopback-gated dev_bypass as real local-curl traffic.
+_LOOPBACK_HOSTS = {"127.0.0.1", "::1", "localhost", "testclient"}
+
+
+def _is_loopback(client_host: str | None) -> bool:
+    if not client_host:
+        return False
+    h = client_host.split("%")[0].strip().lower()  # strip IPv6 zone id
+    return h in _LOOPBACK_HOSTS
+
+
 async def _resolve_user(
     aegis_header: str | None,
     authorization: str | None,
     *,
     dev_bypass_opt_in: bool = False,
+    client_host: str | None = None,
 ) -> dict:
     settings = get_settings()
     u = await _try_aegis(aegis_header)
@@ -152,12 +166,19 @@ async def _resolve_user(
     if u:
         return _stamp_is_admin(u)
     # Dev bypass: only fire when the request EXPLICITLY opts in via the
-    # X-Dev-Bypass header. Without that, bootstrapMe() / /auth/me without a
-    # valid Bearer must 401 — otherwise wrong-password "logins" silently
-    # succeed because the frontend's follow-up /auth/me hits dev_bypass.
-    if settings.AEGIS_DEV_BYPASS_EMAIL and dev_bypass_opt_in:
+    # X-Dev-Bypass header AND originates from a loopback address. Without the
+    # opt-in, bootstrapMe() / /auth/me without a valid Bearer must 401 —
+    # otherwise wrong-password "logins" silently succeed via the follow-up
+    # /auth/me. The loopback gate is defense-in-depth: a forgotten
+    # AEGIS_DEV_BYPASS_EMAIL on a LAN-exposed dev server would otherwise
+    # let anyone with the LAN IP claim that user's identity.
+    if settings.AEGIS_DEV_BYPASS_EMAIL and dev_bypass_opt_in and _is_loopback(client_host):
         log.debug("aegis: dev bypass active as %s", settings.AEGIS_DEV_BYPASS_EMAIL)
         return _stamp_is_admin(await _dev_bypass_user(settings.AEGIS_DEV_BYPASS_EMAIL))
+    if settings.AEGIS_DEV_BYPASS_EMAIL and dev_bypass_opt_in and not _is_loopback(client_host):
+        log.warning(
+            "aegis dev_bypass refused: request from %s is non-loopback", client_host
+        )
     raise APIError(
         401,
         ErrorCode.TOKEN_INVALID,
@@ -174,6 +195,7 @@ async def resolve_user(aegis_header: str | None, authorization: str | None) -> d
 
 
 async def get_current_user(
+    request: Request,
     x_proxy_user_detail: str | None = Header(default=None, alias=_AEGIS_HEADER),
     authorization: str | None = Header(default=None),
     x_dev_bypass: str | None = Header(default=None, alias="X-Dev-Bypass"),
@@ -182,6 +204,7 @@ async def get_current_user(
         x_proxy_user_detail,
         authorization,
         dev_bypass_opt_in=bool(x_dev_bypass and x_dev_bypass.strip() not in ("", "0", "false")),
+        client_host=request.client.host if request.client else None,
     )
 
 

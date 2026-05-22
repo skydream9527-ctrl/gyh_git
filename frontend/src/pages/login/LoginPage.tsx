@@ -7,38 +7,12 @@ import { useUIStore } from "@/stores/uiStore";
 import "./Login.css";
 
 /**
- * 三种登录方式（后端 /auth/methods 控制可见性）：
+ * 两种登录方式（后端 /auth/methods 控制可见性）：
  *  ① 米盾代理：浏览器 cookie 由代理注入，进入页面自动 bootstrapMe。
  *  ② 账号密码：POST /auth/login 换 JWT。
- *  ③ 测试样例账号：一键预填密码调同一接口。
  */
 
-type Tab = "aegis" | "password" | "sample";
-
-interface SampleAccount {
-  email: string;
-  password: string;
-  name: string;
-  role: string;
-  hint: string;
-}
-
-const SAMPLE_ACCOUNTS: SampleAccount[] = [
-  {
-    email: "zhangmingyuan",
-    password: "test123",
-    name: "张明远",
-    role: "产品经理",
-    hint: "Growth 团队样例用户",
-  },
-  {
-    email: "lisihan",
-    password: "test123",
-    name: "李思涵",
-    role: "数据分析师",
-    hint: "Biz 团队样例用户",
-  },
-];
+type Tab = "aegis" | "password";
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -167,12 +141,21 @@ export function LoginPage() {
       pushToast("warning", "账号不能包含空格");
       return;
     }
-    if (password.length < 6) {
-      pushToast("warning", "密码至少 6 位");
+    if (password.length < 10) {
+      pushToast("warning", "密码至少 10 位");
       return;
     }
     if (password.length > 128) {
       pushToast("warning", "密码最长 128 位");
+      return;
+    }
+    const classes =
+      Number(/[a-z]/.test(password)) +
+      Number(/[A-Z]/.test(password)) +
+      Number(/[0-9]/.test(password)) +
+      Number(/[^A-Za-z0-9]/.test(password));
+    if (classes < 3) {
+      pushToast("warning", "密码需包含大小写字母 / 数字 / 符号中的任意 3 类");
       return;
     }
     if (password !== confirm) {
@@ -244,7 +227,7 @@ export function LoginPage() {
 
         <main className="login-right">
           <h1>登录</h1>
-          <p className="login-sub">三种登录方式任选其一</p>
+          <p className="login-sub">两种登录方式任选其一</p>
 
           <div className="login-tabs">
             {aegisTabVisible && (
@@ -265,13 +248,6 @@ export function LoginPage() {
                 🔑 账号密码
               </button>
             )}
-            <button
-              type="button"
-              className={`login-tab ${tab === "sample" ? "active" : ""}`}
-              onClick={() => setTab("sample")}
-            >
-              🧪 测试账号
-            </button>
           </div>
 
           {tab === "aegis" && aegisTabVisible && (
@@ -396,7 +372,7 @@ export function LoginPage() {
                       autoComplete="username"
                       value={form.email}
                       onChange={(e) => setForm({ ...form, email: e.target.value })}
-                      placeholder="例如 admin 或 zhangmingyuan"
+                      placeholder="账号或邮箱"
                     />
                   </label>
                   <label className="login-field">
@@ -466,7 +442,7 @@ export function LoginPage() {
                       autoComplete="new-password"
                       value={regForm.password}
                       onChange={(e) => setRegForm({ ...regForm, password: e.target.value })}
-                      placeholder="至少 6 位"
+                      placeholder="至少 10 位，含大小写/数字/符号 3 类"
                     />
                   </label>
                   <label className="login-field">
@@ -500,39 +476,6 @@ export function LoginPage() {
                   </div>
                 </form>
               )}
-            </div>
-          )}
-
-          {tab === "sample" && (
-            <div className="login-pane">
-              <div className="login-hint">
-                <div className="lh-body">
-                  开发 / 演示环境预置账号，点击任意卡片一键登录。
-                </div>
-              </div>
-              <div className="sample-grid">
-                {SAMPLE_ACCOUNTS.map((s) => (
-                  <button
-                    key={s.email}
-                    className="sample-card"
-                    type="button"
-                    disabled={submitting}
-                    onClick={() => submitPassword(s.email, s.password)}
-                  >
-                    <div className="sc-top">
-                      <span className="sc-avatar">{s.name[0]}</span>
-                      <div className="sc-meta">
-                        <div className="sc-name">{s.name}</div>
-                        <div className="sc-role">{s.role}</div>
-                      </div>
-                    </div>
-                    <div className="sc-hint">{s.hint}</div>
-                    <div className="sc-creds">
-                      账号 <code>{s.email}</code> · 密码 <code>{s.password}</code>
-                    </div>
-                  </button>
-                ))}
-              </div>
             </div>
           )}
 

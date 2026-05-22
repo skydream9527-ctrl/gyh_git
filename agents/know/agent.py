@@ -64,19 +64,19 @@ TOOLS = [
     ),
     ToolDef(
         name="mify_search",
-        description="通过 Mify RAG 进行语义知识检索",
+        description="通过 Mify RAG 进行语义知识检索（可选增强；本 agent 默认不绑定任何 Mify KB，调用时必须显式传 kb_name）",
         parameters={
             "type": "object",
             "properties": {
                 "query": {"type": "string", "description": "搜索问题"},
-                "kb_name": {"type": "string", "description": "知识库名称"},
+                "kb_name": {"type": "string", "description": "Mify 知识库名称（必填）"},
                 "top_k": {"type": "integer", "description": "返回结果数量", "default": 5},
             },
-            "required": ["query"],
+            "required": ["query", "kb_name"],
         },
         handler=lambda args: handle_mify_search(
             query=args["query"],
-            kb_name=args.get("kb_name", "数据产品知识库beta"),
+            kb_name=args["kb_name"],
             top_k=args.get("top_k", 5),
         ),
     ),

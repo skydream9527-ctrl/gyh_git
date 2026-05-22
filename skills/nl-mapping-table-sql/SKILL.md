@@ -9,26 +9,6 @@ description: 根据用户自然语言输入生成映射表（dim/dm/ads）相关
 
 ---
 
-## 公共原则：时间范围分窗（重要）
-
-生成 SQL 前先评估时间窗口，以适配 Kyuubi 工具运行时硬上限（300 秒）：
-
-| 用户给定的时间范围 | 处理方式 |
-|---|---|
-| 未指定 | 默认查最近 7 天，并在回复里明确告知用户 |
-| ≤ 7 天 | 单次查询 |
-| > 7 天 | **必须分窗**：按 7 天滚动循环，每窗一条 SQL，逐次调用 kyuubi_query |
-
-分窗时使用半开区间避免重叠：
-```sql
-WHERE date >= '{start_date}' AND date < '{end_date}'
-```
-
-**严禁**用 `UNION ALL` 把多个 7 天拼成一条大 SQL —— 仍是单次执行，没省扫描量。
-**严禁**对聚合结果（SUM/COUNT/AVG）做简单跨窗相加 —— 同一用户跨窗去重等场景会算错；正确做法是把每窗的明细取出后在 LLM 端二次聚合。
-
----
-
 ## 标准执行流程
 
 严格按以下顺序逐步执行，每步等待用户回复后再继续。
@@ -41,14 +21,22 @@ WHERE date >= '{start_date}' AND date < '{end_date}'
 > 1. 浏览器
 > 2. 浏览器信息流
 > 3. 内容中心
+> 4. 搜索
+> 5. 小说
 
 **业务线与参考文件映射表**：
 
-| 业务线 | 参考文件目录 |
-|--------|-------------|
-| 浏览器 | `reference/browser/` |
-| 浏览器信息流 | `reference/browser-feed/` |
-| 内容中心 | `reference/content-center/` |
+| 业务线 | 参考文件目录 | 数据层级 |
+|--------|-------------|---------|
+| 浏览器 | `reference/browser/` | 中间表 + 底表/宽表 |
+| 浏览器信息流 | `reference/browser-feed/` | 中间表 + 底表/宽表 |
+| 内容中心 | `reference/content-center/` | 中间表 + 底表/宽表 |
+| 搜索 | `reference/search/` | 中间表 + 底表/宽表（口径权威：[`reference/search/data_tables.yaml`](reference/search/data_tables.yaml)） |
+| 小说 | `reference/novel/` | 仅底表/宽表 |
+
+> **数据层级说明**：
+> - **中间表**（dm/ads/dim 层）：预聚合表，查询效率高，维度有限。优先使用。
+> - **底表/宽表**（dwm/dwd 层，参考文件以 `raw-` 前缀标识）：原始聚合表，支持更灵活的维度筛选，查询性能较低。当中间表不支持所需维度或指标时回退使用。
 
 ---
 
@@ -264,13 +252,36 @@ SQL 生成完成后，向用户展示以下信息：
 - 浏览器信息流：`reference/browser-feed/sql-templates.md`
 - 内容中心：`reference/content-center/sql-templates.md`
 
-### 指标查询参考文件
+### 指标查询参考文件（中间表 — dm/ads/dim 层）
 - 浏览器核心指标：`reference/browser/core-metrics-reference.md`
 - 浏览器商业化指标：`reference/browser/commerce-metrics-reference.md`
 - 浏览器信息流核心指标：`reference/browser-feed/core-metrics-reference.md`
 - 浏览器信息流商业化指标：`reference/browser-feed/commerce-metrics-reference.md`
 - 内容中心核心指标：`reference/content-center/core-metrics-reference.md`
 - 内容中心商业化指标：`reference/content-center/commerce-metrics-reference.md`
+
+### 指标查询参考文件（底表/宽表 — dwm/dwd 层，raw- 前缀）
+- 浏览器底表核心指标：`reference/browser/raw-core-metrics-reference.md`
+- 浏览器底表表结构&模板：`reference/browser/raw-core-metrics-tables.md`
+- 浏览器底表埋点指标：`reference/browser/raw-event-metrics-reference.md`
+- 浏览器底表指标名称索引：`reference/browser/raw-metric-name-index.md`
+- 浏览器底表指标维度索引：`reference/browser/raw-metric-dimension-index.md`
+- 浏览器信息流底表核心指标：`reference/browser-feed/raw-core-metrics-reference.md`
+- 浏览器信息流底表表结构&模板：`reference/browser-feed/raw-core-metrics-tables.md`
+- 浏览器信息流底表埋点指标：`reference/browser-feed/raw-event-metrics-reference.md`
+- 浏览器信息流底表指标名称索引：`reference/browser-feed/raw-metric-name-index.md`
+- 浏览器信息流底表指标维度索引：`reference/browser-feed/raw-metric-dimension-index.md`
+- 内容中心底表核心指标：`reference/content-center/raw-core-metrics-reference.md`
+- 内容中心底表表结构&模板：`reference/content-center/raw-core-metrics-tables.md`
+- 内容中心底表埋点指标：`reference/content-center/raw-event-metrics-reference.md`
+- 内容中心底表指标名称索引：`reference/content-center/raw-metric-name-index.md`
+- 内容中心底表指标维度索引：`reference/content-center/raw-metric-dimension-index.md`
+- 搜索口径权威 YAML：`reference/search/data_tables.yaml`
+- 搜索表结构：`reference/search/table-schema.md`
+- 搜索核心指标（含 dm/ads 中间表 SQL）：`reference/search/raw-core-metrics-reference.md`
+- 搜索底表埋点指标：`reference/search/raw-event-metrics-reference.md`
+- 小说底表核心指标：`reference/novel/raw-core-metrics-reference.md`
+- 小说底表埋点指标：`reference/novel/raw-event-metrics-reference.md`
 
 ### 不支持维度参考文件
 - 不在dm表中的维度：`reference/unsupported-dimensions.md`
