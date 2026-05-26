@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { adminApi } from "@/api/endpoints";
-import type { AdminAgent, AgentPromptSnapshot } from "@/api/endpoints";
+import type { AdminAgent, AdminAgentFeatures, AgentPromptSnapshot } from "@/api/endpoints";
 import { ConfirmModal } from "@/components/feedback/ConfirmModal";
 import { Skeleton } from "@/components/feedback/Skeleton";
 import { useUIStore } from "@/stores/uiStore";
@@ -32,6 +32,15 @@ export function AdminAgentEdit() {
     system_prompt: "",
     change_note: "",
   });
+  // Three-state: true (force on) / false (force off) / null (inherit env)
+  const [features, setFeatures] = useState<{
+    [K in keyof AdminAgentFeatures]: boolean | null;
+  }>({
+    spawn_subagent: null,
+    run_background: null,
+    todo_write: null,
+    exit_plan_mode: null,
+  });
   const [saving, setSaving] = useState(false);
   const [confirmSave, setConfirmSave] = useState(false);
   const [testInput, setTestInput] = useState("");
@@ -50,6 +59,13 @@ export function AdminAgentEdit() {
       system_prompt: a.system_prompt || "",
       change_note: "",
     });
+    const f = a.features || {};
+    setFeatures({
+      spawn_subagent: f.spawn_subagent ?? null,
+      run_background: f.run_background ?? null,
+      todo_write: f.todo_write ?? null,
+      exit_plan_mode: f.exit_plan_mode ?? null,
+    });
     const h = await adminApi.promptHistory(agentId);
     setHistory(h.items);
   };
@@ -62,6 +78,12 @@ export function AdminAgentEdit() {
   const save = async () => {
     setSaving(true);
     try {
+      // Strip null entries — backend treats absent keys as "no override".
+      const featPayload: AdminAgentFeatures = {};
+      (Object.keys(features) as (keyof AdminAgentFeatures)[]).forEach((k) => {
+        const v = features[k];
+        if (v !== null && v !== undefined) featPayload[k] = v;
+      });
       await adminApi.updateAgent(agentId, {
         name: form.name,
         description: form.description,
@@ -69,6 +91,7 @@ export function AdminAgentEdit() {
         color: form.color,
         publish_status: form.publish_status,
         system_prompt: form.system_prompt,
+        features: featPayload,
         change_note: form.change_note || undefined,
       });
       pushToast("success", "已保存");
@@ -182,6 +205,65 @@ export function AdminAgentEdit() {
               Color
               <input value={form.color} onChange={(e) => setForm({ ...form, color: e.target.value })} />
             </label>
+          </div>
+          <h3 style={{ fontFamily: "var(--font-head)", fontSize: 14, margin: "22px 0 10px" }}>
+            🛠 Runtime 能力开关
+          </h3>
+          <p style={{ color: "var(--text-muted)", fontSize: 12, margin: "0 0 10px" }}>
+            「继承全局」= 跟随 .env 的 ICE_*_ENABLED；强制开 / 关 = 仅对本 Agent 生效，
+            优先级高于全局开关。
+          </p>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: 10,
+              background: "var(--surface-2)",
+              border: "1px solid var(--border)",
+              borderRadius: 8,
+              padding: 12,
+            }}
+          >
+            {(
+              [
+                { key: "spawn_subagent", label: "spawn_subagent（派子 agent）", env: "ICE_SUBAGENT_ENABLED" },
+                { key: "run_background", label: "run_background（后台任务）", env: "ICE_BG_TASK_ENABLED" },
+                { key: "todo_write", label: "todo_write（自维护待办）", env: "ICE_TODO_ENABLED" },
+                { key: "exit_plan_mode", label: "exit_plan_mode（计划模式）", env: "ICE_PLAN_MODE_ENABLED" },
+              ] as { key: keyof AdminAgentFeatures; label: string; env: string }[]
+            ).map((f) => {
+              const cur = features[f.key];
+              const value = cur === true ? "on" : cur === false ? "off" : "inherit";
+              return (
+                <label
+                  key={f.key}
+                  style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 12 }}
+                >
+                  <span>{f.label}</span>
+                  <select
+                    value={value}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      setFeatures((prev) => ({
+                        ...prev,
+                        [f.key]: v === "on" ? true : v === "off" ? false : null,
+                      }));
+                    }}
+                    style={{
+                      background: "var(--surface)",
+                      border: "1px solid var(--border)",
+                      color: "var(--text)",
+                      padding: "5px 8px",
+                      borderRadius: 4,
+                    }}
+                  >
+                    <option value="inherit">继承全局（{f.env}）</option>
+                    <option value="on">强制开启</option>
+                    <option value="off">强制关闭</option>
+                  </select>
+                </label>
+              );
+            })}
           </div>
           <h3 style={{ fontFamily: "var(--font-head)", fontSize: 14, margin: "22px 0 10px" }}>
             System Prompt

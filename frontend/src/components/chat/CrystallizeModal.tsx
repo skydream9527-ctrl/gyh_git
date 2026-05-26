@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { experienceApi } from "@/api/endpoints";
+import { useBackdropClose } from "@/hooks/useBackdropClose";
 import { useUIStore } from "@/stores/uiStore";
 import "./CrystallizeModal.css";
 
@@ -27,16 +28,6 @@ export function CrystallizeModal({ open, taskId, sourceMessage, onClose, onCreat
     }
   }, [open, sourceMessage]);
 
-  // ESC 关闭
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open, onClose]);
-
   // 弹窗打开时锁住主页面滚动
   useEffect(() => {
     if (!open) return;
@@ -46,6 +37,8 @@ export function CrystallizeModal({ open, taskId, sourceMessage, onClose, onCreat
       document.body.style.overflow = prev;
     };
   }, [open]);
+
+  const backdrop = useBackdropClose(onClose, open);
 
   if (!open) return null;
 
@@ -73,8 +66,8 @@ export function CrystallizeModal({ open, taskId, sourceMessage, onClose, onCreat
   };
 
   return (
-    <div className="crystallize-overlay" onClick={onClose} role="dialog" aria-modal="true">
-      <div className="crystallize-card" onClick={(e) => e.stopPropagation()}>
+    <div className="crystallize-overlay" {...backdrop} role="dialog" aria-modal="true">
+      <div className="crystallize-card">
         <div className="crystallize-head">
           <h3>✨ 沉淀经验</h3>
           <p className="crystallize-hint">

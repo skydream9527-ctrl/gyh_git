@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import hashlib
+import re
 import shutil
 import uuid
 from datetime import datetime, timezone
@@ -15,6 +16,95 @@ MAX_SIZE_HARD_CAP_MB = 50
 MAX_SIZE_DEFAULT_MB = 20
 
 TEXT_EXTS = {".md", ".txt", ".csv", ".sql", ".py", ".json", ".tsv", ".log", ".yml", ".yaml"}
+
+# Allowed extensions for user uploads. Anything not in this list is rejected
+# at the API boundary — including server-side script types (.php, .jsp,
+# .aspx, .py, .sh) which an attacker could try to drop into a path that
+# someone later misconfigures as executable. .py is on the deny list here
+# because uploads land in /files; the data-analysis sandbox runs `.py`
+# *content* via execute_python from a separate path, not from uploads.
+_UPLOAD_ALLOWED_EXTS = {
+    # text / docs
+    "md", "txt", "log", "csv", "tsv", "json", "yaml", "yml", "sql",
+    "pdf", "rtf", "docx", "xlsx", "pptx", "html", "xml",
+    # images
+    "png", "jpg", "jpeg", "gif", "webp", "svg",
+    # audio (voice memos)
+    "wav", "mp3", "ogg", "webm", "m4a",
+    # archives (allowed but scanned-by-magic below)
+    "zip",
+}
+
+# (offset, signature_bytes, label) tuples. We require: if a file's extension
+# is in the magic-byte map, the bytes must match. Extensions not listed
+# (.txt/.md/.log/.csv/.tsv/.json/.yaml/.yml/.sql/.html/.xml/.rtf/.svg) are
+# treated as "free-form text/markup" and do not undergo magic-byte checks.
+_MAGIC_BYTE_RULES: dict[str, list[tuple[int, bytes]]] = {
+    "pdf": [(0, b"%PDF-")],
+    "png": [(0, b"\x89PNG\r\n\x1a\n")],
+    "jpg": [(0, b"\xFF\xD8\xFF")],
+    "jpeg": [(0, b"\xFF\xD8\xFF")],
+    "gif": [(0, b"GIF87a"), (0, b"GIF89a")],
+    "webp": [(0, b"RIFF")],  # also need 'WEBP' at offset 8 — checked below
+    # ZIP-based formats (docx/xlsx/pptx are actually zips). Magic 'PK\x03\x04'.
+    "zip": [(0, b"PK\x03\x04"), (0, b"PK\x05\x06"), (0, b"PK\x07\x08")],
+    "docx": [(0, b"PK\x03\x04")],
+    "xlsx": [(0, b"PK\x03\x04")],
+    "pptx": [(0, b"PK\x03\x04")],
+    "mp3": [(0, b"ID3"), (0, b"\xFF\xFB"), (0, b"\xFF\xF3"), (0, b"\xFF\xF2")],
+    "ogg": [(0, b"OggS")],
+    "wav": [(0, b"RIFF")],  # also 'WAVE' at offset 8
+    "webm": [(0, b"\x1A\x45\xDF\xA3")],
+    "m4a": [(4, b"ftypM4A "), (4, b"ftyp")],  # ISO-BMFF, ftyp box
+}
+
+# Filenames that look like server-side script payloads — we reject them
+# regardless of extension because an attacker may try double-extensions
+# (`shell.php.png`) hoping for a misconfigured server to interpret them.
+_DANGEROUS_FILENAME_PATTERNS = re.compile(
+    r"\.(php\d?|phtml|jsp|jspx|aspx?|asax|cer|ashx|exe|bat|cmd|sh|ps1)(\.|$)",
+    re.IGNORECASE,
+)
+
+
+def _ext(name: str) -> str:
+    return Path(name).suffix.lower().lstrip(".")
+
+
+def _validate_upload(filename: str, data: bytes) -> None:
+    """Reject filenames/contents that look like attacks. Called by every
+    upload entry point."""
+    if not filename or not filename.strip():
+        raise APIError(400, ErrorCode.VALIDATION_ERROR, "文件名不能为空")
+    if "\x00" in filename:
+        raise APIError(400, ErrorCode.VALIDATION_ERROR, "文件名包含非法字符")
+    if _DANGEROUS_FILENAME_PATTERNS.search(filename):
+        raise APIError(
+            400, ErrorCode.VALIDATION_ERROR,
+            "不允许上传可执行 / 服务端脚本类型文件",
+        )
+    ext = _ext(filename)
+    if ext and ext not in _UPLOAD_ALLOWED_EXTS:
+        raise APIError(
+            400, ErrorCode.VALIDATION_ERROR,
+            f"不支持的文件扩展名：.{ext}",
+        )
+
+    # Magic-byte check when the ext has a known signature. Empty files of
+    # any binary type would fail here — intentional, those are rejected.
+    rules = _MAGIC_BYTE_RULES.get(ext)
+    if rules:
+        head = data[:64]
+        if not any(head[off : off + len(sig)] == sig for off, sig in rules):
+            raise APIError(
+                400, ErrorCode.VALIDATION_ERROR,
+                f"文件内容与 .{ext} 扩展名不匹配（魔数校验失败）",
+            )
+        # Extra checks for containers that share a magic prefix:
+        if ext == "webp" and not (len(data) >= 12 and data[8:12] == b"WEBP"):
+            raise APIError(400, ErrorCode.VALIDATION_ERROR, "WEBP 容器无效")
+        if ext == "wav" and not (len(data) >= 12 and data[8:12] == b"WAVE"):
+            raise APIError(400, ErrorCode.VALIDATION_ERROR, "WAV 容器无效")
 
 
 def _now() -> str:
@@ -51,6 +141,7 @@ async def upload_task_file(
             ErrorCode.FILE_TOO_LARGE,
             f"文件超过 {MAX_SIZE_HARD_CAP_MB}MB 上限，无法上传",
         )
+    _validate_upload(filename, data)
     paths = get_paths()
     target_dir = (
         paths.task_files_input(task_id)
@@ -138,6 +229,7 @@ async def list_task_files(task_id: str) -> list[dict]:
                     "created_at": m.get("imported_at"),
                     "source_type": m.get("source_type"),
                     "source_url": m.get("source_url"),
+                    "source_ref": m.get("source_ref"),
                     "imported_at": m.get("imported_at"),
                     "imported_by": m.get("imported_by"),
                     "last_refreshed_at": m.get("last_refreshed_at"),
@@ -238,6 +330,7 @@ async def upload_public_file(*, filename: str, data: bytes, is_pinned: bool = Fa
         raise APIError(
             413, ErrorCode.FILE_TOO_LARGE, f"文件超过 {MAX_SIZE_HARD_CAP_MB}MB 上限"
         )
+    _validate_upload(filename, data)
     paths = get_paths()
     safe_name = filename.replace("/", "_").replace("\\", "_")
     target = paths.files / safe_name

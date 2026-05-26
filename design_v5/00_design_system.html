@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ICE Workbench v5 · Design System (Stripe / Cursor inspired)</title>
+<script>(function(){var t=localStorage.getItem('ice-v5-theme')||'light';document.documentElement.dataset.theme=t;})();</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ==========================================================
+   ICE Workbench v5 — Stripe / Cursor inspired Design System
+   Light = Stripe (clean white + violet accent)
+   Dark  = Cursor (deep ink + glow accent)
+   ========================================================== */
+:root[data-theme="light"]{
+  --bg:#ffffff;
+  --surface:#ffffff;
+  --surface-2:#fafafb;
+  --surface-3:#f3f4f6;
+  --surface-inv:#0a0e1a;
+
+  --border:#e5e7eb;
+  --border-soft:#eef0f3;
+  --border-strong:#d1d5db;
+  --divider:#f0f1f4;
+
+  --text:#0a0e1a;
+  --text-dim:#4b5563;
+  --text-muted:#6b7280;
+  --text-inv:#ffffff;
+
+  --accent:#635bff;
+  --accent-hover:#524bd8;
+  --accent-pressed:#4338ca;
+  --accent-soft:#eef0ff;
+  --accent-text:#4338ca;
+  --accent-grad:linear-gradient(135deg,#635bff 0%,#8b85ff 100%);
+  --accent-grad-hover:linear-gradient(135deg,#524bd8 0%,#7a73ff 100%);
+  --accent-glow:0 0 0 4px rgba(99,91,255,.14);
+
+  --success:#00875a;   --success-soft:#d4f4e9;
+  --warning:#b54708;   --warning-soft:#fef0c7;
+  --error:#b42318;     --error-soft:#fee4e2;
+  --info:#1849a9;      --info-soft:#d1e9ff;
+
+  /* 范式 5 色（更彩，但仍克制） */
+  --p-ab:#4f46e5;      --p-ab-soft:#eef0ff;     /* indigo · ab 实验 */
+  --p-biz:#c2410c;     --p-biz-soft:#ffedd5;    /* orange · 业务洞察 */
+  --p-gray:#7c3aed;    --p-gray-soft:#f3e8ff;   /* violet · 灰度发布 */
+  --p-data:#0e7490;    --p-data-soft:#cffafe;   /* cyan · 数据分析 */
+  --p-wave:#be185d;    --p-wave-soft:#fce7f3;   /* pink · 浪潮归因 */
+
+  --shadow-1:0 1px 2px rgba(10,14,26,.04);
+  --shadow-2:0 1px 2px rgba(10,14,26,.04),0 4px 12px rgba(10,14,26,.06);
+  --shadow-3:0 4px 24px rgba(10,14,26,.08),0 12px 48px rgba(10,14,26,.06);
+  --shadow-press:0 1px 2px rgba(10,14,26,.06) inset;
+  --ring:0 0 0 4px rgba(99,91,255,.14);
+}
+
+:root[data-theme="dark"]{
+  --bg:#0d0e12;
+  --surface:#16181f;
+  --surface-2:#1c1f28;
+  --surface-3:#242833;
+  --surface-inv:#f5f6fa;
+
+  --border:#2a2e3a;
+  --border-soft:#20232c;
+  --border-strong:#363b48;
+  --divider:#1f222b;
+
+  --text:#f5f6fa;
+  --text-dim:#9ba1b3;
+  --text-muted:#6b7080;
+  --text-inv:#0a0e1a;
+
+  --accent:#7a73ff;
+  --accent-hover:#9590ff;
+  --accent-pressed:#a59dff;
+  --accent-soft:rgba(122,115,255,.14);
+  --accent-text:#b6b1ff;
+  --accent-grad:linear-gradient(135deg,#7a73ff 0%,#a59dff 100%);
+  --accent-grad-hover:linear-gradient(135deg,#9590ff 0%,#bdb7ff 100%);
+  --accent-glow:0 0 0 4px rgba(122,115,255,.22);
+
+  --success:#34d399;   --success-soft:rgba(52,211,153,.14);
+  --warning:#fbbf24;   --warning-soft:rgba(251,191,36,.14);
+  --error:#f87171;     --error-soft:rgba(248,113,113,.14);
+  --info:#60a5fa;      --info-soft:rgba(96,165,250,.14);
+
+  --p-ab:#818cf8;      --p-ab-soft:rgba(129,140,248,.14);
+  --p-biz:#fb923c;     --p-biz-soft:rgba(251,146,60,.14);
+  --p-gray:#a78bfa;    --p-gray-soft:rgba(167,139,250,.14);
+  --p-data:#22d3ee;    --p-data-soft:rgba(34,211,238,.14);
+  --p-wave:#f472b6;    --p-wave-soft:rgba(244,114,182,.14);
+
+  --shadow-1:0 1px 2px rgba(0,0,0,.4);
+  --shadow-2:0 4px 16px rgba(0,0,0,.5),0 1px 2px rgba(0,0,0,.4);
+  --shadow-3:0 16px 48px rgba(0,0,0,.6);
+  --shadow-press:0 1px 2px rgba(0,0,0,.4) inset;
+  --ring:0 0 0 4px rgba(122,115,255,.22);
+}
+
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:'Inter','SF Pro Display','PingFang SC','Microsoft YaHei',-apple-system,system-ui,sans-serif;
+  font-size:14px;line-height:1.6;letter-spacing:-.005em;
+  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
+  font-feature-settings:'cv11','ss01';
+}
+.tnum{font-variant-numeric:tabular-nums}
+
+/* ============ App bar ============ */
+.appbar{height:56px;background:rgba(255,255,255,.7);backdrop-filter:saturate(180%) blur(16px);
+  -webkit-backdrop-filter:saturate(180%) blur(16px);
+  border-bottom:1px solid var(--border-soft);
+  display:flex;align-items:center;padding:0 24px;gap:14px;position:sticky;top:0;z-index:50}
+:root[data-theme="dark"] .appbar{background:rgba(13,14,18,.7)}
+.brand{display:flex;align-items:center;gap:10px;cursor:pointer}
+.brand-mark{width:28px;height:28px;border-radius:8px;background:var(--accent-grad);
+  display:grid;place-items:center;color:#fff;font-weight:700;font-size:13px;letter-spacing:-.02em;
+  box-shadow:0 1px 2px rgba(99,91,255,.4),0 4px 12px rgba(99,91,255,.18)}
+.brand-text{font-weight:600;font-size:15px;letter-spacing:-.01em}
+.brand-text .dim{color:var(--text-muted);font-weight:500}
+.appbar .spacer{flex:1}
+.icon-btn{width:36px;height:36px;border-radius:8px;display:grid;place-items:center;cursor:pointer;
+  color:var(--text-dim);border:none;background:transparent;font-size:16px;transition:all .15s}
+.icon-btn:hover{background:var(--surface-2);color:var(--text)}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--accent-grad);
+  display:grid;place-items:center;font-weight:600;font-size:12px;color:#fff;cursor:pointer;
+  box-shadow:0 1px 2px rgba(99,91,255,.3)}
+
+/* ============ Page wrap ============ */
+.page{max-width:1100px;margin:0 auto;padding:40px 24px 100px}
+.hero{margin-bottom:48px}
+.hero-tag{display:inline-flex;align-items:center;gap:6px;font-size:11px;
+  color:var(--accent-text);background:var(--accent-soft);
+  padding:5px 12px;border-radius:999px;font-weight:500;letter-spacing:.02em;
+  margin-bottom:18px;border:1px solid transparent}
+.hero h1{font-size:44px;font-weight:600;margin:0 0 14px;letter-spacing:-.025em;line-height:1.1}
+.hero-grad{background:var(--accent-grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{color:var(--text-dim);font-size:16px;margin:0;max-width:680px;line-height:1.6}
+
+.section-h{font-size:22px;font-weight:600;margin:64px 0 6px;letter-spacing:-.015em;
+  display:flex;align-items:center;gap:12px}
+.section-h .num{font-family:'JetBrains Mono',monospace;font-size:11px;
+  color:var(--text-muted);font-weight:500;letter-spacing:.05em}
+.section-sub{color:var(--text-dim);font-size:14px;margin:0 0 24px;max-width:680px}
+
+.preview{background:var(--surface);border:1px solid var(--border-soft);
+  border-radius:16px;padding:28px;margin-bottom:18px;box-shadow:var(--shadow-1)}
+.preview-label{font-size:11px;color:var(--text-muted);text-transform:uppercase;
+  letter-spacing:.08em;margin-bottom:18px;font-weight:600}
+
+/* ============ Color tokens ============ */
+.swatch-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.swatch{background:var(--surface);border:1px solid var(--border-soft);
+  border-radius:12px;overflow:hidden;transition:all .15s}
+.swatch:hover{border-color:var(--border);box-shadow:var(--shadow-1)}
+.swatch .chip{height:64px;position:relative}
+.swatch .chip::after{content:"";position:absolute;inset:0;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.1),inset 0 -1px 0 rgba(0,0,0,.06)}
+.swatch .meta{padding:10px 12px}
+.swatch .meta .name{font-weight:500;font-size:13px;letter-spacing:-.005em}
+.swatch .meta .hex{color:var(--text-muted);font-size:11px;
+  font-family:'JetBrains Mono',monospace;margin-top:2px}
+
+/* ============ Buttons ============ */
+.btn{display:inline-flex;align-items:center;gap:8px;font-family:inherit;font-size:14px;
+  font-weight:500;padding:0 16px;height:40px;border-radius:8px;border:1px solid transparent;
+  cursor:pointer;transition:all .15s;line-height:1;letter-spacing:-.005em;
+  white-space:nowrap;outline:none}
+.btn:focus-visible{box-shadow:var(--ring)}
+.btn-primary{background:var(--accent-grad);color:#fff;
+  box-shadow:0 1px 2px rgba(99,91,255,.4),0 1px 3px rgba(99,91,255,.18),
+    inset 0 1px 0 rgba(255,255,255,.18)}
+.btn-primary:hover{background:var(--accent-grad-hover);
+  box-shadow:0 2px 4px rgba(99,91,255,.45),0 4px 16px rgba(99,91,255,.2)}
+.btn-primary:active{box-shadow:0 1px 2px rgba(99,91,255,.4),inset 0 1px 0 rgba(0,0,0,.1)}
+.btn-secondary{background:var(--surface);color:var(--text);
+  border-color:var(--border);box-shadow:var(--shadow-1)}
+.btn-secondary:hover{background:var(--surface-2);border-color:var(--border-strong)}
+.btn-ghost{background:transparent;color:var(--text-dim)}
+.btn-ghost:hover{background:var(--surface-2);color:var(--text)}
+.btn-danger{background:var(--error);color:#fff;
+  box-shadow:0 1px 2px rgba(180,35,24,.3)}
+.btn-sm{height:32px;padding:0 12px;font-size:13px;border-radius:7px}
+.btn-lg{height:48px;padding:0 22px;font-size:15px;border-radius:10px}
+.btn .ico{font-size:14px}
+.btn-icon{width:40px;padding:0;justify-content:center}
+.btn-icon.btn-sm{width:32px}
+
+.kbd{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;
+  padding:0 6px;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;
+  background:var(--surface-2);border:1px solid var(--border-soft);border-bottom-width:2px;
+  border-radius:5px;color:var(--text-dim)}
+
+/* ============ Chips / Tags ============ */
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;
+  padding:4px 10px;border-radius:6px;background:var(--surface-2);color:var(--text-dim);
+  border:1px solid var(--border-soft);transition:all .12s;letter-spacing:-.005em}
+.chip:hover{border-color:var(--border)}
+.chip.active{background:var(--accent-soft);color:var(--accent-text);border-color:transparent}
+.chip-pill{border-radius:999px;padding:4px 12px}
+.chip.ab{background:var(--p-ab-soft);color:var(--p-ab);border-color:transparent}
+.chip.biz{background:var(--p-biz-soft);color:var(--p-biz);border-color:transparent}
+.chip.gray{background:var(--p-gray-soft);color:var(--p-gray);border-color:transparent}
+.chip.data{background:var(--p-data-soft);color:var(--p-data);border-color:transparent}
+.chip.wave{background:var(--p-wave-soft);color:var(--p-wave);border-color:transparent}
+.chip.success{background:var(--success-soft);color:var(--success);border-color:transparent}
+.chip.warn{background:var(--warning-soft);color:var(--warning);border-color:transparent}
+.chip.error{background:var(--error-soft);color:var(--error);border-color:transparent}
+.chip .dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+
+/* ============ Inputs ============ */
+.field{display:flex;flex-direction:column;gap:6px;max-width:360px}
+.label{font-size:13px;font-weight:500;color:var(--text)}
+.input{height:40px;padding:0 12px;border-radius:8px;border:1px solid var(--border);
+  background:var(--surface);color:var(--text);font-family:inherit;font-size:14px;
+  transition:all .15s;outline:none;box-shadow:var(--shadow-1)}
+.input:hover{border-color:var(--border-strong)}
+.input:focus{border-color:var(--accent);box-shadow:var(--ring)}
+.input::placeholder{color:var(--text-muted)}
+.search-box{position:relative;max-width:380px}
+.search-box .input{padding-left:38px}
+.search-box .ico{position:absolute;left:12px;top:50%;transform:translateY(-50%);
+  color:var(--text-muted);font-size:14px;pointer-events:none}
+.search-box .kbd{position:absolute;right:8px;top:50%;transform:translateY(-50%)}
+
+/* ============ Cards ============ */
+.card{background:var(--surface);border:1px solid var(--border-soft);border-radius:12px;
+  padding:18px;transition:all .15s;box-shadow:var(--shadow-1)}
+.card:hover{border-color:var(--border);box-shadow:var(--shadow-2)}
+.card-grad{position:relative;overflow:hidden}
+.card-grad::before{content:"";position:absolute;inset:0;background:var(--accent-grad);
+  opacity:.04;pointer-events:none}
+.card-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.card-title{font-size:14px;font-weight:600;letter-spacing:-.01em}
+.card-sub{font-size:12px;color:var(--text-muted)}
+
+/* Stat card */
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.stat{background:var(--surface);border:1px solid var(--border-soft);border-radius:12px;
+  padding:18px;position:relative;overflow:hidden;box-shadow:var(--shadow-1)}
+.stat .label{font-size:12px;color:var(--text-muted);font-weight:500;letter-spacing:.01em;
+  text-transform:none;display:flex;align-items:center;gap:6px;margin:0 0 10px}
+.stat .label .ico{width:24px;height:24px;border-radius:6px;background:var(--accent-soft);
+  color:var(--accent);display:grid;place-items:center;font-size:13px}
+.stat .v{font-size:28px;font-weight:600;letter-spacing:-.025em;font-variant-numeric:tabular-nums;line-height:1}
+.stat .delta{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:500;
+  color:var(--success);margin-top:8px;font-variant-numeric:tabular-nums}
+.stat .delta.down{color:var(--error)}
+
+/* ============ Table ============ */
+.tbl{width:100%;border-collapse:collapse;font-size:13.5px}
+.tbl thead th{text-align:left;padding:10px 12px;font-weight:500;font-size:12px;
+  color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;
+  border-bottom:1px solid var(--border-soft);background:var(--surface-2)}
+.tbl tbody td{padding:12px;border-bottom:1px solid var(--border-soft);vertical-align:middle}
+.tbl tbody tr:hover{background:var(--surface-2)}
+.tbl tbody tr:last-child td{border-bottom:none}
+.tbl-wrap{border:1px solid var(--border-soft);border-radius:12px;overflow:hidden;background:var(--surface)}
+
+/* ============ List ============ */
+.list-item{display:flex;align-items:center;gap:12px;padding:12px;border-radius:10px;
+  cursor:pointer;transition:background .12s}
+.list-item:hover{background:var(--surface-2)}
+.list-item .ico-box{width:36px;height:36px;border-radius:8px;background:var(--accent-soft);
+  color:var(--accent);display:grid;place-items:center;font-size:16px;flex-shrink:0}
+.list-item .meta{flex:1;min-width:0}
+.list-item .title{font-size:13.5px;font-weight:500;letter-spacing:-.005em;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.list-item .sub{font-size:12px;color:var(--text-muted);margin-top:2px}
+.list-item .time{font-size:11px;color:var(--text-muted);font-family:'JetBrains Mono',monospace}
+
+/* ============ Mobile preview ============ */
+.devices{display:grid;grid-template-columns:1fr 320px;gap:24px;margin-top:8px}
+@media (max-width:1000px){.devices{grid-template-columns:1fr}}
+.device-frame{background:var(--surface);border:1px solid var(--border);
+  border-radius:14px;overflow:hidden;box-shadow:var(--shadow-2)}
+.device-bar{height:32px;background:var(--surface-2);border-bottom:1px solid var(--border-soft);
+  display:flex;align-items:center;padding:0 12px;gap:6px;font-size:11px;color:var(--text-muted);
+  font-family:'JetBrains Mono',monospace}
+.device-bar .dot{width:10px;height:10px;border-radius:50%;background:var(--surface-3)}
+.device-bar .url{flex:1;text-align:center}
+.phone{width:320px;height:640px;background:#000;border-radius:36px;padding:8px;
+  box-shadow:var(--shadow-3);position:relative;margin:0 auto}
+.phone-screen{width:100%;height:100%;background:var(--bg);border-radius:28px;overflow:hidden;
+  position:relative}
+.phone-notch{position:absolute;top:18px;left:50%;transform:translateX(-50%);
+  width:96px;height:24px;background:#000;border-radius:99px;z-index:10}
+.phone-content{padding:50px 14px 14px;height:100%;overflow-y:auto}
+.phone-h{font-size:18px;font-weight:600;letter-spacing:-.015em;margin:6px 0 12px}
+
+/* ============ Notes & guides ============ */
+.notes{background:var(--surface-2);border:1px solid var(--border-soft);border-radius:14px;
+  padding:24px;margin-top:36px;font-size:13.5px;line-height:1.75}
+.notes h3{font-size:15px;margin:0 0 8px;font-weight:600;letter-spacing:-.01em}
+.notes h3:not(:first-child){margin-top:18px}
+.notes ul{padding-left:22px;margin:8px 0}
+.notes li{margin-bottom:5px}
+.notes code{background:var(--surface);padding:2px 7px;border-radius:5px;
+  font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent-text);
+  border:1px solid var(--border-soft)}
+.notes b{font-weight:600}
+
+/* font sample */
+.font-row{display:grid;grid-template-columns:140px 1fr 80px;gap:16px;align-items:baseline;
+  padding:14px 0;border-bottom:1px solid var(--border-soft)}
+.font-row:last-child{border-bottom:none}
+.font-row .name{font-size:11px;text-transform:uppercase;letter-spacing:.06em;
+  color:var(--text-muted);font-weight:600}
+.font-row .meta{color:var(--text-muted);font-size:12px;font-family:'JetBrains Mono',monospace}
+.t-h1{font-size:40px;font-weight:600;letter-spacing:-.025em;line-height:1.1}
+.t-h2{font-size:28px;font-weight:600;letter-spacing:-.02em;line-height:1.2}
+.t-h3{font-size:20px;font-weight:600;letter-spacing:-.015em;line-height:1.3}
+.t-body{font-size:14px;line-height:1.6}
+.t-small{font-size:13px;color:var(--text-dim)}
+.t-micro{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);font-weight:600}
+.t-mono{font-family:'JetBrains Mono',monospace;font-size:13px}
+
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.col{display:flex;flex-direction:column;gap:14px}
+</style>
+</head>
+<body>
+
+<header class="appbar">
+  <div class="brand">
+    <div class="brand-mark">i</div>
+    <span class="brand-text">ICE Workbench <span class="dim">· v5</span></span>
+  </div>
+  <div class="spacer"></div>
+  <div class="search-box" style="width:280px">
+    <span class="ico">🔍</span>
+    <input class="input" placeholder="搜索任务、Agent、文件…">
+    <span class="kbd">⌘K</span>
+  </div>
+  <button class="icon-btn" title="切换主题" onclick="toggleTheme()" aria-label="切换主题">
+    <span class="t-light">🌙</span><span class="t-dark" style="display:none">☀️</span>
+  </button>
+  <button class="icon-btn">🔔</button>
+  <div class="avatar">GY</div>
+</header>
+<script>
+function toggleTheme(){
+  var cur=document.documentElement.dataset.theme||'light';
+  var next=cur==='light'?'dark':'light';
+  document.documentElement.dataset.theme=next;
+  localStorage.setItem('ice-v5-theme',next);
+  document.querySelectorAll('.t-light').forEach(e=>e.style.display=next==='light'?'inline':'none');
+  document.querySelectorAll('.t-dark').forEach(e=>e.style.display=next==='dark'?'inline':'none');
+}
+(function(){var t=document.documentElement.dataset.theme;if(t==='dark'){
+  document.querySelectorAll('.t-light').forEach(e=>e.style.display='none');
+  document.querySelectorAll('.t-dark').forEach(e=>e.style.display='inline');
+}})();
+</script>
+
+<div class="page">
+
+  <header class="hero">
+    <span class="hero-tag">v5 · Stripe / Cursor inspired · 2026-05-26</span>
+    <h1>Design v5 · <span class="hero-grad">现代 SaaS</span> 工作台</h1>
+    <p>把 ICE Workbench 重塑为「现代 SaaS · 工程师工具」隐喻：克制白底 + 深墨夜模式、单一渐变紫 accent、Stripe 式微阴影 + 边框叠加、8/12px 圆角层级、tabular 数字。专业但不冷，理性 + 可读性优先。</p>
+    <div style="margin-top:24px" class="row">
+      <a class="btn btn-primary" href="01_dashboard.html">看 Dashboard 双稿 →</a>
+      <button class="btn btn-secondary">查看 Tokens</button>
+      <button class="btn btn-ghost">回到 v4 对照</button>
+    </div>
+  </header>
+
+  <h2 class="section-h">颜色 Tokens <span class="num">01</span></h2>
+  <p class="section-sub">中性灰阶 + 单一紫 accent。状态色克制。范式 5 色饱和度统一，互不抢戏。点右上 🌙/☀️ 切主题对照。</p>
+
+  <div class="preview">
+    <div class="preview-label">Surface · 灰阶</div>
+    <div class="swatch-row">
+      <div class="swatch"><div class="chip" style="background:var(--bg)"></div><div class="meta"><div class="name">bg</div><div class="hex">--bg</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--surface)"></div><div class="meta"><div class="name">surface</div><div class="hex">--surface</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--surface-2)"></div><div class="meta"><div class="name">surface-2</div><div class="hex">--surface-2</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--surface-3)"></div><div class="meta"><div class="name">surface-3</div><div class="hex">--surface-3</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--border)"></div><div class="meta"><div class="name">border</div><div class="hex">--border</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--text)"></div><div class="meta"><div class="name">text</div><div class="hex">--text</div></div></div>
+    </div>
+  </div>
+
+  <div class="preview">
+    <div class="preview-label">Accent · 渐变紫</div>
+    <div class="swatch-row">
+      <div class="swatch"><div class="chip" style="background:var(--accent)"></div><div class="meta"><div class="name">accent</div><div class="hex">#635bff</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--accent-grad)"></div><div class="meta"><div class="name">accent-grad</div><div class="hex">135° linear</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--accent-soft)"></div><div class="meta"><div class="name">accent-soft</div><div class="hex">--accent-soft</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--accent-text);"></div><div class="meta"><div class="name">accent-text</div><div class="hex">--accent-text</div></div></div>
+    </div>
+  </div>
+
+  <div class="preview">
+    <div class="preview-label">范式 · 5 色（任务分类）</div>
+    <div class="swatch-row">
+      <div class="swatch"><div class="chip" style="background:var(--p-ab)"></div><div class="meta"><div class="name">ab · indigo</div><div class="hex">--p-ab</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--p-biz)"></div><div class="meta"><div class="name">biz · orange</div><div class="hex">--p-biz</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--p-gray)"></div><div class="meta"><div class="name">gray · violet</div><div class="hex">--p-gray</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--p-data)"></div><div class="meta"><div class="name">data · cyan</div><div class="hex">--p-data</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--p-wave)"></div><div class="meta"><div class="name">wave · pink</div><div class="hex">--p-wave</div></div></div>
+    </div>
+    <div style="margin-top:16px" class="row">
+      <span class="chip ab"><span class="dot"></span>AB 实验</span>
+      <span class="chip biz"><span class="dot"></span>业务洞察</span>
+      <span class="chip gray"><span class="dot"></span>灰度发布</span>
+      <span class="chip data"><span class="dot"></span>数据分析</span>
+      <span class="chip wave"><span class="dot"></span>浪潮归因</span>
+    </div>
+  </div>
+
+  <h2 class="section-h">字体系统 <span class="num">02</span></h2>
+  <p class="section-sub">Inter 主字体（含 cv11 / ss01 OpenType 特性），数字开 tabular-nums。中文兜底 PingFang SC。代码 JetBrains Mono。</p>
+  <div class="preview">
+    <div class="font-row"><span class="name">Display</span><span class="t-h1">无声胜有声 · The quick brown fox</span><span class="meta">40 / 600 / -.025em</span></div>
+    <div class="font-row"><span class="name">Heading</span><span class="t-h2">现代 SaaS 工作台</span><span class="meta">28 / 600 / -.02em</span></div>
+    <div class="font-row"><span class="name">Subhead</span><span class="t-h3">范式分布</span><span class="meta">20 / 600 / -.015em</span></div>
+    <div class="font-row"><span class="name">Body</span><span class="t-body">数据驱动决策 · A complete reimagination of data analytics workflows.</span><span class="meta">14 / 400</span></div>
+    <div class="font-row"><span class="name">Small</span><span class="t-small">2026-05-26 · admin · 142 次调用</span><span class="meta">13 / 400</span></div>
+    <div class="font-row"><span class="name">Micro</span><span class="t-micro">CONNECTED · ALL SYSTEMS GREEN</span><span class="meta">11 / 600 / +.08em</span></div>
+    <div class="font-row"><span class="name">Mono</span><span class="t-mono">SELECT user_id, COUNT(*) FROM events</span><span class="meta">JetBrains Mono</span></div>
+    <div class="font-row"><span class="name">Tabular</span><span class="t-h2 tnum">1,234,567.89</span><span class="meta">tnum + ss01</span></div>
+  </div>
+
+  <h2 class="section-h">按钮 <span class="num">03</span></h2>
+  <p class="section-sub">三档（primary 渐变 / secondary 边框 / ghost 透明），三尺寸（sm 32 / md 40 / lg 48），8-10px 圆角。primary 自带 inset highlight + 软阴影 + focus ring。</p>
+  <div class="preview">
+    <div class="row" style="gap:16px;margin-bottom:18px">
+      <button class="btn btn-primary"><span class="ico">＋</span>新建任务</button>
+      <button class="btn btn-secondary">取消</button>
+      <button class="btn btn-ghost">了解更多</button>
+      <button class="btn btn-danger">删除</button>
+      <button class="btn btn-icon btn-secondary">⚙️</button>
+    </div>
+    <div class="row" style="gap:16px;margin-bottom:18px">
+      <button class="btn btn-sm btn-primary">小尺寸</button>
+      <button class="btn btn-primary">默认尺寸</button>
+      <button class="btn btn-lg btn-primary">大尺寸 →</button>
+    </div>
+    <div class="row" style="gap:16px">
+      <span class="t-small">键盘提示：<span class="kbd">⌘</span> <span class="kbd">K</span> 搜索 · <span class="kbd">G</span> <span class="kbd">D</span> 跳到 Dashboard · <span class="kbd">N</span> 新建</span>
+    </div>
+  </div>
+
+  <h2 class="section-h">输入 / Chip / 标签 <span class="num">04</span></h2>
+  <div class="preview">
+    <div class="row" style="gap:24px;align-items:flex-end;margin-bottom:24px">
+      <div class="field">
+        <label class="label">任务名称</label>
+        <input class="input" placeholder="例如：双十一 AB 实验复盘">
+      </div>
+      <div class="field">
+        <label class="label">状态过滤</label>
+        <select class="input"><option>全部</option><option>进行中</option><option>已完成</option></select>
+      </div>
+      <div class="search-box" style="width:300px">
+        <span class="ico">🔍</span>
+        <input class="input" placeholder="搜索…">
+        <span class="kbd">⌘K</span>
+      </div>
+    </div>
+    <div class="row" style="gap:8px">
+      <span class="chip">默认</span>
+      <span class="chip active">已选中</span>
+      <span class="chip-pill chip">胶囊形</span>
+      <span class="chip success"><span class="dot"></span>已完成</span>
+      <span class="chip warn"><span class="dot"></span>审批中</span>
+      <span class="chip error"><span class="dot"></span>失败</span>
+      <span class="chip ab">ab 实验</span>
+      <span class="chip biz">业务洞察</span>
+      <span class="chip data">数据分析</span>
+    </div>
+  </div>
+
+  <h2 class="section-h">卡片 <span class="num">05</span></h2>
+  <div class="preview">
+    <div class="stat-row" style="margin-bottom:18px">
+      <div class="stat">
+        <div class="label"><span class="ico">📒</span>任务总数</div>
+        <div class="v tnum">142</div>
+        <div class="delta">↗ +18 本周</div>
+      </div>
+      <div class="stat">
+        <div class="label"><span class="ico">🤖</span>Agent 调用</div>
+        <div class="v tnum">8,294</div>
+        <div class="delta">↗ +12.4%</div>
+      </div>
+      <div class="stat">
+        <div class="label"><span class="ico">⏱</span>定时任务</div>
+        <div class="v tnum">23</div>
+        <div class="delta down">↘ -2</div>
+      </div>
+      <div class="stat">
+        <div class="label"><span class="ico">🔥</span>P95 延时</div>
+        <div class="v tnum">412<span style="font-size:14px;color:var(--text-muted);margin-left:4px">ms</span></div>
+        <div class="delta">↗ -8ms</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <div class="card">
+        <div class="card-h">
+          <div>
+            <div class="card-title">📊 双十一 AB 实验复盘</div>
+            <div class="card-sub">2026-05-26 · 进行中 · 28 条对话</div>
+          </div>
+          <span class="chip ab">ab 实验</span>
+        </div>
+        <div class="t-small">通过对照组对比，主推礼盒装在 18-24 岁人群转化率 +14.2% (p<0.01)，但 ARPU 持平。建议下次实验调整定价区间…</div>
+      </div>
+      <div class="card card-grad">
+        <div class="card-h">
+          <div>
+            <div class="card-title">🎯 上新增长归因</div>
+            <div class="card-sub">2026-05-25 · 已完成 · 41 条对话</div>
+          </div>
+          <span class="chip wave">wave</span>
+        </div>
+        <div class="t-small">归因模型显示，本周新增主要来自小红书素材 #3 (37%)，抖音直播间 (24%)。建议加投…</div>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="section-h">表格 / 列表 <span class="num">06</span></h2>
+  <div class="preview">
+    <div class="tbl-wrap" style="margin-bottom:24px">
+      <table class="tbl">
+        <thead><tr>
+          <th>任务</th><th>范式</th><th>状态</th><th>更新时间</th><th style="width:140px;text-align:right">操作</th>
+        </tr></thead>
+        <tbody>
+          <tr>
+            <td><b>双十一 AB 实验复盘</b><div class="t-small" style="margin-top:2px">28 条对话 · admin</div></td>
+            <td><span class="chip ab">ab 实验</span></td>
+            <td><span class="chip success"><span class="dot"></span>进行中</span></td>
+            <td class="tnum t-small">2026-05-26 14:32</td>
+            <td style="text-align:right"><button class="btn btn-sm btn-secondary">打开</button></td>
+          </tr>
+          <tr>
+            <td><b>上新增长归因</b><div class="t-small" style="margin-top:2px">41 条对话 · gongyunhe</div></td>
+            <td><span class="chip wave">wave</span></td>
+            <td><span class="chip"><span class="dot"></span>已完成</span></td>
+            <td class="tnum t-small">2026-05-25 18:01</td>
+            <td style="text-align:right"><button class="btn btn-sm btn-secondary">打开</button></td>
+          </tr>
+          <tr>
+            <td><b>付费转化漏斗</b><div class="t-small" style="margin-top:2px">12 条对话 · admin</div></td>
+            <td><span class="chip data">data</span></td>
+            <td><span class="chip warn"><span class="dot"></span>审批中</span></td>
+            <td class="tnum t-small">2026-05-25 09:15</td>
+            <td style="text-align:right"><button class="btn btn-sm btn-secondary">打开</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card" style="padding:6px">
+      <div class="list-item">
+        <div class="ico-box">📒</div>
+        <div class="meta">
+          <div class="title">付费用户留存模型</div>
+          <div class="sub">data 范式 · 8 条对话</div>
+        </div>
+        <span class="time">2 小时前</span>
+      </div>
+      <div class="list-item">
+        <div class="ico-box" style="background:var(--p-biz-soft);color:var(--p-biz)">💼</div>
+        <div class="meta">
+          <div class="title">Q2 业务诊断</div>
+          <div class="sub">biz 范式 · 16 条对话</div>
+        </div>
+        <span class="time">昨天</span>
+      </div>
+      <div class="list-item">
+        <div class="ico-box" style="background:var(--p-gray-soft);color:var(--p-gray)">🚀</div>
+        <div class="meta">
+          <div class="title">10% 灰度试运行</div>
+          <div class="sub">gray 范式 · 4 条对话</div>
+        </div>
+        <span class="time">3 天前</span>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="section-h">移动端 · 360 框 <span class="num">07</span></h2>
+  <p class="section-sub">所有 token 复用，移动端继承一切；唯一调整：触控目标 ≥ 44px、字号 ≥ 16px（防 iOS Safari zoom）、底部安全区。</p>
+
+  <div class="devices">
+    <div class="device-frame">
+      <div class="device-bar">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        <span class="url">ice.workbench / mobile preview</span>
+      </div>
+      <div style="padding:32px;background:var(--surface-2)">
+        <div style="text-align:center;color:var(--text-muted);font-size:12px;margin-bottom:14px">→ 完整 mobile dashboard 在 <a href="01_dashboard.html" style="color:var(--accent)">01_dashboard.html</a></div>
+        <div class="phone">
+          <div class="phone-notch"></div>
+          <div class="phone-screen">
+            <div class="phone-content">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
+                <div class="brand-mark" style="width:24px;height:24px;font-size:11px">i</div>
+                <span style="font-weight:600;font-size:14px">ICE</span>
+                <div style="margin-left:auto;display:flex;gap:6px">
+                  <button class="icon-btn" style="width:32px;height:32px;font-size:14px">🔔</button>
+                  <div class="avatar" style="width:28px;height:28px;font-size:11px">GY</div>
+                </div>
+              </div>
+              <div class="phone-h">早上好 👋</div>
+              <div class="t-small" style="margin-bottom:14px">今天有 <b style="color:var(--accent)">3 个任务</b> 需要你跟进</div>
+              <div class="row" style="gap:6px;margin-bottom:14px">
+                <span class="chip ab">ab</span>
+                <span class="chip biz">biz</span>
+                <span class="chip data">data</span>
+                <span class="chip">+2</span>
+              </div>
+              <div class="card" style="padding:12px;margin-bottom:8px">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+                  <b style="font-size:13px">📊 双十一 AB 复盘</b>
+                  <span class="chip success" style="font-size:10px;padding:2px 6px"><span class="dot"></span>进行中</span>
+                </div>
+                <div class="t-small" style="font-size:12px">28 条对话 · 14:32</div>
+              </div>
+              <div class="card" style="padding:12px;margin-bottom:8px">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+                  <b style="font-size:13px">🎯 上新归因</b>
+                  <span class="chip wave" style="font-size:10px;padding:2px 6px">wave</span>
+                </div>
+                <div class="t-small" style="font-size:12px">41 条对话 · 昨天</div>
+              </div>
+              <button class="btn btn-primary btn-sm" style="width:100%;margin-top:8px">＋ 新建任务</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card" style="margin-bottom:14px">
+        <div class="card-title" style="margin-bottom:8px">移动端规则</div>
+        <ul style="margin:0;padding-left:18px;font-size:13px;color:var(--text-dim);line-height:1.8">
+          <li>触控 ≥ 44 × 44 px</li>
+          <li>input font-size ≥ 16px</li>
+          <li>底部留 env(safe-area-inset-bottom)</li>
+          <li>主操作 FAB 浮动右下</li>
+          <li>三栏 → 顶部 Tab 切换</li>
+          <li>列表 swipe 操作（可选）</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-title" style="margin-bottom:8px">断点</div>
+        <table style="width:100%;font-size:12.5px;font-family:'JetBrains Mono',monospace">
+          <tr><td style="color:var(--text-muted);padding:4px 0">≥ 1280</td><td>桌面满栏</td></tr>
+          <tr><td style="color:var(--text-muted);padding:4px 0">≥ 1024</td><td>桌面紧凑</td></tr>
+          <tr><td style="color:var(--text-muted);padding:4px 0">≥ 768</td><td>平板</td></tr>
+          <tr><td style="color:var(--text-muted);padding:4px 0">< 768</td><td>移动端</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="notes">
+    <h3>📐 v5 设计决策</h3>
+    <ul>
+      <li><b>底色</b>：light <code>#ffffff</code>（纯白，Stripe 风）/ dark <code>#0d0e12</code>（Cursor 深墨）。 <b>不再用 v4 的纸张色</b>。</li>
+      <li><b>Accent</b>：<code>#635bff → #8b85ff</code> 渐变紫，主按钮 + brand mark + key CTA 用渐变；其余链接 / 链状态用纯色 #635bff。</li>
+      <li><b>形状</b>：圆角分级 — 按钮 8 / 卡片 12 / 大卡片 16 / chip 6 / pill 999。<b>不再全胶囊</b>。</li>
+      <li><b>阴影</b>：Stripe 招牌「微阴影 + 边框」叠加 — 卡片同时有 1px border 和 shadow-1，避免纯靠阴影。</li>
+      <li><b>字体</b>：Inter（cv11/ss01）+ JetBrains Mono；数字一律 tabular-nums。中文 PingFang SC 兜底。</li>
+      <li><b>范式 5 色</b>：indigo / orange / violet / cyan / pink，饱和度统一在 60–70%，dark 模式下 desaturate 到 50%。</li>
+      <li><b>顶栏</b>：56 px sticky，背景 70% 透明 + backdrop-filter blur 16px（Stripe 经典）。</li>
+      <li><b>键盘优先</b>：<code>⌘K</code> 搜索、<code>G + 字母</code> 跳页、<code>N</code> 新建。所有 .kbd 提示组件已就位。</li>
+      <li><b>暗夜模式</b>：渲染前 IIFE 读 <code>localStorage('ice-v5-theme')</code>，避免 FOUC。</li>
+    </ul>
+
+    <h3>🆚 v4 → v5 关键变化</h3>
+    <ul>
+      <li>底色：纸张白 <code>#faf9f6</code> → 纯白 <code>#ffffff</code>；侧栏纸张色去掉</li>
+      <li>Accent：单色蓝 <code>#1a73e8</code> → 渐变紫 <code>#635bff→#8b85ff</code></li>
+      <li>形状：全胶囊（99px） → 圆角分级（8/12/16）</li>
+      <li>阴影：极弱（border 主导） → Stripe 风（border + shadow 双层）</li>
+      <li>字体：Inter 500 字重 → Inter 600 字重 + 更紧字距 letter-spacing</li>
+      <li>范式色：低饱和（NotebookLM 克制） → 中饱和（更彩，更现代）</li>
+      <li>三栏：Sources/Chat/Studio → 见 Workspace 稿（保留三栏，但视觉重新调度）</li>
+    </ul>
+
+    <h3>📁 文件清单</h3>
+    <ul style="font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.9">
+      <li><code>00_design_system.html</code> — 你正在看这页</li>
+      <li><code>01_dashboard.html</code> — Dashboard 桌面 + 手机双稿（已就绪）</li>
+      <li><code>02_workspace_chat.html</code> — Workspace · 待画</li>
+      <li><code>03 → 12</code> — 其余 10 张稿，待和你逐张对齐后继续</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>

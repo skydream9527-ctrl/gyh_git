@@ -377,6 +377,22 @@ async def health():
     return {"code": 0, "message": "success", "data": {"status": "ok", "version": "3.0.0"}}
 
 
+# robots.txt — explicit Disallow keeps the SPA shell out of search indexes.
+# Otherwise the previous behavior was a SPA fallback returning the app shell,
+# which Google would index under the title alone (information disclosure).
+_ROBOTS_TXT = (
+    "User-agent: *\n"
+    "Disallow: /\n"
+)
+
+
+@app.api_route("/robots.txt", methods=["GET", "HEAD"], include_in_schema=False)
+async def robots_txt():
+    from fastapi.responses import PlainTextResponse
+
+    return PlainTextResponse(_ROBOTS_TXT, headers={"Cache-Control": "public, max-age=86400"})
+
+
 app.include_router(api_router)
 
 

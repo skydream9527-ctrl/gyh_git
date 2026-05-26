@@ -1,6 +1,7 @@
 """JWT (access + refresh) and password hashing."""
 from __future__ import annotations
 
+import secrets
 from datetime import datetime, timedelta, timezone
 from typing import Literal
 
@@ -35,6 +36,13 @@ def _now() -> datetime:
     return datetime.now(tz=timezone.utc)
 
 
+def new_jti() -> str:
+    """Random unique-id for a refresh token. Used for single-use rotation:
+    auth_svc tracks the set of issued, not-yet-consumed jtis per user;
+    refresh consumes one and issues a new one."""
+    return secrets.token_urlsafe(16)
+
+
 def create_access_token(user_id: str, role: str) -> str:
     s = get_settings()
     payload = {
@@ -47,15 +55,19 @@ def create_access_token(user_id: str, role: str) -> str:
     return jwt.encode(payload, s.ICE_SECRET_KEY, algorithm=JWT_ALG)
 
 
-def create_refresh_token(user_id: str) -> str:
+def create_refresh_token(user_id: str, *, jti: str | None = None) -> tuple[str, str]:
+    """Returns (token, jti). Caller persists the jti so it can be invalidated
+    on the next successful refresh."""
     s = get_settings()
+    j = jti or new_jti()
     payload = {
         "sub": user_id,
+        "jti": j,
         "type": "refresh",
         "iat": int(_now().timestamp()),
         "exp": int((_now() + timedelta(days=s.ICE_REFRESH_TOKEN_TTL_DAYS)).timestamp()),
     }
-    return jwt.encode(payload, s.ICE_SECRET_KEY, algorithm=JWT_ALG)
+    return jwt.encode(payload, s.ICE_SECRET_KEY, algorithm=JWT_ALG), j
 
 
 def decode_token(token: str, expect: Literal["access", "refresh"] = "access") -> dict:

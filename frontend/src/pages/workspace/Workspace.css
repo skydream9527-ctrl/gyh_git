@@ -372,6 +372,17 @@
   opacity: 0.5;
   cursor: wait;
 }
+.ws-kb-refbtn.is-referenced {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--primary-dim);
+  cursor: default;
+  opacity: 1;
+}
+.ws-kb-refbtn.is-referenced:disabled {
+  opacity: 1;
+  cursor: default;
+}
 .ws-upload-row {
   background: var(--primary-dim);
   color: var(--primary);
@@ -400,9 +411,63 @@
 .ws-main > .ws-banner,
 .ws-main > .plan-mode-banner,
 .ws-main > .conv-locked-banner,
+.ws-main > .kb-ref-chips,
 .ws-main > .chat-input,
 .ws-main > .plan-toggle-row {
   flex: 0 0 auto;
+}
+
+/* KB 引用 chips：贴在 ChatInput 上方，提醒用户当前会话挂了哪些 KB 文档。
+   点 chip 名 → 在输入框插入 @ 引用；点 × → 取消引用（删任务文件）。 */
+.kb-ref-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px 4px;
+}
+.kb-ref-chips__label {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-right: 2px;
+}
+.kb-ref-chip {
+  display: inline-flex;
+  align-items: center;
+  background: var(--primary-dim);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  font-size: 12px;
+  color: var(--text);
+  max-width: 240px;
+  overflow: hidden;
+}
+.kb-ref-chip__name {
+  background: transparent;
+  border: 0;
+  padding: 2px 6px 2px 10px;
+  color: inherit;
+  cursor: pointer;
+  font-size: inherit;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.kb-ref-chip__name:hover {
+  color: var(--primary);
+}
+.kb-ref-chip__close {
+  background: transparent;
+  border: 0;
+  padding: 2px 8px 2px 4px;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+}
+.kb-ref-chip__close:hover {
+  color: var(--danger, #d33);
 }
 .ws-chat-head {
   display: flex;

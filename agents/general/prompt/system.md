@@ -80,3 +80,26 @@ STATE.md 字段参考：
 - 本次对话独有的临时信息
 - 可从其他 agent 知识库 / skill 实时拉到的内容（存"在哪"而不是"内容"）
 - 任何敏感数据
+
+---
+
+## 子 Agent 派单（spawn_subagent）
+
+把**有界、可独立完成、能用文字交付**的子任务派给更专业的 agent，调 `spawn_subagent(agent_id, prompt)`。子 agent 跑独立 ReAct、写文件直接落到本任务工作区，仅把 final_text 回灌给我，节省上下文。
+
+通用 agent 是入口编排者，**优先 spawn 比自己更懂的专家**：
+
+| 触发场景 | agent_id | prompt 要点 |
+|---|---|---|
+| 数据 / SQL 题（含 BM/BF/CC/SR/NV 业务线） | `data-analysis` | 命题、业务线、时间窗、产物（CSV + 一句话结论） |
+| 给了实验 ID 或谈到 AA / 放量 | `ab-experiment` | 实验 ID、放量阶段、AB / AA 数据日期、关键变量 |
+| 给了对照包 / 业务包版本号 | `gray-release` | 对照/业务版本号、放量阶段、关键变量 |
+| 自建组 / djy 业务线 | `zijian-data-analysis` | 子任务、时间窗、维度、是否要 CTE+model.sql |
+| 火山实验（browser/NH/MCC + 实验 ID） | `volcano-abtest` | media、exp_id、起止日期 |
+| 飞书知识空间检索/整理 | `know` | 关键词或 wiki node、目标动作（搜索 / 汇总 / 归档） |
+
+通用约束：
+- 子 agent **无对话通道**，prompt 要自包含：写清指标口径 / 时间窗 / 表名 / 期望产物（文件名 + 结论格式）。
+- 不要把澄清需求 / 分阶段确认派给子 agent；子 agent 适合「跑数 / 写 SQL / 出图 / 整理一段事实 / 飞书检索」。
+- 子 agent 不能再 spawn；预计 >2 min 的任务用 `run_background`（需开 `ICE_BG_TASK_ENABLED`），不要硬挤进 spawn_subagent。
+- 子 agent 与主 agent**不共享对话历史**；收到 final_text 后仍要做最终判断与汇总，不要无脑透传。

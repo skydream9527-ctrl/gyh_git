@@ -4,6 +4,7 @@ import { adminApi } from "@/api/endpoints";
 import type { AdminUser } from "@/api/endpoints";
 import { ConfirmModal } from "@/components/feedback/ConfirmModal";
 import { Skeleton } from "@/components/feedback/Skeleton";
+import { useBackdropClose } from "@/hooks/useBackdropClose";
 import { useAuthStore } from "@/stores/authStore";
 import { useUIStore } from "@/stores/uiStore";
 
@@ -27,6 +28,10 @@ export function AdminUsers() {
   const [confirmDelete, setConfirmDelete] = useState<AdminUser | null>(null);
   const [rejecting, setRejecting] = useState<AdminUser | null>(null);
   const [rejectReason, setRejectReason] = useState("");
+  const rejectBackdrop = useBackdropClose(() => {
+    setRejecting(null);
+    setRejectReason("");
+  }, !!rejecting);
   const [reviewBusy, setReviewBusy] = useState<string | null>(null);
 
   const reload = async () => {
@@ -274,14 +279,8 @@ export function AdminUsers() {
       />
 
       {rejecting && (
-        <div
-          className="cm-overlay"
-          onClick={() => {
-            setRejecting(null);
-            setRejectReason("");
-          }}
-        >
-          <div className="cm-card" style={{ minWidth: 440 }} onClick={(e) => e.stopPropagation()}>
+        <div className="cm-overlay" {...rejectBackdrop}>
+          <div className="cm-card" style={{ minWidth: 440 }}>
             <h3>驳回账号申请</h3>
             <div className="cm-body">
               <p style={{ color: "var(--text-muted)", fontSize: 13, marginBottom: 10 }}>
@@ -373,9 +372,10 @@ function UserModal({ existing, isSuper, selfId, onClose, onSaved }: ModalProps) 
     }
   };
 
+  const backdrop = useBackdropClose(onClose);
   return (
-    <div className="cm-overlay" onClick={onClose}>
-      <div className="cm-card" style={{ minWidth: 520 }} onClick={(e) => e.stopPropagation()}>
+    <div className="cm-overlay" {...backdrop}>
+      <div className="cm-card" style={{ minWidth: 520 }}>
         <h3>{existing ? "编辑用户" : "创建用户"}</h3>
         <div className="cm-body">
           <div className="adm-form-grid">

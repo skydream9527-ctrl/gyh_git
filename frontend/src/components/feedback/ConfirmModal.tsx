@@ -1,4 +1,5 @@
-import { ReactNode, useEffect } from "react";
+import { ReactNode } from "react";
+import { useBackdropClose } from "@/hooks/useBackdropClose";
 import "./ConfirmModal.css";
 
 interface Props {
@@ -22,18 +23,11 @@ export function ConfirmModal({
   onConfirm,
   onCancel,
 }: Props) {
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onCancel();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open, onCancel]);
+  const backdrop = useBackdropClose(onCancel, open);
   if (!open) return null;
   return (
-    <div className="cm-overlay" onClick={onCancel}>
-      <div className="cm-card" onClick={(e) => e.stopPropagation()}>
+    <div className="cm-overlay" {...backdrop}>
+      <div className="cm-card">
         <h3>{title}</h3>
         {body && <div className="cm-body">{body}</div>}
         <div className="cm-actions">

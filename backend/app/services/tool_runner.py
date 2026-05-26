@@ -340,10 +340,14 @@ BUILTIN_TOOL_SCHEMAS: list[dict] = [
             "name": "feishu_publish",
             "description": (
                 "Publish a markdown document to Feishu (lark) via the bundled "
-                "`feishu` CLI. Uses the host's logged-in feishu account; if the "
-                "user has not authenticated the CLI, returns FEISHU_CLI_ERROR "
-                "with stderr. Returns the doc URL on success — INCLUDE the URL "
-                "in your reply so the user can open it."
+                "`feishu` CLI. By default lands in the team wiki space "
+                "configured in FEISHU_DEFAULT_WIKI_SPACE_ID — every space "
+                "member already has read access (no manual permission "
+                "request needed). After creation, the task owner + active "
+                "collaborators (those with a xiaomi_email on file) are "
+                "auto-granted the FEISHU_AUTO_PERM_LEVEL permission; passing "
+                "extra `share_to` emails grants them too. Returns the doc URL "
+                "on success — INCLUDE the URL in your reply."
             ),
             "parameters": {
                 "type": "object",
@@ -352,6 +356,46 @@ BUILTIN_TOOL_SCHEMAS: list[dict] = [
                     "markdown": {
                         "type": "string",
                         "description": "Document body in Feishu-flavored markdown.",
+                    },
+                    "wiki_space": {
+                        "type": "string",
+                        "description": (
+                            "Optional override: place the doc under this wiki "
+                            "space root. Defaults to FEISHU_DEFAULT_WIKI_SPACE_ID."
+                        ),
+                    },
+                    "wiki_node": {
+                        "type": "string",
+                        "description": (
+                            "Optional: put the doc under this wiki node "
+                            "(token or URL). Mutually exclusive with wiki_space / folder."
+                        ),
+                    },
+                    "folder": {
+                        "type": "string",
+                        "description": (
+                            "Optional: put the doc under this drive folder token. "
+                            "Mutually exclusive with wiki_space / wiki_node."
+                        ),
+                    },
+                    "share_to": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": (
+                            "Optional Xiaomi office emails (xxx@xiaomi.com / "
+                            "@mi.com) to grant explicit perms in addition to "
+                            "the task owner + collaborators. Use when sharing "
+                            "with a stakeholder who is not yet on the task."
+                        ),
+                    },
+                    "share_perm": {
+                        "type": "string",
+                        "enum": ["view", "edit", "full_access"],
+                        "description": (
+                            "Permission level for share_to addresses. "
+                            "Defaults to 'edit'. Task owner + collaborators "
+                            "always get FEISHU_AUTO_PERM_LEVEL regardless."
+                        ),
                     },
                 },
                 "required": ["title", "markdown"],
@@ -572,7 +616,12 @@ BUILTIN_TOOL_SCHEMAS: list[dict] = [
         "_meta": {
             "display_name": "调度子 Agent",
             "side_effect": "write",
-            "parallel_safe": False,
+            # Each spawn allocates an independent run_id + transcript path +
+            # child_ctx, so concurrent calls don't interfere. The ws.py main
+            # loop fans out parallel-safe tools via asyncio.gather only when
+            # ICE_PARALLEL_TOOLS_ENABLED — leaving this off is the safe
+            # default for users who never enable parallel tools.
+            "parallel_safe": True,
             "plan_mode_allowed": False,
             "subagent_exposable": False,  # prevents recursion
         },
@@ -1200,8 +1249,82 @@ async def _tool_volcano_abtest_analyze(args: dict, ctx: dict | None = None) -> A
     }
 
 
+_VALID_PERM_LEVELS = {"view", "edit", "full_access"}
+
+
+async def _feishu_perm_add(
+    cli: str, doc_token: str, email: str, perm: str
+) -> tuple[bool, str]:
+    """Run `feishu perm add` for a single email. Returns (ok, message)."""
+    proc = await asyncio.create_subprocess_exec(
+        cli, "perm", "add", doc_token,
+        "--type", "docx",
+        "--member-type", "email",
+        "--member-id", email,
+        "--perm", perm,
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE,
+    )
+    try:
+        _out_b, err_b = await asyncio.wait_for(proc.communicate(), timeout=20.0)
+    except asyncio.TimeoutError:
+        proc.kill()
+        await proc.wait()
+        return False, f"timeout (20s) for {email}"
+    err_s = err_b.decode(errors="replace").strip()
+    if proc.returncode == 0:
+        return True, ""
+    return False, (err_s or f"exit {proc.returncode}")[:200]
+
+
+def _collect_task_xiaomi_emails(task_id: str) -> list[str]:
+    """Pull the task owner's + active collaborators' xiaomi_email values.
+
+    Returns deduped lowercase list. Silent on missing fields — users without
+    a xiaomi_email simply skip auto-perm and the report stays inaccessible
+    to them via this channel (the AccountModal banner nudges them to add it).
+    """
+    from ..core.storage import read_json as _read_json
+    from ..core.storage.paths import get_paths as _gp
+
+    paths = _gp()
+    meta = _read_json(paths.task_meta(task_id)) or {}
+    collabs = _read_json(paths.task_collaborators(task_id)) or []
+
+    user_ids: list[str] = []
+    owner_id = meta.get("owner_id") or meta.get("user_id")
+    if owner_id:
+        user_ids.append(owner_id)
+    for c in collabs:
+        if isinstance(c, dict) and c.get("status") == "active" and c.get("user_id"):
+            user_ids.append(c["user_id"])
+
+    seen: set[str] = set()
+    emails: list[str] = []
+    for uid in user_ids:
+        if uid in seen:
+            continue
+        seen.add(uid)
+        prof = _read_json(paths.user_profile(uid)) or {}
+        xe = (prof.get("xiaomi_email") or "").strip().lower()
+        if xe and xe not in emails:
+            emails.append(xe)
+    return emails
+
+
 async def _tool_feishu_publish(args: dict, ctx: dict | None = None) -> Any:
-    """Create a Feishu doc via the bundled `feishu` CLI."""
+    """Create a Feishu doc via the bundled `feishu` CLI.
+
+    Three layers of access provisioning, applied in order:
+      A. Default location → team wiki space (FEISHU_DEFAULT_WIKI_SPACE_ID),
+         so every space member has read perms by default.
+      B. After create, perm-add the task owner + active collaborators
+         (their xiaomi_email) at FEISHU_AUTO_PERM_LEVEL.
+      C. Anything in `share_to` gets perm-add at `share_perm` (default edit).
+
+    Per-call args can override the location (wiki_space / wiki_node / folder).
+    Perm-add failures are warnings, never fatal — the doc stays usable.
+    """
     import json as _json
     import shutil
     import tempfile
@@ -1218,6 +1341,25 @@ async def _tool_feishu_publish(args: dict, ctx: dict | None = None) -> Any:
             "message": "feishu CLI 未安装；请管理员在后端环境安装 feishu 命令行",
         }
 
+    settings = get_settings()
+    # Resolve location: per-call > env default. Three options are mutually
+    # exclusive — first truthy wins.
+    wiki_space = (args.get("wiki_space") or "").strip()
+    wiki_node = (args.get("wiki_node") or "").strip()
+    folder_token = (args.get("folder") or "").strip()
+    if not (wiki_space or wiki_node or folder_token):
+        wiki_space = (settings.FEISHU_DEFAULT_WIKI_SPACE_ID or "").strip()
+        if not wiki_space:
+            folder_token = (settings.FEISHU_DEFAULT_FOLDER_TOKEN or "").strip()
+
+    extra_args: list[str] = []
+    if wiki_node:
+        extra_args = ["--wiki-node", wiki_node]
+    elif wiki_space:
+        extra_args = ["--wiki-space", wiki_space]
+    elif folder_token:
+        extra_args = ["--folder", folder_token]
+
     with tempfile.NamedTemporaryFile(
         mode="w", suffix=".md", delete=False, encoding="utf-8"
     ) as f:
@@ -1225,7 +1367,7 @@ async def _tool_feishu_publish(args: dict, ctx: dict | None = None) -> Any:
         tmp_path = f.name
     try:
         proc = await asyncio.create_subprocess_exec(
-            cli, "docx", "create", title, "-f", tmp_path,
+            cli, "docx", "create", title, "-f", tmp_path, *extra_args,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
         )
@@ -1250,10 +1392,64 @@ async def _tool_feishu_publish(args: dict, ctx: dict | None = None) -> Any:
         data = _json.loads(out_s)
     except _json.JSONDecodeError:
         return {"raw_output": out_s.strip()[:2000]}
+
+    doc_token = data.get("doc_token", "")
+    location = (
+        f"wiki_space={wiki_space}" if wiki_space
+        else f"wiki_node={wiki_node}" if wiki_node
+        else f"folder={folder_token}" if folder_token
+        else "personal"
+    )
+
+    # ----- Auto-permission step (A's tail-end + B + C) -----
+    perm_results: list[dict] = []
+    perm_warnings: list[str] = []
+    if doc_token:
+        task_id = (ctx or {}).get("task_id")
+        # B: task owner + active collaborators (deduped)
+        auto_level = (settings.FEISHU_AUTO_PERM_LEVEL or "").strip().lower()
+        auto_emails: list[str] = []
+        if task_id and auto_level in _VALID_PERM_LEVELS:
+            try:
+                auto_emails = _collect_task_xiaomi_emails(task_id)
+            except Exception as exc:
+                perm_warnings.append(f"collect collaborators failed: {exc!s}"[:200])
+
+        # C: explicit share_to from the caller
+        share_perm_raw = (args.get("share_perm") or "edit").strip().lower()
+        share_perm = share_perm_raw if share_perm_raw in _VALID_PERM_LEVELS else "edit"
+        share_to_raw = args.get("share_to") or []
+        share_to: list[str] = []
+        if isinstance(share_to_raw, list):
+            for x in share_to_raw:
+                if isinstance(x, str):
+                    e = x.strip().lower()
+                    if e and e not in share_to:
+                        share_to.append(e)
+
+        # Run sequentially — perm add is fast (<1s typical) and tiny per
+        # team, but parallel would mean N concurrent CLI procs spawning
+        # subprocesses on the host; not worth the variance.
+        targets: list[tuple[str, str]] = []  # (email, perm)
+        for em in auto_emails:
+            targets.append((em, auto_level))
+        for em in share_to:
+            if not any(em == e for e, _ in targets):
+                targets.append((em, share_perm))
+
+        for em, p in targets:
+            ok, msg = await _feishu_perm_add(cli, doc_token, em, p)
+            perm_results.append({"email": em, "perm": p, "ok": ok, "error": msg or None})
+            if not ok:
+                perm_warnings.append(f"{em} ({p}): {msg}"[:200])
+
     return {
         "url": data.get("url", ""),
-        "doc_token": data.get("doc_token", ""),
+        "doc_token": doc_token,
         "title": title,
+        "location": location,
+        "perm_grants": perm_results,
+        "perm_warnings": perm_warnings or None,
         "warning": err_s.strip() if proc.returncode in (2, 3) else None,
     }
 
@@ -1773,10 +1969,9 @@ async def _tool_spawn_subagent(args: dict, ctx: dict | None = None) -> Any:
     if not task_id:
         return {"error_code": "VALIDATION_ERROR", "message": "spawn_subagent needs a task context"}
 
-    # Verify the target agent exists.
-    try:
-        await agents_svc.get_agent(agent_id)
-    except Exception:
+    # Verify the target agent exists. (get_agent is sync — earlier code awaited
+    # it and the resulting TypeError got swallowed, so the check was dead.)
+    if not agents_svc.get_agent(agent_id):
         return {"error_code": "AGENT_NOT_FOUND", "message": f"agent '{agent_id}' not found"}
 
     run_id = f"sub_{uuid.uuid4().hex[:12]}"

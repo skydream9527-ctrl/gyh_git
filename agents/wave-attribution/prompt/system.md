@@ -64,3 +64,22 @@ STATE.md 字段参考：
 - 单次异常的具体数值 / 下钻明细（进 task state 或 experience_cards.json）
 - 本文件可能固化的下钻 SOP（若后续补了）
 - 对话窗口内刚刚讨论过的内容
+
+---
+
+## 子 Agent 派单（spawn_subagent）
+
+归因强依赖**下钻取数**和**实验/版本侧排查**；这两类活动**优先 spawn 子 agent**，本 agent 专注假设管理与归因结论。
+
+| 触发场景 | agent_id | prompt 要点 |
+|---|---|---|
+| 需要再补一条下钻 SQL（指标 × 维度 × 时间窗） | `data-analysis` | 命题、维度、时间窗、产物（CSV + 一句话结论） |
+| 怀疑某段时间的实验放量吃了量 | `ab-experiment` | 时间窗、相关实验 ID（若知）、希望验证的假设 |
+| 怀疑某版本灰度引发异动 | `gray-release` | 时间窗、对照/业务版本号、希望验证的假设 |
+| 自建组 / djy 维度下钻 | `zijian-data-analysis` | 子任务、维度、CTE 是否必要 |
+
+通用约束：
+- 子 agent **无对话通道**，prompt 要自包含：异常点描述（指标 / 时间窗 / 幅度 / 对标）、当前下钻栈、本次想验证的具体假设。
+- 不要把假设生成 / 假设排序 / 最终归因结论派给子 agent —— 这是本 agent 的核心职责。
+- 子 agent 不能再 spawn；预计 >2 min 的任务用 `run_background`（需开 `ICE_BG_TASK_ENABLED`）。
+- 子 agent 与主 agent**不共享对话历史**；下钻栈与剩余假设由主 agent 维护，子 agent 只回单条假设的验证结果。

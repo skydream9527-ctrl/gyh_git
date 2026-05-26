@@ -49,6 +49,20 @@ class Settings(BaseSettings):
     FEISHU_HOST: str = "https://open.feishu.cn"
     FEISHU_REDIRECT_URI: str = "http://localhost:5173/auth/feishu/callback"
 
+    # Default location for `feishu_publish` — without this, the CLI drops every
+    # generated doc into the app's *personal* my_library, where nobody else
+    # has read perms (the "needs to apply for permission" complaint).
+    # Setting either field makes feishu_publish create docs in a shared place
+    # all space members can already see. wiki_space wins if both are set.
+    # Default = 「内容生态数据产品知识库」(known agent's space).
+    FEISHU_DEFAULT_WIKI_SPACE_ID: str = "7560912865739997187"
+    FEISHU_DEFAULT_FOLDER_TOKEN: str = ""
+    # If non-empty, feishu_publish auto-grants this perm to:
+    #   1. the task owner's xiaomi_email
+    #   2. every active collaborator's xiaomi_email
+    # one perm-add RPC per address. Errors are warnings, never block publish.
+    FEISHU_AUTO_PERM_LEVEL: str = "edit"  # view | edit | full_access | "" (off)
+
     # Kyuubi (Xiaomi internal SQL gateway). Defaults bundled for chnbj/iceberg.
     KYUUBI_HOST: str = ""
     KYUUBI_PORT: int = 10009

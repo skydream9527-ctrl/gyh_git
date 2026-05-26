@@ -30,6 +30,12 @@ LOGIN_LIMIT = RateLimitConfig(max_failures=5, window_sec=60.0, lockout_sec=900.0
 # Slower IP-level limit so brute force across many usernames from one IP also
 # trips: 20 failures / 5 min, 30 min lockout.
 LOGIN_IP_LIMIT = RateLimitConfig(max_failures=20, window_sec=300.0, lockout_sec=1800.0)
+# /auth/register caps. Open registration + admin-approval queue means an
+# attacker spamming register fills the review tray with junk; throttle hard.
+# 3 attempts / hour per IP, 50 / hour globally — matches the secure-register
+# reference defaults.
+REGISTER_IP_LIMIT = RateLimitConfig(max_failures=3, window_sec=3600.0, lockout_sec=3600.0)
+REGISTER_GLOBAL_LIMIT = RateLimitConfig(max_failures=50, window_sec=3600.0, lockout_sec=3600.0)
 
 _lock = threading.Lock()
 _failures: dict[str, deque[float]] = {}

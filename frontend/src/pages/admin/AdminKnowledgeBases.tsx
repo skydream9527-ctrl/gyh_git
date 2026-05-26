@@ -3,6 +3,7 @@ import { adminKBApi } from "@/api/endpoints";
 import type { KBArticle, KBRecord, KBSyncLog } from "@/api/endpoints";
 import { ConfirmModal } from "@/components/feedback/ConfirmModal";
 import { Skeleton } from "@/components/feedback/Skeleton";
+import { useBackdropClose } from "@/hooks/useBackdropClose";
 import { useUIStore } from "@/stores/uiStore";
 
 export function AdminKnowledgeBases() {
@@ -273,9 +274,10 @@ function KBModal({
     }
   };
 
+  const backdrop = useBackdropClose(onClose);
   return (
-    <div className="cm-overlay" onClick={onClose}>
-      <div className="cm-card" style={{ minWidth: 560 }} onClick={(e) => e.stopPropagation()}>
+    <div className="cm-overlay" {...backdrop}>
+      <div className="cm-card" style={{ minWidth: 560 }}>
         <h3>{existing ? "编辑知识库" : "新建知识库"}</h3>
         <div className="cm-body" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           <label className="ct-field">
@@ -351,9 +353,10 @@ function SyncLogsModal({ kb, onClose }: { kb: KBRecord; onClose: () => void }) {
   useEffect(() => {
     adminKBApi.syncLogs(kb.id).then((r) => setLogs(r.items));
   }, [kb.id]);
+  const backdrop = useBackdropClose(onClose);
   return (
-    <div className="cm-overlay" onClick={onClose}>
-      <div className="cm-card" style={{ minWidth: 640, maxWidth: "80vw" }} onClick={(e) => e.stopPropagation()}>
+    <div className="cm-overlay" {...backdrop}>
+      <div className="cm-card" style={{ minWidth: 640, maxWidth: "80vw" }}>
         <h3>📜 同步日志：{kb.name}</h3>
         <div className="cm-body">
           {logs === null ? (
@@ -444,12 +447,12 @@ function BrowseArticlesModal({ kb, onClose }: { kb: KBRecord; onClose: () => voi
     }
   };
 
+  const backdrop = useBackdropClose(onClose);
   return (
-    <div className="cm-overlay" onClick={onClose}>
+    <div className="cm-overlay" {...backdrop}>
       <div
         className="cm-card"
         style={{ width: "min(1100px, 92vw)", height: "min(720px, 85vh)", display: "flex", flexDirection: "column" }}
-        onClick={(e) => e.stopPropagation()}
       >
         <h3>
           📂 浏览文档：{kb.name}

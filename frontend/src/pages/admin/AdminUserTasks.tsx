@@ -5,7 +5,9 @@ import type { AdminUser } from "@/api/endpoints";
 import type { AgentCard, TaskDetail } from "@/types/api";
 import { Skeleton } from "@/components/feedback/Skeleton";
 import { ConfirmModal } from "@/components/feedback/ConfirmModal";
+import { useBackdropClose } from "@/hooks/useBackdropClose";
 import { useUIStore } from "@/stores/uiStore";
+import { clickIgnoreSelection } from "@/utils/click";
 
 type EditPatch = Parameters<typeof adminApi.updateTask>[1];
 
@@ -107,7 +109,7 @@ export function AdminUserTasks() {
               <tr key={t.id}>
                 <td data-label="任务名">
                   <a
-                    onClick={() => navigate(`/workspace/${t.id}`)}
+                    onClick={clickIgnoreSelection(() => navigate(`/workspace/${t.id}`))}
                     style={{ cursor: "pointer", color: "var(--primary)" }}
                   >
                     {t.name}
@@ -238,13 +240,10 @@ function TaskEditModal({ task, agents, onClose, onSaved }: EditModalProps) {
     }
   };
 
+  const backdrop = useBackdropClose(onClose);
   return (
-    <div className="cm-overlay" onClick={onClose}>
-      <div
-        className="cm-card"
-        style={{ minWidth: 560, maxWidth: 720 }}
-        onClick={(e) => e.stopPropagation()}
-      >
+    <div className="cm-overlay" {...backdrop}>
+      <div className="cm-card" style={{ minWidth: 560, maxWidth: 720 }}>
         <h3>编辑任务「{task.name}」</h3>
         <div className="cm-body">
           <div className="adm-form-grid">

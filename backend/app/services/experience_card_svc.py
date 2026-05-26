@@ -297,9 +297,9 @@ def merged_system_prompt(
     tools are off-limits until `exit_plan_mode` is called.
     """
     from ..core.config import get_settings
-    from .agents_svc import get_agent_system_prompt
+    from .agent_prompt_builder import build_base_prompt
 
-    base = get_agent_system_prompt(agent_id)
+    base = build_base_prompt(agent_id)
     cards_path = get_paths().agents / agent_id / "prompt" / "cards.md"
     parts: list[str] = [base]
     if cards_path.exists():

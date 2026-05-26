@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { joinRequestApi } from "@/api/endpoints";
+import { useBackdropClose } from "@/hooks/useBackdropClose";
 import { useUIStore } from "@/stores/uiStore";
 import type { JoinRequest } from "@/types/api";
 import "./JoinRequestPanel.css";
@@ -51,6 +52,7 @@ function ViewerView({
     if (submitting) return;
     setDialogOpen(false);
   };
+  const dialogBackdrop = useBackdropClose(closeDialog, dialogOpen);
 
   const handleSubmit = async () => {
     const trimmed = message.trim();
@@ -91,12 +93,7 @@ function ViewerView({
       )}
 
       {dialogOpen && (
-        <div
-          className="jrp-backdrop"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) closeDialog();
-          }}
-        >
+        <div className="jrp-backdrop" {...dialogBackdrop}>
           <div className="jrp-dialog" role="dialog" aria-modal="true">
             <div className="jrp-dialog-head">
               <h3 className="jrp-dialog-title">申请加入共建</h3>

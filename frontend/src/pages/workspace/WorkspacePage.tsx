@@ -451,6 +451,20 @@ export function WorkspacePage() {
     () => [...history, ...socket.finalized],
     [history, socket.finalized],
   );
+  // KB 引用：把 KB 文章 import 进来的任务文件单独拎出来，给 ChatInput 上方 chips 用；
+  // 同时建一个 (kb_id:article_id) Set，让 KB 面板的「引用」按钮判断是否已引用。
+  const kbImportedFiles = useMemo(
+    () => files.filter((f) => f.source_type === "kb_article"),
+    [files],
+  );
+  const kbReferenced = useMemo(() => {
+    const set = new Set<string>();
+    for (const f of kbImportedFiles) {
+      const ref = f.source_ref;
+      if (ref?.kb_id && ref.article_id) set.add(`${ref.kb_id}:${ref.article_id}`);
+    }
+    return set;
+  }, [kbImportedFiles]);
   const handleCrystallize = useCallback(
     (m: ChatMessage) => setCrystallizeFor(m),
     [],
@@ -864,6 +878,7 @@ export function WorkspacePage() {
                             <ul>
                               {arts.map((a) => {
                                 const busy = kbBusy === `${kb.id}:${a.id}`;
+                                const referenced = kbReferenced.has(`${kb.id}:${a.id}`);
                                 return (
                                   <li key={a.id} className="ws-kb-article">
                                     <span
@@ -875,12 +890,12 @@ export function WorkspacePage() {
                                     {canWrite && (
                                       <button
                                         type="button"
-                                        className="ws-kb-refbtn"
-                                        disabled={busy}
+                                        className={`ws-kb-refbtn${referenced ? " is-referenced" : ""}`}
+                                        disabled={busy || referenced}
                                         onClick={() => referenceKbArticle(kb, a)}
-                                        title="引用到任务文件"
+                                        title={referenced ? "已引用到任务文件" : "引用到任务文件"}
                                       >
-                                        {busy ? "…" : "引用"}
+                                        {busy ? "…" : referenced ? "✓ 已引用" : "引用"}
                                       </button>
                                     )}
                                   </li>
@@ -1096,6 +1111,37 @@ export function WorkspacePage() {
           {lockedBySelfElsewhere && (
             <div className="conv-locked-banner conv-locked-banner--self" role="status">
               <span>🔒 你的另一个标签页或设备正在该对话中，等当前回合结束再发新消息</span>
+            </div>
+          )}
+          {kbImportedFiles.length > 0 && (
+            <div className="kb-ref-chips" role="list" aria-label="已引用的知识库文档">
+              <span className="kb-ref-chips__label">📎 已引用</span>
+              {kbImportedFiles.map((f) => (
+                <span key={f.id} className="kb-ref-chip" role="listitem">
+                  <button
+                    type="button"
+                    className="kb-ref-chip__name"
+                    title="点击在输入框插入 @ 引用"
+                    onClick={() => {
+                      chatInputRef.current?.insertText(`@${f.name} `);
+                      chatInputRef.current?.focus();
+                    }}
+                  >
+                    {f.name}
+                  </button>
+                  {canWrite && (
+                    <button
+                      type="button"
+                      className="kb-ref-chip__close"
+                      title="取消引用（移除该任务文件）"
+                      onClick={() => removeFile(f)}
+                      aria-label={`取消引用 ${f.name}`}
+                    >
+                      ×
+                    </button>
+                  )}
+                </span>
+              ))}
             </div>
           )}
           <ChatInput

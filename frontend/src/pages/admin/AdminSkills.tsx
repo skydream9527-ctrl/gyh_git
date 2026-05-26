@@ -3,6 +3,7 @@ import { adminSkillApi } from "@/api/endpoints";
 import type { SkillRecord } from "@/api/endpoints";
 import { ConfirmModal } from "@/components/feedback/ConfirmModal";
 import { Skeleton } from "@/components/feedback/Skeleton";
+import { useBackdropClose } from "@/hooks/useBackdropClose";
 import { useUIStore } from "@/stores/uiStore";
 
 export function AdminSkills() {
@@ -225,9 +226,10 @@ function SkillModal({
     }
   };
 
+  const backdrop = useBackdropClose(onClose);
   return (
-    <div className="cm-overlay" onClick={onClose}>
-      <div className="cm-card" style={{ minWidth: 720, maxWidth: "85vw" }} onClick={(e) => e.stopPropagation()}>
+    <div className="cm-overlay" {...backdrop}>
+      <div className="cm-card" style={{ minWidth: 720, maxWidth: "85vw" }}>
         <h3>
           {readonly ? `查看「${existing?.name}」（内置不可编辑）` : existing ? `编辑「${existing.name}」` : "新建 Skill"}
         </h3>
@@ -348,9 +350,10 @@ function TestRunModal({ skill, onClose }: { skill: SkillRecord; onClose: () => v
     }
   };
 
+  const backdrop = useBackdropClose(onClose);
   return (
-    <div className="cm-overlay" onClick={onClose}>
-      <div className="cm-card" style={{ minWidth: 600 }} onClick={(e) => e.stopPropagation()}>
+    <div className="cm-overlay" {...backdrop}>
+      <div className="cm-card" style={{ minWidth: 600 }}>
         <h3>▶ 测试运行：{skill.name}</h3>
         <div className="cm-body" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           <label className="ct-field">

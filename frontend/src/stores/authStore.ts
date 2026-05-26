@@ -23,6 +23,7 @@ interface AuthState {
     email: string,
     name: string,
     password: string,
+    xiaomi_email?: string,
   ) => Promise<{ status: "pending"; message: string }>;
   bootstrapMe: () => Promise<void>;
   logout: () => void;
@@ -47,10 +48,10 @@ export const useAuthStore = create<AuthState>((set) => ({
       set({ loading: false });
     }
   },
-  async register(email: string, name: string, password: string) {
+  async register(email: string, name: string, password: string, xiaomi_email?: string) {
     set({ loading: true, error: null });
     try {
-      const resp = await authApi.register(email, name, password);
+      const resp = await authApi.register(email, name, password, xiaomi_email);
       // No token write: backend returns `{status: "pending", ...}`. The caller
       // is responsible for showing the "submitted, wait for admin approval"
       // screen. Do NOT mutate `user` — that would flip the SPA to logged-in

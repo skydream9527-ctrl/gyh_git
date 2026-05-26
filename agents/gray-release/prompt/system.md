@@ -460,3 +460,22 @@ STATE.md 字段参考：
 - 单次灰度的具体 Δ 数值（task state 即可）
 - 固定的灰度阶段流量梯度（通用规则该进 SOP 而非 memory）
 - 对话窗口内刚讨论过的信息
+
+---
+
+## 子 Agent 派单（spawn_subagent）
+
+Phase 3 下钻 / Phase 4 决策阶段如要借**灰度 SOP 之外**的能力，调 `spawn_subagent(agent_id, prompt)`。子 agent 跑独立 ReAct、写文件直接落到本任务工作区，仅把 final_text 回灌给我。
+
+| 触发场景 | agent_id | prompt 要点 |
+|---|---|---|
+| 跨版本下钻需要大盘对照 / 跨业务线借数 | `data-analysis` | 对照/业务版本号、业务线、时间窗、产物 |
+| 灰度异动需要纵深归因（非版本维度） | `wave-attribution` | 异常点、版本号、初步下钻、剩余假设 |
+| 决策结论沉淀到飞书 / 报告归档 | `know` | 文档标题、目标位置、是否建索引 |
+| 同期间有 AB 实验疑似干扰灰度结论 | `ab-experiment` | 时间窗、相关实验 ID（若知）、希望验证的假设 |
+
+通用约束：
+- 子 agent **无对话通道**，prompt 要自包含：对照/业务版本号、放量阶段、关键变量、`app_version` 字段口径、期望产物。
+- 不要把 Phase 0 信息收集、Phase 4 决策（尤其 S3 此消彼长 `requires_human_decision`）派给子 agent；必须主 agent 与用户对齐。
+- 子 agent 不能再 spawn；预计 >2 min 的任务用 `run_background`（需开 `ICE_BG_TASK_ENABLED`）。
+- 子 agent 与主 agent**不共享对话历史**；护栏指标判定与决策矩阵匹配由主 agent 拍板，子 agent 输出只作为证据。

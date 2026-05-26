@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { sqlAuditApi } from "@/api/endpoints";
 import type { SqlAuditRow, SqlAuditStats } from "@/api/endpoints";
 import { Skeleton } from "@/components/feedback/Skeleton";
+import { useBackdropClose } from "@/hooks/useBackdropClose";
 
 const PERIODS = [7, 30, 90];
 
@@ -13,6 +14,7 @@ export function AdminSqlAudit() {
   const [decision, setDecision] = useState<string>("");
   const [q, setQ] = useState("");
   const [active, setActive] = useState<SqlAuditRow | null>(null);
+  const detailBackdrop = useBackdropClose(() => setActive(null), !!active);
 
   const reload = async () => {
     setLoading(true);
@@ -159,8 +161,8 @@ export function AdminSqlAudit() {
       )}
 
       {active && (
-        <div className="cm-overlay" onClick={() => setActive(null)}>
-          <div className="cm-card" style={{ minWidth: 640, maxWidth: "80vw" }} onClick={(e) => e.stopPropagation()}>
+        <div className="cm-overlay" {...detailBackdrop}>
+          <div className="cm-card" style={{ minWidth: 640, maxWidth: "80vw" }}>
             <h3>SQL 审计详情</h3>
             <div className="cm-body" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               <KV label="时间" val={new Date(active.created_at).toLocaleString()} />

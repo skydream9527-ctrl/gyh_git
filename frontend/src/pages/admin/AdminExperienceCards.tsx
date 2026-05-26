@@ -3,6 +3,7 @@ import { adminApi, reviewApi } from "@/api/endpoints";
 import type { AdminAgent, ExperienceCard } from "@/api/endpoints";
 import { ConfirmModal } from "@/components/feedback/ConfirmModal";
 import { Skeleton } from "@/components/feedback/Skeleton";
+import { useBackdropClose } from "@/hooks/useBackdropClose";
 import { useUIStore } from "@/stores/uiStore";
 
 export function AdminExperienceCards() {
@@ -245,9 +246,10 @@ function RejectModal({
   onConfirm: (reason: string) => void | Promise<void>;
 }) {
   const [reason, setReason] = useState("");
+  const backdrop = useBackdropClose(onClose);
   return (
-    <div className="cm-overlay" onClick={onClose}>
-      <div className="cm-card" style={{ minWidth: 460 }} onClick={(e) => e.stopPropagation()}>
+    <div className="cm-overlay" {...backdrop}>
+      <div className="cm-card" style={{ minWidth: 460 }}>
         <h3>{title}</h3>
         <div className="cm-body">
           <label className="ct-field">

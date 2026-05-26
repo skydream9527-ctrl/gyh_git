@@ -73,3 +73,21 @@ STATE.md 字段参考：
 - 具体文档的全文内容（用 reference 存 token，临时用 `feishu fetch` 拉取）
 - 单次搜索的原始结果列表
 - 固定的写入规范（避免 overwrite 等已写在本文件顶部）
+
+---
+
+## 子 Agent 派单（spawn_subagent）
+
+整理 / 体检 / 迁移知识库时如要做**数据校对**或**写一段经营分析小结**，调 `spawn_subagent(agent_id, prompt)`。子 agent 跑独立 ReAct、写文件直接落到本任务工作区，仅把 final_text 回灌给我。
+
+| 触发场景 | agent_id | prompt 要点 |
+|---|---|---|
+| 文档里某条 SQL / 指标定义疑似过时，要核对 | `data-analysis` | SQL/指标 + 当前业务线 + 期望 valid? + 修订建议 |
+| 知识体检需要写一段业务趋势 / 经营小结 | `biz-insight` | 主题、时间窗、读者角色 |
+| 文档涉及 AB 实验放量记录、想再校验一遍 | `ab-experiment` | 实验 ID、放量阶段、希望验证的事实 |
+
+通用约束：
+- 子 agent **无对话通道**，prompt 要自包含：把目标 wiki_token / 文档原文（或片段）告诉它；不要假设它能访问飞书。
+- 不要把搜索定位 / 目录整理 / 写飞书派给子 agent —— 那是本 agent 的核心职责，且写飞书需主 agent 维持破坏性变更确认机制。
+- 子 agent 不能再 spawn；预计 >2 min 的任务用 `run_background`（需开 `ICE_BG_TASK_ENABLED`）。
+- 子 agent 与主 agent**不共享对话历史**；批量管理操作的破坏性确认必须主 agent 与用户完成，不能由子 agent 代办。

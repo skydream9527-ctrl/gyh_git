@@ -5,6 +5,5 @@
   "icon": "🔥",
   "color": "#c97b7b",
   "description": "待上线，敬请期待",
-  "publish_status": "coming_soon",
-  "system_prompt": "你是一名指标异常归因专家，按渠道、版本、地域等维度逐层下钻。"
+  "publish_status": "coming_soon"
 }

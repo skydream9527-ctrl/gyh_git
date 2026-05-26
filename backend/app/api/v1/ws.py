@@ -630,11 +630,13 @@ async def _handle_user_message(
         plan_mode=plan_mode,
         task_skill_ids=list(task.get("skill_ids") or []),
     )
+    # Resolve per-agent overrides on top of global env flags. agent.json
+    # `features.<name>` (true/false) wins; missing → falls back to env.
     feature_flags = {
-        "todo_write": s.ICE_TODO_ENABLED,
-        "exit_plan_mode": s.ICE_PLAN_MODE_ENABLED,
-        "spawn_subagent": s.ICE_SUBAGENT_ENABLED,
-        "run_background": s.ICE_BG_TASK_ENABLED,
+        "todo_write": agents_svc.get_agent_feature(agent_id, "todo_write", s.ICE_TODO_ENABLED),
+        "exit_plan_mode": agents_svc.get_agent_feature(agent_id, "exit_plan_mode", s.ICE_PLAN_MODE_ENABLED),
+        "spawn_subagent": agents_svc.get_agent_feature(agent_id, "spawn_subagent", s.ICE_SUBAGENT_ENABLED),
+        "run_background": agents_svc.get_agent_feature(agent_id, "run_background", s.ICE_BG_TASK_ENABLED),
     }
     tools = tool_runner.get_anthropic_tools(
         plan_mode=plan_mode,

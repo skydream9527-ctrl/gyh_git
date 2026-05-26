@@ -365,8 +365,11 @@ def update_agent_prompt(*, aid: str, new_prompt: str, operator: dict, change_not
     append_jsonl(_agent_history_path(aid), snapshot)
     md_path.parent.mkdir(parents=True, exist_ok=True)
     md_path.write_text(new_prompt, encoding="utf-8")
-    cfg["system_prompt"] = new_prompt
-    write_json(cfg_path, cfg)
+    # agent.json no longer carries system_prompt — system.md is the only
+    # source of truth, history.jsonl carries snapshots. If a legacy agent.json
+    # still has the field (pre-migration), strip it on the way through.
+    if cfg.pop("system_prompt", None) is not None:
+        write_json(cfg_path, cfg)
     return cfg
 
 

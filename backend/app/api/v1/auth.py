@@ -18,7 +18,7 @@ from fastapi import APIRouter, Depends, Request
 from ...core.config import get_settings
 from ...core.deps import client_ip as _client_ip, get_current_user
 from ...core.errors import APIError, ErrorCode, ok
-from ...core.security import create_access_token, create_refresh_token, decode_token
+from ...core.security import decode_token  # noqa: F401  (kept for tests/back-compat)
 from ...schemas.auth import LoginRequest, RefreshRequest, RegisterRequest
 from ...services import auth_svc, feishu, rate_limit_svc, sysconfig_svc
 
@@ -60,31 +60,46 @@ async def login(body: LoginRequest, request: Request):
 
 
 @router.post("/register")
-async def register(body: RegisterRequest):
+async def register(body: RegisterRequest, request: Request):
     """Open self-service account creation → pending admin approval.
 
     Gated by sysconfig toggle `enable_open_register` (default off). On success
     returns `{status: "pending", user, message}` — the SPA should show a
     "submitted, waiting for approval" screen. Login only works after an admin
     flips the account status to `active` via /admin/users/{id}/review.
+
+    Rate limited per-IP (3/h) and globally (50/h) to keep the admin-review
+    queue from being filled by automated junk. Counted on EVERY attempt —
+    a "register every 20 min" attacker is fine; an `xargs -P 100 curl` loop
+    is locked out within seconds.
     """
-    result = await auth_svc.register(body.email, body.name, body.password)
+    ip = _client_ip(request)
+    for scope, ident, cfg in (
+        ("register_ip", ip, rate_limit_svc.REGISTER_IP_LIMIT),
+        ("register_global", "all", rate_limit_svc.REGISTER_GLOBAL_LIMIT),
+    ):
+        wait = rate_limit_svc.check(scope, ident, cfg)
+        if wait:
+            raise APIError(
+                429, ErrorCode.LOGIN_RATE_LIMITED,
+                f"注册请求过于频繁，请 {int(wait) + 1} 秒后再试",
+            )
+    # Each attempt counts (success or failure) — every register hits the
+    # admin-review queue, so we must throttle even successful posts.
+    rate_limit_svc.record_failure("register_ip", ip, rate_limit_svc.REGISTER_IP_LIMIT)
+    rate_limit_svc.record_failure("register_global", "all", rate_limit_svc.REGISTER_GLOBAL_LIMIT)
+    result = await auth_svc.register(
+        body.email, body.name, body.password, xiaomi_email=body.xiaomi_email or ""
+    )
     return ok(result)
 
 
 @router.post("/refresh")
 async def refresh(body: RefreshRequest):
-    payload = decode_token(body.refresh_token, expect="refresh")
-    user = await auth_svc.load_user_by_id(payload["sub"])
-    if not user:
-        raise APIError(401, ErrorCode.TOKEN_REFRESH_FAILED, "user not found")
-    return ok(
-        {
-            "access_token": create_access_token(user["id"], user["auth_role"]),
-            "refresh_token": create_refresh_token(user["id"]),
-            "token_type": "bearer",
-        }
-    )
+    """Single-use refresh-token rotation. Each refresh consumes the presented
+    token's jti and issues a fresh pair. Replaying an already-consumed token
+    revokes ALL the user's refresh tokens (assumed compromise)."""
+    return ok(await auth_svc.rotate_refresh_token(body.refresh_token))
 
 
 @router.post("/logout")
@@ -108,8 +123,13 @@ async def feishu_start():
 @router.post("/feishu/oauth/callback")
 async def feishu_callback(payload: dict):
     code = payload.get("code")
+    state = payload.get("state")
     if not code:
         raise APIError(400, ErrorCode.VALIDATION_ERROR, "missing code")
+    # Backend-side state verification — rejects forged/expired states even
+    # if the frontend's sessionStorage check were bypassed (closed tab,
+    # phishing redirect, etc.). See feishu.verify_state for details.
+    feishu.verify_state(state)
     info = await feishu.exchange_code(code)
     result = await auth_svc.feishu_login(
         feishu_user_id=info["feishu_user_id"],

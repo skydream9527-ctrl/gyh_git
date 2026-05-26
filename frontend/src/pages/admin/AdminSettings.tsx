@@ -9,6 +9,7 @@ import type {
 } from "@/api/endpoints";
 import { ConfirmModal } from "@/components/feedback/ConfirmModal";
 import { Skeleton } from "@/components/feedback/Skeleton";
+import { useBackdropClose } from "@/hooks/useBackdropClose";
 import { useAuthStore } from "@/stores/authStore";
 import { useUIStore } from "@/stores/uiStore";
 
@@ -357,9 +358,10 @@ function ModelEditModal({
   onSave: (m: LLMModel) => void;
 }) {
   const [m, setM] = useState(model);
+  const backdrop = useBackdropClose(onClose);
   return (
-    <div className="cm-overlay" onClick={onClose}>
-      <div className="cm-card" style={{ minWidth: 480 }} onClick={(e) => e.stopPropagation()}>
+    <div className="cm-overlay" {...backdrop}>
+      <div className="cm-card" style={{ minWidth: 480 }}>
         <h3>编辑 {model.id}</h3>
         <div className="cm-body">
           <div className="adm-form-grid">
@@ -659,9 +661,10 @@ function AnnouncementModal({
     }
   };
 
+  const backdrop = useBackdropClose(onClose);
   return (
-    <div className="cm-overlay" onClick={onClose}>
-      <div className="cm-card" style={{ minWidth: 560 }} onClick={(e) => e.stopPropagation()}>
+    <div className="cm-overlay" {...backdrop}>
+      <div className="cm-card" style={{ minWidth: 560 }}>
         <h3>{existing ? "编辑公告" : "新建公告"}</h3>
         <div className="cm-body" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           <label className="ct-field">

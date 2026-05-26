@@ -6,13 +6,58 @@ without code changes — only env tweak).
 """
 from __future__ import annotations
 
+import base64
+import hashlib
+import hmac
 import secrets
+import time
 from urllib.parse import urlencode
 
 import httpx
 
 from ..core.config import get_settings
 from ..core.errors import APIError, ErrorCode
+
+# OAuth `state` is rebuilt as a stateless HMAC token: `<nonce>.<exp>.<sig>`
+# where sig = HMAC_SHA256(ICE_SECRET_KEY, "<nonce>.<exp>"). The backend
+# verifies sig + exp on callback so a forged state (random string from an
+# attacker-built link) is rejected before code-exchange. The frontend still
+# stores the state and matches it on the redirect URL — the two checks are
+# orthogonal: the frontend check binds state to "this browser session"; the
+# backend check binds state to "issued by us within 10 min".
+_STATE_TTL_SEC = 600
+
+
+def _sign_state() -> str:
+    s = get_settings()
+    nonce = secrets.token_urlsafe(12)
+    exp = int(time.time()) + _STATE_TTL_SEC
+    payload = f"{nonce}.{exp}".encode()
+    sig = hmac.new(s.ICE_SECRET_KEY.encode(), payload, hashlib.sha256).digest()
+    sig_b64 = base64.urlsafe_b64encode(sig).rstrip(b"=").decode()
+    return f"{nonce}.{exp}.{sig_b64}"
+
+
+def verify_state(state: str | None) -> None:
+    """Raise APIError if state is missing/forged/expired."""
+    if not state:
+        raise APIError(400, ErrorCode.VALIDATION_ERROR, "缺少 state 参数")
+    parts = state.split(".")
+    if len(parts) != 3:
+        raise APIError(400, ErrorCode.VALIDATION_ERROR, "state 格式错误")
+    nonce, exp_str, sig_b64 = parts
+    try:
+        exp = int(exp_str)
+    except ValueError as e:
+        raise APIError(400, ErrorCode.VALIDATION_ERROR, "state 格式错误") from e
+    if exp < int(time.time()):
+        raise APIError(400, ErrorCode.VALIDATION_ERROR, "OAuth state 已过期，请重新登录")
+    s = get_settings()
+    payload = f"{nonce}.{exp}".encode()
+    expected = hmac.new(s.ICE_SECRET_KEY.encode(), payload, hashlib.sha256).digest()
+    expected_b64 = base64.urlsafe_b64encode(expected).rstrip(b"=").decode()
+    if not hmac.compare_digest(expected_b64, sig_b64):
+        raise APIError(400, ErrorCode.VALIDATION_ERROR, "OAuth state 校验失败")
 
 
 def _host() -> str:
@@ -46,10 +91,14 @@ def assert_configured() -> None:
 
 
 def build_authorize_url() -> tuple[str, str]:
-    """Compose the Feishu authorize URL the SPA should redirect the user to."""
+    """Compose the Feishu authorize URL the SPA should redirect the user to.
+
+    `state` is HMAC-signed (see `verify_state`) so any state value that
+    didn't come out of this very call is rejected at callback time.
+    """
     assert_configured()
     s = get_settings()
-    state = secrets.token_urlsafe(16)
+    state = _sign_state()
     qs = urlencode(
         {
             "app_id": s.FEISHU_APP_ID,

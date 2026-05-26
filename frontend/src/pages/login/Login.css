@@ -259,6 +259,39 @@
   background: var(--surface);
 }
 
+/* 注册页：密码规则实时清单。每条规则跟着用户输入变绿/变红/灰。 */
+.password-rules {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 8px 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--text-dim);
+}
+.password-rules li {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+.password-rules li[data-status="ok"] {
+  color: #34d399;
+}
+.password-rules li[data-status="fail"] {
+  color: #f87171;
+}
+.password-rules li[data-status="idle"] {
+  color: var(--text-dim);
+}
+.password-rules .pr-mark {
+  font-weight: 700;
+  width: 12px;
+  text-align: center;
+  flex: 0 0 12px;
+}
+
 .feishu-btn {
   background: linear-gradient(135deg, #2c70d6, #4a8ab5);
   color: #fff;

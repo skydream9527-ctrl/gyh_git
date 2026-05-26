@@ -3,6 +3,7 @@ import { adminFileApi } from "@/api/endpoints";
 import type { PublicFileMeta } from "@/api/endpoints";
 import { ConfirmModal } from "@/components/feedback/ConfirmModal";
 import { Skeleton } from "@/components/feedback/Skeleton";
+import { useBackdropClose } from "@/hooks/useBackdropClose";
 import { useUIStore } from "@/stores/uiStore";
 
 const TEXT_FORMATS = ["md", "txt", "csv", "sql", "py", "json", "tsv", "log", "yml", "yaml"];
@@ -193,9 +194,10 @@ function FileEditModal({
     }
   };
 
+  const backdrop = useBackdropClose(onClose);
   return (
-    <div className="cm-overlay" onClick={onClose}>
-      <div className="cm-card" style={{ minWidth: 720, maxWidth: "85vw" }} onClick={(e) => e.stopPropagation()}>
+    <div className="cm-overlay" {...backdrop}>
+      <div className="cm-card" style={{ minWidth: 720, maxWidth: "85vw" }}>
         <h3>编辑「{file.name}」</h3>
         <div className="cm-body">
           <label className="ct-toggle" style={{ marginBottom: 10 }}>

@@ -90,21 +90,49 @@ _DEFAULT_AGENTS = [
 
 
 def _ensure_seed_agents() -> None:
+    """Create missing seed agents AND migrate legacy agent.json files.
+
+    Migration: drop the redundant `system_prompt` field from agent.json. Truth
+    has always been `prompt/system.md` (read by `get_agent_system_prompt`); the
+    duplicate field in agent.json is dead data that drifts every time admin
+    edits one without the other. If system.md is missing but agent.json carries
+    a non-empty system_prompt, we seed system.md from it before pruning.
+    """
     paths = get_paths()
     paths.agents.mkdir(parents=True, exist_ok=True)
+    from ..core.storage import write_json
+
     for a in _DEFAULT_AGENTS:
         d = paths.agents / a["id"]
         d.mkdir(parents=True, exist_ok=True)
         cfg_path = d / "agent.json"
         if not cfg_path.exists():
-            from ..core.storage import write_json
-
-            write_json(cfg_path, a)
+            seed = {k: v for k, v in a.items() if k != "system_prompt"}
+            write_json(cfg_path, seed)
         prompt_dir = d / "prompt"
         prompt_dir.mkdir(parents=True, exist_ok=True)
         sp_path = prompt_dir / "system.md"
         if not sp_path.exists():
             sp_path.write_text(a.get("system_prompt", ""), encoding="utf-8")
+
+    # One-pass migration over every agent dir on disk (covers user-created
+    # agents too, not just seed ones).
+    for d in paths.agents.iterdir():
+        if not d.is_dir():
+            continue
+        cfg_path = d / "agent.json"
+        if not cfg_path.exists():
+            continue
+        cfg = read_json(cfg_path)
+        if not isinstance(cfg, dict) or "system_prompt" not in cfg:
+            continue
+        sp_path = d / "prompt" / "system.md"
+        sp_path.parent.mkdir(parents=True, exist_ok=True)
+        legacy = cfg.get("system_prompt") or ""
+        if not sp_path.exists() and legacy:
+            sp_path.write_text(legacy, encoding="utf-8")
+        cfg.pop("system_prompt", None)
+        write_json(cfg_path, cfg)
 
 
 def list_agents() -> list[dict]:
@@ -129,12 +157,120 @@ def get_agent(agent_id: str) -> dict | None:
 
 
 def get_agent_system_prompt(agent_id: str) -> str:
+    """Raw, editable view of the agent's prompt — used by admin display only.
+
+    Resolution order:
+        1. New layout: `prompt/identity.md` (+ `prompt/sop.md` if present),
+           concatenated for read-only display. Admin Phase 6 will switch to
+           per-file editors; until then the textarea shows the merged view.
+        2. Legacy layout: `prompt/system.md` byte-for-byte.
+        3. Fallback default.
+
+    For runtime prompt assembly use `agent_prompt_builder.build_base_prompt`,
+    which adds shared partials, dynamic spawn targets, and plan-mode banner.
+    """
     _ensure_seed_agents()
-    md_path: Path = get_paths().agents / agent_id / "prompt" / "system.md"
+    prompt_dir = get_paths().agents / agent_id / "prompt"
+    identity_path = prompt_dir / "identity.md"
+    if identity_path.exists():
+        identity = identity_path.read_text(encoding="utf-8").strip()
+        sop_path = prompt_dir / "sop.md"
+        if sop_path.exists():
+            sop = sop_path.read_text(encoding="utf-8").strip()
+            if sop:
+                return f"{identity}\n\n---\n\n{sop}"
+        return identity
+    md_path = prompt_dir / "system.md"
     if md_path.exists():
         return md_path.read_text(encoding="utf-8")
     cfg = get_agent(agent_id) or {}
     return cfg.get("system_prompt", "你是一名通用 AI 助手。")
+
+
+_FEATURE_KEYS = ("spawn_subagent", "run_background", "todo_write", "exit_plan_mode")
+
+
+def get_agent_feature(agent_id: str, feature_name: str, default: bool) -> bool:
+    """Per-agent override for runtime feature flags.
+
+    Resolution: agent.json `features.<name>` if present (true / false) →
+    `default` (typically the global ICE_*_ENABLED setting).
+
+    Lets admin disable spawn_subagent for a specific simple agent (e.g. one
+    that runs a single CLI tool and would only get distracted by delegation
+    boilerplate), or pre-enable it for a single agent while keeping global
+    rollout off.
+    """
+    if feature_name not in _FEATURE_KEYS:
+        return default
+    cfg = get_agent(agent_id) or {}
+    features = cfg.get("features")
+    if isinstance(features, dict) and feature_name in features:
+        return bool(features[feature_name])
+    return default
+
+
+# ---- CC-style declarative fields (tools whitelist / model / spawn targets / skills) ----
+#
+# All four return None / [] when the field is absent so unmigrated agents stay
+# bit-stable: the runtime treats None as "no restriction / use default".
+
+def get_agent_tools(agent_id: str) -> list[str] | None:
+    """Per-agent tool whitelist (declared in agent.json `tools: [str]`).
+
+    Returns None when the field is absent — runtime exposes every builtin tool
+    (back-compat for unmigrated agents). Returns the declared list otherwise;
+    the dispatcher will intersect with feature flags + plan-mode gating.
+    """
+    cfg = get_agent(agent_id) or {}
+    tools = cfg.get("tools")
+    if isinstance(tools, list) and all(isinstance(t, str) for t in tools):
+        return list(tools)
+    return None
+
+
+def get_agent_model(agent_id: str) -> str | None:
+    """Per-agent LLM model id (declared in agent.json `model`).
+
+    None / empty / absent = inherit the global default. Lets a cheap-and-fast
+    sub-agent run on Haiku while the orchestrator stays on Opus.
+    """
+    cfg = get_agent(agent_id) or {}
+    model = cfg.get("model")
+    if isinstance(model, str) and model.strip():
+        return model.strip()
+    return None
+
+
+def get_agent_spawn_targets(agent_id: str) -> list[str] | None:
+    """Allowed spawn_subagent targets (agent.json `spawn_targets: [str]`).
+
+    None / absent = no restriction (any published agent is spawnable).
+    `["*"]` is sugar for "all agents" and is also returned as None to the
+    runtime, but admin UI can show it explicitly. Specific list = whitelist.
+    """
+    cfg = get_agent(agent_id) or {}
+    targets = cfg.get("spawn_targets")
+    if isinstance(targets, list) and all(isinstance(t, str) for t in targets):
+        if targets == ["*"]:
+            return None
+        return list(targets)
+    return None
+
+
+def get_agent_skills(agent_id: str) -> list[str]:
+    """Documentation-type skill hints (agent.json `skills: [str]`).
+
+    Rendered into the system prompt under "Available Skills" so the LLM knows
+    which skill ids are most relevant for this agent. No auto-load behavior —
+    the LLM still calls `read_skill` to pull SKILL.md content. Empty list
+    when absent (no hint rendered).
+    """
+    cfg = get_agent(agent_id) or {}
+    skills = cfg.get("skills")
+    if isinstance(skills, list):
+        return [s for s in skills if isinstance(s, str)]
+    return []
 
 
 def _now() -> str:
@@ -208,7 +344,6 @@ def create_agent(
         "color": (color or "#7bafd4").strip() or "#7bafd4",
         "description": (description or "").strip(),
         "publish_status": publish_status,
-        "system_prompt": system_prompt or "",
         "created_at": _now(),
     }
     agent_dir.mkdir(parents=True, exist_ok=True)

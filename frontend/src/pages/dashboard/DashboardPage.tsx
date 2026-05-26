@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { useBackdropClose } from "@/hooks/useBackdropClose";
+import { clickIgnoreSelection } from "@/utils/click";
 import { useNavigate } from "react-router-dom";
 import { agentApi, fileApi, kbApi, skillApi, taskApi } from "@/api/endpoints";
 import type { KBArticle, KBSummary } from "@/api/endpoints";
@@ -72,6 +74,9 @@ export function DashboardPage() {
   //  - 点待上线 agent → toast 提示
   const [starting, setStarting] = useState<string | null>(null);
   const [namePrompt, setNamePrompt] = useState<{ agent: AgentCard; name: string } | null>(null);
+  const namePromptBackdrop = useBackdropClose(() => {
+    if (!starting) setNamePrompt(null);
+  }, !!namePrompt);
   const defaultTaskName = (agent: AgentCard) => {
     const now = new Date();
     const ts = `${now.getMonth() + 1}/${now.getDate()} ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
@@ -284,7 +289,7 @@ export function DashboardPage() {
                   className={`task-card ${paradigmClass(t.paradigm)}`}
                   role="button"
                   tabIndex={0}
-                  onClick={() => navigate(`/workspace/${t.id}`)}
+                  onClick={clickIgnoreSelection(() => navigate(`/workspace/${t.id}`))}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ") {
                       e.preventDefault();
@@ -517,14 +522,8 @@ export function DashboardPage() {
       </main>
 
       {namePrompt && (
-        <div
-          className="cm-overlay"
-          onClick={() => !starting && setNamePrompt(null)}
-        >
-          <div
-            className="cm-card dash-name-prompt"
-            onClick={(e) => e.stopPropagation()}
-          >
+        <div className="cm-overlay" {...namePromptBackdrop}>
+          <div className="cm-card dash-name-prompt">
             <h3>
               <span style={{ marginRight: 8 }}>{namePrompt.agent.icon}</span>
               以「{namePrompt.agent.name}」新建任务
@@ -647,8 +646,9 @@ function BrowseKBModal({ kb, onClose }: { kb: KBSummary; onClose: () => void }) 
     }
   };
 
+  const backdrop = useBackdropClose(onClose);
   return (
-    <div className="cm-overlay" onClick={onClose}>
+    <div className="cm-overlay" {...backdrop}>
       <div
         className="cm-card"
         style={{
@@ -657,7 +657,6 @@ function BrowseKBModal({ kb, onClose }: { kb: KBSummary; onClose: () => void }) 
           display: "flex",
           flexDirection: "column",
         }}
-        onClick={(e) => e.stopPropagation()}
       >
         <h3>
           {kb.source_type === "feishu_wiki" ? "🪶" : "📚"} {kb.name}

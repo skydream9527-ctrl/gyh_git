@@ -4,6 +4,7 @@ import { adminApi } from "@/api/endpoints";
 import type { AdminAgent } from "@/api/endpoints";
 import { ConfirmModal } from "@/components/feedback/ConfirmModal";
 import { Skeleton } from "@/components/feedback/Skeleton";
+import { useBackdropClose } from "@/hooks/useBackdropClose";
 import { useUIStore } from "@/stores/uiStore";
 
 // Seed agents ship with the platform — deleting them would break the seed
@@ -218,13 +219,10 @@ function AgentCreateModal({ existingIds, onClose, onSaved }: CreateProps) {
     }
   };
 
+  const backdrop = useBackdropClose(onClose);
   return (
-    <div className="cm-overlay" onClick={onClose}>
-      <div
-        className="cm-card"
-        style={{ minWidth: 560, maxWidth: 720 }}
-        onClick={(e) => e.stopPropagation()}
-      >
+    <div className="cm-overlay" {...backdrop}>
+      <div className="cm-card" style={{ minWidth: 560, maxWidth: 720 }}>
         <h3>新建 Agent</h3>
         <div className="cm-body">
           <div className="adm-form-grid">

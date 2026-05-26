@@ -4,6 +4,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { authApi, sysApi } from "@/api/endpoints";
 import type { GlobalToggles } from "@/types/api";
 import { useUIStore } from "@/stores/uiStore";
+import { checkLoginLimit, clearLoginLimit, recordLoginFailure } from "@/utils/loginRateLimit";
 import "./Login.css";
 
 /**
@@ -13,6 +14,103 @@ import "./Login.css";
  */
 
 type Tab = "aegis" | "password";
+
+/**
+ * Password rule checklist — must mirror the backend's `_validate_password_strength`
+ * in `backend/app/services/auth_svc.py`. Showing the rules inline both
+ * reduces user frustration (no submit-then-error) and surfaces what the
+ * server actually enforces, so people can't silently set weaker policies
+ * by editing the placeholder.
+ */
+const BANNED_BASES = [
+  "password", "passw0rd", "password1", "password123",
+  "admin", "admin123", "admin1234", "administrator",
+  "qwerty", "qwerty123", "qwertyuiop",
+  "12345678", "123456789", "1234567890", "11111111", "00000000",
+  "letmein", "welcome", "iloveyou", "abc12345", "testtest",
+  "test123", "test1234",
+  "iceworkbench", "ice123",
+];
+const LEET: Record<string, string> = {
+  "@": "a", "0": "o", "1": "i", "3": "e", "$": "s", "!": "i", "5": "s", "7": "t",
+};
+function canonicalize(s: string): string {
+  return s.toLowerCase().split("").map((c) => LEET[c] ?? c).join("");
+}
+function hasOverlap(haystack: string, needle: string, minLen = 4): boolean {
+  if (!needle || needle.length < minLen) return false;
+  const h = haystack.toLowerCase();
+  const n = needle.toLowerCase();
+  if (n.length <= minLen) return h.includes(n);
+  for (let i = 0; i <= n.length - minLen; i++) {
+    if (h.includes(n.slice(i, i + minLen))) return true;
+  }
+  return false;
+}
+
+function PasswordRuleList({
+  password,
+  email,
+  name,
+}: {
+  password: string;
+  email: string;
+  name: string;
+}) {
+  // Each rule returns "ok" / "fail" / "idle" (idle = empty pwd, no judgment yet).
+  const idle = password.length === 0;
+  const lenOk = password.length >= 10 && password.length <= 128;
+  const classes =
+    Number(/[a-z]/.test(password)) +
+    Number(/[A-Z]/.test(password)) +
+    Number(/[0-9]/.test(password)) +
+    Number(/[^A-Za-z0-9]/.test(password));
+  const classesOk = classes >= 3;
+  const noRepeat = !/(.)\1{3,}/.test(password);
+  // 4+ ascending: check codepoint diff = -1 step three times in a row
+  let noSeq = true;
+  const lower = password.toLowerCase();
+  for (let i = 0; i < lower.length - 3; i++) {
+    const d1 = lower.charCodeAt(i + 1) - lower.charCodeAt(i);
+    const d2 = lower.charCodeAt(i + 2) - lower.charCodeAt(i + 1);
+    const d3 = lower.charCodeAt(i + 3) - lower.charCodeAt(i + 2);
+    if (d1 === 1 && d2 === 1 && d3 === 1) {
+      noSeq = false;
+      break;
+    }
+  }
+  const canon = canonicalize(password);
+  const canonAlpha = canon.replace(/[^a-z0-9]/g, "");
+  const noBanned = !BANNED_BASES.some((b) => canonAlpha.includes(b));
+  const localPart = email.split("@")[0] ?? "";
+  const noOverlap =
+    !hasOverlap(canon, localPart) && !hasOverlap(canon, name);
+
+  const rules: { ok: boolean; label: string }[] = [
+    { ok: lenOk, label: "长度 10–128 位" },
+    { ok: classesOk, label: "至少含 3 类字符（大写 / 小写 / 数字 / 符号）" },
+    { ok: noBanned, label: "不能是常见弱口令（如 password / admin / qwerty / 123456 及其 l33t 变体）" },
+    { ok: noRepeat, label: "不能有 4 个以上重复字符（如 aaaa / 1111）" },
+    { ok: noSeq, label: "不能有 4 个以上连续递增字符（如 1234 / abcd）" },
+    { ok: noOverlap, label: "不能包含账号 / 姓名连续 4 字符以上的片段" },
+  ];
+
+  return (
+    <ul className="password-rules">
+      {rules.map((r) => {
+        const status = idle ? "idle" : r.ok ? "ok" : "fail";
+        return (
+          <li key={r.label} data-status={status}>
+            <span className="pr-mark" aria-hidden>
+              {idle ? "○" : r.ok ? "✓" : "✗"}
+            </span>
+            <span>{r.label}</span>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -36,7 +134,13 @@ export function LoginPage() {
   const [checking, setChecking] = useState(!justLoggedOut);
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({ email: "", password: "" });
-  const [regForm, setRegForm] = useState({ email: "", name: "", password: "", confirm: "" });
+  const [regForm, setRegForm] = useState({
+    email: "",
+    name: "",
+    password: "",
+    confirm: "",
+    xiaomi_email: "",
+  });
   const [submittedForApproval, setSubmittedForApproval] = useState<{
     email: string;
     name: string;
@@ -117,13 +221,22 @@ export function LoginPage() {
       pushToast("warning", "请输入账号和密码");
       return;
     }
+    // 客户端 5 分钟内 5 次失败软锁，避免给后端送无谓请求 + 给用户即时反馈。
+    // 后端 rate_limit_svc 仍是真实强制；此处只是防误操作 / 自动化脚本。
+    const wait = checkLoginLimit(email.trim());
+    if (wait > 0) {
+      pushToast("warning", `登录失败次数过多，请 ${Math.ceil(wait / 60)} 分钟后再试`);
+      return;
+    }
     clearLogoutFlag();
     setSubmitting(true);
     try {
       await login(email.trim(), password);
+      clearLoginLimit(email.trim());
       pushToast("success", "登录成功");
       // user 变化后由 useEffect 跳转
     } catch (err) {
+      recordLoginFailure(email.trim());
       pushToast("error", (err as Error).message);
     } finally {
       setSubmitting(false);
@@ -135,9 +248,20 @@ export function LoginPage() {
     const name = regForm.name.trim();
     const password = regForm.password;
     const confirm = regForm.confirm;
+    const xiaomiEmail = regForm.xiaomi_email.trim().toLowerCase();
     if (!email || !name) {
       pushToast("warning", "账号和姓名不能为空");
       return;
+    }
+    if (xiaomiEmail) {
+      // Mirror backend's accept-list (xiaomi.com / mi.com). If the user types
+      // a non-Xiaomi address we fail fast — backend would reject anyway, but
+      // a client-side hint avoids round-trip.
+      const ok = /^[A-Za-z0-9._\-+]+@(xiaomi|mi)\.com$/i.test(xiaomiEmail);
+      if (!ok) {
+        pushToast("warning", "小米办公邮箱必须是 @xiaomi.com 或 @mi.com");
+        return;
+      }
     }
     if (/\s/.test(email)) {
       pushToast("warning", "账号不能包含空格");
@@ -170,11 +294,11 @@ export function LoginPage() {
     // admin 自动登入并跳到 dashboard。
     setSubmitting(true);
     try {
-      const r = await register(email, name, password);
+      const r = await register(email, name, password, xiaomiEmail || undefined);
       pushToast("success", "账号申请已提交，等待管理员审批");
       setSubmittedForApproval({ email, name, message: r.message });
       // Clear form so the user can't accidentally resubmit.
-      setRegForm({ email: "", name: "", password: "", confirm: "" });
+      setRegForm({ email: "", name: "", password: "", confirm: "", xiaomi_email: "" });
     } catch (err) {
       pushToast("error", (err as Error).message);
     } finally {
@@ -438,6 +562,18 @@ export function LoginPage() {
                     />
                   </label>
                   <label className="login-field">
+                    <span>小米办公邮箱（可选）</span>
+                    <input
+                      type="email"
+                      autoComplete="email"
+                      value={regForm.xiaomi_email}
+                      onChange={(e) =>
+                        setRegForm({ ...regForm, xiaomi_email: e.target.value })
+                      }
+                      placeholder="xxx@xiaomi.com — 用于飞书报告自动给你加权限"
+                    />
+                  </label>
+                  <label className="login-field">
                     <span>密码</span>
                     <input
                       type="password"
@@ -447,6 +583,11 @@ export function LoginPage() {
                       placeholder="至少 10 位，含大小写/数字/符号 3 类"
                     />
                   </label>
+                  <PasswordRuleList
+                    password={regForm.password}
+                    email={regForm.email}
+                    name={regForm.name}
+                  />
                   <label className="login-field">
                     <span>确认密码</span>
                     <input

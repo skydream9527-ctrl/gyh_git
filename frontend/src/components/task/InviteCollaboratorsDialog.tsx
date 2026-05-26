@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import http, { api } from "@/api/client";
 import { invitationApi } from "@/api/endpoints";
 import type { TaskInvite } from "@/api/endpoints";
+import { useBackdropClose } from "@/hooks/useBackdropClose";
 import { useUIStore } from "@/stores/uiStore";
 import "./InviteCollaboratorsDialog.css";
 
@@ -174,12 +175,12 @@ export function InviteCollaboratorsDialog({
     }
   };
 
+  const backdrop = useBackdropClose(onClose, open);
   if (!open) return null;
   return (
-    <div className="inv-overlay" role="presentation" onClick={onClose}>
+    <div className="inv-overlay" role="presentation" {...backdrop}>
       <div
         className="inv-card"
-        onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
         aria-labelledby="inv-title"

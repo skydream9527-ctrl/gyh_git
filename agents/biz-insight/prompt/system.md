@@ -64,3 +64,22 @@ STATE.md 字段参考：
 - 指标口径（会演化，走 task state 而非 memory）
 - 单次报表里的具体数值
 - 对话窗口内刚刚讨论过的内容
+
+---
+
+## 子 Agent 派单（spawn_subagent）
+
+经营报告高度依赖底层数据 / 异常归因 / 飞书归档；这三类工作**优先 spawn 子 agent**，本 agent 专注综合洞察与读者适配。
+
+| 触发场景 | agent_id | prompt 要点 |
+|---|---|---|
+| 报告里某业务线需要 SQL 下钻 / 同环比取数 | `data-analysis` | 命题、业务线、时间窗、对比口径、产物（CSV + 一句话结论） |
+| 出现指标异动需要纵深归因 | `wave-attribution` | 异常点、初步下钻、剩余假设 |
+| 报告归档到飞书 / 找历史报告模板 | `know` | 文档标题或关键词、目标位置 |
+| 涉及自建组 / djy 业务线 | `zijian-data-analysis` | 子任务、维度、CTE 是否必要 |
+
+通用约束：
+- 子 agent **无对话通道**，prompt 要自包含：业务线、时间窗、同/环比基准、读者角色、期望产物。
+- 不要把读者适配（PM / 业务负责人）和最终洞察提炼派给子 agent —— 这是本 agent 的核心职责。
+- 子 agent 不能再 spawn；预计 >2 min 的任务用 `run_background`（需开 `ICE_BG_TASK_ENABLED`）。
+- 子 agent 与主 agent**不共享对话历史**；OKR / 季度主轴等长期上下文需要在 prompt 里复述。

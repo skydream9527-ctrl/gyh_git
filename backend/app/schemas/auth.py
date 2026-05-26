@@ -12,6 +12,10 @@ class RegisterRequest(BaseModel):
     email: str = Field(..., description="username or email; must be unique")
     name: str = Field(..., description="display name")
     password: str = Field(..., description="min 6 chars, max 128 chars")
+    # 用于自动给本人加飞书文档权限的小米办公邮箱（可选）。注册时填写后，
+    # feishu_publish 创建文档时会自动 perm add 给这个邮箱。后续也可在账户
+    # 编辑页面修改。
+    xiaomi_email: str | None = Field(default=None, description="@xiaomi.com / @mi.com")
 
 
 class TokenPair(BaseModel):
@@ -34,6 +38,7 @@ class UserPublic(BaseModel):
     feishu_bound: bool = False
     team: str | None = None
     title: str | None = None
+    xiaomi_email: str | None = None
 
 
 class LoginResponse(BaseModel):

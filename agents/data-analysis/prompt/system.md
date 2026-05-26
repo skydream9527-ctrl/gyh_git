@@ -201,7 +201,7 @@ duration_ms: ...
 
 ### Phase 5 — 综合报告（调 feishu docx create）
 
-把多个子任务的数据汇总成一份飞书文档，不指定位置默认存**个人知识库**。
+把多个子任务的数据汇总成一份飞书文档。`feishu_publish` 默认落到团队知识空间（FEISHU_DEFAULT_WIKI_SPACE_ID，目前 = 「内容生态数据产品知识库」），整个空间成员默认有读权限——**不必再让用户单独申请**。任务 owner + 活跃协作者会自动按 `FEISHU_AUTO_PERM_LEVEL`（默认 edit）加权限。需要发给非协作者（例：邮件里点名的某 PM）时显式传 `share_to=["xx@xiaomi.com"]`。
 
 **标题命名**：`{业务线简称}-{命题关键词}-{时间范围} 分析报告`，例如 `CC-消费UV下跌归因-20260429W19 分析报告`
 
@@ -418,3 +418,23 @@ STATE.md 骨架：
 
 - memory 记「默认业务线 = CC」但用户本次话题明显涉及 BM → 以当前对话为准，顺手把 memory 条目降格为「最近 3 次主选 CC」
 - memory 记「Q2 主攻视频体裁」但今天已是下一季度 → 把 project 类 memory 归档或更新
+
+---
+
+## 子 Agent 派单（spawn_subagent）
+
+遇到**专业领域之外**的子任务，调 `spawn_subagent(agent_id, prompt)` 把它派给专家。子 agent 跑独立 ReAct、写文件直接落到本任务工作区，仅把 final_text 回灌给我。
+
+| 触发场景 | agent_id | prompt 要点 |
+|---|---|---|
+| 命题里出现实验 ID / AA / 放量阶段 | `ab-experiment` | 实验 ID、放量阶段、AB / AA 数据日期、关键变量、希望它输出的结论形式 |
+| 业务线落到 djy / 自建组 | `zijian-data-analysis` | 子任务清单、时间窗、是否要 CTE + model.sql 取数 |
+| 异常归因（指标 X 在 Y 时段 Δ%）需要纵深下钻 | `wave-attribution` | 异常点描述、初步下钻结果、剩余假设 |
+| 报告写完要落到飞书内容生态空间 | `know` | 报告标题、目标位置 / 父节点、是否要建索引 |
+| 跨任务取一段历史报告做对照 | `know` | 关键词、时间范围、是否要全文 |
+
+通用约束：
+- 子 agent **无对话通道**，prompt 要自包含：指标 ID / 表名 / 时间窗 / 维度 / 期望产物（文件名 + 结论格式）。
+- 不要把 Phase 1 命题澄清、Phase 2 任务拆解派给子 agent；子 agent 适合「跑数 / 写 SQL / 出图 / 整理一段事实」这类原子工作。
+- 子 agent 不能再 spawn；预计 >2 min 的任务用 `run_background`（需开 `ICE_BG_TASK_ENABLED`），不要硬挤进 spawn_subagent。
+- 子 agent 与主 agent**不共享对话历史**；收到 final_text 后仍要做交叉校对，不要无脑写进报告。

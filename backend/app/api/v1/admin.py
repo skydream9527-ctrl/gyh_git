@@ -313,6 +313,30 @@ async def admin_list_agents(_: dict = Depends(require_admin)):
     return ok({"items": items, "total": len(items)})
 
 
+@router.get("/tools/builtin")
+async def admin_list_builtin_tools(_: dict = Depends(require_admin)):
+    """Catalog of builtin tools the admin UI can pick from for an agent's
+    `tools[]` whitelist. Pulled from `BUILTIN_TOOL_SCHEMAS` so adding a new
+    tool to tool_runner automatically surfaces it here."""
+    from ...services.tool_runner import BUILTIN_TOOL_SCHEMAS
+
+    items = []
+    for t in BUILTIN_TOOL_SCHEMAS:
+        fn = t.get("function") or {}
+        meta = t.get("_meta") or {}
+        items.append(
+            {
+                "name": fn.get("name"),
+                "description": fn.get("description"),
+                "display_name": meta.get("display_name") or fn.get("name"),
+                "side_effect": meta.get("side_effect", "read"),
+                "plan_mode_allowed": bool(meta.get("plan_mode_allowed", False)),
+                "subagent_exposable": bool(meta.get("subagent_exposable", False)),
+            }
+        )
+    return ok({"items": items, "total": len(items)})
+
+
 @router.get("/agents/{aid}")
 async def admin_agent_detail(aid: str, _: dict = Depends(require_admin)):
     a = agents_svc.get_agent(aid)
@@ -382,6 +406,18 @@ async def admin_agent_update(aid: str, body: dict, op: dict = Depends(require_ad
             diff["before"][k] = cfg.get(k)
             diff["after"][k] = body[k]
             cfg[k] = body[k]
+    if "features" in body:
+        feats = body["features"] if isinstance(body["features"], dict) else {}
+        # Whitelist keys + coerce to bool/None. Setting a key to None removes
+        # the override (falls back to global env flag).
+        clean: dict = {}
+        for fk in ("spawn_subagent", "run_background", "todo_write", "exit_plan_mode"):
+            if fk in feats and feats[fk] is not None:
+                clean[fk] = bool(feats[fk])
+        if clean != (cfg.get("features") or {}):
+            diff["before"]["features"] = cfg.get("features") or {}
+            diff["after"]["features"] = clean
+            cfg["features"] = clean
     if "system_prompt" in body:
         admin_svc.update_agent_prompt(
             aid=aid,
@@ -389,6 +425,17 @@ async def admin_agent_update(aid: str, body: dict, op: dict = Depends(require_ad
             operator=op,
             change_note=body.get("change_note"),
         )
+        # update_agent_prompt rewrites agent.json from disk, dropping any
+        # in-memory edits we made above. Re-apply features/etc. by reloading
+        # and merging.
+        if diff["after"]:
+            from ...core.storage import write_json
+
+            fresh = agents_svc.get_agent(aid) or {}
+            for k in diff["after"]:
+                fresh[k] = diff["after"][k]
+            write_json(get_paths().agents / aid / "agent.json", fresh)
+            cfg = fresh
     else:
         from ...core.storage import write_json
 

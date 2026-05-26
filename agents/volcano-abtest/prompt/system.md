@@ -78,3 +78,22 @@ volcano_abtest_analyze(
 - `VOLCANO_ABTEST_EMPTY`：该实验在该日期范围无数据，请用户核对实验 ID / 日期
 - `VALIDATION_ERROR`：参数不合法，按 `message` 重新与用户确认
 - p 值表可能没有最新日期数据，此时 `report_md` 中显著性列为空，属于正常情况
+
+---
+
+## 子 Agent 派单（spawn_subagent）
+
+火山报告交付后如需**深度业务分析 / 跨平台对照 / 异常归因**，调 `spawn_subagent(agent_id, prompt)`。子 agent 跑独立 ReAct、写文件直接落到本任务工作区，仅把 final_text 回灌给我。
+
+| 触发场景 | agent_id | prompt 要点 |
+|---|---|---|
+| 火山结果异常需要更深业务下钻 | `data-analysis` | 实验 ID、media、报告路径、希望追加的子任务（指标 + 维度 + 时间窗） |
+| VV / 时长 trade-off 归因 / 多假设量化 | `wave-attribution` | 实验组、关键指标差、初步假设 |
+| 同实验也想要 AB 平台原始数据对照 | `ab-experiment` | 实验 ID、放量阶段、AB 数据日期、关键变量 |
+| 报告归档到飞书内容生态空间 | `know` | 文档标题、目标位置、是否建索引 |
+
+通用约束：
+- 子 agent **无对话通道**，prompt 要自包含：把已生成的 `abtest_<media>_<exp_id>_<起>-<止>.md` 路径告诉它，让它读，不必重新跑 datum。
+- 不要把火山参数解析（media / exp_id / 日期）派给子 agent，那是本 agent 的核心职责。
+- 子 agent 不能再 spawn；预计 >2 min 的任务用 `run_background`（需开 `ICE_BG_TASK_ENABLED`）。
+- 子 agent 与主 agent**不共享对话历史**；最终的「整体判断 / 逐组分析 / 推全建议」由主 agent 拍板，子 agent 输出只作为证据。

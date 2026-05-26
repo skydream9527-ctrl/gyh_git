@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { fileApi } from "@/api/endpoints";
+import { useBackdropClose } from "@/hooks/useBackdropClose";
 import { useUIStore } from "@/stores/uiStore";
 import type { FileMeta } from "@/types/api";
 import "./ImportLinkDialog.css";
@@ -28,6 +29,10 @@ function ImportLinkDialog({ open, taskId, onClose, onImported }: ImportLinkDialo
       setSubmitting(false);
     }
   }, [open]);
+
+  const backdrop = useBackdropClose(() => {
+    if (!submitting) onClose();
+  }, open);
 
   if (!open) return null;
 
@@ -58,16 +63,10 @@ function ImportLinkDialog({ open, taskId, onClose, onImported }: ImportLinkDialo
     }
   };
 
-  const handleBackdrop = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget && !submitting) {
-      onClose();
-    }
-  };
-
   return (
     <div
       className="import-link-backdrop"
-      onClick={handleBackdrop}
+      {...backdrop}
       role="presentation"
     >
       <div

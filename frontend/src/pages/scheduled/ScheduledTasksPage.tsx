@@ -5,6 +5,8 @@ import { MobileBottomBar } from "@/components/shell/MobileBottomBar";
 import { ConfirmModal } from "@/components/feedback/ConfirmModal";
 import { EmptyState } from "@/components/feedback/ErrorState";
 import { Skeleton } from "@/components/feedback/Skeleton";
+import { useBackdropClose } from "@/hooks/useBackdropClose";
+import { clickIgnoreSelection } from "@/utils/click";
 import { ModelSelector } from "@/components/chat/ModelSelector";
 import { scheduledApi, taskApi } from "@/api/endpoints";
 import type { ScheduledRun, ScheduledTask } from "@/api/endpoints";
@@ -177,7 +179,7 @@ export function ScheduledTasksPage() {
                   </div>
                   <div>
                     <span className="sc-label">所属任务</span>
-                    <a onClick={() => navigate(`/workspace/${s.task_id}`)} style={{ cursor: "pointer" }}>
+                    <a onClick={clickIgnoreSelection(() => navigate(`/workspace/${s.task_id}`))} style={{ cursor: "pointer" }}>
                       {s.task_name || s.task_id.slice(0, 8)}
                     </a>
                   </div>
@@ -354,9 +356,10 @@ function ScheduleEditModal({ tasks, existing, onClose, onSaved }: ModalProps) {
     }
   };
 
+  const backdrop = useBackdropClose(onClose);
   return (
-    <div className="cm-overlay" onClick={onClose}>
-      <div className="cm-card sc-modal" onClick={(e) => e.stopPropagation()}>
+    <div className="cm-overlay" {...backdrop}>
+      <div className="cm-card sc-modal">
         <h3>{existing ? "编辑定时任务" : "新建定时任务"}</h3>
         <div className="cm-body">
           <div className="sc-form">

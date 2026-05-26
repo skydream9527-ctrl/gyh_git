@@ -21,8 +21,10 @@ import type {
 export const authApi = {
   login: (email: string, password: string) =>
     api<LoginResponse>(http.post("/auth/login", { email, password })),
-  register: (email: string, name: string, password: string) =>
-    api<RegisterResponse>(http.post("/auth/register", { email, name, password })),
+  register: (email: string, name: string, password: string, xiaomi_email?: string) =>
+    api<RegisterResponse>(
+      http.post("/auth/register", { email, name, password, xiaomi_email: xiaomi_email || null }),
+    ),
   refresh: (refresh_token: string) =>
     api<{ access_token: string; refresh_token: string }>(
       http.post("/auth/refresh", { refresh_token }),
@@ -46,6 +48,7 @@ export const userApi = {
     name?: string;
     team?: string | null;
     title?: string | null;
+    xiaomi_email?: string | null;
     current_password?: string;
     new_password?: string;
   }) => api<UserPublic>(http.patch("/users/me", body)),
@@ -341,8 +344,16 @@ export interface AdminUser {
   reject_reason?: string | null;
 }
 
+export interface AdminAgentFeatures {
+  spawn_subagent?: boolean;
+  run_background?: boolean;
+  todo_write?: boolean;
+  exit_plan_mode?: boolean;
+}
+
 export interface AdminAgent extends AgentCard {
   system_prompt?: string;
+  features?: AdminAgentFeatures;
 }
 
 export interface AgentPromptSnapshot {

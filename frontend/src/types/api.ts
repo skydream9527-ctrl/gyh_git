@@ -24,6 +24,8 @@ export interface UserPublic {
   feishu_bound: boolean;
   team?: string | null;
   title?: string | null;
+  /** 小米办公邮箱（@xiaomi.com / @mi.com）。用于 feishu_publish 自动加权限。 */
+  xiaomi_email?: string | null;
 }
 
 export interface TokenPair {
@@ -123,6 +125,12 @@ export interface FileMeta {
   // Imported-file fields (source_type = kb_article | feishu_doc)
   source_type?: "kb_article" | "feishu_doc" | null;
   source_url?: string | null;
+  source_ref?: {
+    kb_id?: string;
+    article_id?: string;
+    url?: string;
+    [k: string]: unknown;
+  } | null;
   imported_at?: string | null;
   imported_by?: string | null;
   last_refreshed_at?: string | null;

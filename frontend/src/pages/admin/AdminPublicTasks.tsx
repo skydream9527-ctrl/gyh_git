@@ -4,7 +4,9 @@ import { reviewApi } from "@/api/endpoints";
 import type { TaskSummary } from "@/types/api";
 import { Skeleton } from "@/components/feedback/Skeleton";
 import { ConfirmModal } from "@/components/feedback/ConfirmModal";
+import { useBackdropClose } from "@/hooks/useBackdropClose";
 import { useUIStore } from "@/stores/uiStore";
+import { clickIgnoreSelection } from "@/utils/click";
 
 const STATUS_TABS = [
   { k: "pending", label: "待审核" },
@@ -96,7 +98,7 @@ export function AdminPublicTasks() {
             {items.map((t) => (
               <tr key={t.id}>
                 <td>
-                  <a onClick={() => navigate(`/workspace/${t.id}`)} style={{ cursor: "pointer" }}>
+                  <a onClick={clickIgnoreSelection(() => navigate(`/workspace/${t.id}`))} style={{ cursor: "pointer" }}>
                     {t.name}
                   </a>
                 </td>
@@ -191,9 +193,10 @@ function RejectWithReason({
   onConfirm: (reason: string) => void | Promise<void>;
 }) {
   const [reason, setReason] = useState("");
+  const backdrop = useBackdropClose(onClose);
   return (
-    <div className="cm-overlay" onClick={onClose}>
-      <div className="cm-card" style={{ minWidth: 460 }} onClick={(e) => e.stopPropagation()}>
+    <div className="cm-overlay" {...backdrop}>
+      <div className="cm-card" style={{ minWidth: 460 }}>
         <h3>{title}</h3>
         <div className="cm-body">
           <label className="ct-field">

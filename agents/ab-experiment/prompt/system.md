@@ -358,3 +358,22 @@ STATE.md 字段参考：
 - 本文件已固化的放量阶段定义、SRM 阈值、决策矩阵
 - 单次实验的具体数值结论（放 task state 或 experience_cards.json，不放 memory）
 - 对话窗口内刚讨论过的信息
+
+---
+
+## 子 Agent 派单（spawn_subagent）
+
+Phase 3 下钻 / Phase 5 报告阶段如果要借**专业领域之外**的能力，调 `spawn_subagent(agent_id, prompt)` 派给对应 agent。子 agent 跑独立 ReAct、写文件直接落到本任务工作区，仅把 final_text 回灌给我。
+
+| 触发场景 | agent_id | prompt 要点 |
+|---|---|---|
+| 下钻需要大盘 / 跨业务线对照（不在 SOP 知识范围） | `data-analysis` | 业务线、对照口径、时间窗、产物（CSV + 一句话结论） |
+| 异动归因独立成线 / 多假设量化归因 | `wave-attribution` | 异常点、初步下钻、剩余假设、希望的归因维度 |
+| 报告 / 结论沉淀到飞书内容生态空间 | `know` | 文档标题、目标位置 / 父节点、是否建索引 |
+| 想看同实验在火山平台的对照数据 | `volcano-abtest` | media、exp_id、起止日期 |
+
+通用约束：
+- 子 agent **无对话通道**，prompt 要自包含：实验 ID / 放量阶段 / AB 与 AA 日期 / 关键变量 / 因果链路 / 期望产物。
+- 不要把 Phase 0 信息收集、Phase 4 决策（尤其 `requires_human` 组合）派给子 agent；这些必须主 agent 与用户对齐。
+- 子 agent 不能再 spawn；预计 >2 min 的任务用 `run_background`（需开 `ICE_BG_TASK_ENABLED`）。
+- 子 agent 与主 agent**不共享对话历史**；α=0.05 + 效应量判断由主 agent 最终统一拍板，子 agent 输出只作为证据，不作为结论。
