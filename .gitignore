@@ -56,3 +56,8 @@ ice_data_workspace_v2.zip
 
 # Distributable bundles produced by `make pack`
 ice-workbench-*.zip
+
+# 工作 staging — 不入库
+update_file/                 # skill 上传 zip 暂存
+test_file/                   # agent 测试样本
+SQL口径与取数表清单.md       # 工作底稿
