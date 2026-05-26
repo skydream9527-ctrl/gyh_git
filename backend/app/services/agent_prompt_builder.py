@@ -43,10 +43,17 @@ def _agent_dir(agent_id: str) -> Path:
 
 
 def has_new_layout(agent_id: str) -> bool:
-    """True when the agent has been migrated to identity.md + (optional) sop.md.
-    Used by admin tooling and the legacy reader to decide which path to take.
+    """True when the agent has opted into the v3 declarative layout.
+
+    Selection is explicit via `agent.json.prompt_layout == "v3"`. We avoid
+    auto-detection on `identity.md` existence because the legacy RuntimeFacade
+    era left orphan `identity.md`/`rules.md` files in some agent dirs that
+    we'd otherwise misinterpret as a v3 migration.
     """
-    return (_agent_dir(agent_id) / "prompt" / "identity.md").exists()
+    from . import agents_svc
+
+    cfg = agents_svc.get_agent(agent_id) or {}
+    return cfg.get("prompt_layout") == "v3"
 
 
 def _render_spawn_targets(agent_id: str) -> str:
@@ -133,14 +140,18 @@ def build_base_prompt(agent_id: str) -> str:
     from . import agents_svc
 
     adir = _agent_dir(agent_id)
-    identity_path = adir / "prompt" / "identity.md"
-    if not identity_path.exists():
-        # Legacy bit-stable path.
-        legacy = _read_text(adir / "prompt" / "system.md")
-        if legacy:
-            return legacy
+    if not has_new_layout(agent_id):
+        # Legacy bit-stable path — preserve trailing whitespace exactly so the
+        # assembled prompt is identical to what the legacy reader produced.
+        sys_path = adir / "prompt" / "system.md"
+        if sys_path.exists():
+            try:
+                return sys_path.read_text(encoding="utf-8")
+            except OSError:
+                pass
         cfg = agents_svc.get_agent(agent_id) or {}
         return cfg.get("system_prompt") or _DEFAULT_FALLBACK_PROMPT
+    identity_path = adir / "prompt" / "identity.md"
 
     parts: list[str] = []
     parts.append(_read_text(identity_path))

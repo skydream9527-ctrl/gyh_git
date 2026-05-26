@@ -401,11 +401,43 @@ async def admin_agent_update(aid: str, body: dict, op: dict = Depends(require_ad
     if not cfg:
         raise APIError(404, ErrorCode.RESOURCE_NOT_FOUND, "Agent 不存在")
     diff = {"before": {}, "after": {}}
-    for k in ("name", "description", "icon", "color", "publish_status", "paradigm"):
+    for k in ("name", "description", "icon", "color", "publish_status", "paradigm", "prompt_layout"):
         if k in body and body[k] != cfg.get(k):
             diff["before"][k] = cfg.get(k)
             diff["after"][k] = body[k]
             cfg[k] = body[k]
+    # Declarative v3 fields. Each is optional; missing = inherit defaults.
+    # Validate light-touch (types only) — full validation is light here so
+    # admins can experiment without a frontend round-trip.
+    for arr_key in ("tools", "spawn_targets", "skills"):
+        if arr_key in body:
+            val = body[arr_key]
+            if val is None:
+                if arr_key in cfg:
+                    diff["before"][arr_key] = cfg.get(arr_key)
+                    diff["after"][arr_key] = None
+                    cfg.pop(arr_key, None)
+            elif isinstance(val, list) and all(isinstance(x, str) for x in val):
+                if val != cfg.get(arr_key):
+                    diff["before"][arr_key] = cfg.get(arr_key)
+                    diff["after"][arr_key] = val
+                    cfg[arr_key] = val
+            else:
+                raise APIError(400, ErrorCode.VALIDATION_ERROR, f"`{arr_key}` 必须是字符串数组或 null")
+    if "model" in body:
+        m = body["model"]
+        if m is None or (isinstance(m, str) and not m.strip()):
+            if cfg.get("model"):
+                diff["before"]["model"] = cfg.get("model")
+                diff["after"]["model"] = None
+                cfg.pop("model", None)
+        elif isinstance(m, str):
+            if m != cfg.get("model"):
+                diff["before"]["model"] = cfg.get("model")
+                diff["after"]["model"] = m
+                cfg["model"] = m
+        else:
+            raise APIError(400, ErrorCode.VALIDATION_ERROR, "`model` 必须是字符串或 null")
     if "features" in body:
         feats = body["features"] if isinstance(body["features"], dict) else {}
         # Whitelist keys + coerce to bool/None. Setting a key to None removes

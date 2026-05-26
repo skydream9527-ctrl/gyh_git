@@ -4,6 +4,31 @@
   "paradigm": "open",
   "icon": "🤖",
   "color": "#8a8a8a",
-  "description": "自由对话 · 跨范式多工具编排",
-  "publish_status": "published"
+  "description": "自由对话 · 跨范式多工具编排 · 入口编排者,优先派单给更专业的子 agent",
+  "publish_status": "published",
+  "prompt_layout": "v3",
+  "tools": [
+    "now",
+    "echo",
+    "kyuubi_query",
+    "write_file",
+    "read_file",
+    "list_files",
+    "feishu_publish",
+    "feishu_upload_image",
+    "read_skill",
+    "read_agent_knowledge",
+    "todo_write",
+    "exit_plan_mode",
+    "spawn_subagent",
+    "run_background"
+  ],
+  "model": null,
+  "spawn_targets": ["*"],
+  "skills": [],
+  "features": {
+    "spawn_subagent": true,
+    "todo_write": true,
+    "exit_plan_mode": true
+  }
 }

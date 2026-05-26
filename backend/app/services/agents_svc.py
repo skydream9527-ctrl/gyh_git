@@ -112,6 +112,12 @@ def _ensure_seed_agents() -> None:
         prompt_dir = d / "prompt"
         prompt_dir.mkdir(parents=True, exist_ok=True)
         sp_path = prompt_dir / "system.md"
+        # v3-layout agents intentionally do NOT have system.md (identity.md +
+        # sop.md replaces it). Don't recreate an empty stub; identity.md is
+        # the source of truth and the legacy reader checks prompt_layout first.
+        existing_cfg = read_json(cfg_path) if cfg_path.exists() else {}
+        if existing_cfg.get("prompt_layout") == "v3":
+            continue
         if not sp_path.exists():
             sp_path.write_text(a.get("system_prompt", ""), encoding="utf-8")
 
@@ -160,9 +166,10 @@ def get_agent_system_prompt(agent_id: str) -> str:
     """Raw, editable view of the agent's prompt — used by admin display only.
 
     Resolution order:
-        1. New layout: `prompt/identity.md` (+ `prompt/sop.md` if present),
-           concatenated for read-only display. Admin Phase 6 will switch to
-           per-file editors; until then the textarea shows the merged view.
+        1. v3 layout (agent.json `prompt_layout == "v3"`): `prompt/identity.md`
+           (+ `prompt/sop.md` if present), concatenated for read-only display.
+           Admin Phase 6 will switch to per-file editors; until then the
+           textarea shows the merged view.
         2. Legacy layout: `prompt/system.md` byte-for-byte.
         3. Fallback default.
 
@@ -171,19 +178,20 @@ def get_agent_system_prompt(agent_id: str) -> str:
     """
     _ensure_seed_agents()
     prompt_dir = get_paths().agents / agent_id / "prompt"
-    identity_path = prompt_dir / "identity.md"
-    if identity_path.exists():
-        identity = identity_path.read_text(encoding="utf-8").strip()
-        sop_path = prompt_dir / "sop.md"
-        if sop_path.exists():
-            sop = sop_path.read_text(encoding="utf-8").strip()
-            if sop:
-                return f"{identity}\n\n---\n\n{sop}"
-        return identity
+    cfg = get_agent(agent_id) or {}
+    if cfg.get("prompt_layout") == "v3":
+        identity_path = prompt_dir / "identity.md"
+        if identity_path.exists():
+            identity = identity_path.read_text(encoding="utf-8").strip()
+            sop_path = prompt_dir / "sop.md"
+            if sop_path.exists():
+                sop = sop_path.read_text(encoding="utf-8").strip()
+                if sop:
+                    return f"{identity}\n\n---\n\n{sop}"
+            return identity
     md_path = prompt_dir / "system.md"
     if md_path.exists():
         return md_path.read_text(encoding="utf-8")
-    cfg = get_agent(agent_id) or {}
     return cfg.get("system_prompt", "你是一名通用 AI 助手。")
 
 

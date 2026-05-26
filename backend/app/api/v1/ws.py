@@ -641,12 +641,14 @@ async def _handle_user_message(
     tools = tool_runner.get_anthropic_tools(
         plan_mode=plan_mode,
         feature_flags=feature_flags,
+        tool_whitelist=agents_svc.get_agent_tools(agent_id),
         task_skill_ids=list(task.get("skill_ids") or []),
     )
-    # Per-message > task workspace > settings default
+    # Per-message > task workspace > agent.json.model > settings default
     model_id = (
         msg.get("model")
         or (task.get("workspace") or {}).get("model")
+        or agents_svc.get_agent_model(agent_id)
         or llm_gateway.resolve_model(None)
     )
 

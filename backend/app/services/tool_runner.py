@@ -685,6 +685,7 @@ def get_anthropic_tools(
     plan_mode: bool = False,
     in_subagent: bool = False,
     feature_flags: dict | None = None,
+    tool_whitelist: list[str] | None = None,
     task_skill_ids: list[str] | None = None,
 ) -> list[dict]:
     """Convert BUILTIN_TOOL_SCHEMAS to Anthropic native tool schema.
@@ -695,6 +696,9 @@ def get_anthropic_tools(
     `feature_flags` filters out v2 tools whose global flag is off; pass a dict
     like {"todo_write": True, "exit_plan_mode": False, "spawn_subagent": True,
     "run_background": False}. Missing keys default to True (tool stays on).
+    `tool_whitelist` (when not None) restricts the output to names in the list;
+    sourced from `agent.json.tools` so each agent can declare its own surface.
+    None / missing field = no whitelist restriction (every tool stays).
     `task_skill_ids` (when not None) rewrites the read_skill tool description
     so the LLM only sees the agentic skills bound to the current task — the
     hardcoded example list (kyuubi, nl-sql, ...) is replaced by the actual
@@ -702,6 +706,7 @@ def get_anthropic_tools(
     contexts without a task (admin sandbox, scheduler one-shot completion).
     """
     out = []
+    whitelist_set = set(tool_whitelist) if tool_whitelist is not None else None
     for t in BUILTIN_TOOL_SCHEMAS:
         fn = t["function"]
         meta = {**_DEFAULT_META, **(t.get("_meta") or {})}
@@ -713,6 +718,8 @@ def get_anthropic_tools(
             flag = feature_flags.get(fn["name"])
             if flag is False:
                 continue
+        if whitelist_set is not None and fn["name"] not in whitelist_set:
+            continue
         description = fn["description"]
         if task_skill_ids is not None and fn["name"] == "read_skill":
             description = _read_skill_description_for_task(task_skill_ids)
@@ -1985,16 +1992,19 @@ async def _tool_spawn_subagent(args: dict, ctx: dict | None = None) -> Any:
     system_prompt = experience_card_svc.merged_system_prompt(
         agent_id, task_skill_ids=parent_skill_ids
     )
-    allowed = args.get("allowed_tools") if isinstance(args.get("allowed_tools"), list) else None
-    feature_flags = None
-    if allowed:
-        feature_flags = {name: True for name in allowed}
-        # If the parent passed a whitelist, all OTHER tools are off in the child.
-        # get_anthropic_tools treats "flag=False" as drop; explicit "True" keeps.
-        feature_flags = {t["function"]["name"]: (t["function"]["name"] in allowed) for t in BUILTIN_TOOL_SCHEMAS}
+    # Effective tool whitelist for the child = intersection of:
+    #   1. the child agent's own `agent.json.tools` (None if unrestricted)
+    #   2. parent-passed `allowed_tools` arg (LLM's runtime choice)
+    # Both None ⇒ no whitelist (the child gets every subagent-exposable tool).
+    child_whitelist = agents_svc.get_agent_tools(agent_id)
+    parent_allowed = args.get("allowed_tools") if isinstance(args.get("allowed_tools"), list) else None
+    if child_whitelist is not None and parent_allowed is not None:
+        effective_whitelist = [t for t in child_whitelist if t in parent_allowed]
+    else:
+        effective_whitelist = child_whitelist if child_whitelist is not None else parent_allowed
     tools = get_anthropic_tools(
         in_subagent=True,
-        feature_flags=feature_flags,
+        tool_whitelist=effective_whitelist,
         task_skill_ids=parent_skill_ids,
     )
 
@@ -2021,6 +2031,8 @@ async def _tool_spawn_subagent(args: dict, ctx: dict | None = None) -> Any:
     )
 
     started = datetime.now(tz=timezone.utc)
+    # Per-message arg > child agent's agent.json.model > runtime default.
+    child_model = args.get("model") or agents_svc.get_agent_model(agent_id)
     try:
         result = await asyncio.wait_for(
             agent_runtime.run_agent_turn(
@@ -2029,7 +2041,7 @@ async def _tool_spawn_subagent(args: dict, ctx: dict | None = None) -> Any:
                 tools=tools,
                 ctx=child_ctx,
                 max_rounds=s.ICE_SUBAGENT_MAX_TOOL_ROUNDS,
-                model=args.get("model"),
+                model=child_model,
                 max_tokens=int(args.get("max_tokens") or 2048),
                 transcript_sink=transcript_path,
             ),
