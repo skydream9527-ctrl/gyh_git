@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends
+import asyncio
+
+from fastapi import APIRouter, Depends, Query
 
 from ...core.deps import TaskRole, get_current_user, require_task_role
 from ...core.errors import APIError, ErrorCode, ok
@@ -48,11 +50,22 @@ async def get_task(task_id: str, user: dict = Depends(get_current_user)):
 
 
 @router.get("/{task_id}/conversation")
-async def task_conversation(task_id: str, user: dict = Depends(get_current_user)):
+async def task_conversation(
+    task_id: str,
+    user: dict = Depends(get_current_user),
+    limit: int = Query(80, ge=1, le=200),
+    before: int | None = Query(default=None, ge=0),
+):
     await task_svc.get_task(task_id, user["id"], is_admin=bool(user.get("is_admin")))
     cid = await task_svc.get_or_create_default_conversation(task_id)
-    messages = task_svc.load_conversation_messages(task_id, cid)
-    return ok({"conversation_id": cid, "messages": messages})
+    page = await asyncio.to_thread(
+        task_svc.load_conversation_messages_page,
+        task_id,
+        cid,
+        limit=limit,
+        before=before,
+    )
+    return ok({"conversation_id": cid, **page})
 
 
 @router.delete("/{task_id}")

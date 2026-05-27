@@ -20,7 +20,7 @@ from fastapi import APIRouter, Query, WebSocket, WebSocketDisconnect
 from ...core.config import get_settings
 from ...core.deps import resolve_user
 from ...core.errors import APIError, ErrorCode
-from ...core.storage import append_jsonl, get_paths
+from ...core.storage import append_jsonl, get_paths, read_jsonl
 from ...services import (
     agents_svc,
     compaction_svc,
@@ -366,6 +366,55 @@ async def ws_chat(
                     message="user requested abort",
                 )
                 continue
+            if mtype == "retry_tool_call":
+                if is_viewer_ws:
+                    await _send_error(
+                        websocket,
+                        ErrorCode.PERMISSION_DENIED,
+                        "您仅有查看权限，如需重试工具请申请编辑权限",
+                    )
+                    continue
+                tool_call_id = str(msg.get("tool_call_id") or "")
+                if not tool_call_id:
+                    await _send_error(websocket, ErrorCode.VALIDATION_ERROR, "missing tool_call_id")
+                    continue
+                existing = _inflight_turns.get(inflight_key)
+                if existing is not None and not existing[0].done():
+                    await _send_error(
+                        websocket,
+                        ErrorCode.CONVERSATION_INFLIGHT,
+                        "该对话正在处理中，请等待当前回合结束后再重试工具",
+                    )
+                    continue
+                lock_fh = _try_acquire_conv_inflight(task_id, conversation_id)
+                if lock_fh is None:
+                    await _send_error(
+                        websocket,
+                        ErrorCode.CONVERSATION_INFLIGHT,
+                        "该对话正在处理中，请等待当前回合结束后再重试工具",
+                    )
+                    continue
+                state = inflight_svc.mark_busy(
+                    task_id,
+                    conversation_id,
+                    user_id=user["id"],
+                    user_name=user_display_name,
+                )
+                await _broadcast_inflight(task_id, conversation_id, state)
+                try:
+                    await _handle_retry_tool_call(
+                        websocket,
+                        user,
+                        task_id,
+                        conversation_id,
+                        tool_path,
+                        tool_call_id,
+                    )
+                finally:
+                    _release_conv_inflight(lock_fh)
+                    inflight_svc.mark_idle(task_id, conversation_id)
+                    await _broadcast_inflight(task_id, conversation_id, None)
+                continue
             if mtype == "set_plan_mode":
                 try:
                     await conversation_svc.set_plan_mode(
@@ -563,19 +612,45 @@ async def _handle_user_message(
 ):
     s = get_settings()
     user_msg_id = _new_id()
+    run_id = _new_id()
     content = (msg.get("content") or "").strip()
+
+    async def _send_run_event(
+        stage: str,
+        label: str,
+        *,
+        status: str = "running",
+        detail: str | None = None,
+        payload: dict | None = None,
+    ) -> None:
+        await _send(
+            ws,
+            {
+                "type": "run_event",
+                "run_id": run_id,
+                "stage": stage,
+                "label": label,
+                "status": status,
+                "detail": detail,
+                "payload": payload or {},
+                "created_at": _now(),
+            },
+        )
+
     if not content:
         await _send_error(ws, ErrorCode.VALIDATION_ERROR, "empty message")
         return
     event_log.emit(
         task_id=task_id,
         conv_id=conversation_id,
+        run_id=run_id,
         source="ws",
         event_type="turn_start",
         user_id=user.get("id"),
         message=f"len={len(content)}",
         payload={"content_preview": content[:80]},
     )
+    await _send_run_event("received", "收到用户消息", detail=content[:80])
 
     user_record = {
         "id": user_msg_id,
@@ -592,6 +667,7 @@ async def _handle_user_message(
     await task_svc.touch_task(task_id, last_message_preview=content)
 
     if not s.llm_enabled:
+        await _send_run_event("failed", "模型服务未配置", status="error")
         await _send(
             ws,
             {
@@ -608,19 +684,24 @@ async def _handle_user_message(
 
     # load_conversation_messages 读 jsonl 是 sync IO，长会话能耗几十毫秒到几秒。
     # _to_api_messages 内部还会读 tool_calls.jsonl 一次。两个一起 to_thread。
+    await _send_run_event("context", "整理对话上下文")
     history = await asyncio.to_thread(
         task_svc.load_conversation_messages, task_id, conversation_id
     )
     api_messages = await asyncio.to_thread(
         _to_api_messages, history, task_id=task_id, conversation_id=conversation_id
     )
+    await _send_run_event("context", "上下文已就绪", status="done", detail=f"{len(api_messages)} 条模型消息")
     if s.ICE_COMPACTION_ENABLED:
         try:
+            await _send_run_event("compaction", "检查长对话压缩")
             api_messages = await compaction_svc.maybe_compact(
                 task_id=task_id, conv_id=conversation_id, api_messages=api_messages
             )
+            await _send_run_event("compaction", "上下文压缩检查完成", status="done")
         except Exception as exc:
             log.warning("compaction failed, falling back: %s", exc)
+            await _send_run_event("compaction", "上下文压缩失败，已回退原历史", status="warning", detail=str(exc)[:160])
     task = await task_svc.get_task(task_id, user["id"])
     agent_id = task.get("agent_id") or "biz-insight"
     plan_state = await conversation_svc.get_plan_mode(task_id=task_id, conv_id=conversation_id)
@@ -688,6 +769,7 @@ async def _handle_user_message(
     try:
         for round_idx in range(max_rounds + 1):
             if cancel_event.is_set():
+                await _send_run_event("aborted", "用户已中断执行", status="aborted")
                 await _send(ws, {"type": "agent_typing", "status": "stop"})
                 await _send(ws, {"type": "agent_message_done", "files_created": files_created, "aborted": True})
                 return
@@ -695,6 +777,12 @@ async def _handle_user_message(
             text_buf = []
             tool_uses: list[dict] = []
             done_event = None
+            await _send_run_event(
+                "llm",
+                "模型生成中",
+                detail=f"第 {round_idx + 1} 轮 · {model_id}",
+                payload={"round": round_idx + 1, "model": model_id},
+            )
             try:
                 async for ev in llm_gateway.stream_chat(
                     system_prompt=system_prompt,
@@ -738,6 +826,7 @@ async def _handle_user_message(
                 event_log.emit(
                     task_id=task_id,
                     conv_id=conversation_id,
+                    run_id=run_id,
                     source="llm_gateway",
                     event_type="gateway_error",
                     level="ERROR",
@@ -751,6 +840,7 @@ async def _handle_user_message(
                 raise _APIError(502, "GATEWAY_ERROR", str(e)[:500]) from e
             if cancel_event.is_set():
                 # 保留已经生成的部分到对话历史，便于用户接着追问。
+                await _send_run_event("aborted", "用户已中断执行", status="aborted")
                 partial_text = "".join(text_buf)
                 if partial_text or tool_uses:
                     await asyncio.to_thread(
@@ -774,12 +864,20 @@ async def _handle_user_message(
                 return
             assistant_text = "".join(text_buf)
             usage = (done_event or {}).get("usage") or {}
+            await _send_run_event(
+                "llm",
+                "模型生成完成",
+                status="done",
+                detail=f"{len(assistant_text)} 字 · {len(tool_uses)} 个工具",
+                payload={"round": round_idx + 1, "tool_count": len(tool_uses)},
+            )
             assistant_record = {
                 "id": assistant_msg_id,
                 "role": "assistant",
                 "content": assistant_text,
                 "tool_uses": tool_uses,
                 "agent_id": agent_id,
+                "run_id": run_id,
                 "stop_reason": (done_event or {}).get("stop_reason"),
                 "usage": usage,
                 "created_at": _now(),
@@ -827,6 +925,12 @@ async def _handle_user_message(
             started_at: list[str] = [""] * len(tool_uses)
             for i in parallel_idx:
                 tu = tool_uses[i]
+                await _send_run_event(
+                    "tool",
+                    f"开始执行 {tool_runner.get_display_name(tu.get('name'))}",
+                    detail="并行执行",
+                    payload={"tool_call_id": tu.get("id"), "tool_name": tu.get("name")},
+                )
                 await _send(
                     ws,
                     {
@@ -867,6 +971,11 @@ async def _handle_user_message(
             # Serial group: emit start+run+done one at a time.
             for i in serial_idx:
                 tu = tool_uses[i]
+                await _send_run_event(
+                    "tool",
+                    f"开始执行 {tool_runner.get_display_name(tu.get('name'))}",
+                    payload={"tool_call_id": tu.get("id"), "tool_name": tu.get("name")},
+                )
                 await _send(
                     ws,
                     {
@@ -890,6 +999,13 @@ async def _handle_user_message(
                 tu_name = tu.get("name")
                 tu_input = tu.get("input") or {}
                 outcome = outcomes[i] or {"status": "error", "success": False, "error": {}}
+                await _send_run_event(
+                    "tool",
+                    f"{tool_runner.get_display_name(tu_name)} 执行结束",
+                    status="done" if outcome.get("success") else "error",
+                    detail=str(outcome.get("status") or ""),
+                    payload={"tool_call_id": tu_id, "tool_name": tu_name},
+                )
                 await _send(
                     ws,
                     {
@@ -919,6 +1035,7 @@ async def _handle_user_message(
                     event_log.emit(
                         task_id=task_id,
                         conv_id=conversation_id,
+                        run_id=run_id,
                         source="tool_runner",
                         event_type="tool_error",
                         level="WARN",
@@ -981,6 +1098,7 @@ async def _handle_user_message(
             # If a plan was proposed this round, stop the outer loop without
             # feeding tool_results back to the LLM — the user must approve.
             if plan_proposed_payload is not None:
+                await _send_run_event("waiting_user", "等待用户审批方案", status="waiting")
                 await _send(ws, {"type": "agent_typing", "status": "stop"})
                 await _send(
                     ws,
@@ -993,12 +1111,15 @@ async def _handle_user_message(
                 )
                 return
 
+        await _send_run_event("completed", "执行完成", status="done", detail=f"生成 {len(files_created)} 个文件")
         await _send(ws, {"type": "agent_message_done", "files_created": files_created})
     except APIError as e:
+        await _send_run_event("failed", "执行失败", status="error", detail=e.message)
         await _send(ws, {"type": "error", "error_code": e.error_code, "message": e.message})
         event_log.emit(
             task_id=task_id,
             conv_id=conversation_id,
+            run_id=run_id,
             source="ws",
             event_type="turn_error",
             level="ERROR",
@@ -1007,10 +1128,12 @@ async def _handle_user_message(
         )
     except Exception as e:
         log.exception("ws stream error")
+        await _send_run_event("failed", "执行异常", status="error", detail=str(e)[:200])
         await _send(ws, {"type": "error", "error_code": "INTERNAL_ERROR", "message": str(e)})
         event_log.emit(
             task_id=task_id,
             conv_id=conversation_id,
+            run_id=run_id,
             source="ws",
             event_type="turn_error",
             level="ERROR",
@@ -1024,6 +1147,7 @@ async def _handle_user_message(
         event_log.emit(
             task_id=task_id,
             conv_id=conversation_id,
+            run_id=run_id,
             source="ws",
             event_type="turn_end",
             user_id=user.get("id"),
@@ -1034,6 +1158,154 @@ async def _handle_user_message(
             await keepalive_task
         except BaseException:
             pass
+
+
+def _latest_tool_call(tool_path, tool_call_id: str) -> dict | None:
+    found = None
+    for rec in read_jsonl(tool_path):
+        if rec.get("id") == tool_call_id:
+            found = rec
+    return found
+
+
+def _normalize_tool_outcome(outcome: dict) -> dict:
+    if outcome.get("success") and isinstance(outcome.get("result"), dict):
+        result = outcome["result"]
+        code = result.get("error_code") or result.get("code")
+        if code:
+            return {
+                "success": False,
+                "status": "error",
+                "error": {
+                    "code": code,
+                    "message": result.get("message") or str(result)[:300],
+                },
+            }
+    return outcome
+
+
+async def _handle_retry_tool_call(
+    ws: WebSocket,
+    user: dict,
+    task_id: str,
+    conversation_id: str,
+    tool_path,
+    tool_call_id: str,
+) -> None:
+    run_id = _new_id()
+    rec = _latest_tool_call(tool_path, tool_call_id)
+    if not rec:
+        await _send_error(ws, ErrorCode.RESOURCE_NOT_FOUND, "未找到该工具调用记录")
+        return
+    tool_name = str(rec.get("tool_name") or "")
+    tool_args = rec.get("arguments") or {}
+    meta = tool_runner.get_tool_meta(tool_name or "")
+    display_name = tool_runner.get_display_name(tool_name or "")
+    if rec.get("success"):
+        await _send_error(ws, ErrorCode.VALIDATION_ERROR, "该工具已成功，无需重试")
+        return
+    if meta.get("side_effect") != "read":
+        await _send_error(
+            ws,
+            ErrorCode.PERMISSION_DENIED,
+            "写入类工具暂不支持一键重试，请让 Agent 重新执行该步骤",
+        )
+        return
+
+    async def _send_run_event(stage: str, label: str, *, status: str = "running", detail: str | None = None):
+        await _send(
+            ws,
+            {
+                "type": "run_event",
+                "run_id": run_id,
+                "stage": stage,
+                "label": label,
+                "status": status,
+                "detail": detail,
+                "payload": {"tool_call_id": tool_call_id, "tool_name": tool_name},
+                "created_at": _now(),
+            },
+        )
+
+    task = await task_svc.get_task(task_id, user["id"], is_admin=bool(user.get("is_admin")))
+    agent_id = task.get("agent_id") or "biz-insight"
+    plan_state = await conversation_svc.get_plan_mode(task_id=task_id, conv_id=conversation_id)
+    tool_ctx = {
+        "user_id": user["id"],
+        "agent_id": agent_id,
+        "task_id": task_id,
+        "conversation_id": conversation_id,
+        "plan_mode": bool(plan_state.get("plan_mode")),
+        "subagent_depth": 0,
+    }
+
+    await _send_run_event("tool_retry", f"重试 {display_name}")
+    await _send(
+        ws,
+        {
+            "type": "tool_call_start",
+            "tool_call_id": tool_call_id,
+            "tool_name": tool_name,
+            "display_name": display_name,
+            "arguments": tool_args,
+            "retry": True,
+        },
+    )
+    started_at = _now()
+
+    async def _runner():
+        return await tool_runner.execute_tool(tool_name, tool_args, ctx=tool_ctx)
+
+    outcome = _normalize_tool_outcome(await llm_gateway.run_tool_with_timeout(_runner))
+    ended_at = _now()
+    await asyncio.to_thread(
+        append_jsonl,
+        tool_path,
+        {
+            "id": tool_call_id,
+            "tool_name": tool_name,
+            "arguments": tool_args,
+            "status": outcome.get("status"),
+            "success": outcome.get("success"),
+            "result": outcome.get("result"),
+            "error": outcome.get("error"),
+            "started_at": started_at,
+            "ended_at": ended_at,
+            "retry_of": tool_call_id,
+            "retried_by": user.get("id"),
+            "retried_at": ended_at,
+        },
+    )
+    await _send(
+        ws,
+        {
+            "type": "tool_call_done",
+            "tool_call_id": tool_call_id,
+            "tool_name": tool_name,
+            "status": outcome.get("status"),
+            "success": outcome.get("success"),
+            "result": outcome.get("result"),
+            "error": outcome.get("error"),
+            "retry": True,
+        },
+    )
+    await _send_run_event(
+        "tool_retry",
+        f"{display_name} 重试完成",
+        status="done" if outcome.get("success") else "error",
+        detail=str(outcome.get("status") or ""),
+    )
+    event_log.emit(
+        task_id=task_id,
+        conv_id=conversation_id,
+        run_id=run_id,
+        source="tool_runner",
+        event_type="tool_retry",
+        level="INFO" if outcome.get("success") else "WARN",
+        code=None if outcome.get("success") else "TOOL_RETRY_FAILED",
+        message=f"{tool_name} retry status={outcome.get('status')}",
+        payload={"tool_call_id": tool_call_id},
+    )
 
 
 def _to_api_messages(
@@ -1091,7 +1363,16 @@ def _to_api_messages(
             for tu in tool_uses:
                 # Strip nullable upstream-extension fields (e.g. `caller`) so
                 # the message survives Bedrock validation on round-trip.
-                blocks.append({k: v for k, v in tu.items() if v is not None})
+                # `task_svc.load_conversation_messages` enriches persisted
+                # tool_uses with status/result/error for the UI; never pass
+                # those audit fields back to the model as tool_use blocks.
+                blocks.append(
+                    {
+                        k: tu.get(k)
+                        for k in ("type", "id", "name", "input")
+                        if tu.get(k) is not None
+                    }
+                )
             out.append({"role": "assistant", "content": blocks})
 
             # Follow with synthetic user{tool_result} message — every tool_use

@@ -443,4 +443,61 @@ async def get_or_create_default_conversation(task_id: str) -> str:
 def load_conversation_messages(task_id: str, conv_id: str) -> list[dict]:
     from ..core.storage import read_jsonl
 
-    return read_jsonl(get_paths().task_conversation(task_id, conv_id))
+    paths = get_paths()
+    messages = read_jsonl(paths.task_conversation(task_id, conv_id))
+    tool_results: dict[str, dict] = {}
+    for rec in read_jsonl(paths.task_tool_calls(task_id, conv_id)):
+        tid = rec.get("id")
+        if tid:
+            tool_results[tid] = rec
+    if not tool_results:
+        return messages
+
+    for msg in messages:
+        if msg.get("role") != "assistant":
+            continue
+        merged = []
+        for tu in msg.get("tool_uses") or []:
+            tid = tu.get("id")
+            rec = tool_results.get(tid)
+            if not rec:
+                merged.append(tu)
+                continue
+            next_tu = dict(tu)
+            next_tu["status"] = rec.get("status")
+            next_tu["success"] = rec.get("success")
+            if rec.get("result") is not None:
+                next_tu["result"] = rec.get("result")
+            if rec.get("error") is not None:
+                next_tu["error"] = rec.get("error")
+            merged.append(next_tu)
+        if merged:
+            msg["tool_uses"] = merged
+    return messages
+
+
+def load_conversation_messages_page(
+    task_id: str,
+    conv_id: str,
+    *,
+    limit: int = 80,
+    before: int | None = None,
+) -> dict:
+    """Return an oldest-to-newest page from a conversation.
+
+    `before` is an exclusive message index in the full JSONL array. Omitting it
+    returns the latest page. The implementation still reads JSONL as the source
+    of truth, but keeps large histories off the wire and out of React's render
+    tree on initial load.
+    """
+    limit = max(1, min(int(limit or 80), 200))
+    all_messages = load_conversation_messages(task_id, conv_id)
+    total = len(all_messages)
+    end = total if before is None else max(0, min(int(before), total))
+    start = max(0, end - limit)
+    return {
+        "messages": all_messages[start:end],
+        "total": total,
+        "next_before": start if start > 0 else None,
+        "has_more": start > 0,
+    }

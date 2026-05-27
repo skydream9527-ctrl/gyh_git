@@ -149,17 +149,18 @@ class GlobalRateLimitMiddleware(BaseHTTPMiddleware):
 
     Counters are per-worker (no shared store). Under uvicorn -w N this means
     the *worst-case* effective cap is N × MAX_PER_WINDOW (when traffic is
-    perfectly balanced). The constants below pick MAX_PER_WINDOW=60/60s,
-    which lands the global ceiling around 240/min for the default 4
-    workers — still aggressive enough to throttle a scrape while leaving
-    normal SPA traffic well clear.
+    perfectly balanced). MAX_PER_WINDOW=240/60s gives 4 req/s sustained per
+    worker — enough headroom for an SPA initial load (workspace mount alone
+    fires ~15 unique requests, doubled by React StrictMode in dev), while
+    still throttling a scraper that holds 4+ req/s for a full minute. With
+    4 prod workers the global ceiling lands near 960/min.
 
     Auth-specific limits in `rate_limit_svc` keep their own separate, much
     tighter counters and are not affected by this middleware.
     """
 
     WINDOW_SEC = 60.0
-    MAX_PER_WINDOW = 60
+    MAX_PER_WINDOW = 240
     _MAX_KEYS = 4096
     _EVICT_TARGET = 3072
 

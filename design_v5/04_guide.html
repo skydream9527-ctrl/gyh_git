@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ICE Workbench v5 · Guide (Moxt Style)</title>
+<script>(function(){var t=localStorage.getItem('ice-v5-theme')||'light';document.documentElement.dataset.theme=t;})();</script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    darkMode: ['class', '[data-theme="dark"]'],
+    theme: {
+      extend: {
+        colors: {
+          bg: 'var(--bg)',
+          surface: 'var(--bg)',
+          'surface-2': 'var(--surface-2)',
+          'surface-3': 'var(--surface-3)',
+          canvas: 'var(--bg)',
+          border: 'var(--border)',
+          'border-soft': 'var(--border-soft)',
+          'border-strong': 'var(--border)',
+          txt: 'var(--text)',
+          'txt-dim': 'var(--text-dim)',
+          'txt-muted': 'var(--text-muted)',
+          'txt-inv': '#ffffff',
+          accent: 'var(--brand)',
+          'accent-hover': 'var(--brand-deep)',
+          'accent-soft': 'var(--brand-soft)',
+          'accent-text': 'var(--brand-deep)',
+          success: '#10b981',
+          warning: '#d97706',
+          error: '#ef4444',
+          'p-ab': '#64748b',
+          'p-biz': '#64748b',
+          'p-gray': '#64748b',
+          'p-data': '#64748b',
+          'p-wave': '#64748b',
+        },
+        fontFamily: {
+          sans: ['Inter', '-apple-system', 'system-ui', 'PingFang SC', 'sans-serif'],
+          serif: ['Inter', 'sans-serif'],
+          mono: ['ui-monospace', 'monospace'],
+        },
+        boxShadow: {
+          'icon-emboss': 'none',
+          'icon-shadow': 'none',
+          'accent-shadow': 'none',
+          '1': '0 1px 2px rgba(0,0,0,.04)',
+          '2': '0 4px 6px -1px rgba(0,0,0,.05)',
+          '3': '0 10px 15px -3px rgba(0,0,0,.05)',
+        },
+        backgroundImage: {
+          'accent-grad': 'none',
+        },
+        borderRadius: {
+          'xl': '10px',
+          '2xl': '12px',
+        }
+      }
+    }
+  }
+</script>
+<style type="text/tailwindcss">
+  @layer base {
+    :root[data-theme="light"]{
+      --bg:#faf4ed;
+      --surface-2:#f5efe4;
+      --surface-3:#ece3d3;
+      --border:#e5dcc8;
+      --border-soft:#ede5d2;
+      --text:#1a1612;
+      --text-dim:#5b5246;
+      --text-muted:#8a7e69;
+      --brand:#cc785c;
+      --brand-deep:#b8624a;
+      --brand-soft:#f5e8e2;
+    }
+    :root[data-theme="dark"]{
+      --bg:#1c1917;
+      --surface-2:#34302d;
+      --surface-3:#44403c;
+      --border:#44403c;
+      --border-soft:#34302d;
+      --text:#f5efe4;
+      --text-dim:#a8a29e;
+      --text-muted:#78716c;
+      --brand:#cc785c;
+      --brand-deep:#e89e83;
+      --brand-soft:rgba(52, 211, 153, 0.1);
+    }
+    body {
+      @apply bg-bg text-txt font-sans antialiased text-[14px] leading-relaxed tracking-tight py-8;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      @apply font-sans font-semibold tracking-tight;
+    }
+  }
+
+  @layer components {
+    .nav-btn {
+      @apply inline-flex items-center gap-1.5 font-medium text-[13px] px-3.5 h-[34px] rounded-lg border border-transparent cursor-pointer transition-all leading-none whitespace-nowrap;
+    }
+    .btn-primary {
+      @apply bg-accent text-white hover:bg-accent-hover rounded-full;
+    }
+    .btn-ghost {
+      @apply bg-transparent text-txt-dim hover:bg-surface-2 hover:text-txt rounded-lg;
+    }
+    .icon-btn {
+      @apply w-[34px] h-[34px] rounded-lg grid place-items-center cursor-pointer text-txt-dim border-none bg-transparent text-sm hover:bg-surface-2 hover:text-txt transition-colors;
+    }
+
+    /* Cards */
+    .start-card {
+      @apply flex items-center gap-3 bg-bg border border-border rounded-xl p-4 cursor-pointer text-left transition-colors relative text-txt hover:bg-surface-2;
+    }
+    .sc-icon {
+      @apply text-xl w-10 h-10 rounded-lg grid place-items-center bg-surface-3 flex-none text-txt-dim;
+    }
+    
+    .paradigm-card {
+      @apply bg-bg border border-border rounded-xl p-4 cursor-pointer flex flex-col items-center text-center transition-colors text-txt relative hover:bg-surface-2;
+    }
+    .pc-icon {
+      @apply w-10 h-10 rounded-lg grid place-items-center text-[20px] mx-auto mb-3 bg-surface-3 text-txt-dim;
+    }
+    
+    .task-card {
+      @apply bg-bg border border-border rounded-xl p-4 cursor-pointer flex flex-col gap-1.5 min-h-[120px] transition-colors text-left text-txt relative hover:bg-surface-2;
+    }
+    .tc-paradigm {
+      @apply text-[10px] px-2 py-0.5 rounded-full bg-surface-3 text-txt-dim font-medium;
+    }
+    
+    .public-tab {
+      @apply bg-transparent border-none rounded-lg px-3 py-1.5 text-[13px] cursor-pointer text-txt-dim inline-flex items-center gap-1.5 transition-colors hover:bg-surface-2 hover:text-txt;
+    }
+    .public-tab.active {
+      @apply bg-surface-3 text-txt font-medium;
+    }
+    .public-tab-count {
+      @apply bg-transparent text-txt-muted text-[11px] ml-0.5;
+    }
+
+    /* Guide specific components */
+    .gd-content p { @apply my-3 text-[15px] leading-[1.55] text-txt-dim; }
+    .gd-content ul, .gd-content ol { @apply my-3 pl-6 list-disc text-[15px] leading-[1.55] text-txt-dim; }
+    .gd-content li { @apply my-[5px]; }
+    .gd-content code { @apply font-mono text-[13px] bg-surface-3 px-1.5 py-[2px] rounded text-txt border border-border-soft; }
+    .gd-content a { @apply text-txt underline decoration-border-strong underline-offset-[3px] font-medium hover:decoration-txt transition-colors; }
+    .gd-content strong { @apply font-semibold text-txt; }
+    .gd-content em { @apply italic; }
+    .gd-content mark { @apply bg-warning/20 text-txt px-1 py-[1px] rounded-[3px]; }
+
+    .gd-pre { @apply bg-surface-2 text-txt font-mono text-[13px] leading-[1.7] px-5 py-4 rounded-xl my-4 overflow-x-auto border border-border; }
+    .gd-pre .c { @apply text-txt-muted italic; }
+    .gd-pre .k { @apply text-accent-text font-medium; }
+    .gd-pre .s { @apply text-success; }
+    .gd-pre .n { @apply text-txt; }
+
+    .gd-callout { @apply flex gap-3 bg-bg border border-border rounded-xl px-4 py-3.5 my-4 text-[14px] leading-[1.6] text-txt-dim; }
+    .gd-callout.info { @apply border-border; }
+    .gd-callout.warn { @apply border-warning/50 bg-warning/5; }
+    .gd-callout.tip { @apply border-success/50 bg-success/5; }
+    .gd-callout .ic { @apply text-[16px] shrink-0; }
+    .gd-callout b { @apply block font-sans font-semibold text-[14.5px] text-txt mb-1; }
+
+    .gd-tbl { @apply w-full border-collapse text-[13px] my-4; }
+    .gd-tbl thead th { @apply bg-surface-2 text-left px-3 py-2 font-mono text-[11px] font-medium text-txt-muted uppercase tracking-widest border border-border; }
+    .gd-tbl tbody td { @apply px-3 py-2 border border-border; }
+
+    .p-jump { @apply w-full h-[38px] px-3 border border-border rounded-xl bg-bg text-txt font-sans text-[14px] mb-4 appearance-none outline-none focus:border-accent; background-image: linear-gradient(45deg,transparent 50%,var(--text-dim) 50%),linear-gradient(135deg,var(--text-dim) 50%,transparent 50%); background-position: calc(100% - 14px) 50%,calc(100% - 9px) 50%; background-size: 5px 5px; background-repeat: no-repeat; }
+    .p-callout { @apply flex gap-2.5 bg-bg border border-border rounded-xl px-3 py-2.5 text-[13px] leading-[1.55] my-3; }
+    .p-callout.tip { @apply border-success/50 bg-success/5; }
+    .p-callout .ic { @apply text-[14px] shrink-0; }
+    .p-callout b { @apply block font-sans font-semibold text-[13px] text-txt mb-0.5; }
+    .p-pre { @apply bg-surface-2 text-txt font-mono text-[12px] leading-[1.6] px-3.5 py-3 rounded-xl my-3 overflow-x-auto border border-border; }
+    .p-pre .c { @apply text-txt-muted italic; }
+    .p-pre .k { @apply text-accent-text font-medium; }
+  }
+</style>
+</head>
+<body>
+
+<div class="max-w-[1900px] mx-auto mb-6 px-8 flex items-center gap-3.5">
+  <span class="inline-flex items-center gap-2 px-3 py-1.5 bg-surface-2 text-txt-dim rounded-full text-[11px] font-medium font-mono uppercase tracking-wider"><span class="w-1.5 h-1.5 rounded-full bg-accent"></span>v5 · Guide</span>
+  <span class="text-txt-muted text-[13px] font-mono">GuidePage.tsx</span>
+  <div class="flex-1"></div>
+  <a href="03_introduce.html" class="text-txt-dim text-[13px] no-underline px-3 py-1.5 rounded-lg hover:bg-surface-2 hover:text-txt transition-colors">← Introduce</a>
+  <a href="01_dashboard.html" class="text-txt-dim text-[13px] no-underline px-3 py-1.5 rounded-lg hover:bg-surface-2 hover:text-txt transition-colors">Dashboard →</a>
+  <button onclick="toggleTheme()" class="bg-bg border border-border text-txt h-[34px] px-3.5 rounded-lg cursor-pointer inline-flex items-center gap-1.5 text-[13px] font-medium transition-colors hover:bg-surface-2">
+    <span class="t-light">🌙 Dark</span><span class="t-dark hidden">☀️ Light</span>
+  </button>
+</div>
+
+<script>
+function toggleTheme(){
+  var cur=document.documentElement.dataset.theme||'light';
+  var next=cur==='light'?'dark':'light';
+  document.documentElement.dataset.theme=next;
+  localStorage.setItem('ice-v5-theme',next);
+  document.querySelectorAll('.t-light').forEach(e=>e.classList.toggle('hidden', next==='dark'));
+  document.querySelectorAll('.t-dark').forEach(e=>e.classList.toggle('hidden', next==='light'));
+}
+(function(){if(document.documentElement.dataset.theme==='dark'){
+  document.querySelectorAll('.t-light').forEach(e=>e.classList.add('hidden'));
+  document.querySelectorAll('.t-dark').forEach(e=>e.classList.remove('hidden'));
+}})();
+</script>
+
+<div class="max-w-[1900px] mx-auto px-8 grid grid-cols-1 xl:grid-cols-[1fr_420px] gap-8 items-start">
+
+  <!-- ===== Desktop browser ===== -->
+  <div class="bg-bg border border-border rounded-xl overflow-hidden">
+    <div class="h-[40px] bg-surface-2 border-b border-border flex items-center px-4 gap-2">
+      <div class="flex gap-1.5"><span class="w-3 h-3 rounded-full bg-[#f87171]"></span><span class="w-3 h-3 rounded-full bg-[#fbbf24]"></span><span class="w-3 h-3 rounded-full bg-[#34d399]"></span></div>
+      <div class="flex-1 text-center font-mono text-[12px] text-txt-muted bg-bg px-3 py-1 rounded-md mx-[80px] border border-border-soft">ice.workbench / guide</div>
+    </div>
+    <div class="h-[1400px] bg-bg overflow-hidden flex flex-col">
+
+      <!-- Top nav (mode=workspace + breadcrumb) -->
+      <header class="h-[56px] bg-bg border-b border-border flex items-center px-6 gap-3.5 shrink-0">
+        <div class="w-7 h-7 rounded-lg bg-accent grid place-items-center text-white font-semibold text-[13px]">i</div>
+        <div class="flex items-center gap-2 text-[14px] text-txt-dim font-medium">
+          <a href="#" class="text-txt-dim no-underline hover:text-txt transition-colors">Dashboard</a>
+          <span class="text-txt-muted">/</span>
+          <span class="text-txt">Guide</span>
+        </div>
+        <div class="flex-1"></div>
+        <button class="icon-btn" onclick="toggleTheme()" title="Toggle Theme">
+          <span class="t-light">🌙</span><span class="t-dark hidden">☀️</span>
+        </button>
+        <button class="icon-btn">🔔</button>
+        <div class="w-7 h-7 rounded-full bg-red-400 grid place-items-center text-white font-medium text-xs">G</div>
+      </header>
+
+      <!-- 3-column doc layout -->
+      <div class="flex-1 flex max-w-[1280px] mx-auto w-full items-start">
+
+        <!-- LEFT · TOC sidebar -->
+        <aside class="py-8 px-5 border-r border-border sticky top-0 max-h-[calc(1400px-56px)] overflow-y-auto w-[240px] shrink-0 box-border">
+          <div class="relative mb-6">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-txt-muted text-[14px] pointer-events-none">🔍</span>
+            <input type="text" placeholder="Search..." class="w-full h-[34px] pl-8 pr-3 border border-border rounded-lg bg-bg text-txt text-[13px] outline-none transition-all focus:border-accent">
+          </div>
+          <div class="font-mono text-[11px] text-txt-muted font-semibold uppercase tracking-widest mb-3">Contents</div>
+          <ul class="list-none p-0 m-0 space-y-0.5">
+            <li class="m-0"><a href="#intro" class="block px-3 py-1.5 text-[13px] text-txt bg-surface-3 font-medium rounded-lg transition-all">Start Here</a></li>
+            <li class="m-0"><a href="#paradigm" class="block px-3 py-1.5 text-[13px] text-txt-dim no-underline rounded-lg transition-all hover:text-txt hover:bg-surface-2">Paradigms</a></li>
+            <li class="m-0"><a href="#first-task" class="block px-3 py-1.5 text-[13px] text-txt-dim no-underline rounded-lg transition-all hover:text-txt hover:bg-surface-2">First Task</a></li>
+            <li class="m-0"><a href="#workspace" class="block px-3 py-1.5 text-[13px] text-txt-dim no-underline rounded-lg transition-all hover:text-txt hover:bg-surface-2">Workspace</a></li>
+            <li class="m-0"><a href="#sources" class="block px-3 py-1.5 text-[13px] text-txt-dim no-underline rounded-lg transition-all hover:text-txt hover:bg-surface-2 pl-6">Sources</a></li>
+            <li class="m-0"><a href="#chat" class="block px-3 py-1.5 text-[13px] text-txt-dim no-underline rounded-lg transition-all hover:text-txt hover:bg-surface-2 pl-6">Chat</a></li>
+            <li class="m-0"><a href="#tools" class="block px-3 py-1.5 text-[13px] text-txt-dim no-underline rounded-lg transition-all hover:text-txt hover:bg-surface-2 pl-6">Tools</a></li>
+          </ul>
+        </aside>
+
+        <!-- MIDDLE · content -->
+        <main class="gd-content px-16 pt-12 pb-24 min-w-0 flex-1 max-w-[760px] box-border">
+          <div class="flex items-center gap-2 font-mono text-[11px] text-txt-muted uppercase tracking-widest mb-6">
+            <span>📅 Last updated <b class="text-txt font-medium">May 26, 2026</b></span>
+          </div>
+
+          <h1 class="text-[32px] tracking-tight leading-tight mb-4" id="intro">Guide</h1>
+          <p class="text-[16px] text-txt-dim leading-[1.6] mb-8 max-w-[580px]">From zero to ICE Workbench —— a complete documentation covering core concepts, workflows, and operational boundaries.</p>
+
+          <div class="gd-callout tip">
+            <span class="ic">💡</span>
+            <div>
+              <b>First time here?</b>
+              Read "<a href="#paradigm">Paradigms</a>" and "<a href="#first-task">First Task</a>" to get started. Other chapters can be read as needed.
+            </div>
+          </div>
+
+          <h2 class="text-[24px] tracking-tight leading-tight mt-12 mb-4 pt-8 border-t border-border" id="paradigm">Understanding Paradigms</h2>
+          <p>ICE Workbench abstracts data workflows into <b>5 paradigms</b>. Each paradigm pre-binds Agent + Skills + Prompt. You always: "Select Paradigm → Describe Problem → Agent Concludes".</p>
+
+          <table class="gd-tbl">
+            <thead><tr><th>Paradigm</th><th>Scenario</th><th>Agent</th></tr></thead>
+            <tbody>
+              <tr><td><b>data</b></td><td>SQL · Visualization</td><td><code>data-analysis</code></td></tr>
+              <tr><td><b>ab</b></td><td>A/B test significance</td><td><code>ab-experiment</code></td></tr>
+              <tr><td><b>biz</b></td><td>Metric drill-down</td><td><code>biz-insight</code></td></tr>
+            </tbody>
+          </table>
+
+          <h2 class="text-[24px] tracking-tight leading-tight mt-12 mb-4 pt-8 border-t border-border" id="first-task">Creating Your First Task</h2>
+          <p>A task is the <em>atomic unit</em> of ICE Workbench —— a complete data workflow including conversation, files, and outputs.</p>
+
+          <h3 class="text-[16px] tracking-tight leading-tight mt-8 mb-3">Three Entry Points</h3>
+          <ol>
+            <li>From Dashboard click <b>+ New Task</b></li>
+            <li>From Dashboard "Quick Start" click a paradigm card</li>
+            <li>Scheduled tasks create a task automatically</li>
+          </ol>
+
+          <div class="gd-pre"><span class="c"># Example: Create a task with data paradigm</span>
+<span class="k">POST</span> /api/v1/tasks
+{
+  <span class="n">"name"</span>: <span class="s">"Double 11 A/B Review"</span>,
+  <span class="n">"paradigm"</span>: <span class="s">"ab"</span>,
+  <span class="n">"agent_id"</span>: <span class="s">"ab-experiment"</span>
+}</div>
+
+          <h2 class="text-[24px] tracking-tight leading-tight mt-12 mb-4 pt-8 border-t border-border" id="workspace">Workspace Layout</h2>
+          <p>The workspace features a <b>3-column layout</b>: Left Files · Center Chat · Right Preview.</p>
+
+          <div class="gd-callout warn">
+            <span class="ic">⚠️</span>
+            <div>
+              <b>Only one conversation at a time</b>
+              If a round is inflight, new messages return <code>CONVERSATION_INFLIGHT</code>.
+            </div>
+          </div>
+
+        </main>
+
+        <!-- RIGHT · on-this-page -->
+        <aside class="py-12 px-6 sticky top-0 max-h-[calc(1400px-56px)] overflow-y-auto text-[13px] w-[240px] shrink-0 box-border">
+          <div class="font-mono text-[11px] text-txt-muted font-semibold uppercase tracking-widest mb-3">On this page</div>
+          <ul class="list-none p-0 m-0 space-y-1.5">
+            <li><a href="#intro" class="block text-txt font-medium no-underline transition-all">Start Here</a></li>
+            <li><a href="#paradigm" class="block text-txt-dim no-underline transition-all hover:text-txt">Paradigms</a></li>
+            <li><a href="#first-task" class="block text-txt-dim no-underline transition-all hover:text-txt">First Task</a></li>
+            <li><a href="#workspace" class="block text-txt-dim no-underline transition-all hover:text-txt">Workspace Layout</a></li>
+          </ul>
+        </aside>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===== Phone preview ===== -->
+  <div class="bg-bg border border-border rounded-xl p-[24px_24px_32px] text-center sticky top-6">
+    <div class="inline-flex items-center gap-1.5 px-3 py-1 bg-surface-2 text-txt-dim rounded-full text-[11px] font-medium tracking-wider mb-3 font-mono uppercase">iPhone 14 Pro</div>
+    <div class="text-[18px] font-semibold tracking-tight mb-1">Guide · Mobile</div>
+    <div class="text-xs text-txt-muted mb-[24px] font-mono">/ guide</div>
+
+    <div class="w-[360px] h-[760px] bg-border rounded-[42px] p-2 relative mx-auto box-border">
+      <div class="absolute top-[14px] left-1/2 -translate-x-1/2 w-[104px] h-[28px] bg-black rounded-full z-10"></div>
+      <div class="w-full h-full bg-bg rounded-[34px] overflow-hidden relative flex flex-col box-border">
+
+        <div class="pt-[54px] pb-3 px-5 flex items-center gap-3 shrink-0 bg-bg border-b border-border">
+          <div class="w-[28px] h-[28px] rounded-lg text-[13px] bg-accent grid place-items-center text-white font-semibold">i</div>
+          <div class="text-[14px] text-txt font-medium">
+            Guide
+          </div>
+          <div class="ml-auto">
+            <button class="w-[32px] h-[32px] text-[15px] rounded-lg grid place-items-center text-txt-dim hover:bg-surface-2 transition-colors border-none bg-transparent">🔍</button>
+          </div>
+        </div>
+
+        <div class="p-[20px_20px_80px] flex-1 overflow-y-auto text-left box-border">
+          <select class="p-jump" defaultValue="">
+            <option>📑 Jump to chapter...</option>
+            <option>Start Here</option>
+            <option>　Paradigms</option>
+            <option>　First Task</option>
+            <option>　Workspace</option>
+          </select>
+
+          <div class="font-mono text-[10px] text-txt-muted uppercase tracking-widest mb-3">📅 MAY 26, 2026</div>
+
+          <h1 class="text-[28px] tracking-tight leading-tight m-[0_0_12px]">Guide</h1>
+          <p class="text-[15px] text-txt-dim leading-[1.6] m-[0_0_24px]">From zero to ICE Workbench.</p>
+
+          <div class="p-callout tip">
+            <span class="ic">💡</span>
+            <div><b>First time?</b> Read Paradigms.</div>
+          </div>
+
+          <h2 class="text-[20px] tracking-tight leading-tight mt-8 mb-3 pt-5 border-t border-border">Paradigms</h2>
+          <p class="text-[14px] leading-[1.6] my-2 text-txt-dim">5 paradigms predefined for tasks.</p>
+
+          <h2 class="text-[20px] tracking-tight leading-tight mt-8 mb-3 pt-5 border-t border-border">First Task</h2>
+          <p class="text-[14px] leading-[1.6] my-2 text-txt-dim">The atomic unit of work.</p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="max-w-[1900px] mx-auto mt-8 px-8 mb-16">
+  <div class="bg-bg border border-border rounded-xl p-6 text-left">
+    <h3 class="text-[16px] font-semibold m-[0_0_12px] tracking-tight">📐 Moxt Style Re-design</h3>
+    <ul class="m-0 pl-5 text-[14px] text-txt-dim leading-[1.8] list-disc">
+      <li><b class="text-txt font-semibold">Base</b>: <code>bg-bg</code> and <code>text-txt</code> for cold white Notion feel.</li>
+      <li><b class="text-txt font-semibold">Typography</b>: Removed Fraunces serif. 100% Inter sans-serif. Minimal tracking with tight leading.</li>
+      <li><b class="text-txt font-semibold">Borders & Corners</b>: Replaced <code>shadow-3</code> with flat 1px borders and <code>rounded-xl</code>.</li>
+      <li><b class="text-txt font-semibold">Callout & Code</b>: Replaced warm tones and custom paradigm colors with subtle grey or green/amber background and thin borders.</li>
+      <li><b class="text-txt font-semibold">Layout</b>: Clean 3-column layout with a 56px high top nav. Hover effects map to <code>bg-surface-2</code>.</li>
+    </ul>
+  </div>
+</div>
+
+</body>
+</html>

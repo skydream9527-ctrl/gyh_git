@@ -12,14 +12,20 @@ import { MarkdownRenderer } from "@/components/markdown/MarkdownRenderer";
 import { ToolCallCard } from "./ToolCallCard";
 import { VoicePlayButton } from "./VoicePlayButton";
 import { useUIStore } from "@/stores/uiStore";
-import type { PartialAssistant, StreamPhase } from "@/hooks/useChatSocket";
+import type { PartialAssistant, RunEvent, StreamPhase } from "@/hooks/useChatSocket";
 import "./MessageList.css";
 
 interface Props {
   finalized: ChatMessage[];
   partial: PartialAssistant | null;
   phase: StreamPhase;
+  runEvents?: RunEvent[];
+  toolOverrides?: Record<string, Partial<ToolCall>>;
+  onRetryToolCall?: (call: ToolCall) => void;
   onCrystallize?: (msg: ChatMessage) => void;
+  historyHasMore?: boolean;
+  historyLoading?: boolean;
+  onLoadOlder?: () => void | Promise<void>;
   /** 当前 conv 后端 _inflight_turns 仍在跑，但本 WS 没在收 stream（典型场景：
    * 用户切走又切回，旧任务还在后台跑）。开启后底部强制显示 Thinking 横幅，
    * 避免用户以为任务停了。 */
@@ -33,7 +39,19 @@ interface Props {
  * - 用户手动滚回底部 → 自动恢复跟随
  * - 流式结束 / 切换对话时用 smooth，让最终落点有缓动
  */
-export function MessageList({ finalized, partial, phase, onCrystallize, backgroundInflight }: Props) {
+export function MessageList({
+  finalized,
+  partial,
+  phase,
+  runEvents = [],
+  toolOverrides = {},
+  onRetryToolCall,
+  onCrystallize,
+  historyHasMore,
+  historyLoading,
+  onLoadOlder,
+  backgroundInflight,
+}: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const stickRef = useRef(true);
   const [showJump, setShowJump] = useState(false);
@@ -68,7 +86,7 @@ export function MessageList({ finalized, partial, phase, onCrystallize, backgrou
     const streaming = phase === "streaming" || phase === "tool" || phase === "typing";
     const behavior: ScrollBehavior = streaming ? "auto" : "smooth";
     el.scrollTo({ top: el.scrollHeight, behavior });
-  }, [finalized.length, partial?.content, partial?.toolCalls.length, phase]);
+  }, [finalized.length, partial?.content, partial?.toolCalls.length, phase, runEvents.length]);
 
   const jumpToBottom = useCallback(() => {
     const el = scrollRef.current;
@@ -77,6 +95,19 @@ export function MessageList({ finalized, partial, phase, onCrystallize, backgrou
     setShowJump(false);
     el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
   }, []);
+
+  const loadOlder = useCallback(async () => {
+    if (!onLoadOlder || historyLoading) return;
+    const el = scrollRef.current;
+    const beforeHeight = el?.scrollHeight ?? 0;
+    const beforeTop = el?.scrollTop ?? 0;
+    await onLoadOlder();
+    window.requestAnimationFrame(() => {
+      const next = scrollRef.current;
+      if (!next) return;
+      next.scrollTop = beforeTop + Math.max(0, next.scrollHeight - beforeHeight);
+    });
+  }, [historyLoading, onLoadOlder]);
 
   // 把 finalized + partial 合并成「轮次组」：一条 user 消息 + 它后面所有连续的
   // assistant 消息合成一个 turn 气泡。后端 5-round 工具循环每轮写一条
@@ -94,6 +125,13 @@ export function MessageList({ finalized, partial, phase, onCrystallize, backgrou
   return (
     <div className="msg-list-wrap">
       <div className="msg-list" ref={scrollRef}>
+        {historyHasMore && (
+          <div className="msg-history-more">
+            <button type="button" onClick={loadOlder} disabled={historyLoading}>
+              {historyLoading ? "加载中…" : "加载更早消息"}
+            </button>
+          </div>
+        )}
         {turns.map((t) =>
           t.kind === "user" ? (
             <UserBubble key={t.key} content={t.content} />
@@ -102,10 +140,13 @@ export function MessageList({ finalized, partial, phase, onCrystallize, backgrou
               key={t.key}
               messages={t.messages}
               partial={t.partial}
+              toolOverrides={toolOverrides}
+              onRetryToolCall={onRetryToolCall}
               onCrystallize={onCrystallize}
             />
           ),
         )}
+        {runEvents.length > 0 && <RunTimeline events={runEvents} />}
         {showThinking && (
           <ThinkingIndicator
             label={
@@ -127,6 +168,44 @@ export function MessageList({ finalized, partial, phase, onCrystallize, backgrou
           ↓ 最新
         </button>
       )}
+    </div>
+  );
+}
+
+// ---- 当前执行时间线 ----------------------------------------------------
+
+function RunTimeline({ events }: { events: RunEvent[] }) {
+  const visible = events.slice(-8);
+  const latest = visible[visible.length - 1];
+  const title =
+    latest?.status === "done"
+      ? "执行完成"
+      : latest?.status === "error"
+        ? "执行失败"
+        : latest?.status === "aborted"
+          ? "已中断"
+          : latest?.status === "warning"
+            ? "执行有警告"
+            : latest?.status === "waiting"
+              ? "等待确认"
+              : "执行中";
+  return (
+    <div className="run-timeline" aria-live="polite">
+      <div className="run-timeline-head">
+        <span className={`run-status-dot ${latest?.status || "running"}`} />
+        <span>{title}</span>
+      </div>
+      <ol className="run-timeline-list">
+        {visible.map((ev, idx) => (
+          <li key={`${ev.run_id}-${idx}-${ev.created_at}`} className={`run-event ${ev.status}`}>
+            <span className="run-event-mark" />
+            <span className="run-event-body">
+              <span className="run-event-label">{ev.label}</span>
+              {ev.detail && <span className="run-event-detail">{ev.detail}</span>}
+            </span>
+          </li>
+        ))}
+      </ol>
     </div>
   );
 }
@@ -190,12 +269,16 @@ const UserBubble = memo(function UserBubble({ content }: { content: string }) {
 interface AssistantTurnBubbleProps {
   messages: ChatMessage[];
   partial?: PartialAssistant;
+  toolOverrides?: Record<string, Partial<ToolCall>>;
+  onRetryToolCall?: (call: ToolCall) => void;
   onCrystallize?: (msg: ChatMessage) => void;
 }
 
 function AssistantTurnBubbleImpl({
   messages,
   partial,
+  toolOverrides = {},
+  onRetryToolCall,
   onCrystallize,
 }: AssistantTurnBubbleProps) {
   const pushToast = useUIStore((s) => s.pushToast);
@@ -239,27 +322,38 @@ function AssistantTurnBubbleImpl({
     const out: ToolCall[] = [];
     for (const m of messages) {
       for (const t of m.tool_uses || []) {
-        out.push({
+        const base: ToolCall = {
           tool_call_id: t.id,
           tool_name: t.name,
           arguments: t.input as Record<string, unknown>,
-          status: "done",
-        });
+          status: t.status || (t.success === false ? "error" : "done"),
+          result: t.result,
+          error: t.error
+            ? {
+                code: t.error.code || t.error.error_code,
+                message: t.error.message,
+              }
+            : undefined,
+        };
+        out.push({ ...base, ...(toolOverrides[t.id] || {}) });
       }
     }
     if (partial) {
       for (const t of partial.toolCalls) {
-        out.push({
+        const base: ToolCall = {
           tool_call_id: t.tool_call_id,
           tool_name: t.tool_name,
           display_name: t.display_name,
           arguments: t.arguments,
           status: t.status,
-        });
+          result: t.result,
+          error: t.error,
+        };
+        out.push({ ...base, ...(toolOverrides[t.tool_call_id] || {}) });
       }
     }
     return out;
-  }, [messages, partial]);
+  }, [messages, partial, toolOverrides]);
 
   // 复制：合并所有段落原文（不含工具调用细节）
   const combinedText = useMemo(
@@ -324,11 +418,13 @@ function AssistantTurnBubbleImpl({
             >
               🔧 {allToolCalls.length} 步工具执行 {toolsExpanded ? "▲" : "▼"}
             </button>
-            <div className="tool-calls-body">
-              {allToolCalls.map((tc) => (
-                <ToolCallCard key={tc.tool_call_id} call={tc} />
-              ))}
-            </div>
+            {toolsExpanded && (
+              <div className="tool-calls-body">
+                {allToolCalls.map((tc) => (
+                  <ToolCallCard key={tc.tool_call_id} call={tc} onRetry={onRetryToolCall} />
+                ))}
+              </div>
+            )}
           </div>
         )}
 
@@ -374,6 +470,8 @@ const AssistantTurnBubble = memo(
     a.partial?.id === b.partial?.id &&
     a.partial?.content === b.partial?.content &&
     a.partial?.toolCalls.length === b.partial?.toolCalls.length &&
+    a.toolOverrides === b.toolOverrides &&
+    a.onRetryToolCall === b.onRetryToolCall &&
     a.onCrystallize === b.onCrystallize,
 );
 

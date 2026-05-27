@@ -3,349 +3,163 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>ICE Workbench v5 · Dashboard (基于真实页面)</title>
+<title>ICE Workbench v5 · Moxt Style</title>
 <script>(function(){var t=localStorage.getItem('ice-v5-theme')||'light';document.documentElement.dataset.theme=t;})();</script>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>
-:root[data-theme="light"]{
-  --bg:#faf4ed;--surface:#ffffff;--surface-2:#f5efe4;--surface-3:#ece3d3;--paper-deep:#f0e9dc;
-  --border:#e5dcc8;--border-soft:#ede5d2;--border-strong:#d4c8ad;
-  --text:#1a1612;--text-dim:#5b5246;--text-muted:#8a7e69;--text-inv:#faf4ed;
-  --accent:#cc785c;--accent-hover:#b8624a;--accent-soft:#f5e8e2;--accent-text:#8a3a23;
-  --success:#5a7a4f;--success-soft:#e6ede0;
-  --warning:#b07d2a;--warning-soft:#f5ead0;
-  --error:#b54a3a;--error-soft:#f5dfd9;
-  --p-ab:#5e7d6a;--p-ab-soft:#e6ede6;
-  --p-biz:#b86b3a;--p-biz-soft:#f5e3d0;
-  --p-gray:#7a6b8e;--p-gray-soft:#ebe5ee;
-  --p-data:#4a7c8b;--p-data-soft:#d8e5ea;
-  --p-wave:#b04f5f;--p-wave-soft:#f0d8dc;
-  /* 图标质感 v5.1 */
-  --accent-grad:linear-gradient(135deg,#cc785c 0%,#e89e83 100%);
-  --accent-shadow:0 1px 0 rgba(166,84,57,.30),0 4px 14px rgba(204,120,92,.18),inset 0 1px 0 rgba(255,255,255,.24);
-  --icon-emboss:inset 0 1px 0 rgba(255,255,255,.55),inset 0 -1px 0 rgba(26,22,18,.04);
-  --icon-shadow:0 1px 2px rgba(26,22,18,.06);
-  --shadow-1:0 1px 0 rgba(26,22,18,.04);
-  --shadow-2:0 1px 2px rgba(26,22,18,.06),0 4px 16px rgba(26,22,18,.04);
-  --shadow-3:0 8px 32px rgba(26,22,18,.08);
-  --ring:0 0 0 3px rgba(204,120,92,.20);
-  --canvas:#f0e9dc;
-}
-:root[data-theme="dark"]{
-  --bg:#1f1d1a;--surface:#2a2723;--surface-2:#322e29;--surface-3:#3d3831;--paper-deep:#262320;
-  --border:#44403a;--border-soft:#322e29;--border-strong:#5a544c;
-  --text:#f5f0e6;--text-dim:#bdb19c;--text-muted:#8c8270;--text-inv:#1a1612;
-  --accent:#e89e83;--accent-hover:#f5b39a;--accent-soft:rgba(232,158,131,.16);--accent-text:#f0b59c;
-  --success:#8aa680;--success-soft:rgba(138,166,128,.14);
-  --warning:#d4a463;--warning-soft:rgba(212,164,99,.14);
-  --error:#d4756a;--error-soft:rgba(212,117,106,.14);
-  --p-ab:#8aa68f;--p-ab-soft:rgba(138,166,143,.14);
-  --p-biz:#d49070;--p-biz-soft:rgba(212,144,112,.14);
-  --p-gray:#a895b8;--p-gray-soft:rgba(168,149,184,.14);
-  --p-data:#7aa5b3;--p-data-soft:rgba(122,165,179,.14);
-  --p-wave:#d4868f;--p-wave-soft:rgba(212,134,143,.14);
-  --accent-grad:linear-gradient(135deg,#e89e83 0%,#f5b39a 100%);
-  --accent-shadow:0 1px 0 rgba(0,0,0,.45),0 4px 14px rgba(232,158,131,.22),inset 0 1px 0 rgba(255,255,255,.18);
-  --icon-emboss:inset 0 1px 0 rgba(255,255,255,.10),inset 0 -1px 0 rgba(0,0,0,.20);
-  --icon-shadow:0 1px 2px rgba(0,0,0,.30);
-  --shadow-1:0 1px 0 rgba(0,0,0,.3);
-  --shadow-2:0 4px 16px rgba(0,0,0,.4),0 1px 2px rgba(0,0,0,.4);
-  --shadow-3:0 16px 48px rgba(0,0,0,.5);
-  --ring:0 0 0 3px rgba(232,158,131,.30);
-  --canvas:#1a1815;
-}
-*{box-sizing:border-box}html,body{margin:0;padding:0}
-body{background:var(--canvas);color:var(--text);
-  font-family:'Inter','PingFang SC',-apple-system,system-ui,sans-serif;
-  font-size:15px;line-height:1.6;letter-spacing:-.003em;
-  -webkit-font-smoothing:antialiased;font-feature-settings:'ss01','cv11';padding:32px 0}
-.serif{font-family:'Fraunces',serif;font-variation-settings:'opsz' 144;font-feature-settings:'ss01'}
-.tnum{font-variant-numeric:tabular-nums}
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    darkMode: ['class', '[data-theme="dark"]'],
+    theme: {
+      extend: {
+        colors: {
+          bg: 'var(--bg)',
+          surface: 'var(--bg)', /* Moxt doesn't distinguish much between bg and surface */
+          'surface-2': 'var(--surface-2)',
+          'surface-3': 'var(--surface-3)',
+          canvas: 'var(--bg)',
+          border: 'var(--border)',
+          'border-soft': 'var(--border-soft)',
+          'border-strong': 'var(--border)',
+          txt: 'var(--text)',
+          'txt-dim': 'var(--text-dim)',
+          'txt-muted': 'var(--text-muted)',
+          'txt-inv': '#ffffff',
+          accent: 'var(--brand)',
+          'accent-hover': 'var(--brand-deep)',
+          'accent-soft': 'var(--brand-soft)',
+          'accent-text': 'var(--brand-deep)',
+          success: '#10b981',
+          warning: '#d97706',
+          error: '#ef4444',
+          /* Map the paradigm colors to moxt muted grays or just keep them subtle */
+          'p-ab': '#64748b',
+          'p-biz': '#64748b',
+          'p-gray': '#64748b',
+          'p-data': '#64748b',
+          'p-wave': '#64748b',
+        },
+        fontFamily: {
+          sans: ['Inter', '-apple-system', 'system-ui', 'PingFang SC', 'sans-serif'],
+          serif: ['Inter', 'sans-serif'], /* Override serif to sans for moxt style */
+          mono: ['ui-monospace', 'monospace'],
+        },
+        boxShadow: {
+          'icon-emboss': 'none',
+          'icon-shadow': 'none',
+          'accent-shadow': 'none',
+          '1': '0 1px 2px rgba(0,0,0,.04)',
+          '2': '0 4px 6px -1px rgba(0,0,0,.05)',
+          '3': '0 10px 15px -3px rgba(0,0,0,.05)',
+        },
+        backgroundImage: {
+          'accent-grad': 'none',
+        },
+        borderRadius: {
+          'xl': '10px',
+          '2xl': '12px',
+        }
+      }
+    }
+  }
+</script>
+<style type="text/tailwindcss">
+  @layer base {
+    :root[data-theme="light"]{
+      --bg:#faf4ed;
+      --surface-2:#f5efe4;
+      --surface-3:#ece3d3;
+      --border:#e5dcc8;
+      --border-soft:#ede5d2;
+      --text:#1a1612;
+      --text-dim:#5b5246;
+      --text-muted:#8a7e69;
+      --brand:#cc785c;
+      --brand-deep:#b8624a;
+      --brand-soft:#f5e8e2;
+    }
+    :root[data-theme="dark"]{
+      --bg:#1c1917;
+      --surface-2:#34302d;
+      --surface-3:#44403c;
+      --border:#44403c;
+      --border-soft:#34302d;
+      --text:#f5efe4;
+      --text-dim:#a8a29e;
+      --text-muted:#78716c;
+      --brand:#cc785c;
+      --brand-deep:#e89e83;
+      --brand-soft:rgba(52, 211, 153, 0.1);
+    }
+    body {
+      @apply bg-bg text-txt font-sans antialiased text-[14px] leading-relaxed tracking-tight py-8;
+    }
+    h1, h2, h3, h4, h5, h6, .serif {
+      @apply font-sans font-semibold tracking-tight;
+    }
+  }
 
-/* ====== outer canvas bar ====== */
-.outer-bar{max-width:1900px;margin:0 auto 24px;padding:0 32px;display:flex;align-items:center;gap:14px}
-.outer-tag{display:inline-flex;align-items:center;gap:8px;padding:5px 12px;
-  background:var(--accent-soft);color:var(--accent-text);border-radius:4px;font-size:11px;font-weight:500;
-  font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.06em}
-.outer-tag .dot{width:6px;height:6px;border-radius:50%;background:var(--accent)}
-.outer-bar .spacer{flex:1}
-.outer-bar a{color:var(--text-dim);font-size:13px;text-decoration:none;padding:6px 12px;border-radius:6px}
-.outer-bar a:hover{background:var(--surface-2);color:var(--text)}
-.outer-bar button{background:var(--surface);border:1px solid var(--border);color:var(--text);
-  height:36px;padding:0 14px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:500;
-  display:inline-flex;align-items:center;gap:6px}
+  @layer components {
+    .nav-btn {
+      @apply inline-flex items-center gap-1.5 font-medium text-[13px] px-3.5 h-[34px] rounded-lg border border-transparent cursor-pointer transition-all leading-none whitespace-nowrap;
+    }
+    .btn-primary {
+      @apply bg-accent text-white hover:bg-accent-hover rounded-full;
+    }
+    .btn-ghost {
+      @apply bg-transparent text-txt-dim hover:bg-surface-2 hover:text-txt rounded-lg;
+    }
+    .icon-btn {
+      @apply w-[34px] h-[34px] rounded-lg grid place-items-center cursor-pointer text-txt-dim border-none bg-transparent text-sm hover:bg-surface-2 hover:text-txt transition-colors;
+    }
 
-/* ====== two-up canvas ====== */
-.canvas{max-width:1900px;margin:0 auto;padding:0 32px;
-  display:grid;grid-template-columns:1fr 420px;gap:32px;align-items:flex-start}
-@media (max-width:1500px){.canvas{grid-template-columns:1fr}}
-
-/* ====== browser frame ====== */
-.browser{background:var(--surface);border:1px solid var(--border);border-radius:10px;
-  overflow:hidden;box-shadow:var(--shadow-3)}
-.browser-bar{height:36px;background:var(--surface-2);border-bottom:1px solid var(--border-soft);
-  display:flex;align-items:center;padding:0 14px;gap:8px}
-.browser-dots{display:flex;gap:6px}
-.browser-dots span{width:11px;height:11px;border-radius:50%}
-.browser-dots span:nth-child(1){background:#cc6c5e}
-.browser-dots span:nth-child(2){background:#c4a55a}
-.browser-dots span:nth-child(3){background:#7a9a6e}
-.browser-url{flex:1;text-align:center;font-family:'JetBrains Mono',monospace;font-size:11.5px;
-  color:var(--text-muted);background:var(--surface);padding:5px 12px;border-radius:5px;
-  margin:0 80px;border:1px solid var(--border-soft)}
-.viewport{height:1080px;background:var(--bg);overflow:hidden;display:flex;flex-direction:column}
-
-/* ====== TopNav (mode="dashboard") ====== */
-.appbar{height:60px;background:var(--bg);border-bottom:1px solid var(--border-soft);
-  display:flex;align-items:center;padding:0 24px;gap:14px;flex-shrink:0}
-.brand{display:flex;align-items:center;gap:10px}
-.brand-mark{width:30px;height:30px;border-radius:7px;background:var(--accent-grad);
-  display:grid;place-items:center;color:#faf4ed;font-weight:600;font-size:14px;
-  font-family:'Fraunces',serif;font-variation-settings:'opsz' 144;
-  box-shadow:var(--accent-shadow)}
-.brand-text{font-family:'Fraunces',serif;font-weight:600;font-size:18px;letter-spacing:-.015em;
-  font-variation-settings:'opsz' 144}
-.appbar nav{display:flex;align-items:center;gap:2px;margin-left:18px}
-.appbar nav a{padding:6px 12px;border-radius:6px;color:var(--text-dim);font-size:13.5px;
-  font-weight:500;text-decoration:none;letter-spacing:-.005em}
-.appbar nav a:hover{background:var(--surface-2);color:var(--text)}
-.appbar nav a.active{color:var(--text);background:var(--surface-2)}
-.appbar .spacer{flex:1}
-.btn{display:inline-flex;align-items:center;gap:6px;font-family:inherit;font-size:13px;
-  font-weight:500;padding:0 14px;height:34px;border-radius:8px;border:1px solid transparent;
-  cursor:pointer;transition:all .15s;line-height:1;white-space:nowrap}
-.btn-primary{background:var(--accent-grad);color:#faf4ed;
-  box-shadow:var(--accent-shadow)}
-.btn-primary:hover{background:linear-gradient(135deg,#b8624a 0%,#cc785c 100%)}
-.btn-ghost{background:transparent;color:var(--text-dim)}
-.btn-ghost:hover{background:var(--surface-2);color:var(--text)}
-.btn-secondary{background:var(--surface);border-color:var(--border);color:var(--text)}
-.btn-secondary:hover{background:var(--surface-2)}
-.icon-btn{width:34px;height:34px;border-radius:6px;display:grid;place-items:center;cursor:pointer;
-  color:var(--text-dim);border:none;background:transparent;font-size:14px}
-.icon-btn:hover{background:var(--surface-2);color:var(--text)}
-.avatar{width:32px;height:32px;border-radius:50%;background:var(--accent-grad);
-  display:grid;place-items:center;color:#faf4ed;font-weight:500;font-size:12px;
-  font-family:'Fraunces',serif;font-variation-settings:'opsz' 144;
-  box-shadow:var(--accent-shadow)}
-
-/* ====== main · 真实结构 ====== */
-.main{flex:1;overflow-y:auto;padding:0;background:var(--bg)}
-.dash-main{max-width:1200px;margin:0 auto;padding:32px 24px 80px;width:100%}
-
-.dash-welcome{margin-bottom:32px}
-.dash-welcome h1{font-family:'Fraunces',serif;font-size:36px;font-weight:500;
-  letter-spacing:-.025em;line-height:1.1;margin:0 0 8px;
-  font-variation-settings:'opsz' 144,'wght' 500}
-.dash-welcome p{color:var(--text-dim);font-size:15px;margin:0}
-
-.dash-section{margin-bottom:36px}
-.dash-section h2{font-family:'Fraunces',serif;font-size:22px;font-weight:500;
-  letter-spacing:-.02em;line-height:1.2;margin:0 0 16px;
-  font-variation-settings:'opsz' 144}
-.dash-section h2 .num{font-family:'JetBrains Mono',monospace;font-size:11px;
-  color:var(--accent);font-weight:500;letter-spacing:.06em;margin-right:10px;text-transform:uppercase}
-
-/* start-grid · 真实尺寸 */
-.start-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
-.start-card{display:flex;align-items:center;gap:14px;background:var(--surface);
-  border:1px solid var(--border);border-radius:10px;padding:18px 20px;cursor:pointer;
-  text-align:left;transition:all .18s;position:relative;overflow:hidden;color:var(--text);
-  font-family:inherit}
-.start-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--accent)}
-.start-card:hover{border-color:var(--accent);transform:translateY(-1px);box-shadow:var(--shadow-2)}
-.start-card.s2::before{background:var(--p-data)}
-.start-card.s3::before{background:var(--p-biz)}
-.start-card.s4::before{background:var(--p-ab)}
-.sc-icon{font-size:24px;width:44px;height:44px;border-radius:11px;
-  display:grid;place-items:center;background:var(--surface-2);flex:0 0 auto;
-  box-shadow:var(--icon-emboss),var(--icon-shadow)}
-.sc-name{font-family:'Fraunces',serif;font-weight:600;font-size:15.5px;margin-bottom:3px;letter-spacing:-.015em;
-  font-variation-settings:'opsz' 144}
-.sc-desc{color:var(--text-dim);font-size:12.5px;line-height:1.5}
-
-/* paradigm-grid · 真实尺寸 height 160 / icon 44 / radius 11 / border-top 3 */
-.paradigm-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px}
-.paradigm-card{background:var(--surface);border:1px solid var(--border);
-  border-top:3px solid var(--accent);border-radius:10px;padding:18px;
-  cursor:pointer;height:160px;display:flex;flex-direction:column;
-  text-align:left;transition:all .18s;font-family:inherit;color:var(--text);position:relative}
-.paradigm-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-2);border-color:var(--accent)}
-.paradigm-card.pc-ab{border-top-color:var(--p-ab)}
-.paradigm-card.pc-biz{border-top-color:var(--p-biz)}
-.paradigm-card.pc-gray{border-top-color:var(--p-gray)}
-.paradigm-card.pc-data{border-top-color:var(--p-data)}
-.paradigm-card.pc-wave{border-top-color:var(--p-wave)}
-.pc-icon{width:44px;height:44px;border-radius:11px;display:grid;place-items:center;
-  font-size:22px;margin-bottom:12px;background:var(--accent-soft);color:var(--accent);
-  box-shadow:var(--icon-emboss),var(--icon-shadow)}
-.pc-ab .pc-icon{background:var(--p-ab-soft);color:var(--p-ab)}
-.pc-biz .pc-icon{background:var(--p-biz-soft);color:var(--p-biz)}
-.pc-gray .pc-icon{background:var(--p-gray-soft);color:var(--p-gray)}
-.pc-data .pc-icon{background:var(--p-data-soft);color:var(--p-data)}
-.pc-wave .pc-icon{background:var(--p-wave-soft);color:var(--p-wave)}
-.pc-name{font-family:'Fraunces',serif;font-weight:600;font-size:15px;margin-bottom:4px;letter-spacing:-.01em;
-  font-variation-settings:'opsz' 144}
-.pc-desc{color:var(--text-dim);font-size:12.5px;line-height:1.5;
-  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.pc-badge-soon{position:absolute;top:10px;right:10px;font-size:10px;padding:2px 8px;
-  border-radius:999px;background:var(--surface-2);color:var(--text-muted);
-  border:1px solid var(--border);font-weight:500;font-family:'JetBrains Mono',monospace;letter-spacing:.04em}
-.paradigm-card-soon{opacity:.55;cursor:not-allowed}
-
-/* task-grid · 真实尺寸 5→4→3→2 / min-h 132 */
-.task-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}
-@media (max-width:1280px){.task-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
-.task-card{background:var(--surface);border:1px solid var(--border);
-  border-top:3px solid var(--accent);border-radius:10px;padding:18px;
-  cursor:pointer;display:flex;flex-direction:column;gap:6px;min-height:132px;
-  transition:all .18s;text-align:left;font-family:inherit;color:var(--text);position:relative}
-.task-card:hover{border-color:var(--accent);transform:translateY(-1px)}
-.task-card.tc-ab{border-top-color:var(--p-ab)}
-.task-card.tc-biz{border-top-color:var(--p-biz)}
-.task-card.tc-data{border-top-color:var(--p-data)}
-.task-card.tc-wave{border-top-color:var(--p-wave)}
-.task-card.tc-gray{border-top-color:var(--p-gray)}
-.tc-name{font-family:'Fraunces',serif;font-weight:500;font-size:15px;letter-spacing:-.01em;line-height:1.3;
-  font-variation-settings:'opsz' 144}
-.tc-meta{display:flex;gap:8px;align-items:center}
-.tc-paradigm{font-family:'JetBrains Mono',monospace;font-size:9.5px;padding:2px 7px;border-radius:3px;
-  background:var(--surface-2);color:var(--text-dim);text-transform:uppercase;letter-spacing:.08em;font-weight:500}
-.tc-collab{font-size:10.5px;color:var(--success)}
-.tc-preview{color:var(--text-dim);font-size:12px;font-style:italic;line-height:1.4;
-  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.tc-foot{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--text-muted);margin-top:auto;
-  display:flex;gap:10px}
-
-/* public area */
-.public-tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
-.public-tab{background:var(--surface);border:1px solid var(--border);border-radius:999px;
-  padding:6px 14px;font-size:12.5px;cursor:pointer;color:var(--text-dim);
-  display:inline-flex;align-items:center;gap:6px;font-family:inherit}
-.public-tab:hover{background:var(--surface-2);color:var(--text)}
-.public-tab.active{background:var(--accent);color:var(--text-inv);border-color:var(--accent)}
-.public-tab-count{background:var(--surface-2);padding:1px 7px;border-radius:8px;font-size:10px;
-  font-family:'JetBrains Mono',monospace;color:var(--text-dim)}
-.public-tab.active .public-tab-count{background:rgba(255,255,255,.22);color:var(--text-inv)}
-
-.public-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
-@media (max-width:1280px){.public-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
-.ptc{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 14px;
-  min-height:96px;display:flex;flex-direction:column;gap:6px;cursor:pointer;text-align:left;
-  font-family:inherit;color:var(--text);transition:border-color .12s}
-.ptc:hover{border-color:var(--accent)}
-.ptc-name{font-family:'Fraunces',serif;font-size:13.5px;font-weight:600;line-height:1.4;letter-spacing:-.005em;
-  font-variation-settings:'opsz' 144}
-.ptc-meta{font-size:11px;color:var(--text-muted);line-height:1.5}
-.ptc-owner{font-size:10.5px;color:var(--text-muted);margin-top:auto;padding-top:6px;
-  border-top:1px solid var(--border-soft);font-family:'JetBrains Mono',monospace}
-
-/* ====== Phone preview ====== */
-.phone-wrap{background:var(--surface);border:1px solid var(--border);border-radius:10px;
-  box-shadow:var(--shadow-3);padding:32px 28px 36px;text-align:center}
-.phone-wrap .phone-tag{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;
-  background:var(--accent-soft);color:var(--accent-text);border-radius:4px;font-size:10.5px;font-weight:500;
-  letter-spacing:.06em;margin-bottom:8px;font-family:'JetBrains Mono',monospace;text-transform:uppercase}
-.phone-wrap .phone-name{font-family:'Fraunces',serif;font-size:18px;font-weight:600;letter-spacing:-.015em;margin-bottom:4px;
-  font-variation-settings:'opsz' 144}
-.phone-wrap .phone-meta{font-size:12px;color:var(--text-muted);margin-bottom:18px;font-family:'JetBrains Mono',monospace}
-.phone{width:360px;height:760px;background:#1a1612;border-radius:42px;padding:10px;
-  box-shadow:0 24px 64px rgba(26,22,18,.3);position:relative;margin:0 auto}
-.phone-screen{width:100%;height:100%;background:var(--bg);border-radius:32px;overflow:hidden;
-  position:relative;display:flex;flex-direction:column}
-.phone-notch{position:absolute;top:14px;left:50%;transform:translateX(-50%);
-  width:104px;height:28px;background:#000;border-radius:99px;z-index:10}
-
-/* phone top */
-.p-top{padding:54px 16px 12px;display:flex;align-items:center;gap:8px;flex-shrink:0;
-  background:var(--bg);border-bottom:1px solid var(--border-soft)}
-.p-top .brand-mark{width:24px;height:24px;font-size:11px;border-radius:5px}
-.p-top .brand-text{font-size:14px}
-.p-top .right{margin-left:auto;display:flex;align-items:center;gap:4px}
-.p-top .right .icon-btn{width:30px;height:30px;font-size:13px;border-radius:6px}
-.p-top .right .avatar{width:26px;height:26px;font-size:11px}
-
-.p-content{flex:1;overflow-y:auto;padding:16px 14px 80px}
-.p-greet{font-family:'Fraunces',serif;font-size:24px;font-weight:500;letter-spacing:-.025em;margin:6px 0 4px;
-  font-variation-settings:'opsz' 144}
-.p-greet-sub{color:var(--text-dim);font-size:13px;margin-bottom:18px}
-
-.p-section-h{font-family:'JetBrains Mono',monospace;font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;
-  color:var(--text-muted);font-weight:500;margin:18px 0 10px;display:flex;justify-content:space-between;align-items:center}
-.p-section-h a{font-size:10.5px;color:var(--text-muted);text-decoration:none}
-
-/* phone start cards · 2 列 */
-.p-start{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:18px}
-.p-start .start-card{flex-direction:column;align-items:flex-start;padding:14px 12px;gap:8px;border-radius:8px}
-.p-start .start-card .sc-icon{width:36px;height:36px;font-size:20px;border-radius:8px}
-.p-start .start-card .sc-name{font-size:13px;letter-spacing:-.01em}
-.p-start .start-card .sc-desc{font-size:11px;line-height:1.4;
-  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-
-/* phone paradigm · 2 列 紧凑 */
-.p-paradigm{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:18px}
-.p-paradigm .paradigm-card{height:auto;min-height:108px;padding:14px 12px;border-radius:8px}
-.p-paradigm .pc-icon{width:34px;height:34px;font-size:16px;margin-bottom:8px;border-radius:8px}
-.p-paradigm .pc-name{font-size:12.5px;margin-bottom:3px}
-.p-paradigm .pc-desc{font-size:11px}
-
-/* phone task list · 2 列网格（与真实代码 ≤720px 仍保持 2 列 一致），左侧 3px 范式色条 */
-.p-task-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
-.p-task{background:var(--surface);border:1px solid var(--border);
-  border-left:3px solid var(--p-ab);border-radius:8px;padding:11px 12px;
-  display:flex;flex-direction:column;gap:5px;min-height:88px}
-.p-task.t-biz{border-left-color:var(--p-biz)}
-.p-task.t-data{border-left-color:var(--p-data)}
-.p-task.t-wave{border-left-color:var(--p-wave)}
-.p-task.t-gray{border-left-color:var(--p-gray)}
-.p-task .tc-name{font-size:12.5px;line-height:1.3;
-  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.p-task .tc-meta{margin-top:auto}
-.p-task .tc-foot{font-size:9.5px;margin-top:0}
-
-/* phone public · 横滚 chip tabs + grid 2 列 */
-.p-public-tabs{display:flex;gap:6px;overflow-x:auto;margin:0 -14px 12px;padding:0 14px 4px;scrollbar-width:none}
-.p-public-tabs::-webkit-scrollbar{display:none}
-.p-public-tabs .public-tab{flex-shrink:0;padding:5px 12px;font-size:11.5px}
-.p-public-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.p-public-grid .ptc{padding:10px 12px;min-height:80px;border-radius:6px}
-.p-public-grid .ptc-name{font-size:12px}
-
-/* phone FAB + bottom tabbar */
-.p-fab{position:absolute;bottom:80px;right:16px;width:52px;height:52px;border-radius:50%;
-  background:var(--accent-grad);
-  box-shadow:0 1px 0 rgba(166,84,57,.4),0 8px 24px rgba(204,120,92,.30),inset 0 1px 0 rgba(255,255,255,.24);
-  display:grid;place-items:center;color:#faf4ed;font-size:24px;font-weight:300;border:none;cursor:pointer;z-index:5}
-.p-tabbar{position:absolute;bottom:0;left:0;right:0;height:60px;
-  background:var(--bg);border-top:1px solid var(--border-soft);
-  display:grid;grid-template-columns:repeat(4,1fr);padding:6px 8px 12px}
-.p-tab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
-  background:transparent;border:none;color:var(--text-muted);font-family:inherit;font-size:10px;font-weight:500;cursor:pointer}
-.p-tab.active{color:var(--accent)}
-.p-tab .ico{font-size:20px;line-height:1}
-
-/* page footer spec */
-.spec{max-width:1900px;margin:32px auto 0;padding:0 32px}
-.spec-card{background:var(--surface);border:1px solid var(--border-soft);border-radius:10px;
-  padding:24px 28px;box-shadow:var(--shadow-1)}
-.spec-card h3{font-family:'Fraunces',serif;font-size:18px;font-weight:600;margin:0 0 10px;letter-spacing:-.015em;
-  font-variation-settings:'opsz' 144}
-.spec-card ul{margin:0;padding-left:20px;font-size:13.5px;color:var(--text-dim);line-height:1.85}
-.spec-card code{background:var(--surface-2);padding:1px 6px;border-radius:4px;
-  font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--accent-text);
-  border:1px solid var(--border-soft)}
-.spec-card b{color:var(--text);font-weight:600}
+    /* Cards - Moxt Style: rounded-xl (10-12px), thin borders, no shadow, hover gets surface-2 */
+    .start-card {
+      @apply flex items-center gap-3 bg-bg border border-border rounded-xl p-4 cursor-pointer text-left transition-colors relative text-txt hover:bg-surface-2;
+    }
+    .sc-icon {
+      @apply text-xl w-10 h-10 rounded-lg grid place-items-center bg-surface-3 flex-none text-txt-dim;
+    }
+    
+    .paradigm-card {
+      @apply bg-bg border border-border rounded-xl p-4 cursor-pointer flex flex-col items-center text-center transition-colors text-txt relative hover:bg-surface-2;
+    }
+    .pc-icon {
+      @apply w-10 h-10 rounded-lg grid place-items-center text-[20px] mx-auto mb-3 bg-surface-3 text-txt-dim;
+    }
+    
+    .task-card {
+      @apply bg-bg border border-border rounded-xl p-4 cursor-pointer flex flex-col gap-1.5 min-h-[120px] transition-colors text-left text-txt relative hover:bg-surface-2;
+    }
+    .tc-paradigm {
+      @apply text-[10px] px-2 py-0.5 rounded-full bg-surface-3 text-txt-dim font-medium;
+    }
+    
+    .public-tab {
+      @apply bg-transparent border-none rounded-lg px-3 py-1.5 text-[13px] cursor-pointer text-txt-dim inline-flex items-center gap-1.5 transition-colors hover:bg-surface-2 hover:text-txt;
+    }
+    .public-tab.active {
+      @apply bg-surface-3 text-txt font-medium;
+    }
+    .public-tab-count {
+      @apply bg-transparent text-txt-muted text-[11px] ml-0.5;
+    }
+  }
 </style>
+
 </head>
 <body>
 
-<div class="outer-bar">
-  <span class="outer-tag"><span class="dot"></span>v5 · Dashboard · 桌面 + 手机</span>
-  <span style="color:var(--text-muted);font-size:13px;font-family:'JetBrains Mono',monospace">基于真实 [DashboardPage.tsx](../frontend/src/pages/dashboard/DashboardPage.tsx)</span>
-  <div class="spacer"></div>
-  <a href="00_design_system.html">← Design System</a>
-  <button onclick="toggleTheme()">
-    <span class="t-light">🌙 暗夜</span><span class="t-dark" style="display:none">☀️ 日间</span>
+<div class="max-w-[1900px] mx-auto mb-6 px-8 flex items-center gap-3.5">
+  <span class="inline-flex items-center gap-2 px-3 py-1.5 bg-accent-soft text-accent-text rounded-md text-[11px] font-medium font-mono uppercase tracking-widest">
+    
+    v5 · Dashboard · Tailwind Refactor
+  </span>
+  <span class="text-txt-muted text-[13px] font-mono">基于真实组件</span>
+  <div class="flex-1"></div>
+  <a href="00_design_system.html" class="text-txt-dim text-[13px] no-underline px-3 py-1.5 rounded-md hover:bg-surface-2 hover:text-txt transition-colors">← Design System</a>
+  <button onclick="toggleTheme()" class="bg-surface border border-border text-txt h-[36px] px-3.5 rounded-lg cursor-pointer inline-flex items-center gap-1.5 text-[13px] font-medium transition-colors hover:bg-surface-2">
+    <span class="t-light">🌙 暗夜</span><span class="t-dark hidden">☀️ 日间</span>
   </button>
 </div>
 
@@ -355,226 +169,210 @@ function toggleTheme(){
   var next=cur==='light'?'dark':'light';
   document.documentElement.dataset.theme=next;
   localStorage.setItem('ice-v5-theme',next);
-  document.querySelectorAll('.t-light').forEach(e=>e.style.display=next==='light'?'inline':'none');
-  document.querySelectorAll('.t-dark').forEach(e=>e.style.display=next==='dark'?'inline':'none');
+  document.querySelectorAll('.t-light').forEach(e=>e.classList.toggle('hidden', next==='dark'));
+  document.querySelectorAll('.t-dark').forEach(e=>e.classList.toggle('hidden', next==='light'));
 }
 (function(){if(document.documentElement.dataset.theme==='dark'){
-  document.querySelectorAll('.t-light').forEach(e=>e.style.display='none');
-  document.querySelectorAll('.t-dark').forEach(e=>e.style.display='inline');
+  document.querySelectorAll('.t-light').forEach(e=>e.classList.add('hidden'));
+  document.querySelectorAll('.t-dark').forEach(e=>e.classList.remove('hidden'));
 }})();
 </script>
 
-<div class="canvas">
+<div class="max-w-[1900px] mx-auto px-8 grid grid-cols-1 xl:grid-cols-[1fr_420px] gap-8 items-start">
 
-  <!-- ===== Desktop browser ===== -->
-  <div class="browser">
-    <div class="browser-bar">
-      <div class="browser-dots"><span></span><span></span><span></span></div>
-      <div class="browser-url">ice.workbench.local / dashboard</div>
+  <!-- Desktop Browser -->
+  <div class="bg-surface border border-border rounded-xl overflow-hidden shadow-3">
+    <div class="h-[36px] bg-surface-2 border-b border-border-soft flex items-center px-3.5 gap-2">
+      <div class="flex gap-1.5">
+        <span class="w-[11px] h-[11px] rounded-full bg-[#cc6c5e]"></span>
+        <span class="w-[11px] h-[11px] rounded-full bg-[#c4a55a]"></span>
+        <span class="w-[11px] h-[11px] rounded-full bg-[#7a9a6e]"></span>
+      </div>
+      <div class="flex-1 text-center font-mono text-[11.5px] text-txt-muted bg-surface px-3 py-1.5 rounded-[5px] mx-[80px] border border-border-soft">
+        ice.workbench.local / dashboard
+      </div>
     </div>
-    <div class="viewport">
-
-      <!-- TopNav (mode="dashboard") -->
-      <header class="appbar">
-        <div class="brand">
-          <div class="brand-mark">i</div>
-          <span class="brand-text">ICE Workbench</span>
+    
+    <div class="h-[1080px] bg-bg overflow-hidden flex flex-col">
+      <!-- TopNav -->
+      <header class="h-[60px] bg-bg border-b border-border-soft flex items-center px-6 gap-3.5 shrink-0">
+        <div class="flex items-center gap-2.5">
+          <div class="w-[30px] h-[30px] rounded-[7px] bg-accent-grad grid place-items-center text-[#faf4ed] font-semibold text-sm font-sans shadow-accent-shadow">i</div>
+          <span class="font-sans font-semibold text-lg tracking-tight">ICE Workbench</span>
         </div>
-        <nav>
-          <a href="#" class="active">Dashboard</a>
-          <a href="#">任务</a>
-          <a href="#">Agent 池</a>
-          <a href="#">知识库</a>
+        <nav class="flex items-center gap-0.5 ml-4">
+          <a href="#" class="px-3 py-1.5 rounded-md text-txt text-[13.5px] font-medium bg-surface-2 transition-colors">Dashboard</a>
+          <a href="#" class="px-3 py-1.5 rounded-md text-txt-dim text-[13.5px] font-medium hover:bg-surface-2 hover:text-txt transition-colors">任务</a>
+          <a href="#" class="px-3 py-1.5 rounded-md text-txt-dim text-[13.5px] font-medium hover:bg-surface-2 hover:text-txt transition-colors">Agent 池</a>
+          <a href="#" class="px-3 py-1.5 rounded-md text-txt-dim text-[13.5px] font-medium hover:bg-surface-2 hover:text-txt transition-colors">知识库</a>
         </nav>
-        <div class="spacer"></div>
-        <!-- TopNav.rightActions（来自 DashboardPage rightActions prop） -->
-        <button class="btn btn-primary">＋ 新任务</button>
-        <button class="btn btn-ghost">⏱ 定时</button>
-        <button class="btn btn-ghost">📖 指南</button>
-        <button class="btn btn-ghost">🛡 管理</button>
-        <div style="width:1px;height:20px;background:var(--border);margin:0 4px"></div>
+        <div class="flex-1"></div>
+        <button class="nav-btn btn-primary">＋ 新任务</button>
+        <button class="nav-btn btn-ghost">⏱ 定时</button>
+        <button class="nav-btn btn-ghost">📖 指南</button>
+        <button class="nav-btn btn-ghost">🛡 管理</button>
+        <div class="w-[1px] h-5 bg-border mx-1"></div>
         <button class="icon-btn" onclick="toggleTheme()" title="切换主题">
-          <span class="t-light">🌙</span><span class="t-dark" style="display:none">☀️</span>
+          <span class="t-light">🌙</span><span class="t-dark hidden">☀️</span>
         </button>
-        <div class="avatar">GY</div>
+        <div class="w-8 h-8 rounded-full bg-accent-grad grid place-items-center text-[#faf4ed] font-medium text-xs font-sans shadow-accent-shadow">GY</div>
       </header>
 
-      <!-- main -->
-      <main class="main">
-        <div class="dash-main">
-
+      <!-- Main Content -->
+      <main class="flex-1 overflow-y-auto p-0 bg-bg">
+        <div class="max-w-[1200px] mx-auto w-full pt-8 px-6 pb-20">
+          
           <!-- dash-welcome -->
-          <div class="dash-welcome">
-            <h1 class="serif">👋 你好，Yunhe</h1>
-            <p>选一个范式开始今天的工作</p>
+          <div class="mb-8">
+            <h1 class="font-sans text-4xl font-medium tracking-tight leading-tight mb-2">👋 你好，Yunhe</h1>
+            <p class="text-txt-dim text-[15px] m-0">选一个范式开始今天的工作</p>
           </div>
 
-          <!-- dash-section · dash-start (4 张起点卡) -->
-          <section class="dash-section">
-            <div class="start-grid">
-              <button class="start-card">
-                <div class="sc-icon">📝</div>
-                <div><div class="sc-name">新建任务</div><div class="sc-desc">选择范式 / Agent，开启一个新任务</div></div>
+          <!-- Section 01: Start -->
+          <section class="mb-9">
+            <div class="grid grid-cols-4 gap-3.5">
+              <button class="start-card  group">
+                <div class="sc-icon group-hover:text-accent transition-colors">📝</div>
+                <div><div class="font-sans font-semibold text-[15.5px] mb-1 tracking-tight">新建任务</div><div class="text-txt-dim text-[12.5px] leading-relaxed">选择范式 / Agent，开启一个新任务</div></div>
               </button>
-              <button class="start-card s2">
-                <div class="sc-icon">⏱</div>
-                <div><div class="sc-name">定时任务</div><div class="sc-desc">按周期自动执行的任务列表</div></div>
+              <button class="start-card  group">
+                <div class="sc-icon group-hover:text-p-data transition-colors">⏱</div>
+                <div><div class="font-sans font-semibold text-[15.5px] mb-1 tracking-tight">定时任务</div><div class="text-txt-dim text-[12.5px] leading-relaxed">按周期自动执行的任务列表</div></div>
               </button>
-              <button class="start-card s3">
-                <div class="sc-icon">📖</div>
-                <div><div class="sc-name">使用指南</div><div class="sc-desc">上手教程与功能说明</div></div>
+              <button class="start-card  group">
+                <div class="sc-icon group-hover:text-p-biz transition-colors">📖</div>
+                <div><div class="font-sans font-semibold text-[15.5px] mb-1 tracking-tight">使用指南</div><div class="text-txt-dim text-[12.5px] leading-relaxed">上手教程与功能说明</div></div>
               </button>
-              <button class="start-card s4">
-                <div class="sc-icon">🌐</div>
-                <div><div class="sc-name">公共任务</div><div class="sc-desc">参考团队已有任务</div></div>
+              <button class="start-card  group">
+                <div class="sc-icon group-hover:text-p-ab transition-colors">🌐</div>
+                <div><div class="font-sans font-semibold text-[15.5px] mb-1 tracking-tight">公共任务</div><div class="text-txt-dim text-[12.5px] leading-relaxed">参考团队已有任务</div></div>
               </button>
             </div>
           </section>
 
-          <!-- dash-section · 快速开始 (paradigm-grid) -->
-          <section class="dash-section">
-            <h2 class="serif"><span class="num">02</span>⚡ 快速开始</h2>
-            <div class="paradigm-grid">
-              <button class="paradigm-card pc-data">
-                <div class="pc-icon">📊</div>
-                <div class="pc-name">数据分析</div>
-                <div class="pc-desc">SQL 取数、可视化、自动报表，从问题到结论的最短路径。</div>
+          <!-- Section 02: Paradigms -->
+          <section class="mb-9">
+            <h2 class="font-sans text-[22px] font-medium tracking-tight leading-tight mb-4 flex items-center">
+              <span class="font-mono text-[11px] text-accent font-medium tracking-widest mr-2.5 uppercase">02</span>⚡ 快速开始
+            </h2>
+            <div class="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-3.5">
+              <button class="paradigm-card ">
+                <div class="pc-icon bg-surface-3 text-txt-dim">📊</div>
+                <div class="font-sans font-semibold text-[15px] mb-1 tracking-tight">数据分析</div>
+                <div class="text-txt-dim text-[12.5px] leading-relaxed line-clamp-2">SQL 取数、可视化、自动报表，从问题到结论的最短路径。</div>
               </button>
-              <button class="paradigm-card pc-ab">
-                <div class="pc-icon">🧪</div>
-                <div class="pc-name">AB 实验</div>
-                <div class="pc-desc">实验设计、显著性检验、ARPU 复盘。</div>
+              <button class="paradigm-card ">
+                <div class="pc-icon bg-surface-3 text-txt-dim">🧪</div>
+                <div class="font-sans font-semibold text-[15px] mb-1 tracking-tight">AB 实验</div>
+                <div class="text-txt-dim text-[12.5px] leading-relaxed line-clamp-2">实验设计、显著性检验、ARPU 复盘。</div>
               </button>
-              <button class="paradigm-card pc-gray">
-                <div class="pc-icon">🚀</div>
-                <div class="pc-name">灰度发布</div>
-                <div class="pc-desc">分桶规则、监控指标、决策建议一站式。</div>
+              <button class="paradigm-card ">
+                <div class="pc-icon bg-surface-3 text-txt-dim">🚀</div>
+                <div class="font-sans font-semibold text-[15px] mb-1 tracking-tight">灰度发布</div>
+                <div class="text-txt-dim text-[12.5px] leading-relaxed line-clamp-2">分桶规则、监控指标、决策建议一站式。</div>
               </button>
-              <button class="paradigm-card">
+              <button class="paradigm-card ">
                 <div class="pc-icon">💬</div>
-                <div class="pc-name">通用 Agent</div>
-                <div class="pc-desc">面对任意数据问题的通用工作助手。</div>
+                <div class="font-sans font-semibold text-[15px] mb-1 tracking-tight">通用 Agent</div>
+                <div class="text-txt-dim text-[12.5px] leading-relaxed line-clamp-2">面对任意数据问题的通用工作助手。</div>
               </button>
-              <button class="paradigm-card">
+              <button class="paradigm-card ">
                 <div class="pc-icon">📚</div>
-                <div class="pc-name">Know</div>
-                <div class="pc-desc">基于飞书 Wiki 的内部知识问答。</div>
+                <div class="font-sans font-semibold text-[15px] mb-1 tracking-tight">Know</div>
+                <div class="text-txt-dim text-[12.5px] leading-relaxed line-clamp-2">基于飞书 Wiki 的内部知识问答。</div>
               </button>
-              <button class="paradigm-card pc-ab">
-                <div class="pc-icon">🌋</div>
-                <div class="pc-name">火山 ABTest</div>
-                <div class="pc-desc">对接火山引擎 ABTest 平台。</div>
+              <button class="paradigm-card ">
+                <div class="pc-icon bg-surface-3 text-txt-dim">🌋</div>
+                <div class="font-sans font-semibold text-[15px] mb-1 tracking-tight">火山 ABTest</div>
+                <div class="text-txt-dim text-[12.5px] leading-relaxed line-clamp-2">对接火山引擎 ABTest 平台。</div>
               </button>
-              <button class="paradigm-card pc-biz paradigm-card-soon">
-                <span class="pc-badge-soon">待上线</span>
-                <div class="pc-icon">💼</div>
-                <div class="pc-name">业务洞察</div>
-                <div class="pc-desc">指标拆解、异动归因、业务诊断。</div>
+              <button class="paradigm-card  opacity-55 cursor-not-allowed hover:translate-y-0 hover:shadow-none hover:border-border">
+                <span class="absolute top-2.5 right-2.5 text-[10px] px-2 py-0.5 rounded-full bg-surface-2 text-txt-muted border border-border font-medium font-mono tracking-wider">待上线</span>
+                <div class="pc-icon bg-surface-3 text-txt-dim">💼</div>
+                <div class="font-sans font-semibold text-[15px] mb-1 tracking-tight">业务洞察</div>
+                <div class="text-txt-dim text-[12.5px] leading-relaxed line-clamp-2">指标拆解、异动归因、业务诊断。</div>
               </button>
-              <button class="paradigm-card pc-wave paradigm-card-soon">
-                <span class="pc-badge-soon">待上线</span>
-                <div class="pc-icon">🌊</div>
-                <div class="pc-name">浪潮归因</div>
-                <div class="pc-desc">渠道归因、增长拆解、投放复盘。</div>
+              <button class="paradigm-card  opacity-55 cursor-not-allowed hover:translate-y-0 hover:shadow-none hover:border-border">
+                <span class="absolute top-2.5 right-2.5 text-[10px] px-2 py-0.5 rounded-full bg-surface-2 text-txt-muted border border-border font-medium font-mono tracking-wider">待上线</span>
+                <div class="pc-icon bg-surface-3 text-txt-dim">🌊</div>
+                <div class="font-sans font-semibold text-[15px] mb-1 tracking-tight">浪潮归因</div>
+                <div class="text-txt-dim text-[12.5px] leading-relaxed line-clamp-2">渠道归因、增长拆解、投放复盘。</div>
               </button>
             </div>
           </section>
 
-          <!-- dash-section · 我的任务 (task-grid 4 列@1280) -->
-          <section class="dash-section">
-            <h2 class="serif"><span class="num">03</span>📋 我的任务</h2>
-            <div class="task-grid">
-              <div class="task-card tc-ab">
-                <div class="tc-name">双十一 AB 实验复盘</div>
-                <div class="tc-meta"><span class="tc-paradigm">AB</span></div>
-                <div class="tc-preview">💬 "主推礼盒装在 18-24 岁人群转化率 +14.2% (p&lt;0.01)，但 ARPU 持平…"</div>
-                <div class="tc-foot">⏱ 2 小时前 · 📄 8</div>
+          <!-- Section 03: My Tasks -->
+          <section class="mb-9">
+            <h2 class="font-sans text-[22px] font-medium tracking-tight leading-tight mb-4 flex items-center">
+              <span class="font-mono text-[11px] text-accent font-medium tracking-widest mr-2.5 uppercase">03</span>📋 我的任务
+            </h2>
+            <div class="grid grid-cols-4 lg:grid-cols-5 gap-3.5">
+              <div class="task-card ">
+                <div class="font-sans font-medium text-[15px] tracking-tight leading-snug">双十一 AB 实验复盘</div>
+                <div class="flex gap-2 items-center"><span class="tc-paradigm">AB</span></div>
+                <div class="text-txt-dim text-xs  leading-relaxed line-clamp-2 mt-1">💬 "主推礼盒装在 18-24 岁人群转化率 +14.2% (p&lt;0.01)，但 ARPU 持平…"</div>
+                <div class="font-mono text-[10.5px] text-txt-muted mt-auto flex gap-2.5 pt-2">⏱ 2 小时前 · 📄 8</div>
               </div>
-              <div class="task-card tc-wave">
-                <div class="tc-name">上新增长归因</div>
-                <div class="tc-meta"><span class="tc-paradigm">WAVE</span><span class="tc-collab">👥 协作</span></div>
-                <div class="tc-preview">💬 "小红书素材 #3 贡献 37% 新增，建议加投…"</div>
-                <div class="tc-foot">⏱ 昨天 · 📄 14</div>
+              <div class="task-card ">
+                <div class="font-sans font-medium text-[15px] tracking-tight leading-snug">上新增长归因</div>
+                <div class="flex gap-2 items-center"><span class="tc-paradigm">WAVE</span><span class="text-[10.5px] text-success">👥 协作</span></div>
+                <div class="text-txt-dim text-xs  leading-relaxed line-clamp-2 mt-1">💬 "小红书素材 #3 贡献 37% 新增，建议加投…"</div>
+                <div class="font-mono text-[10.5px] text-txt-muted mt-auto flex gap-2.5 pt-2">⏱ 昨天 · 📄 14</div>
               </div>
-              <div class="task-card tc-data">
-                <div class="tc-name">付费转化漏斗 · Q2</div>
-                <div class="tc-meta"><span class="tc-paradigm">DATA</span></div>
-                <div class="tc-preview">💬 "查看→加购→付款 最大流失发生在加购到付款 67%…"</div>
-                <div class="tc-foot">⏱ 09:15 · 📄 6</div>
+              <div class="task-card ">
+                <div class="font-sans font-medium text-[15px] tracking-tight leading-snug">付费转化漏斗 · Q2</div>
+                <div class="flex gap-2 items-center"><span class="tc-paradigm">DATA</span></div>
+                <div class="text-txt-dim text-xs  leading-relaxed line-clamp-2 mt-1">💬 "查看→加购→付款 最大流失发生在加购到付款 67%…"</div>
+                <div class="font-mono text-[10.5px] text-txt-muted mt-auto flex gap-2.5 pt-2">⏱ 09:15 · 📄 6</div>
               </div>
-              <div class="task-card tc-biz">
-                <div class="tc-name">DAU 异动归因 · 5/24</div>
-                <div class="tc-meta"><span class="tc-paradigm">BIZ</span></div>
-                <div class="tc-preview">💬 "DAU 环比 -3.2% 主要来自上海地区 push 推送故障…"</div>
-                <div class="tc-foot">⏱ 2 天前 · 📄 3</div>
+              <div class="task-card ">
+                <div class="font-sans font-medium text-[15px] tracking-tight leading-snug">DAU 异动归因 · 5/24</div>
+                <div class="flex gap-2 items-center"><span class="tc-paradigm">BIZ</span></div>
+                <div class="text-txt-dim text-xs  leading-relaxed line-clamp-2 mt-1">💬 "DAU 环比 -3.2% 主要来自上海地区 push 推送故障…"</div>
+                <div class="font-mono text-[10.5px] text-txt-muted mt-auto flex gap-2.5 pt-2">⏱ 2 天前 · 📄 3</div>
               </div>
-              <div class="task-card tc-gray">
-                <div class="tc-name">10% 灰度试运行</div>
-                <div class="tc-meta"><span class="tc-paradigm">GRAY</span></div>
-                <div class="tc-preview">💬 "桶 A 转化提升 4.3%，建议扩大至 30% 后观察…"</div>
-                <div class="tc-foot">⏱ 3 天前 · 📄 4</div>
-              </div>
-              <div class="task-card tc-data">
-                <div class="tc-name">用户留存模型</div>
-                <div class="tc-meta"><span class="tc-paradigm">DATA</span></div>
-                <div class="tc-preview">💬 "Cohort 30 日留存 14.2%，比上月降低 1.1pp…"</div>
-                <div class="tc-foot">⏱ 1 周前 · 📄 11</div>
-              </div>
-              <div class="task-card tc-ab">
-                <div class="tc-name">弹窗 CTA 文案 AB</div>
-                <div class="tc-meta"><span class="tc-paradigm">AB</span></div>
-                <div class="tc-preview">💬 "「立即试用」CTR 比「免费体验」高 22%…"</div>
-                <div class="tc-foot">⏱ 1 周前 · 📄 5</div>
-              </div>
-              <div class="task-card tc-wave">
-                <div class="tc-name">小红书素材矩阵分析</div>
-                <div class="tc-meta"><span class="tc-paradigm">WAVE</span></div>
-                <div class="tc-preview">💬 "高 ROI 素材集中在生活方式类，下一波建议加投…"</div>
-                <div class="tc-foot">⏱ 2 周前 · 📄 9</div>
+              <div class="task-card ">
+                <div class="font-sans font-medium text-[15px] tracking-tight leading-snug">10% 灰度试运行</div>
+                <div class="flex gap-2 items-center"><span class="tc-paradigm">GRAY</span></div>
+                <div class="text-txt-dim text-xs  leading-relaxed line-clamp-2 mt-1">💬 "桶 A 转化提升 4.3%，建议扩大至 30% 后观察…"</div>
+                <div class="font-mono text-[10.5px] text-txt-muted mt-auto flex gap-2.5 pt-2">⏱ 3 天前 · 📄 4</div>
               </div>
             </div>
           </section>
 
-          <!-- dash-section · 公共区 (5 Tab + 6 列网格) -->
-          <section class="dash-section">
-            <h2 class="serif"><span class="num">04</span>🌐 团队公共区</h2>
-            <div class="public-tabs">
+          <!-- Section 04: Public -->
+          <section class="mb-9">
+            <h2 class="font-sans text-[22px] font-medium tracking-tight leading-tight mb-4 flex items-center">
+              <span class="font-mono text-[11px] text-accent font-medium tracking-widest mr-2.5 uppercase">04</span>🌐 团队公共区
+            </h2>
+            <div class="flex gap-1.5 mb-3.5 flex-wrap">
               <button class="public-tab active">📋 公共任务<span class="public-tab-count">12</span></button>
               <button class="public-tab">🤖 Agents<span class="public-tab-count">8</span></button>
               <button class="public-tab">🧰 Skills<span class="public-tab-count">14</span></button>
               <button class="public-tab">📁 公共文件<span class="public-tab-count">23</span></button>
               <button class="public-tab">📚 知识库<span class="public-tab-count">5</span></button>
             </div>
-            <div class="public-grid">
-              <button class="ptc">
-                <div class="ptc-name">双十一全量复盘 · 工作台</div>
-                <div class="ptc-meta">ab · 💬 已展开</div>
-                <div class="ptc-owner">👤 admin</div>
+            <div class="grid grid-cols-4 lg:grid-cols-6 gap-3">
+              <!-- ptc card -->
+              <button class="bg-surface border border-border rounded-lg px-3.5 py-3 min-h-[96px] flex flex-col gap-1.5 cursor-pointer text-left text-txt transition-colors hover:border-accent">
+                <div class="font-sans text-[13.5px] font-semibold leading-snug tracking-tight">双十一全量复盘 · 工作台</div>
+                <div class="text-[11px] text-txt-muted leading-relaxed">ab · 💬 已展开</div>
+                <div class="text-[10.5px] text-txt-muted mt-auto pt-1.5 border-t border-border-soft font-mono">👤 admin</div>
               </button>
-              <button class="ptc">
-                <div class="ptc-name">支付链路稳定性月报</div>
-                <div class="ptc-meta">data · 💬 已展开</div>
-                <div class="ptc-owner">👤 zhanghao</div>
+              <button class="bg-surface border border-border rounded-lg px-3.5 py-3 min-h-[96px] flex flex-col gap-1.5 cursor-pointer text-left text-txt transition-colors hover:border-accent">
+                <div class="font-sans text-[13.5px] font-semibold leading-snug tracking-tight">支付链路稳定性月报</div>
+                <div class="text-[11px] text-txt-muted leading-relaxed">data · 💬 已展开</div>
+                <div class="text-[10.5px] text-txt-muted mt-auto pt-1.5 border-t border-border-soft font-mono">👤 zhanghao</div>
               </button>
-              <button class="ptc">
-                <div class="ptc-name">App push 个性化效果评估</div>
-                <div class="ptc-meta">wave · 💬 已展开</div>
-                <div class="ptc-owner">👤 minghan</div>
+              <button class="bg-surface border border-border rounded-lg px-3.5 py-3 min-h-[96px] flex flex-col gap-1.5 cursor-pointer text-left text-txt transition-colors hover:border-accent">
+                <div class="font-sans text-[13.5px] font-semibold leading-snug tracking-tight">App push 个性化评估</div>
+                <div class="text-[11px] text-txt-muted leading-relaxed">wave · 💬 已展开</div>
+                <div class="text-[10.5px] text-txt-muted mt-auto pt-1.5 border-t border-border-soft font-mono">👤 minghan</div>
               </button>
-              <button class="ptc">
-                <div class="ptc-name">运营活动归因模板</div>
-                <div class="ptc-meta">biz · 📭 空</div>
-                <div class="ptc-owner">👤 admin</div>
-              </button>
-              <button class="ptc">
-                <div class="ptc-name">私域用户分层模型</div>
-                <div class="ptc-meta">data · 💬 已展开</div>
-                <div class="ptc-owner">👤 yongqi</div>
-              </button>
-              <button class="ptc">
-                <div class="ptc-name">5 月增长汇报材料</div>
-                <div class="ptc-meta">biz · 💬 已展开</div>
-                <div class="ptc-owner">👤 admin</div>
+              <button class="bg-surface border border-border rounded-lg px-3.5 py-3 min-h-[96px] flex flex-col gap-1.5 cursor-pointer text-left text-txt transition-colors hover:border-accent">
+                <div class="font-sans text-[13.5px] font-semibold leading-snug tracking-tight">运营活动归因模板</div>
+                <div class="text-[11px] text-txt-muted leading-relaxed">biz · 📭 空</div>
+                <div class="text-[10.5px] text-txt-muted mt-auto pt-1.5 border-t border-border-soft font-mono">👤 admin</div>
               </button>
             </div>
           </section>
@@ -584,170 +382,96 @@ function toggleTheme(){
     </div>
   </div>
 
-  <!-- ===== Phone preview ===== -->
-  <div class="phone-wrap">
-    <div class="phone-tag"><span style="width:6px;height:6px;border-radius:50%;background:var(--accent)"></span>iPhone 14 Pro · 390 × 844</div>
-    <div class="phone-name">Dashboard · 移动版</div>
-    <div class="phone-meta">/ dashboard</div>
+  <!-- Mobile View -->
+  <div class="bg-surface border border-border rounded-[10px] shadow-3 pt-8 pb-9 px-7 text-center">
+    <div class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-accent-soft text-accent-text rounded-md text-[10.5px] font-medium tracking-widest mb-2 font-mono uppercase">
+      <span class="w-[6px] h-[6px] rounded-full bg-accent"></span>iPhone 14 Pro · 390 × 844
+    </div>
+    <div class="font-sans text-lg font-semibold tracking-tight mb-1">Dashboard · 移动版</div>
+    <div class="text-xs text-txt-muted mb-4 font-mono">/ dashboard</div>
 
-    <div class="phone">
-      <div class="phone-notch"></div>
-      <div class="phone-screen">
-
-        <!-- top -->
-        <div class="p-top">
-          <div class="brand-mark">i</div>
-          <span class="brand-text serif">ICE</span>
-          <div class="right">
-            <button class="icon-btn">🔍</button>
-            <button class="icon-btn">🔔</button>
-            <div class="avatar">GY</div>
+    <div class="w-[360px] h-[760px] bg-[#1a1612] rounded-[42px] p-2.5 shadow-[0_24px_64px_rgba(26,22,18,0.3)] relative mx-auto">
+      <div class="absolute top-[14px] left-1/2 -translate-x-1/2 w-[104px] h-[28px] bg-black rounded-full z-10"></div>
+      <div class="w-full h-full bg-bg rounded-[32px] overflow-hidden relative flex flex-col">
+        
+        <!-- p-top -->
+        <div class="pt-[54px] pb-3 px-4 flex items-center gap-2 shrink-0 bg-bg border-b border-border-soft">
+          <div class="w-6 h-6 text-[11px] rounded-[5px] bg-accent-grad grid place-items-center text-[#faf4ed] font-semibold font-sans shadow-accent-shadow">i</div>
+          <span class="text-sm font-sans font-semibold tracking-tight">ICE</span>
+          <div class="ml-auto flex items-center gap-1">
+            <button class="w-[30px] h-[30px] text-[13px] rounded-md grid place-items-center text-txt-dim hover:bg-surface-2 transition-colors">🔍</button>
+            <button class="w-[30px] h-[30px] text-[13px] rounded-md grid place-items-center text-txt-dim hover:bg-surface-2 transition-colors">🔔</button>
+            <div class="w-[26px] h-[26px] text-[11px] rounded-full bg-accent-grad grid place-items-center text-[#faf4ed] font-medium font-sans shadow-accent-shadow">GY</div>
           </div>
         </div>
 
-        <div class="p-content">
-          <div class="p-greet">👋 你好，Yunhe</div>
-          <div class="p-greet-sub">选一个范式开始今天的工作</div>
+        <div class="flex-1 overflow-y-auto px-[14px] pt-4 pb-20 text-left">
+          <div class="font-sans text-2xl font-medium tracking-tight mt-1.5 mb-1 text-txt">👋 你好，Yunhe</div>
+          <div class="text-txt-dim text-[13px] mb-4">选一个范式开始今天的工作</div>
 
-          <!-- 起点 4 卡 (2x2) -->
-          <div class="p-start">
-            <button class="start-card">
-              <div class="sc-icon">📝</div>
-              <div><div class="sc-name">新建任务</div><div class="sc-desc">选择范式 / Agent，开启新任务</div></div>
+          <!-- p-start -->
+          <div class="grid grid-cols-2 gap-2 mb-4">
+            <button class="flex flex-col items-start p-3 gap-2 rounded-lg bg-surface border border-border text-left relative overflow-hidden group hover:border-accent transition-colors">
+              <div class="text-xl w-9 h-9 rounded-lg grid place-items-center bg-surface-2 shadow-icon-emboss shadow-icon-shadow group-hover:text-accent transition-colors">📝</div>
+              <div><div class="text-[13px] font-sans font-semibold tracking-tight mb-0.5 text-txt">新建任务</div><div class="text-[11px] text-txt-dim leading-snug line-clamp-2">选择范式 / Agent</div></div>
             </button>
-            <button class="start-card s2">
-              <div class="sc-icon">⏱</div>
-              <div><div class="sc-name">定时任务</div><div class="sc-desc">按周期自动执行</div></div>
-            </button>
-            <button class="start-card s3">
-              <div class="sc-icon">📖</div>
-              <div><div class="sc-name">使用指南</div><div class="sc-desc">上手教程</div></div>
-            </button>
-            <button class="start-card s4">
-              <div class="sc-icon">🌐</div>
-              <div><div class="sc-name">公共任务</div><div class="sc-desc">参考团队已有任务</div></div>
+            <button class="flex flex-col items-start p-3 gap-2 rounded-lg bg-surface border border-border text-left relative overflow-hidden group hover:border-p-data transition-colors">
+              <div class="text-xl w-9 h-9 rounded-lg grid place-items-center bg-surface-2 shadow-icon-emboss shadow-icon-shadow group-hover:text-p-data transition-colors">⏱</div>
+              <div><div class="text-[13px] font-sans font-semibold tracking-tight mb-0.5 text-txt">定时任务</div><div class="text-[11px] text-txt-dim leading-snug line-clamp-2">按周期自动执行</div></div>
             </button>
           </div>
 
-          <!-- 范式 (2 列) -->
-          <div class="p-section-h">⚡ 快速开始</div>
-          <div class="p-paradigm">
-            <button class="paradigm-card pc-data">
-              <div class="pc-icon">📊</div>
-              <div class="pc-name">数据分析</div>
-              <div class="pc-desc">SQL · 可视化 · 报表</div>
+          <!-- p-paradigm -->
+          <div class="font-mono text-[10.5px] uppercase tracking-widest text-txt-muted font-medium my-[18px] flex justify-between items-center">⚡ 快速开始</div>
+          <div class="grid grid-cols-2 gap-2 mb-4">
+            <button class="bg-surface border border-border border-t-[3px] border-t-p-data rounded-lg p-3 min-h-[108px] flex flex-col items-center text-center hover:border-border-strong transition-colors">
+              <div class="w-[34px] h-[34px] rounded-lg grid place-items-center text-base mb-2 bg-p-data-soft text-p-data shadow-icon-emboss shadow-icon-shadow">📊</div>
+              <div class="text-[12.5px] font-sans font-semibold tracking-tight mb-1 text-txt">数据分析</div>
+              <div class="text-[11px] text-txt-dim">SQL · 可视化 · 报表</div>
             </button>
-            <button class="paradigm-card pc-ab">
-              <div class="pc-icon">🧪</div>
-              <div class="pc-name">AB 实验</div>
-              <div class="pc-desc">显著性 · ARPU 复盘</div>
-            </button>
-            <button class="paradigm-card pc-gray">
-              <div class="pc-icon">🚀</div>
-              <div class="pc-name">灰度发布</div>
-              <div class="pc-desc">分桶 · 决策</div>
-            </button>
-            <button class="paradigm-card">
-              <div class="pc-icon">💬</div>
-              <div class="pc-name">通用 Agent</div>
-              <div class="pc-desc">数据问题工作助手</div>
+            <button class="bg-surface border border-border border-t-[3px] border-t-p-ab rounded-lg p-3 min-h-[108px] flex flex-col items-center text-center hover:border-border-strong transition-colors">
+              <div class="w-[34px] h-[34px] rounded-lg grid place-items-center text-base mb-2 bg-p-ab-soft text-p-ab shadow-icon-emboss shadow-icon-shadow">🧪</div>
+              <div class="text-[12.5px] font-sans font-semibold tracking-tight mb-1 text-txt">AB 实验</div>
+              <div class="text-[11px] text-txt-dim">显著性 · ARPU 复盘</div>
             </button>
           </div>
 
-          <!-- 我的任务 (2 列网格 · 与真实代码 ≤720px 一致) -->
-          <div class="p-section-h">📋 我的任务 <a href="#">全部 →</a></div>
-          <div class="p-task-grid">
-            <div class="p-task t-ab">
-              <div class="tc-name serif">双十一 AB 复盘</div>
-              <div class="tc-meta"><span class="tc-paradigm">AB</span></div>
-              <div class="tc-foot">⏱ 2 小时前</div>
+          <!-- p-task -->
+          <div class="font-mono text-[10.5px] uppercase tracking-widest text-txt-muted font-medium my-[18px] flex justify-between items-center">📋 我的任务 <a href="#" class="text-[10.5px] text-txt-muted no-underline">全部 →</a></div>
+          <div class="grid grid-cols-2 gap-2 mb-2">
+            <div class="bg-surface border border-border border-l-[3px] border-l-p-ab rounded-lg px-3 py-2.5 flex flex-col gap-1.5 min-h-[88px]">
+              <div class="text-[12.5px] font-sans font-medium leading-snug line-clamp-2 text-txt">双十一 AB 复盘</div>
+              <div class="mt-auto flex"><span class="tc-paradigm">AB</span></div>
+              <div class="font-mono text-[9.5px] text-txt-muted">⏱ 2 小时前</div>
             </div>
-            <div class="p-task t-wave">
-              <div class="tc-name serif">上新增长归因</div>
-              <div class="tc-meta"><span class="tc-paradigm">WAVE</span></div>
-              <div class="tc-foot">⏱ 昨天</div>
+            <div class="bg-surface border border-border border-l-[3px] border-l-p-wave rounded-lg px-3 py-2.5 flex flex-col gap-1.5 min-h-[88px]">
+              <div class="text-[12.5px] font-sans font-medium leading-snug line-clamp-2 text-txt">上新增长归因</div>
+              <div class="mt-auto flex"><span class="tc-paradigm">WAVE</span></div>
+              <div class="font-mono text-[9.5px] text-txt-muted">⏱ 昨天</div>
             </div>
-            <div class="p-task t-data">
-              <div class="tc-name serif">付费转化漏斗 Q2</div>
-              <div class="tc-meta"><span class="tc-paradigm">DATA</span></div>
-              <div class="tc-foot">⏱ 09:15</div>
-            </div>
-            <div class="p-task t-biz">
-              <div class="tc-name serif">DAU 异动归因</div>
-              <div class="tc-meta"><span class="tc-paradigm">BIZ</span></div>
-              <div class="tc-foot">⏱ 2 天前</div>
-            </div>
-          </div>
-
-          <!-- 公共区 -->
-          <div class="p-section-h">🌐 团队公共区</div>
-          <div class="p-public-tabs">
-            <button class="public-tab active">📋 公共任务</button>
-            <button class="public-tab">🤖 Agents</button>
-            <button class="public-tab">🧰 Skills</button>
-            <button class="public-tab">📁 文件</button>
-            <button class="public-tab">📚 知识库</button>
-          </div>
-          <div class="p-public-grid">
-            <button class="ptc">
-              <div class="ptc-name">双十一全量复盘</div>
-              <div class="ptc-meta">ab</div>
-            </button>
-            <button class="ptc">
-              <div class="ptc-name">支付稳定性月报</div>
-              <div class="ptc-meta">data</div>
-            </button>
-            <button class="ptc">
-              <div class="ptc-name">push 个性化评估</div>
-              <div class="ptc-meta">wave</div>
-            </button>
-            <button class="ptc">
-              <div class="ptc-name">运营活动归因模板</div>
-              <div class="ptc-meta">biz · 📭 空</div>
-            </button>
           </div>
         </div>
 
-        <button class="p-fab">＋</button>
+        <button class="absolute bottom-20 right-4 w-[52px] h-[52px] rounded-full bg-accent-grad shadow-[0_1px_0_rgba(166,84,57,.4),0_8px_24px_rgba(204,120,92,.30),inset_0_1px_0_rgba(255,255,255,.24)] grid place-items-center text-[#faf4ed] text-2xl font-light border-none cursor-pointer z-10 transition-transform active:scale-95">＋</button>
 
-        <nav class="p-tabbar">
-          <button class="p-tab active"><span class="ico">🏠</span><span>首页</span></button>
-          <button class="p-tab"><span class="ico">📒</span><span>任务</span></button>
-          <button class="p-tab"><span class="ico">🤖</span><span>Agent</span></button>
-          <button class="p-tab"><span class="ico">👤</span><span>我的</span></button>
+        <nav class="absolute bottom-0 left-0 right-0 h-[60px] bg-bg border-t border-border-soft grid grid-cols-4 px-2 pb-3 pt-1.5">
+          <button class="flex flex-col items-center justify-center gap-1 bg-transparent border-none text-accent font-medium text-[10px] cursor-pointer">
+            <span class="text-xl leading-none">🏠</span><span>首页</span>
+          </button>
+          <button class="flex flex-col items-center justify-center gap-1 bg-transparent border-none text-txt-muted font-medium text-[10px] cursor-pointer hover:text-txt-dim">
+            <span class="text-xl leading-none">📒</span><span>任务</span>
+          </button>
+          <button class="flex flex-col items-center justify-center gap-1 bg-transparent border-none text-txt-muted font-medium text-[10px] cursor-pointer hover:text-txt-dim">
+            <span class="text-xl leading-none">🤖</span><span>Agent</span>
+          </button>
+          <button class="flex flex-col items-center justify-center gap-1 bg-transparent border-none text-txt-muted font-medium text-[10px] cursor-pointer hover:text-txt-dim">
+            <span class="text-xl leading-none">👤</span><span>我的</span>
+          </button>
         </nav>
-
       </div>
     </div>
   </div>
 
-</div>
-
-<div class="spec">
-  <div class="spec-card">
-    <h3 class="serif">📐 这张稿严格沿用真实代码 [DashboardPage.tsx](../frontend/src/pages/dashboard/DashboardPage.tsx) 的结构</h3>
-    <ul>
-      <li><b>顶栏</b>：[TopNav](frontend/src/components/shell/TopNav.tsx) mode="dashboard"，brand + nav + rightActions（4 按钮：新任务 / 定时 / 指南 / 管理）</li>
-      <li><b>1. dash-welcome</b>：<code>👋 你好，{user?.name}</code> + <code>选一个范式开始今天的工作</code> —— 字号 36px Fraunces 衬线</li>
-      <li><b>2. dash-start (.start-grid)</b>：4 列等宽，每张 .start-card padding 18×20，左侧 3px 彩色条边（起点不同色：accent / data / biz / ab）</li>
-      <li><b>3. ⚡ 快速开始 (.paradigm-grid)</b>：<code>auto-fit minmax(180px, 1fr)</code>，paradigm-card 固定 height 160，icon 44×44 radius 11，<code>border-top: 3px solid 范式色</code>。已上线在前 + 待上线分组（opacity 0.55）</li>
-      <li><b>4. 📋 我的任务 (.task-grid)</b>：5→4→3→2 响应式，task-card min-h 132，padding 18，标题 Fraunces 15/500，<code>tc-paradigm</code> 用 mono uppercase</li>
-      <li><b>5. 🌐 团队公共区 (.public-tabs + .public-grid)</b>：5 Tab（pill 形）+ 6→4→3→2 列响应式。激活 tab 用 accent 实色 + 反白</li>
-      <li><b>FAB</b>：浮动右下，仅移动端显示，accent 实色</li>
-      <li><b>底栏 .p-tabbar</b>：4 Tab（首页 / 任务 / Agent / 我的），仅移动端</li>
-    </ul>
-
-    <h3 class="serif" style="margin-top:24px">和 v4 关键差异</h3>
-    <ul>
-      <li>底色：纸张白 #faf9f6 → <b>暖米白 #faf4ed</b>（更暖）</li>
-      <li>Accent：克制蓝 #1a73e8 → <b>Claude 铜橙 #cc785c</b>（实色，无渐变）</li>
-      <li>字体：Inter 全场 → <b>Fraunces 衬线</b>（标题 / 任务名 / 范式名 / 起点卡名）+ Inter 正文 + JetBrains Mono chip</li>
-      <li>形状：胶囊 99px → <b>方角 4-11px</b>（卡 10/11、按钮 8、chip 4）</li>
-      <li>chip 文字：中文 → <b>Mono 大写英文（AB / BIZ / DATA）</b></li>
-      <li>按钮形状：胶囊 → <b>8px 方角</b>（顶栏的「+ 新任务」「⏱ 定时」按钮也变方）</li>
-      <li>布局尺寸：完全沿用 [Dashboard.css](frontend/src/pages/dashboard/Dashboard.css) 真实尺寸（dash-main 1200max / paradigm-card 160h / task-card 132min-h / start-grid 4 列 / public-grid 6→2 列）</li>
-    </ul>
-  </div>
 </div>
 
 </body>

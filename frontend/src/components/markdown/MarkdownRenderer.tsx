@@ -1,8 +1,6 @@
 import { memo, useMemo } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { vscDarkPlus, vs } from "react-syntax-highlighter/dist/esm/styles/prism";
 import DOMPurify from "dompurify";
 import { useUIStore } from "@/stores/uiStore";
 import "./markdown.css";
@@ -65,7 +63,6 @@ function buildComponents(streaming?: boolean) {
 
 function CodeBlock({ language, code }: { language: string; code: string }) {
   const pushToast = useUIStore((s) => s.pushToast);
-  const theme = useUIStore((s) => s.theme);
   const onCopy = async () => {
     try {
       await navigator.clipboard.writeText(code);
@@ -74,8 +71,6 @@ function CodeBlock({ language, code }: { language: string; code: string }) {
       pushToast("error", `复制失败：${(err as Error).message}`);
     }
   };
-  // 浅色模式用 vs（VS Code Light）白底，深色模式用 vscDarkPlus 黑底
-  const prismStyle = theme === "light" ? vs : vscDarkPlus;
   return (
     <div className="md-code-block">
       <div className="md-code-head">
@@ -84,14 +79,9 @@ function CodeBlock({ language, code }: { language: string; code: string }) {
           复制
         </button>
       </div>
-      <SyntaxHighlighter
-        language={language}
-        style={prismStyle}
-        PreTag="div"
-        customStyle={{ margin: 0 }}
-      >
-        {code}
-      </SyntaxHighlighter>
+      <pre className="md-code-plain">
+        <code>{code}</code>
+      </pre>
     </div>
   );
 }

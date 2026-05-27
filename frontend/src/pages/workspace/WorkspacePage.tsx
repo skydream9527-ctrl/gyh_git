@@ -23,11 +23,14 @@ import { useUIStore } from "@/stores/uiStore";
 import type {
   AgentCard,
   ChatMessage,
+  ConversationMessagesPage,
   FileMeta,
   SkillCard,
   TaskDetail,
 } from "@/types/api";
 import "./Workspace.css";
+
+const HISTORY_PAGE_SIZE = 80;
 
 // task.role 由后端 derive_task_role 派生回传，前端绝不重算——一旦双源各算
 // 一份，viewer 拿到编辑态 UI 的漏档 BUG 就会重现。
@@ -48,6 +51,9 @@ export function WorkspacePage() {
   const [agent, setAgent] = useState<AgentCard | null>(null);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [history, setHistory] = useState<ChatMessage[]>([]);
+  const [historyHasMore, setHistoryHasMore] = useState(false);
+  const [historyNextBefore, setHistoryNextBefore] = useState<number | null>(null);
+  const [historyLoadingOlder, setHistoryLoadingOlder] = useState(false);
   const [files, setFiles] = useState<FileMeta[]>([]);
   // 文件区分组折叠状态——key 是 category, value 是是否展开。默认全开。
   // 不持久化：每次进入工作台都从展开状态开始，符合"有文件默认展开"的需求。
@@ -159,6 +165,15 @@ export function WorkspacePage() {
     },
   });
 
+  const applyHistoryPage = useCallback(
+    (page: ConversationMessagesPage, mode: "replace" | "prepend" = "replace") => {
+      setHistory((cur) => (mode === "prepend" ? [...page.messages, ...cur] : page.messages));
+      setHistoryHasMore(Boolean(page.has_more));
+      setHistoryNextBefore(page.next_before ?? null);
+    },
+    [],
+  );
+
   const upload = useFileUpload({
     taskId,
     onSuccess: (m) => {
@@ -182,7 +197,7 @@ export function WorkspacePage() {
     setLoadErr(null);
     Promise.all([
       taskApi.detail(taskId),
-      taskApi.conversation(taskId),
+      taskApi.conversation(taskId, { limit: HISTORY_PAGE_SIZE }),
       fileApi.listTask(taskId),
       skillApi.list().catch(() => ({ items: [] as SkillCard[] })),
     ])
@@ -190,7 +205,7 @@ export function WorkspacePage() {
         if (cancelled) return;
         setTask(t);
         setConversationId(conv.conversation_id);
-        setHistory(conv.messages);
+        applyHistoryPage(conv);
         setFiles(fs.items);
         setAllSkills(skills.items);
         if (t.workspace?.model) setModel(t.workspace.model);
@@ -214,7 +229,7 @@ export function WorkspacePage() {
     return () => {
       cancelled = true;
     };
-  }, [taskId]);
+  }, [applyHistoryPage, taskId]);
 
   // 加载可用的知识库（失败静默：KB 是增量能力）
   useEffect(() => {
@@ -334,13 +349,13 @@ export function WorkspacePage() {
       setTask(t);
       setFiles(fs.items);
       if (conversationId) {
-        const conv = await conversationApi.get(taskId, conversationId);
-        setHistory(conv.messages);
+        const conv = await conversationApi.get(taskId, conversationId, { limit: HISTORY_PAGE_SIZE });
+        applyHistoryPage(conv);
       } else {
         // 首次进入或 conv 丢失，回退到默认对话
-        const conv = await taskApi.conversation(taskId);
+        const conv = await taskApi.conversation(taskId, { limit: HISTORY_PAGE_SIZE });
         setConversationId(conv.conversation_id);
-        setHistory(conv.messages);
+        applyHistoryPage(conv);
       }
       pushToast("success", "已刷新");
       setConvListReloadKey((k) => k + 1);
@@ -372,17 +387,42 @@ export function WorkspacePage() {
     const transitionedDone = sameConv && prev.inflight === true && cur === false;
     if (transitionedDone && socket.finalized.length === 0) {
       conversationApi
-        .get(taskId, conversationId)
-        .then((data) => setHistory(data.messages))
+        .get(taskId, conversationId, { limit: HISTORY_PAGE_SIZE })
+        .then((data) => applyHistoryPage(data))
         .catch(() => {});
     }
     prevInflightRef.current = { convId: conversationId, inflight: cur };
-  }, [convInflightMap, conversationId, taskId, socket.finalized.length]);
+  }, [applyHistoryPage, convInflightMap, conversationId, taskId, socket.finalized.length]);
+
+  const loadMessagesForBulkAction = useCallback(async (): Promise<ChatMessage[]> => {
+    if (!conversationId || !historyHasMore || historyNextBefore == null) {
+      return [...history, ...socket.finalized];
+    }
+    const older: ChatMessage[] = [];
+    let before: number | null = historyNextBefore;
+    for (let guard = 0; before != null && guard < 50; guard += 1) {
+      const page = await conversationApi.get(taskId, conversationId, {
+        limit: 200,
+        before,
+      });
+      older.unshift(...page.messages);
+      before = page.next_before ?? null;
+      if (!page.has_more) break;
+    }
+    return [...older, ...history, ...socket.finalized];
+  }, [
+    conversationId,
+    history,
+    historyHasMore,
+    historyNextBefore,
+    socket.finalized,
+    taskId,
+  ]);
 
   // 把当前对话（含工具调用摘要）导出为 Markdown 并触发浏览器下载。
-  const exportConversation = () => {
+  const exportConversation = async () => {
     try {
-      const messages: ChatMessage[] = [...history, ...socket.finalized];
+      const messages = await loadMessagesForBulkAction();
       const lines: string[] = [];
       lines.push(`# ${task?.name || "对话导出"}`);
       lines.push("");
@@ -474,6 +514,29 @@ export function WorkspacePage() {
     [socket, model],
   );
 
+  const loadOlderHistory = useCallback(async () => {
+    if (!conversationId || historyLoadingOlder || historyNextBefore == null) return;
+    setHistoryLoadingOlder(true);
+    try {
+      const page = await conversationApi.get(taskId, conversationId, {
+        limit: HISTORY_PAGE_SIZE,
+        before: historyNextBefore,
+      });
+      applyHistoryPage(page, "prepend");
+    } catch (err) {
+      pushToast("error", `加载更早消息失败：${(err as Error).message}`);
+    } finally {
+      setHistoryLoadingOlder(false);
+    }
+  }, [
+    applyHistoryPage,
+    conversationId,
+    historyLoadingOlder,
+    historyNextBefore,
+    pushToast,
+    taskId,
+  ]);
+
   const requestEditAccess = useCallback(async () => {
     try {
       await joinRequestApi.submit(taskId, "申请将只读权限升级为编辑");
@@ -545,6 +608,8 @@ export function WorkspacePage() {
       const conv = await conversationApi.create(taskId);
       setConversationId(conv.id);
       setHistory([]);
+      setHistoryHasMore(false);
+      setHistoryNextBefore(null);
       setConvListReloadKey((k) => k + 1);
     } catch (err) {
       pushToast("error", `新建对话失败：${(err as Error).message}`);
@@ -965,7 +1030,7 @@ export function WorkspacePage() {
               className="btn-ghost ws-sec-action"
               onClick={async () => {
                 try {
-                  const messages: ChatMessage[] = [...history, ...socket.finalized];
+                  const messages = await loadMessagesForBulkAction();
                   const text = messages
                     .map((m) => {
                       const role =
@@ -1075,6 +1140,12 @@ export function WorkspacePage() {
             finalized={allMessages}
             partial={socket.partial}
             phase={socket.phase}
+            historyHasMore={historyHasMore}
+            historyLoading={historyLoadingOlder}
+            onLoadOlder={loadOlderHistory}
+            runEvents={socket.runEvents}
+            toolOverrides={socket.toolOverrides}
+            onRetryToolCall={socket.retryToolCall}
             onCrystallize={handleCrystallize}
             backgroundInflight={
               !!conversationId &&
@@ -1443,10 +1514,12 @@ export function WorkspacePage() {
                     // 先立刻清空旧历史，避免 fetch 返回前这一帧把旧对话的消息
                     // 拼进新对话（useChatSocket 内部会同步重置自己的 finalized）。
                     setHistory([]);
+                    setHistoryHasMore(false);
+                    setHistoryNextBefore(null);
                     setConversationId(cid);
                     try {
-                      const data = await conversationApi.get(taskId, cid);
-                      setHistory(data.messages);
+                      const data = await conversationApi.get(taskId, cid, { limit: HISTORY_PAGE_SIZE });
+                      applyHistoryPage(data);
                     } catch (err: any) {
                       pushToast(
                         "error",

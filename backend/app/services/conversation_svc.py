@@ -93,12 +93,15 @@ async def delete_conversation(*, task_id: str, conv_id: str) -> None:
         idx = tx.read_json(idx_path, default=[])
         idx = [c for c in idx if c["id"] != conv_id]
         tx.write_json(idx_path, idx)
-    jsonl = paths.task_conversation(task_id, conv_id)
-    if jsonl.exists():
-        jsonl.unlink()
-    lock = paths.task_conversation_lock(task_id, conv_id)
-    if lock.exists():
-        lock.unlink()
+    for p in (
+        paths.task_conversation(task_id, conv_id),
+        paths.task_tool_calls(task_id, conv_id),
+        paths.task_conversation_lock(task_id, conv_id),
+        paths.task_conv_inflight_state(task_id, conv_id),
+        paths.task_conversation_compact(task_id, conv_id),
+    ):
+        if p.exists():
+            p.unlink()
 
 
 async def get_or_create_default(*, task_id: str, created_by: str) -> dict:

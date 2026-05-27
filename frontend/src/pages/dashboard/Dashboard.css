@@ -263,6 +263,8 @@
   justify-content: center;
   background: var(--surface-2);
   flex: 0 0 auto;
+  /* v5: 内嵌高光 + 微阴影（start-card 是 horizontal flex，不改对齐） */
+  box-shadow: var(--icon-emboss), var(--icon-shadow);
 }
 .sc-body {
   flex: 1;
@@ -291,7 +293,9 @@
   border-top: 3px solid var(--primary);
   border-radius: var(--radius);
   padding: 18px;
-  text-align: left;
+  /* v5: 图标 + 标题水平居中（与 ct-agent-card / concept-card 视觉统一） */
+  text-align: center;
+  align-items: center;
   cursor: pointer;
   color: var(--text);
   transition: all 0.18s;
@@ -313,7 +317,9 @@
   align-items: center;
   justify-content: center;
   font-size: 22px;
-  margin-bottom: 12px;
+  /* v5: 居中 + 立体 emboss + 1px 微阴影 */
+  margin: 0 auto 12px;
+  box-shadow: var(--icon-emboss), var(--icon-shadow);
 }
 .pc-name {
   font-family: var(--font-head);

@@ -157,6 +157,14 @@ export interface ConversationSummary {
   inflight?: boolean;
 }
 
+export interface ConversationMessagesPage {
+  conversation_id: string;
+  messages: ChatMessage[];
+  total?: number;
+  next_before?: number | null;
+  has_more?: boolean;
+}
+
 export interface JoinRequest {
   id: string;
   user_id: string;
@@ -204,7 +212,15 @@ export interface ChatMessage {
   id: string;
   role: "user" | "assistant" | "system";
   content: string;
-  tool_uses?: Array<{ id: string; name: string; input: Record<string, unknown> }>;
+  tool_uses?: Array<{
+    id: string;
+    name: string;
+    input: Record<string, unknown>;
+    status?: "executing" | "done" | "error" | "timeout";
+    success?: boolean;
+    result?: unknown;
+    error?: { code?: string; error_code?: string; message?: string };
+  }>;
   agent_id?: string;
   user_id?: string;
   created_at: string;
@@ -217,7 +233,7 @@ export interface ToolCall {
   arguments: Record<string, unknown>;
   status: "executing" | "done" | "error" | "timeout";
   result?: unknown;
-  error?: { code: string; message: string };
+  error?: { code?: string; error_code?: string; message?: string };
 }
 
 export interface GlobalToggles {

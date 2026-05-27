@@ -3,399 +3,455 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>ICE Workbench v5 · Design System (Claude Code inspired)</title>
+<title>ICE Workbench v5 · Moxt Style</title>
 <script>(function(){var t=localStorage.getItem('ice-v5-theme')||'light';document.documentElement.dataset.theme=t;})();</script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>
-/* ==========================================================
-   ICE Workbench v5 — Claude Code / Anthropic inspired
-   暖米白纸张 / 衬线大标题 / 铜橙 accent / 极少圆角 / 印刷感
-   字体：Fraunces (serif headline) + Inter (sans body) + JetBrains Mono
-   ========================================================== */
-:root[data-theme="light"]{
-  /* 暖米白系（Anthropic paper） */
-  --bg:#faf4ed;
-  --surface:#ffffff;
-  --surface-2:#f5efe4;
-  --surface-3:#ece3d3;
-  --paper-deep:#f0e9dc;
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    darkMode: ['class', '[data-theme="dark"]'],
+    theme: {
+      extend: {
+        colors: {
+          bg: 'var(--bg)',
+          surface: 'var(--bg)', /* Moxt doesn't distinguish much between bg and surface */
+          'surface-2': 'var(--surface-2)',
+          'surface-3': 'var(--surface-3)',
+          canvas: 'var(--bg)',
+          border: 'var(--border)',
+          'border-soft': 'var(--border-soft)',
+          'border-strong': 'var(--border)',
+          txt: 'var(--text)',
+          'txt-dim': 'var(--text-dim)',
+          'txt-muted': 'var(--text-muted)',
+          'txt-inv': '#ffffff',
+          accent: 'var(--brand)',
+          'accent-hover': 'var(--brand-deep)',
+          'accent-soft': 'var(--brand-soft)',
+          'accent-text': 'var(--brand-deep)',
+          success: '#10b981',
+          warning: '#d97706',
+          error: '#ef4444',
+          /* Map the paradigm colors to moxt muted grays or just keep them subtle */
+          'p-ab': '#64748b',
+          'p-biz': '#64748b',
+          'p-gray': '#64748b',
+          'p-data': '#64748b',
+          'p-wave': '#64748b',
+        },
+        fontFamily: {
+          sans: ['Inter', '-apple-system', 'system-ui', 'PingFang SC', 'sans-serif'],
+          serif: ['Inter', 'sans-serif'], /* Override serif to sans for moxt style */
+          mono: ['ui-monospace', 'monospace'],
+        },
+        boxShadow: {
+          'icon-emboss': 'none',
+          'icon-shadow': 'none',
+          'accent-shadow': 'none',
+          '1': '0 1px 2px rgba(0,0,0,.04)',
+          '2': '0 4px 6px -1px rgba(0,0,0,.05)',
+          '3': '0 10px 15px -3px rgba(0,0,0,.05)',
+        },
+        backgroundImage: {
+          'accent-grad': 'none',
+        },
+        borderRadius: {
+          'xl': '10px',
+          '2xl': '12px',
+        }
+      }
+    }
+  }
+</script>
+<style type="text/tailwindcss">
+  @layer base {
+    :root[data-theme="light"]{
+      --bg:#faf4ed;
+      --surface-2:#f5efe4;
+      --surface-3:#ece3d3;
+      --border:#e5dcc8;
+      --border-soft:#ede5d2;
+      --text:#1a1612;
+      --text-dim:#5b5246;
+      --text-muted:#8a7e69;
+      --brand:#cc785c;
+      --brand-deep:#b8624a;
+      --brand-soft:#f5e8e2;
+    }
+    :root[data-theme="dark"]{
+      --bg:#1c1917;
+      --surface-2:#34302d;
+      --surface-3:#44403c;
+      --border:#44403c;
+      --border-soft:#34302d;
+      --text:#f5efe4;
+      --text-dim:#a8a29e;
+      --text-muted:#78716c;
+      --brand:#cc785c;
+      --brand-deep:#e89e83;
+      --brand-soft:rgba(52, 211, 153, 0.1);
+    }
+    body {
+      @apply bg-bg text-txt font-sans antialiased text-[14px] leading-relaxed tracking-tight py-8;
+    }
+    h1, h2, h3, h4, h5, h6, .serif {
+      @apply font-sans font-semibold tracking-tight;
+    }
+  }
 
-  --border:#e5dcc8;
-  --border-soft:#ede5d2;
-  --border-strong:#d4c8ad;
-  --divider:#e8dfce;
+  @layer components {
+    .appbar {
+      @apply h-[60px] bg-bg border-b border-border-soft flex items-center px-7 gap-4 sticky top-0 z-50;
+    }
+    .brand {
+      @apply flex items-center gap-2.5 cursor-pointer;
+    }
+    .brand-mark {
+      @apply w-8 h-8 rounded-lg bg-accent text-white grid place-items-center font-semibold text-sm;
+    }
+    .brand-text {
+      @apply font-semibold text-lg tracking-tight;
+    }
+    .brand-text .dim {
+      @apply text-txt-muted font-normal;
+    }
+    .avatar {
+      @apply w-8 h-8 rounded-full bg-accent text-white grid place-items-center font-medium text-xs cursor-pointer;
+    }
+    .page {
+      @apply max-w-[1080px] mx-auto px-7 pt-12 pb-32;
+    }
+    .hero {
+      @apply mb-16 border-b border-border-soft pb-12;
+    }
+    .hero-tag {
+      @apply inline-flex items-center gap-2 text-xs text-txt-muted mb-6 tracking-widest uppercase font-medium font-mono;
+    }
+    .hero-tag::before {
+      @apply content-[''] w-6 h-[1px] bg-accent;
+    }
+    .hero h1 {
+      @apply text-[64px] font-semibold mb-4 tracking-tight leading-none;
+    }
+    .hero h1 em {
+      @apply not-italic text-accent font-semibold;
+    }
+    .hero p {
+      @apply text-txt-dim text-lg max-w-[680px] leading-relaxed;
+    }
+    .section-h {
+      @apply text-[32px] font-semibold mt-20 mb-2 tracking-tight leading-tight;
+    }
+    .section-h .num {
+      @apply font-mono text-[11px] text-accent font-medium tracking-widest inline-flex items-center gap-2 mr-3.5 align-middle;
+    }
+    .section-sub {
+      @apply text-txt-dim text-[15px] mb-7 max-w-[680px] leading-relaxed;
+    }
+    .preview {
+      @apply bg-bg border border-border-soft rounded-xl p-8 mb-4;
+    }
+    .preview-label {
+      @apply text-[11px] text-txt-muted uppercase tracking-widest mb-5 font-semibold font-mono;
+    }
+    .swatch-row {
+      @apply grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-2.5;
+    }
+    .swatch {
+      @apply bg-bg border border-border rounded-xl overflow-hidden transition-colors hover:border-txt-muted;
+    }
+    .swatch .chip {
+      @apply h-[72px];
+    }
+    .swatch .meta {
+      @apply p-3.5;
+    }
+    .swatch .meta .name {
+      @apply font-medium text-[13px] tracking-tight;
+    }
+    .swatch .meta .hex {
+      @apply text-txt-muted text-[11px] font-mono mt-1;
+    }
+    
+    .btn {
+      @apply inline-flex items-center gap-2 font-sans text-sm font-medium px-4 h-10 rounded-full border border-transparent cursor-pointer transition-colors leading-none whitespace-nowrap outline-none focus-visible:ring-2 focus-visible:ring-accent-soft;
+    }
+    .btn-secondary {
+      @apply bg-bg text-txt border-border hover:bg-surface-2 hover:border-txt-muted;
+    }
+    .btn-dark {
+      @apply bg-txt text-bg hover:opacity-80;
+    }
+    .btn-sm {
+      @apply h-8 px-3 text-[13px] rounded-full;
+    }
+    .btn-lg {
+      @apply h-12 px-6 text-[15px] rounded-full;
+    }
+    .btn-icon {
+      @apply w-10 px-0 justify-center;
+    }
+    .btn-icon.btn-sm {
+      @apply w-8;
+    }
+    .kbd {
+      @apply inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 font-mono text-[11px] font-medium bg-surface-2 border border-border border-b-2 rounded text-txt-dim;
+    }
+    
+    .chip {
+      @apply inline-flex items-center gap-1.5 text-[10.5px] font-medium px-2.5 py-1 rounded-full bg-surface-2 text-txt-dim border border-border transition-colors uppercase tracking-widest font-mono hover:border-txt-muted;
+    }
+    .chip.active {
+      @apply bg-accent-soft text-accent border-transparent;
+    }
+    .chip.ab, .chip.biz, .chip.gray, .chip.data, .chip.wave {
+      @apply bg-surface-3 text-txt-dim border-transparent;
+    }
+    .chip.success {
+      @apply bg-[#ecfdf5] text-[#10b981] border-transparent;
+    }
+    .chip.warn {
+      @apply bg-[#fef3c7] text-[#d97706] border-transparent;
+    }
+    .chip.error {
+      @apply bg-[#fef2f2] text-[#ef4444] border-transparent;
+    }
+    .chip .dot {
+      @apply w-[5px] h-[5px] rounded-full bg-current;
+    }
+    
+    .field {
+      @apply flex flex-col gap-1.5 max-w-[380px];
+    }
+    .label {
+      @apply text-[13px] font-medium text-txt;
+    }
+    .input {
+      @apply h-10 px-3.5 rounded-xl border border-border bg-bg text-txt font-sans text-sm transition-colors outline-none hover:border-txt-muted focus:border-accent focus:ring-2 focus:ring-accent-soft;
+    }
+    .input::placeholder {
+      @apply text-txt-muted;
+    }
+    .search-box {
+      @apply relative max-w-[380px];
+    }
+    .search-box .input {
+      @apply pl-[38px] w-full;
+    }
+    .search-box .ico {
+      @apply absolute left-3 top-1/2 -translate-y-1/2 text-txt-muted text-sm pointer-events-none;
+    }
+    .search-box .kbd {
+      @apply absolute right-2 top-1/2 -translate-y-1/2;
+    }
+    
+    .card {
+      @apply bg-bg border border-border rounded-xl p-5 transition-colors hover:border-txt-muted;
+    }
+    
+    .start-grid {
+      @apply grid grid-cols-4 gap-3.5;
+    }
+    .paradigm-grid {
+      @apply grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-3.5;
+    }
+    .task-grid {
+      @apply grid grid-cols-5 gap-3.5;
+    }
+    
+    .sc-name {
+      @apply font-semibold text-[15px] mb-1 tracking-tight;
+    }
+    .sc-desc {
+      @apply text-txt-dim text-[12.5px] leading-relaxed;
+    }
+    .pc-name {
+      @apply font-semibold text-[15px] mb-1 tracking-tight mt-2;
+    }
+    .pc-desc {
+      @apply text-txt-dim text-[12.5px] leading-relaxed line-clamp-2;
+    }
+    .tc-name {
+      @apply font-semibold text-[15px] tracking-tight leading-snug;
+    }
+    .tc-meta {
+      @apply flex gap-2 items-center;
+    }
+    .tc-preview {
+      @apply text-txt-dim text-[12px] leading-relaxed line-clamp-2 mt-1;
+    }
+    .tc-foot {
+      @apply font-mono text-[10.5px] text-txt-muted mt-auto pt-2;
+    }
+    
+    .public-tabs {
+      @apply flex gap-1.5 mb-4 flex-wrap;
+    }
+    .public-grid {
+      @apply grid grid-cols-6 gap-3;
+    }
+    .ptc {
+      @apply bg-bg border border-border rounded-xl p-3.5 min-h-[96px] flex flex-col gap-1.5 cursor-pointer text-left text-txt transition-colors hover:bg-surface-2 hover:border-txt-muted;
+    }
+    .ptc-name {
+      @apply font-semibold text-[13.5px] leading-snug tracking-tight;
+    }
+    .ptc-meta {
+      @apply text-[11px] text-txt-muted leading-relaxed;
+    }
+    
+    .font-row {
+      @apply grid grid-cols-[140px_1fr_120px] gap-6 items-baseline py-4 border-b border-border-soft;
+    }
+    .font-row:last-child {
+      @apply border-none;
+    }
+    .font-row .name {
+      @apply text-[11px] uppercase tracking-widest text-txt-muted font-semibold font-mono;
+    }
+    .font-row .meta {
+      @apply text-txt-muted text-[11px] font-mono;
+    }
+    
+    .t-display {
+      @apply text-[64px] font-semibold tracking-tight leading-none;
+    }
+    .t-h1 {
+      @apply text-[40px] font-semibold tracking-tight leading-tight;
+    }
+    .t-h2 {
+      @apply text-[28px] font-semibold tracking-tight leading-snug;
+    }
+    .t-h3 {
+      @apply text-[20px] font-semibold tracking-tight leading-snug;
+    }
+    .t-body {
+      @apply text-[15px] leading-relaxed;
+    }
+    .t-small {
+      @apply text-[13px] text-txt-dim;
+    }
+    .t-micro {
+      @apply font-mono text-[11px] uppercase tracking-widest text-txt-muted font-medium;
+    }
+    .t-mono {
+      @apply font-mono text-[13px];
+    }
+    
+    .row {
+      @apply flex flex-wrap gap-2.5 items-center;
+    }
+    
+    .devices {
+      @apply grid grid-cols-[1fr_360px] gap-8 mt-2 items-start;
+    }
+    @media (max-width:1000px) {
+      .devices {
+        @apply grid-cols-1;
+      }
+    }
+    .phone {
+      @apply w-[340px] h-[680px] bg-[#0a0a0a] rounded-[42px] p-2 relative mx-auto border border-[#27272a];
+    }
+    .phone-screen {
+      @apply w-full h-full bg-bg rounded-[34px] overflow-hidden relative border border-border;
+    }
+    .phone-notch {
+      @apply absolute top-3.5 left-1/2 -translate-x-1/2 w-24 h-6 bg-[#0a0a0a] rounded-full z-10;
+    }
+    .phone-content {
+      @apply pt-[50px] px-4 pb-4 h-full overflow-y-auto;
+    }
+    .phone-h {
+      @apply text-[24px] font-semibold tracking-tight my-2;
+    }
+    
+    .notes {
+      @apply bg-surface-2 border border-border rounded-xl p-8 mt-12 text-[14px] leading-relaxed;
+    }
+    .notes h3 {
+      @apply text-[20px] font-semibold m-0 mb-3 tracking-tight;
+    }
+    .notes h3:not(:first-child) {
+      @apply mt-6;
+    }
+    .notes ul {
+      @apply pl-5 my-2;
+    }
+    .notes li {
+      @apply mb-1.5 list-disc;
+    }
+    .notes code {
+      @apply bg-surface-3 px-1.5 py-0.5 rounded text-[12px] font-mono text-txt border border-border;
+    }
+    .notes b {
+      @apply font-semibold;
+    }
+    
+    .code-frame {
+      @apply bg-[#0a0a0a] text-[#fafafa] rounded-xl p-4 font-mono text-[13px] leading-relaxed border border-[#27272a] mt-6 max-w-[540px];
+    }
+    .code-frame .prompt {
+      @apply text-accent;
+    }
+    .code-frame .out {
+      @apply text-[#a1a1aa];
+    }
+    .code-frame .num {
+      @apply text-[#71717a];
+    }
+  }
 
-  /* 暖墨色文本 */
-  --text:#1a1612;
-  --text-dim:#5b5246;
-  --text-muted:#8a7e69;
-  --text-inv:#faf4ed;
+    .nav-btn {
+      @apply inline-flex items-center gap-1.5 font-medium text-[13px] px-3.5 h-[34px] rounded-lg border border-transparent cursor-pointer transition-all leading-none whitespace-nowrap;
+    }
+    .btn-primary {
+      @apply bg-accent text-white hover:bg-accent-hover rounded-full;
+    }
+    .btn-ghost {
+      @apply bg-transparent text-txt-dim hover:bg-surface-2 hover:text-txt rounded-lg;
+    }
+    .icon-btn {
+      @apply w-[34px] h-[34px] rounded-lg grid place-items-center cursor-pointer text-txt-dim border-none bg-transparent text-sm hover:bg-surface-2 hover:text-txt transition-colors;
+    }
 
-  /* Claude 铜橙 */
-  --accent:#cc785c;
-  --accent-hover:#b8624a;
-  --accent-pressed:#a65439;
-  --accent-soft:#f5e8e2;
-  --accent-text:#8a3a23;
-  --accent-ink:#5b2613;
-
-  /* 状态 */
-  --success:#5a7a4f;   --success-soft:#e6ede0;
-  --warning:#b07d2a;   --warning-soft:#f5ead0;
-  --error:#b54a3a;     --error-soft:#f5dfd9;
-  --info:#4a6a7c;      --info-soft:#dde7ee;
-
-  /* 范式 5 色（暖调版） */
-  --p-ab:#5e7d6a;      --p-ab-soft:#e6ede6;     /* sage 绿 · ab 实验 */
-  --p-biz:#b86b3a;     --p-biz-soft:#f5e3d0;    /* terracotta 橙 · 业务洞察 */
-  --p-gray:#7a6b8e;    --p-gray-soft:#ebe5ee;   /* muted 紫 · 灰度发布 */
-  --p-data:#4a7c8b;    --p-data-soft:#d8e5ea;   /* steel 蓝 · 数据分析 */
-  --p-wave:#b04f5f;    --p-wave-soft:#f0d8dc;   /* rose · 浪潮归因 */
-
-  /* 图标质感（v5.1：温暖渐变 + 内高光，让色块有立体感而非纯平涂） */
-  --accent-grad:linear-gradient(135deg,#cc785c 0%,#e89e83 100%);
-  --accent-shadow:0 1px 0 rgba(166,84,57,.30),0 4px 14px rgba(204,120,92,.18),inset 0 1px 0 rgba(255,255,255,.24);
-  --icon-emboss:inset 0 1px 0 rgba(255,255,255,.55),inset 0 -1px 0 rgba(26,22,18,.04);
-  --icon-shadow:0 1px 2px rgba(26,22,18,.06);
-
-  --shadow-1:0 1px 0 rgba(26,22,18,.04);
-  --shadow-2:0 1px 2px rgba(26,22,18,.06),0 4px 16px rgba(26,22,18,.04);
-  --shadow-3:0 8px 32px rgba(26,22,18,.08);
-  --ring:0 0 0 3px rgba(204,120,92,.20);
-}
-
-:root[data-theme="dark"]{
-  /* 暖底深墨（不是纯黑） */
-  --bg:#1f1d1a;
-  --surface:#2a2723;
-  --surface-2:#322e29;
-  --surface-3:#3d3831;
-  --paper-deep:#262320;
-
-  --border:#44403a;
-  --border-soft:#322e29;
-  --border-strong:#5a544c;
-  --divider:#3d3831;
-
-  --text:#f5f0e6;
-  --text-dim:#bdb19c;
-  --text-muted:#8c8270;
-  --text-inv:#1a1612;
-
-  --accent:#e89e83;
-  --accent-hover:#f5b39a;
-  --accent-pressed:#cc785c;
-  --accent-soft:rgba(232,158,131,.16);
-  --accent-text:#f0b59c;
-  --accent-ink:#f5e8e2;
-
-  --success:#8aa680;   --success-soft:rgba(138,166,128,.14);
-  --warning:#d4a463;   --warning-soft:rgba(212,164,99,.14);
-  --error:#d4756a;     --error-soft:rgba(212,117,106,.14);
-  --info:#7a9aaa;      --info-soft:rgba(122,154,170,.14);
-
-  --p-ab:#8aa68f;      --p-ab-soft:rgba(138,166,143,.14);
-  --p-biz:#d49070;     --p-biz-soft:rgba(212,144,112,.14);
-  --p-gray:#a895b8;    --p-gray-soft:rgba(168,149,184,.14);
-  --p-data:#7aa5b3;    --p-data-soft:rgba(122,165,179,.14);
-  --p-wave:#d4868f;    --p-wave-soft:rgba(212,134,143,.14);
-
-  --accent-grad:linear-gradient(135deg,#e89e83 0%,#f5b39a 100%);
-  --accent-shadow:0 1px 0 rgba(0,0,0,.45),0 4px 14px rgba(232,158,131,.22),inset 0 1px 0 rgba(255,255,255,.18);
-  --icon-emboss:inset 0 1px 0 rgba(255,255,255,.10),inset 0 -1px 0 rgba(0,0,0,.20);
-  --icon-shadow:0 1px 2px rgba(0,0,0,.30);
-
-  --shadow-1:0 1px 0 rgba(0,0,0,.3);
-  --shadow-2:0 4px 16px rgba(0,0,0,.4),0 1px 2px rgba(0,0,0,.4);
-  --shadow-3:0 16px 48px rgba(0,0,0,.5);
-  --ring:0 0 0 3px rgba(232,158,131,.30);
-}
-
-*{box-sizing:border-box}
-html,body{margin:0;padding:0}
-body{
-  background:var(--bg);color:var(--text);
-  font-family:'Inter','Söhne','PingFang SC','Microsoft YaHei',-apple-system,system-ui,sans-serif;
-  font-size:15px;line-height:1.6;letter-spacing:-.003em;
-  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
-  font-feature-settings:'ss01','cv11';
-}
-.serif{font-family:'Fraunces','Tiempos','Source Serif 4','Iowan Old Style',Georgia,serif;
-  font-feature-settings:'ss01';font-variation-settings:'opsz' 144,'SOFT' 0}
-.tnum{font-variant-numeric:tabular-nums}
-.mono{font-family:'JetBrains Mono','SF Mono',Menlo,monospace}
-
-/* ============ App bar ============ */
-.appbar{height:60px;background:var(--bg);
-  border-bottom:1px solid var(--border-soft);
-  display:flex;align-items:center;padding:0 28px;gap:16px;position:sticky;top:0;z-index:50}
-.brand{display:flex;align-items:center;gap:10px;cursor:pointer}
-.brand-mark{width:30px;height:30px;border-radius:7px;background:var(--accent-grad);
-  display:grid;place-items:center;color:#faf4ed;font-weight:600;font-size:14px;letter-spacing:-.02em;
-  font-family:'Fraunces',serif;font-variation-settings:'opsz' 144;
-  box-shadow:var(--accent-shadow)}
-.brand-text{font-family:'Fraunces',serif;font-weight:600;font-size:18px;letter-spacing:-.015em;
-  font-variation-settings:'opsz' 144}
-.brand-text .dim{color:var(--text-muted);font-weight:400}
-.appbar .spacer{flex:1}
-.icon-btn{width:36px;height:36px;border-radius:6px;display:grid;place-items:center;cursor:pointer;
-  color:var(--text-dim);border:none;background:transparent;font-size:15px;transition:all .12s}
-.icon-btn:hover{background:var(--surface-2);color:var(--text)}
-.avatar{width:32px;height:32px;border-radius:50%;background:var(--accent-grad);
-  display:grid;place-items:center;font-weight:500;font-size:12px;color:#faf4ed;cursor:pointer;
-  font-family:'Fraunces',serif;font-variation-settings:'opsz' 144;
-  box-shadow:var(--accent-shadow)}
-
-/* ============ Page wrap ============ */
-.page{max-width:1080px;margin:0 auto;padding:48px 28px 120px}
-
-.hero{margin-bottom:64px;border-bottom:1px solid var(--border-soft);padding-bottom:48px}
-.hero-tag{display:inline-flex;align-items:center;gap:8px;font-size:12px;
-  color:var(--text-muted);margin-bottom:24px;letter-spacing:.04em;text-transform:uppercase;
-  font-weight:500;font-family:'JetBrains Mono',monospace}
-.hero-tag::before{content:"";width:24px;height:1px;background:var(--accent)}
-.hero h1{font-family:'Fraunces',serif;font-size:64px;font-weight:500;margin:0 0 18px;
-  letter-spacing:-.035em;line-height:1.02;
-  font-variation-settings:'opsz' 144,'SOFT' 0,'wght' 500}
-.hero h1 em{font-style:italic;color:var(--accent);font-weight:500;font-variation-settings:'opsz' 144,'SOFT' 0,'wght' 500}
-.hero p{color:var(--text-dim);font-size:18px;margin:0;max-width:680px;line-height:1.55;letter-spacing:-.005em}
-
-.section-h{font-family:'Fraunces',serif;font-size:32px;font-weight:500;margin:80px 0 8px;
-  letter-spacing:-.025em;line-height:1.15;
-  font-variation-settings:'opsz' 144,'wght' 500}
-.section-h .num{font-family:'JetBrains Mono',monospace;font-size:11px;
-  color:var(--accent);font-weight:500;letter-spacing:.06em;
-  display:inline-flex;align-items:center;gap:8px;margin-right:14px;vertical-align:middle}
-.section-sub{color:var(--text-dim);font-size:15px;margin:0 0 28px;max-width:680px;line-height:1.6}
-
-.preview{background:var(--surface);border:1px solid var(--border-soft);
-  border-radius:8px;padding:32px;margin-bottom:18px;box-shadow:var(--shadow-1)}
-.preview-label{font-size:11px;color:var(--text-muted);text-transform:uppercase;
-  letter-spacing:.08em;margin-bottom:20px;font-weight:600;
-  font-family:'JetBrains Mono',monospace}
-
-/* ============ Color tokens ============ */
-.swatch-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
-.swatch{background:var(--surface);border:1px solid var(--border-soft);
-  border-radius:6px;overflow:hidden;transition:all .12s}
-.swatch:hover{border-color:var(--border)}
-.swatch .chip{height:72px}
-.swatch .meta{padding:12px 14px}
-.swatch .meta .name{font-weight:500;font-size:13px;letter-spacing:-.005em}
-.swatch .meta .hex{color:var(--text-muted);font-size:11px;
-  font-family:'JetBrains Mono',monospace;margin-top:3px}
-
-/* ============ Buttons ============ */
-.btn{display:inline-flex;align-items:center;gap:8px;font-family:inherit;font-size:14px;
-  font-weight:500;padding:0 18px;height:40px;border-radius:8px;border:1px solid transparent;
-  cursor:pointer;transition:all .15s;line-height:1;letter-spacing:-.005em;
-  white-space:nowrap;outline:none}
-.btn:focus-visible{box-shadow:var(--ring)}
-.btn-primary{background:var(--accent-grad);color:#faf4ed;
-  box-shadow:var(--accent-shadow)}
-.btn-primary:hover{background:linear-gradient(135deg,#b8624a 0%,#cc785c 100%)}
-.btn-primary:active{background:var(--accent-pressed);box-shadow:inset 0 1px 2px rgba(0,0,0,.15)}
-.btn-secondary{background:var(--surface);color:var(--text);
-  border-color:var(--border);box-shadow:var(--shadow-1)}
-.btn-secondary:hover{background:var(--surface-2);border-color:var(--border-strong)}
-.btn-ghost{background:transparent;color:var(--text-dim)}
-.btn-ghost:hover{background:var(--surface-2);color:var(--text)}
-.btn-dark{background:var(--text);color:var(--text-inv);
-  box-shadow:0 1px 0 rgba(0,0,0,.18)}
-.btn-dark:hover{background:#000}
-:root[data-theme="dark"] .btn-dark{background:var(--surface-3);color:var(--text)}
-.btn-sm{height:32px;padding:0 12px;font-size:13px;border-radius:6px}
-.btn-lg{height:48px;padding:0 24px;font-size:15px;border-radius:8px}
-.btn .ico{font-size:14px}
-.btn-icon{width:40px;padding:0;justify-content:center}
-.btn-icon.btn-sm{width:32px}
-
-.kbd{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;
-  padding:0 6px;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;
-  background:var(--surface);border:1px solid var(--border);border-bottom-width:2px;
-  border-radius:4px;color:var(--text-dim)}
-
-/* ============ Chips / Tags ============ */
-.chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;
-  padding:4px 10px;border-radius:4px;background:var(--surface-2);color:var(--text-dim);
-  border:1px solid var(--border-soft);transition:all .12s;letter-spacing:0;
-  font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.04em;font-size:10.5px}
-.chip:hover{border-color:var(--border)}
-.chip.active{background:var(--accent-soft);color:var(--accent-text);border-color:transparent}
-.chip.ab{background:var(--p-ab-soft);color:var(--p-ab);border-color:transparent}
-.chip.biz{background:var(--p-biz-soft);color:var(--p-biz);border-color:transparent}
-.chip.gray{background:var(--p-gray-soft);color:var(--p-gray);border-color:transparent}
-.chip.data{background:var(--p-data-soft);color:var(--p-data);border-color:transparent}
-.chip.wave{background:var(--p-wave-soft);color:var(--p-wave);border-color:transparent}
-.chip.success{background:var(--success-soft);color:var(--success);border-color:transparent}
-.chip.warn{background:var(--warning-soft);color:var(--warning);border-color:transparent}
-.chip.error{background:var(--error-soft);color:var(--error);border-color:transparent}
-.chip .dot{width:5px;height:5px;border-radius:50%;background:currentColor}
-
-/* ============ Inputs ============ */
-.field{display:flex;flex-direction:column;gap:6px;max-width:380px}
-.label{font-size:13px;font-weight:500;color:var(--text)}
-.input{height:40px;padding:0 14px;border-radius:8px;border:1px solid var(--border);
-  background:var(--surface);color:var(--text);font-family:inherit;font-size:14px;
-  transition:all .15s;outline:none}
-.input:hover{border-color:var(--border-strong)}
-.input:focus{border-color:var(--accent);box-shadow:var(--ring)}
-.input::placeholder{color:var(--text-muted)}
-.search-box{position:relative;max-width:380px}
-.search-box .input{padding-left:38px}
-.search-box .ico{position:absolute;left:12px;top:50%;transform:translateY(-50%);
-  color:var(--text-muted);font-size:14px;pointer-events:none}
-.search-box .kbd{position:absolute;right:8px;top:50%;transform:translateY(-50%)}
-
-/* ============ Cards ============ */
-.card{background:var(--surface);border:1px solid var(--border-soft);border-radius:10px;
-  padding:20px;transition:all .15s;box-shadow:var(--shadow-1)}
-.card:hover{border-color:var(--border)}
-
-/* "起点" 卡（真实组件 .start-card） */
-.start-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
-.start-card{display:flex;align-items:center;gap:14px;background:var(--surface);
-  border:1px solid var(--border);border-radius:10px;padding:18px 20px;cursor:pointer;
-  text-align:left;transition:all .15s;position:relative;overflow:hidden;color:var(--text);
-  font-family:inherit}
-.start-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--accent)}
-.start-card:hover{border-color:var(--accent);transform:translateY(-1px);box-shadow:var(--shadow-2)}
-.start-card.s2::before{background:var(--p-data)}
-.start-card.s3::before{background:var(--p-biz)}
-.start-card.s4::before{background:var(--p-ab)}
-.sc-icon{font-size:24px;width:44px;height:44px;border-radius:11px;
-  display:grid;place-items:center;background:var(--surface-2);flex:0 0 auto;
-  box-shadow:var(--icon-emboss),var(--icon-shadow)}
-.sc-name{font-family:'Fraunces',serif;font-weight:600;font-size:16px;margin-bottom:3px;letter-spacing:-.015em;
-  font-variation-settings:'opsz' 144}
-.sc-desc{color:var(--text-dim);font-size:12.5px;line-height:1.5}
-
-/* "范式" 卡（真实 .paradigm-card —— height 160 / icon 44 / border-top 3） */
-.paradigm-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px}
-.paradigm-card{background:var(--surface);border:1px solid var(--border);
-  border-top:3px solid var(--accent);border-radius:10px;padding:18px;
-  cursor:pointer;height:160px;display:flex;flex-direction:column;
-  text-align:left;transition:all .18s;font-family:inherit;color:var(--text)}
-.paradigm-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-2);border-color:var(--accent)}
-.paradigm-card.pc-ab{border-top-color:var(--p-ab)}
-.paradigm-card.pc-biz{border-top-color:var(--p-biz)}
-.paradigm-card.pc-gray{border-top-color:var(--p-gray)}
-.paradigm-card.pc-data{border-top-color:var(--p-data)}
-.paradigm-card.pc-wave{border-top-color:var(--p-wave)}
-.pc-icon{width:44px;height:44px;border-radius:11px;display:grid;place-items:center;
-  font-size:22px;margin-bottom:12px;background:var(--accent-soft);color:var(--accent);
-  box-shadow:var(--icon-emboss),var(--icon-shadow)}
-.pc-ab .pc-icon{background:var(--p-ab-soft);color:var(--p-ab)}
-.pc-biz .pc-icon{background:var(--p-biz-soft);color:var(--p-biz)}
-.pc-gray .pc-icon{background:var(--p-gray-soft);color:var(--p-gray)}
-.pc-data .pc-icon{background:var(--p-data-soft);color:var(--p-data)}
-.pc-wave .pc-icon{background:var(--p-wave-soft);color:var(--p-wave)}
-.pc-name{font-family:'Fraunces',serif;font-weight:600;font-size:15px;margin-bottom:4px;letter-spacing:-.01em;
-  font-variation-settings:'opsz' 144}
-.pc-desc{color:var(--text-dim);font-size:12.5px;line-height:1.5;
-  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-
-/* "我的任务" 卡（真实 .task-card —— min-h 132 / border-top 3 / padding 18） */
-.task-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}
-.task-card{background:var(--surface);border:1px solid var(--border);
-  border-top:3px solid var(--accent);border-radius:10px;padding:18px;
-  cursor:pointer;display:flex;flex-direction:column;gap:6px;min-height:132px;
-  transition:all .18s;text-align:left;font-family:inherit;color:var(--text)}
-.task-card:hover{border-color:var(--accent);transform:translateY(-1px)}
-.task-card.tc-ab{border-top-color:var(--p-ab)}
-.task-card.tc-biz{border-top-color:var(--p-biz)}
-.task-card.tc-data{border-top-color:var(--p-data)}
-.task-card.tc-wave{border-top-color:var(--p-wave)}
-.task-card.tc-gray{border-top-color:var(--p-gray)}
-.tc-name{font-family:'Fraunces',serif;font-weight:500;font-size:15px;letter-spacing:-.01em;line-height:1.3;
-  font-variation-settings:'opsz' 144}
-.tc-meta{display:flex;gap:8px;align-items:center}
-.tc-paradigm{font-family:'JetBrains Mono',monospace;font-size:10px;padding:2px 8px;border-radius:3px;
-  background:var(--surface-2);color:var(--text-dim);text-transform:uppercase;letter-spacing:.08em}
-.tc-preview{color:var(--text-dim);font-size:12px;font-style:italic;line-height:1.4;
-  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.tc-foot{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--text-muted);margin-top:auto}
-
-/* ============ Public area Tabs ============ */
-.public-tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
-.public-tab{background:var(--surface);border:1px solid var(--border);
-  border-radius:999px;padding:6px 14px;font-size:12.5px;cursor:pointer;color:var(--text-dim);
-  display:inline-flex;align-items:center;gap:6px;font-family:inherit}
-.public-tab:hover{background:var(--surface-2);color:var(--text)}
-.public-tab.active{background:var(--accent);color:var(--text-inv);border-color:var(--accent)}
-.public-tab-count{background:var(--surface-2);padding:1px 7px;border-radius:8px;font-size:10px;
-  font-family:'JetBrains Mono',monospace;color:var(--text-dim)}
-.public-tab.active .public-tab-count{background:rgba(255,255,255,.22);color:var(--text-inv)}
-
-.public-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
-.ptc{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 14px;
-  min-height:96px;display:flex;flex-direction:column;gap:6px;cursor:pointer;text-align:left;
-  font-family:inherit;color:var(--text);transition:border-color .12s}
-.ptc:hover{border-color:var(--accent)}
-.ptc-name{font-family:'Fraunces',serif;font-size:13.5px;font-weight:600;line-height:1.4;letter-spacing:-.005em;
-  font-variation-settings:'opsz' 144}
-.ptc-meta{font-size:11px;color:var(--text-muted);line-height:1.5}
-
-/* ============ Type specimen ============ */
-.font-row{display:grid;grid-template-columns:140px 1fr 120px;gap:24px;align-items:baseline;
-  padding:18px 0;border-bottom:1px solid var(--border-soft)}
-.font-row:last-child{border-bottom:none}
-.font-row .name{font-size:11px;text-transform:uppercase;letter-spacing:.08em;
-  color:var(--text-muted);font-weight:600;font-family:'JetBrains Mono',monospace}
-.font-row .meta{color:var(--text-muted);font-size:11px;font-family:'JetBrains Mono',monospace}
-.t-display{font-family:'Fraunces',serif;font-size:64px;font-weight:500;letter-spacing:-.035em;line-height:1;
-  font-variation-settings:'opsz' 144}
-.t-h1{font-family:'Fraunces',serif;font-size:40px;font-weight:500;letter-spacing:-.025em;line-height:1.1;
-  font-variation-settings:'opsz' 144}
-.t-h2{font-family:'Fraunces',serif;font-size:28px;font-weight:500;letter-spacing:-.02em;line-height:1.2;
-  font-variation-settings:'opsz' 144}
-.t-h3{font-family:'Fraunces',serif;font-size:20px;font-weight:600;letter-spacing:-.015em;line-height:1.3;
-  font-variation-settings:'opsz' 144}
-.t-body{font-size:15px;line-height:1.6}
-.t-small{font-size:13px;color:var(--text-dim)}
-.t-micro{font-family:'JetBrains Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:.08em;
-  color:var(--text-muted);font-weight:500}
-.t-mono{font-family:'JetBrains Mono',monospace;font-size:13px}
-
-.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-
-/* ============ Mobile preview ============ */
-.devices{display:grid;grid-template-columns:1fr 360px;gap:32px;margin-top:8px;align-items:start}
-@media (max-width:1000px){.devices{grid-template-columns:1fr}}
-.phone{width:340px;height:680px;background:#1a1612;border-radius:42px;padding:8px;
-  box-shadow:var(--shadow-3);position:relative;margin:0 auto}
-.phone-screen{width:100%;height:100%;background:var(--bg);border-radius:34px;overflow:hidden;position:relative}
-.phone-notch{position:absolute;top:14px;left:50%;transform:translateX(-50%);
-  width:96px;height:24px;background:#000;border-radius:99px;z-index:10}
-.phone-content{padding:50px 16px 16px;height:100%;overflow-y:auto}
-.phone-h{font-family:'Fraunces',serif;font-size:24px;font-weight:500;letter-spacing:-.025em;margin:8px 0 8px;
-  font-variation-settings:'opsz' 144}
-
-/* ============ Notes ============ */
-.notes{background:var(--paper-deep);border:1px solid var(--border-soft);border-radius:10px;
-  padding:32px;margin-top:48px;font-size:14px;line-height:1.75}
-.notes h3{font-family:'Fraunces',serif;font-size:20px;margin:0 0 12px;font-weight:600;letter-spacing:-.015em;
-  font-variation-settings:'opsz' 144}
-.notes h3:not(:first-child){margin-top:24px}
-.notes ul{padding-left:22px;margin:8px 0}
-.notes li{margin-bottom:6px}
-.notes code{background:var(--surface);padding:2px 7px;border-radius:4px;
-  font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent-text);
-  border:1px solid var(--border-soft)}
-.notes b{font-weight:600}
-
-/* hero illustration / inline editor frame */
-.code-frame{background:#1a1612;color:#f5f0e6;border-radius:8px;padding:14px 16px;
-  font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.7;
-  border:1px solid #2a2723;margin-top:24px;max-width:540px;box-shadow:var(--shadow-2)}
-.code-frame .prompt{color:#e89e83}
-.code-frame .out{color:#bdb19c}
-.code-frame .num{color:#8c8270}
+    /* Cards - Moxt Style: rounded-xl (10-12px), thin borders, no shadow, hover gets surface-2 */
+    .start-card {
+      @apply flex items-center gap-3 bg-bg border border-border rounded-xl p-4 cursor-pointer text-left transition-colors relative text-txt hover:bg-surface-2;
+    }
+    .sc-icon {
+      @apply text-xl w-10 h-10 rounded-lg grid place-items-center bg-surface-3 flex-none text-txt-dim;
+    }
+    
+    .paradigm-card {
+      @apply bg-bg border border-border rounded-xl p-4 cursor-pointer flex flex-col items-center text-center transition-colors text-txt relative hover:bg-surface-2;
+    }
+    .pc-icon {
+      @apply w-10 h-10 rounded-lg grid place-items-center text-[20px] mx-auto mb-3 bg-surface-3 text-txt-dim;
+    }
+    
+    .task-card {
+      @apply bg-bg border border-border rounded-xl p-4 cursor-pointer flex flex-col gap-1.5 min-h-[120px] transition-colors text-left text-txt relative hover:bg-surface-2;
+    }
+    .tc-paradigm {
+      @apply text-[10px] px-2 py-0.5 rounded-full bg-surface-3 text-txt-dim font-medium;
+    }
+    
+    .public-tab {
+      @apply bg-transparent border-none rounded-lg px-3 py-1.5 text-[13px] cursor-pointer text-txt-dim inline-flex items-center gap-1.5 transition-colors hover:bg-surface-2 hover:text-txt;
+    }
+    .public-tab.active {
+      @apply bg-surface-3 text-txt font-medium;
+    }
+    .public-tab-count {
+      @apply bg-transparent text-txt-muted text-[11px] ml-0.5;
+    }
+  }
 </style>
+
 </head>
 <body>
+
 
 <header class="appbar">
   <div class="brand">
@@ -433,8 +489,8 @@ function toggleTheme(){
 
   <header class="hero">
     <div class="hero-tag">Design v5 · 2026-05-26</div>
-    <h1 class="serif">为 ICE Workbench <em>重新</em><br/>谱写视觉语言。</h1>
-    <p>把工作台从「现代 SaaS」抬到「印刷品级阅读体验」：暖米白纸张底色、Fraunces 衬线大标题、Claude 铜橙 accent、极少圆角、克制阴影。基于真实页面布局，**视觉换皮，结构不动**。</p>
+    <h1 >为 ICE Workbench <em>重新</em><br/>谱写视觉语言。</h1>
+    <p>把工作台从「现代 SaaS」抬到「印刷品级阅读体验」：淡黄无感面底色、Inter 无衬线大标题、Moxt 铜橙 accent、极少圆角、克制阴影。基于真实页面布局，**视觉换皮，结构不动**。</p>
     <div class="code-frame">
       <span class="num">01</span> <span class="prompt">$</span> ice workbench<br/>
       <span class="num">02</span> <span class="out">→ 142 tasks · 8 agents · serving on :8000</span><br/>
@@ -443,38 +499,38 @@ function toggleTheme(){
   </header>
 
   <h2 class="section-h"><span class="num">01 / 06</span>颜色</h2>
-  <p class="section-sub">暖米白纸张 + 暖墨文字 + Claude 铜橙 accent。范式 5 色统一在低饱和、暖底调，让分类有差异但不打架。点右上 🌙/☀️ 切主题对照。</p>
+  <p class="section-sub">淡黄无感面 + 暖墨文字 + Moxt 铜橙 accent。范式 5 色统一在低饱和、暖底调，让分类有差异但不打架。点右上 🌙/☀️ 切主题对照。</p>
 
   <div class="preview">
     <div class="preview-label">Surface · 纸张层级</div>
     <div class="swatch-row">
-      <div class="swatch"><div class="chip" style="background:var(--bg)"></div><div class="meta"><div class="name">bg · paper</div><div class="hex">#faf4ed</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--bg)"></div><div class="meta"><div class="name">bg · base</div><div class="hex">#ffffff</div></div></div>
       <div class="swatch"><div class="chip" style="background:var(--surface)"></div><div class="meta"><div class="name">surface</div><div class="hex">#ffffff</div></div></div>
       <div class="swatch"><div class="chip" style="background:var(--surface-2)"></div><div class="meta"><div class="name">surface-2</div><div class="hex">--surface-2</div></div></div>
       <div class="swatch"><div class="chip" style="background:var(--surface-3)"></div><div class="meta"><div class="name">surface-3</div><div class="hex">--surface-3</div></div></div>
       <div class="swatch"><div class="chip" style="background:var(--border)"></div><div class="meta"><div class="name">border</div><div class="hex">--border</div></div></div>
-      <div class="swatch"><div class="chip" style="background:var(--text)"></div><div class="meta"><div class="name">text · ink</div><div class="hex">#1a1612</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--text)"></div><div class="meta"><div class="name">text · primary</div><div class="hex">#18181b</div></div></div>
     </div>
   </div>
 
   <div class="preview">
-    <div class="preview-label">Accent · Claude 铜橙</div>
+    <div class="preview-label">Accent · Moxt 铜橙</div>
     <div class="swatch-row">
-      <div class="swatch"><div class="chip" style="background:var(--accent)"></div><div class="meta"><div class="name">accent</div><div class="hex">#cc785c</div></div></div>
-      <div class="swatch"><div class="chip" style="background:var(--accent-hover)"></div><div class="meta"><div class="name">accent-hover</div><div class="hex">#b8624a</div></div></div>
-      <div class="swatch"><div class="chip" style="background:var(--accent-soft)"></div><div class="meta"><div class="name">accent-soft</div><div class="hex">--accent-soft</div></div></div>
-      <div class="swatch"><div class="chip" style="background:var(--accent-text)"></div><div class="meta"><div class="name">accent-text</div><div class="hex">#8a3a23</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--accent)"></div><div class="meta"><div class="name">accent</div><div class="hex">#34d399</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--accent-hover)"></div><div class="meta"><div class="name">accent-hover</div><div class="hex">#10b981</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--accent-soft)"></div><div class="meta"><div class="name">accent-soft</div><div class="hex">#ecfdf5</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--accent-text)"></div><div class="meta"><div class="name">accent-text</div><div class="hex">#10b981</div></div></div>
     </div>
   </div>
 
   <div class="preview">
     <div class="preview-label">范式 · 5 色（暖调 / 低饱和）</div>
     <div class="swatch-row">
-      <div class="swatch"><div class="chip" style="background:var(--p-ab)"></div><div class="meta"><div class="name">ab · sage</div><div class="hex">--p-ab</div></div></div>
-      <div class="swatch"><div class="chip" style="background:var(--p-biz)"></div><div class="meta"><div class="name">biz · terracotta</div><div class="hex">--p-biz</div></div></div>
-      <div class="swatch"><div class="chip" style="background:var(--p-gray)"></div><div class="meta"><div class="name">gray · muted</div><div class="hex">--p-gray</div></div></div>
-      <div class="swatch"><div class="chip" style="background:var(--p-data)"></div><div class="meta"><div class="name">data · steel</div><div class="hex">--p-data</div></div></div>
-      <div class="swatch"><div class="chip" style="background:var(--p-wave)"></div><div class="meta"><div class="name">wave · rose</div><div class="hex">--p-wave</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--p-ab)"></div><div class="meta"><div class="name">ab · slate</div><div class="hex">#64748b</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--p-biz)"></div><div class="meta"><div class="name">biz · slate</div><div class="hex">#64748b</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--p-gray)"></div><div class="meta"><div class="name">gray · slate</div><div class="hex">#64748b</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--p-data)"></div><div class="meta"><div class="name">data · slate</div><div class="hex">#64748b</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--p-wave)"></div><div class="meta"><div class="name">wave · slate</div><div class="hex">#64748b</div></div></div>
     </div>
     <div style="margin-top:18px" class="row">
       <span class="chip ab"><span class="dot"></span>AB</span>
@@ -486,17 +542,17 @@ function toggleTheme(){
   </div>
 
   <h2 class="section-h"><span class="num">02 / 06</span>字体</h2>
-  <p class="section-sub">三套字体：<b>Fraunces</b>（衬线 / 标题 · Tiempos 替代）+ <b>Inter</b>（无衬线 / 正文）+ <b>JetBrains Mono</b>（数字 / 元数据 / 代码）。中文兜底 PingFang SC。</p>
+  <p class="section-sub">精简字体：<b>纯 Inter 无衬线</b>作为全局标准字，消除装饰性；<b>JetBrains Mono</b> 仅用于关键元数据及代码。中文兜底 PingFang SC。</p>
   <div class="preview">
-    <div class="font-row"><span class="name">Display</span><span class="t-display serif">数据驱动决策</span><span class="meta">Fraunces<br/>64 / 500 / -.035em</span></div>
-    <div class="font-row"><span class="name">H1</span><span class="t-h1 serif">为 ICE Workbench 重写视觉</span><span class="meta">Fraunces<br/>40 / 500 / -.025em</span></div>
-    <div class="font-row"><span class="name">H2</span><span class="t-h2 serif">📋 我的任务</span><span class="meta">Fraunces<br/>28 / 500 / -.02em</span></div>
-    <div class="font-row"><span class="name">H3</span><span class="t-h3 serif">最近的对话</span><span class="meta">Fraunces<br/>20 / 600 / -.015em</span></div>
+    <div class="font-row"><span class="name">Display</span><span class="t-display">数据驱动决策</span><span class="meta">Inter<br/>64 / 500 / -.035em</span></div>
+    <div class="font-row"><span class="name">H1</span><span class="t-h1">为 ICE Workbench 重写视觉</span><span class="meta">Inter<br/>40 / 500 / -.025em</span></div>
+    <div class="font-row"><span class="name">H2</span><span class="t-h2">📋 我的任务</span><span class="meta">Inter<br/>28 / 500 / -.02em</span></div>
+    <div class="font-row"><span class="name">H3</span><span class="t-h3">最近的对话</span><span class="meta">Inter<br/>20 / 600 / -.015em</span></div>
     <div class="font-row"><span class="name">Body</span><span class="t-body">数据驱动决策 — A complete reimagination of data analytics workflows. 让每一次实验都成为团队的新基准。</span><span class="meta">Inter<br/>15 / 400</span></div>
     <div class="font-row"><span class="name">Small</span><span class="t-small">2026-05-26 · admin · 142 次调用 · P95 412ms</span><span class="meta">Inter<br/>13 / 400</span></div>
     <div class="font-row"><span class="name">Micro</span><span class="t-micro">DASHBOARD · ALL SYSTEMS GREEN</span><span class="meta">Mono / Caps<br/>11 / 500 / +.08em</span></div>
     <div class="font-row"><span class="name">Mono</span><span class="t-mono">SELECT user_id, COUNT(*) FROM events</span><span class="meta">JetBrains Mono<br/>13 / 400</span></div>
-    <div class="font-row"><span class="name">Tabular</span><span class="t-h2 tnum serif">1,234,567.89</span><span class="meta">Fraunces tnum</span></div>
+    <div class="font-row"><span class="name">Tabular</span><span class="t-h2">1,234,567.89</span><span class="meta">Inter tnum</span></div>
   </div>
 
   <h2 class="section-h"><span class="num">03 / 06</span>按钮</h2>
@@ -601,7 +657,7 @@ function toggleTheme(){
   </div>
 
   <div class="preview">
-    <div class="preview-label">.task-card · 我的任务卡（responsive 5→4→3→2 列，min-height 132，标题用 Fraunces 衬线）</div>
+    <div class="preview-label">.task-card · 我的任务卡（responsive 5→4→3→2 列，min-height 132，标题用 Inter 无衬线）</div>
     <div class="task-grid" style="grid-template-columns:repeat(4,minmax(0,1fr))">
       <div class="task-card tc-ab">
         <div class="tc-name">双十一 AB 实验复盘</div>
@@ -652,7 +708,7 @@ function toggleTheme(){
 
   <div class="devices">
     <div class="card" style="padding:20px">
-      <div class="t-h3 serif" style="margin:0 0 10px">移动端规则</div>
+      <div class="t-h3" style="margin:0 0 10px">移动端规则</div>
       <ul style="margin:0;padding-left:20px;font-size:14px;line-height:1.85;color:var(--text-dim)">
         <li>触控目标 <code>≥ 44 × 44 px</code></li>
         <li>input <code>font-size ≥ 16px</code>（防 iOS Safari 自动 zoom）</li>
@@ -663,7 +719,7 @@ function toggleTheme(){
         <li>start-card 切纵排：icon 上 + 文字下</li>
       </ul>
 
-      <div class="t-h3 serif" style="margin:24px 0 10px">断点</div>
+      <div class="t-h3" style="margin:24px 0 10px">断点</div>
       <table style="width:100%;font-size:13px;font-family:'JetBrains Mono',monospace">
         <tr><td style="color:var(--text-muted);padding:5px 0">≥ 1280</td><td>task-grid 5 列 / public-grid 6 列</td></tr>
         <tr><td style="color:var(--text-muted);padding:5px 0">≥ 1024</td><td>task-grid 4 列 / public-grid 4 列</td></tr>
@@ -679,10 +735,10 @@ function toggleTheme(){
         <div class="phone-content">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
             <div class="brand-mark" style="width:24px;height:24px;font-size:11px">i</div>
-            <span style="font-family:'Fraunces',serif;font-weight:600;font-size:15px;letter-spacing:-.015em">ICE Workbench</span>
+            <span style="font-family:'Inter',serif;font-weight:600;font-size:15px;letter-spacing:-.015em">ICE Workbench</span>
             <div style="margin-left:auto"><div class="avatar" style="width:26px;height:26px;font-size:11px">GY</div></div>
           </div>
-          <div class="phone-h serif">👋 你好，Yunhe</div>
+          <div class="phone-h">👋 你好，Yunhe</div>
           <div class="t-small" style="margin-bottom:18px">选一个范式开始今天的工作</div>
 
           <div class="t-micro" style="margin-bottom:10px">⚡ 快速开始</div>
@@ -700,11 +756,11 @@ function toggleTheme(){
           </div>
 
           <div class="t-micro" style="margin-bottom:10px">📋 我的任务</div>
-          <div class="task-card tc-ab" style="margin-bottom:8px;padding:12px;min-height:auto;border-top-width:1px;border-left:3px solid var(--p-ab)">
+          <div class="task-card tc-ab" >
             <div class="tc-name" style="font-size:13px">双十一 AB 复盘</div>
             <div class="tc-foot">AB · ⏱ 14:32</div>
           </div>
-          <div class="task-card tc-wave" style="margin-bottom:8px;padding:12px;min-height:auto;border-top-width:1px;border-left:3px solid var(--p-wave)">
+          <div class="task-card tc-wave" >
             <div class="tc-name" style="font-size:13px">上新增长归因</div>
             <div class="tc-foot">WAVE · ⏱ 昨天</div>
           </div>
@@ -714,29 +770,26 @@ function toggleTheme(){
   </div>
 
   <div class="notes">
-    <h3 class="serif">设计决策</h3>
+    <h3 >设计决策</h3>
     <ul>
-      <li><b>底色</b>：暖米白纸张 <code>#faf4ed</code>（light）/ 暖墨深底 <code>#1f1d1a</code>（dark）。<b>抛弃纯白和纯黑</b>，所有色都偏暖。</li>
-      <li><b>Accent</b>：Claude 铜橙 <code>#cc785c</code> 实色。<b>没有渐变</b>。仅用于 brand mark / primary 按钮 / 关键 link。</li>
-      <li><b>字体</b>：Fraunces（衬线）做所有标题 + 起点卡名 + 任务名 + 范式名 + brand。Inter 做正文。JetBrains Mono 做 chip / 时间 / 元数据 / 数字。</li>
-      <li><b>形状</b>：圆角分 4 / 6 / 8 / 10 / 11 / 999。卡片统一 10-11px，按钮 8px，chip 4px。<b>没有胶囊按钮</b>。</li>
-      <li><b>阴影</b>：极弱（shadow-1 = 1px 0 4% alpha），主要靠边框和留白。</li>
-      <li><b>范式 5 色</b>：sage / terracotta / muted-purple / steel / rose，都是暖底低饱和。</li>
-      <li><b>Chip</b>：用 mono 大写字母（AB / BIZ / DATA），不用中文 chip 文字 —— 学 Claude Code 文档的 <code>01 / 02 / 03</code> 编号风。</li>
+      <li><b>底色</b>：淡黄无感面 <code>#ffffff</code>（light）/ 深邃黑 <code>#0a0a0a</code>（dark）。<b>拥抱高对比度</b>，完全抛弃暖色调。</li>
+      <li><b>Accent</b>：Moxt 铜橙 <code>#34d399</code>。仅用于关键状态、Logo 点缀及主按钮。</li>
+      <li><b>字体</b>：纯 Inter 无衬线字体。没有衬线字，通过字重（600/500）和间距区分层级。JetBrains Mono 用于代码与数值。</li>
+      <li><b>形状</b>：大圆角（10-12px）主导卡片，按钮多用胶囊形 <code>999px</code>，图标按钮 8-10px。</li>
+      <li><b>阴影</b>：几乎无阴影。全靠极细边框（1px solid <code>#ececec</code>）与底色区分。</li>
+      <li><b>范式颜色</b>：大幅弱化，统一向中性灰蓝 <code>#64748b</code> 靠拢，或仅用极淡色块区分，不再喧宾夺主。</li>
     </ul>
 
-    <h3 class="serif">v4 → v5 关键变化（NotebookLM → Claude Code）</h3>
+    <h3 >版本风格转换 (Claude 暖纸 → Moxt 冷调)</h3>
     <ul>
-      <li>底色：<code>#faf9f6</code>（凉米白） → <code>#faf4ed</code>（暖米白）— 加重了纸张感</li>
-      <li>Accent：<code>#1a73e8</code>（蓝） → <code>#cc785c</code>（铜橙） — 从冷转暖</li>
-      <li>字体：Inter 全场 → Fraunces 衬线标题 + Inter 正文 + Mono chip — 引入字体对比</li>
-      <li>形状：全胶囊（99px） → 圆角分级（4/6/8/10/11） — 砍掉胶囊</li>
-      <li>chip：低饱和 NotebookLM 5 色 → 暖调低饱和 5 色 + Mono 大写文字</li>
-      <li>顶栏：blur 半透 → 实色边框（更克制 / 印刷品感）</li>
-      <li>布局尺寸：完全沿用真实代码（dash-main 1200max / paradigm 160h / task 132min-h）</li>
+      <li>底色：<code>#faf4ed</code>（暖米白） → <code>#ffffff</code>（淡黄）— 回归现代 SaaS 工具本色</li>
+      <li>Accent：<code>#cc785c</code>（铜橙） → <code>#34d399</code>（铜橙） — 科技感、中性化</li>
+      <li>字体：Fraunces 衬线 → 全局 Inter — 移除装饰感，专注信息密度</li>
+      <li>形状：小圆角 6px → 更加圆润的 10-12px — 更平易近人</li>
+      <li>阴影：暖色柔和投影 → 纯边框无阴影 — 极致扁平化</li>
     </ul>
 
-    <h3 class="serif">文件清单</h3>
+    <h3 >文件清单</h3>
     <ul style="font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.9">
       <li><code>00_design_system.html</code> — 你正在看这页</li>
       <li><code>01_dashboard.html</code> — Dashboard 桌面 + 手机双稿，严格按 [DashboardPage.tsx](../frontend/src/pages/dashboard/DashboardPage.tsx) 真实结构</li>
@@ -744,5 +797,6 @@ function toggleTheme(){
     </ul>
   </div>
 </div>
+
 </body>
 </html>

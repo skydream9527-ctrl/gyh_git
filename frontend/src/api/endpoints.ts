@@ -2,7 +2,7 @@ import http, { api } from "./client";
 import type {
   AgentCard,
   AgentRefreshResult,
-  ChatMessage,
+  ConversationMessagesPage,
   ConversationSummary,
   FileMeta,
   FileRefreshResult,
@@ -67,9 +67,14 @@ export const taskApi = {
     visibility?: string;
   }) => api<TaskDetail>(http.post("/tasks", body)),
   detail: (id: string) => api<TaskDetail>(http.get(`/tasks/${id}`)),
-  conversation: (id: string) =>
-    api<{ conversation_id: string; messages: ChatMessage[] }>(
-      http.get(`/tasks/${id}/conversation`),
+  conversation: (id: string, opts?: { limit?: number; before?: number | null }) =>
+    api<ConversationMessagesPage>(
+      http.get(`/tasks/${id}/conversation`, {
+        params: {
+          limit: opts?.limit,
+          before: opts?.before ?? undefined,
+        },
+      }),
     ),
   remove: (id: string) =>
     api<{ deleted: boolean; task_id: string }>(http.delete(`/tasks/${id}`)),
@@ -149,9 +154,14 @@ export const conversationApi = {
     api<ConversationSummary>(http.patch(`/tasks/${taskId}/conversations/${convId}`, { title })),
   remove: (taskId: string, convId: string) =>
     api<{ deleted: boolean }>(http.delete(`/tasks/${taskId}/conversations/${convId}`)),
-  get: (taskId: string, convId: string) =>
-    api<{ conversation_id: string; messages: ChatMessage[] }>(
-      http.get(`/tasks/${taskId}/conversations/${convId}`),
+  get: (taskId: string, convId: string, opts?: { limit?: number; before?: number | null }) =>
+    api<ConversationMessagesPage>(
+      http.get(`/tasks/${taskId}/conversations/${convId}`, {
+        params: {
+          limit: opts?.limit,
+          before: opts?.before ?? undefined,
+        },
+      }),
     ),
   abort: (taskId: string, convId: string) =>
     api<{ cancelled: boolean }>(http.post(`/tasks/${taskId}/conversations/${convId}/abort`)),

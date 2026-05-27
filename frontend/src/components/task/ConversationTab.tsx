@@ -32,8 +32,15 @@ function formatRelative(iso?: string): string {
 }
 
 function extractErrMsg(err: unknown, fallback: string): string {
-  const e = err as { response?: { data?: { message?: string; error_code?: string } } };
-  return e?.response?.data?.message || fallback;
+  // api() in client.ts has already unwrapped axios errors into a plain
+  // Error with .message set from envelope.message — so checking
+  // err.response.data.message here would never hit. Read .message first,
+  // fall back to the raw axios shape only for callers that bypassed api().
+  const e = err as {
+    message?: string;
+    response?: { data?: { message?: string; error_code?: string } };
+  };
+  return e?.message || e?.response?.data?.message || fallback;
 }
 
 function ConversationTab({

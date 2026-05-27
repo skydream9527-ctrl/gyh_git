@@ -8,6 +8,10 @@
   font-size: 13px;
   max-width: 580px;
 }
+.tool-card-placeholder {
+  min-height: 42px;
+  opacity: 0.75;
+}
 .tool-warning {
   border-left-color: var(--warning);
 }
@@ -53,6 +57,10 @@
   border-radius: 5px;
   font-size: 12px;
   margin-top: 4px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
 }
 .tool-result.success {
   background: var(--success-dim);
@@ -85,4 +93,17 @@
 .btn-mini:hover {
   background: var(--surface-3);
   color: var(--text);
+}
+.tool-inline-btn {
+  border: 1px solid currentColor;
+  background: transparent;
+  color: inherit;
+  border-radius: 4px;
+  padding: 2px 7px;
+  font-size: 11px;
+  cursor: pointer;
+  opacity: 0.86;
+}
+.tool-inline-btn:hover {
+  opacity: 1;
 }

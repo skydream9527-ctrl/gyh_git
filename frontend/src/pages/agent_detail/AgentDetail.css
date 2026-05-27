@@ -26,6 +26,8 @@
   align-items: center;
   justify-content: center;
   font-size: 30px;
+  /* v5: 立体 emboss + 1px 微阴影 */
+  box-shadow: var(--icon-emboss), var(--icon-shadow);
 }
 .ad-meta {
   flex: 1;
@@ -89,16 +91,23 @@
 }
 
 .ad-prompt-readonly {
-  background: var(--surface-2);
+  /* v5: 暖墨深色块（与编辑态视觉一致） */
+  background: var(--code-bg);
+  color: var(--code-text);
+  border: 1px solid var(--border);
   border-radius: 8px;
   padding: 14px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.7;
 }
 .ad-prompt-edit {
   width: 100%;
-  background: var(--surface-2);
+  /* v5: 暖墨深色块（终端 / Claude Code 风），与 system prompt 的代码语义统一 */
+  background: var(--code-bg);
   border: 1px solid var(--border);
   border-radius: 8px;
-  color: var(--text);
+  color: var(--code-text);
   padding: 14px;
   font-family: var(--font-mono);
   font-size: 13px;
@@ -108,6 +117,7 @@
 }
 .ad-prompt-edit:focus {
   border-color: var(--primary);
+  box-shadow: var(--ring);
 }
 .ad-prompt-actions {
   display: flex;

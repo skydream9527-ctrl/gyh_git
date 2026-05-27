@@ -85,6 +85,15 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (!id.includes("node_modules")) return undefined;
+          if (
+            id.includes("/react-syntax-highlighter/") ||
+            id.includes("/refractor/") ||
+            id.includes("/prismjs/") ||
+            id.includes("/hast-util-to-text/") ||
+            id.includes("/lowlight/")
+          ) {
+            return "vendor-highlight";
+          }
           // Only split out React core. Every other vendor lives in one chunk —
           // splitting markdown / hast / refractor creates circular ESM imports
           // (`Ti is undefined` at load time, white screen). One bigger chunk

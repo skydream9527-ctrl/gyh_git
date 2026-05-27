@@ -1,5 +1,6 @@
 .PHONY: help install install-sandbox backend frontend dev seed test fmt clean pack pack-clean reset-data \
-        prod-build prod-run prod
+        prod-build prod-run prod \
+        docker-build docker-up docker-down docker-upgrade docker-logs
 
 VERSION ?= $(shell date +%Y%m%d)
 PKG_NAME = ice-workbench-$(VERSION).zip
@@ -32,6 +33,14 @@ help:
 	@echo "    For phone testing on the same WiFi, use \`make prod\` — it serves the static"
 	@echo "    build via uvicorn with the security-headers middleware. The dev server leaks"
 	@echo "    full /src source + sourcemaps and lacks security headers."
+	@echo ""
+	@echo ""
+	@echo "  Docker 自托管（详见 docs/SELF_HOSTING.md）："
+	@echo "  make docker-build    docker compose build"
+	@echo "  make docker-up       后台起容器，提示初始 admin 密码位置"
+	@echo "  make docker-down     停止并删除容器（数据保留）"
+	@echo "  make docker-upgrade  git pull + 重建镜像 + 滚动更新"
+	@echo "  make docker-logs     跟踪容器日志"
 	@echo ""
 	@echo "  make seed        one-shot seed bootstrap"
 	@echo "  make test        backend pytest"
@@ -134,3 +143,31 @@ pack: prod-build
 	@echo ""
 
 pack-clean: reset-data pack
+
+# ---------- Docker 自托管 target（详见 docs/SELF_HOSTING.md） ----------
+docker-build:
+	docker compose build
+
+docker-up:
+	@if [ ! -f .env ]; then \
+		echo "  ✗ .env 不存在。先 cp .env.example .env 并改 ICE_SECRET_KEY 等密钥。"; exit 1; \
+	fi
+	docker compose up -d
+	@echo ""
+	@echo "  ✓ 已启动。访问： http://localhost:$${ICE_BIND_PORT:-8000}"
+	@echo "  ✓ 取初始 admin 密码（首次启动后约 30s）："
+	@echo "      docker exec ice-workbench cat /app/.cache/initial_admin_password.txt"
+	@echo ""
+
+docker-down:
+	docker compose down
+
+docker-upgrade:
+	@echo "升级前请先备份："
+	@echo "  tar czf backup-\$$(date +%F).tgz .env users tasks files agents skills .cache"
+	@echo ""
+	git pull
+	docker compose up -d --build
+
+docker-logs:
+	docker compose logs -f
