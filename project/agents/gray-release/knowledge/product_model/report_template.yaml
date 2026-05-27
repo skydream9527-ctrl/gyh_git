@@ -1,0 +1,375 @@
+# report_template.yaml - 报告结构模板
+#
+# 定义报告的结构、内容和样式规范
+# 支持角色自适应（PM视图 vs 分析师视图）
+#
+# 使用方式：Phase 5 报告生成
+
+report_metadata:
+  title_template: "版本灰度分析报告_{treatment_version}_{date}"
+  version: "V1.2"
+  aligned_with_sop: true  # 对齐SOP第八节
+
+# ═══════════════════════════════════════
+# 报告章节定义
+# ═══════════════════════════════════════
+sections:
+
+  # ═══════════════════════════════════════
+  # 章节1: 结论先行（必须）
+  # ═══════════════════════════════════════
+  - order: 1
+    name: 结论先行
+    id: conclusion
+    required: true
+    always_visible: true
+    
+    content:
+      - item: 发布建议
+        type: decision_banner
+        format: 大字醒目显示 + emoji
+        data_source: phase4.decision
+        
+      - item: 核心理由
+        type: paragraph
+        length: 1-3句话
+        data_source: phase4.reasoning
+        
+      - item: 关键数据摘要
+        type: badge_group
+        badges:
+          - label: 正向指标数
+            color: green
+            data: step1.positive_count
+          - label: 平稳指标数
+            color: gray
+            data: step1.steady_count
+          - label: 下降指标数
+            color: red
+            data: step1.declined_count
+            
+      - item: 因果链路概览
+        type: one_liner
+        format: "变量 → 直接指标 → 核心指标"
+        validation_status: step3.causal_validated
+        
+    role_adaptive:
+      product_manager:
+        visible: true
+        expanded: true
+        style: "突出决策和建议，简洁明了"
+      data_analyst:
+        visible: true
+        expanded: true
+        style: "同上，增加统计依据引用"
+
+  # ═══════════════════════════════════════
+  # 章节2: 实验概览（必须）
+  # ═══════════════════════════════════════
+  - order: 2
+    name: 实验概览
+    id: overview
+    required: true
+    always_visible: true
+    
+    content:
+      - item: 版本号信息
+        type: table_2col
+        rows:
+          - 对照包版本 | {control_version}（基线）
+          - 业务包版本 | {treatment_version}（实验）
+          
+      - item: 实验背景
+        type: table_2col
+        rows:
+          - 关键变量 | {key_variable}
+          - 当前阶段 | {phase_label}（{traffic_pct}% | 约{dau} DAU）
+          - 分析时间范围 | {start_date} ~ {end_date}（共{days}天）
+          
+      - item: 因果链路预览
+        type: callout_box
+        format: "🔗 {causal_chain_definition}"
+        
+    role_adaptive:
+      product_manager:
+        visible: true
+        expanded: true
+      data_analyst:
+        visible: true
+        expanded: true
+
+  # ═══════════════════════════════════════
+  # 章节3: 核心数据表现（必须）
+  # ═══════════════════════════════════════
+  - order: 3
+    name: 核心数据表现
+    id: core_metrics
+    required: true
+    always_visible: true
+    
+    content:
+      - item: 规模指标热力图
+        type: heatmap_table
+        columns:
+          - 指标名称
+          - 对照包值
+          - 业务包值
+          - 绝对差异
+          - 相对变化%
+          - p值
+          - 统计显著性标签
+          - "**护栏状态** ⭐"
+        row_coloring:
+          positive: light_green
+          negative: light_red
+          neutral: light_gray
+        data_source: step1.metrics_evaluation (category=规模)
+        
+      - item: 消费指标热力图
+        type: heatmap_table
+        columns: 同上
+        data_source: step1.metrics_evaluation (category=消费)
+        
+      - item: 收入指标热力图
+        type: heatmap_table
+        columns: 同上
+        data_source: step1.metrics_evaluation (category=收入)
+        
+      - item: 组合类型判定卡片
+        type: highlight_card
+        size: large
+        content: 组合类型名称（全部正向/部分正向+平稳/此消彼长/出现下降）
+        color_scheme:
+          全部正向: green
+          部分正向+平稳: blue
+          此消彼长: orange  # ⚠️
+          出现下降: red     # ❌
+        additional_info: 决策倾向文字
+        
+    role_adaptive:
+      product_manager:
+        visible: true
+        expanded: true
+        show_details: ["方向", "幅度", "护栏状态"]
+        hide_details: ["p值精确值", "置信区间", "效应量"]
+        
+      data_analyst:
+        visible: true
+        expanded: true
+        show_details: ALL  # 展示所有统计细节
+        extra_details: ["95%置信区间", "Cohen's d / Odds Ratio", "检验统计量"]
+
+  # ═══════════════════════════════════════
+  # 章节4: 直接指标 & 因果链路（必须）
+  # ═══════════════════════════════════════
+  - order: 4
+    name: 直接指标与因果链路验证
+    id: direct_and_causal
+    required: true
+    always_visible: true
+    
+    content:
+      - item: 直接指标表格
+        type: table
+        columns:
+          - 直接指标名
+          - 对照包值
+          - 业务包值
+          - 相对变化%
+          - 预期方向
+          - 是否符合预期 ✅❌
+        data_source: step2.metrics_results
+        summary_row: 总体评价（符合预期/不符合预期）
+        
+      - item: 因果链路验证面板
+        type: verification_flow
+        steps:
+          - Step 1: 直接指标响应验证
+            status_icon: ✅/❌
+            detail_text: X/Y 个直接指标...
+            
+          - Step 2: 核心指标跟随验证
+            status_icon: ✅/❌
+            detail_text: X/Y 个核心指标...
+            
+          - Step 3: AA基线检查
+            status_icon: ✅/ℹ️
+            detail_text: 正常/免AA/已扣除
+            
+        final_conclusion: 通过/未通过
+        confidence_score: 百分比
+        
+    role_adaptive:
+      product_manager:
+        visible: true
+        expanded: true
+        focus: "是否符合预期 + 结论"
+        collapse_verification_details: true  # 折叠详细步骤
+        
+      data_analyst:
+        visible: true
+        expanded: true
+        show_all_steps: true
+        expand_step_details: true
+
+  # ═══════════════════════════════════════
+  # 章节5: 下钻分析（条件必须）
+  # ═══════════════════════════════════════
+  - order: 5
+    name: 异常下钻分析
+    id: drilldown
+    required: conditional  # 条件必须
+    condition: step4.triggered == true  # 仅当Step 4被执行时显示
+    default_visibility: hidden  # 默认隐藏
+    
+    content:
+      - item: 问题陈述
+        type: alert_box
+        level: warning
+        text: 触发原因列表
+        
+      - item: AI假设列表
+        type: hypothesis_cards
+        layout: horizontal
+        per_hypothesis:
+          - 假设ID + 描述
+          - 初始置信度 → 验证后置信度
+          - 支持/不支持标签
+          - 关键发现摘要（200字以内）
+          
+      - item: 问题定位结论
+        type: highlight_callout
+        level: success/warning/error
+        text: 根因描述
+        
+      - item: 改进建议
+        type: numbered_list
+        source: step4.recommendation
+        
+    role_adaptive:
+      product_manager:
+        visible: condition_met
+        focus: "问题定位 + 建议"
+        hide_hypothesis_details: true  # 隐藏假设细节
+        
+      data_analyst:
+        visible: condition_met
+        show_all_hypotheses: true
+        expand_evidence: true
+
+  # ═══════════════════════════════════════
+  # 附录（必须）
+  # ═══════════════════════════════════════
+  - order: 6
+    name: 附录
+    id: appendix
+    required: true
+    always_visible: true
+    default_state: collapsed  # 默认折叠
+    
+    subsections:
+      - order: 6.1
+        name: 数据质量校验报告
+        id: data_quality
+        type: table
+        columns:
+          - 校验项
+          - 数据详情
+          - 状态标签（✅正常/⚠️警告/❌异常）
+        data_source: phase2.validation_results
+        
+      - order: 6.2
+        name: SRM校验结果
+        id: srm_check
+        type: text + chart
+        condition: has_srm_data
+        content: 样本比例对比 + 偏差可视化
+        
+      - order: 6.3
+        name: 统计功效校验
+        id: statistical_power
+        type: text
+        content: 功效值 + 是否达标 + 说明
+        
+      - order: 6.4
+        name: AA基线扣除详情
+        id: aa_deduction
+        type: text + table
+        condition: has_aa_data and needs_deduction
+        content: AA波动情况 + 扣除过程 + 扣除前后对比
+        
+      - order: 6.5
+        name: 统计检验方法说明
+        id: methodology
+        type: definition_list
+        items:
+          - 均值类指标: Welch's t检验 (scipy.stats.ttest_ind)
+          - 比率类指标: 双样本比率Z检验
+          - 显著性水平: α = 0.05（双侧）
+          - 置信区间: 95%
+          - 效应量: Cohen's d (连续型) / Odds Ratio (比率型)
+          - 多重比较: 未校正（可选Bonferroni/BH）
+          
+    role_adaptive:
+      product_manager:
+        visible: true
+        keep_collapsed: true  # PM视角保持折叠
+        show_summary_only: true  # 只显示通过/不通过
+        
+      data_analyst:
+        visible: true
+        allow_expand: true  # 允许展开查看详情
+        expand_by_default: false  # 默认折叠
+
+# ═══════════════════════════════════════
+# 样式规范
+# ═══════════════════════════════════════
+style_guide:
+  colors:
+    primary: "#667eea"  # 主色调（紫色渐变）
+    success: "#22c55e"  # 正向/通过（绿色）
+    warning: "#f59e0b"  # 警告/待定（橙色）
+    danger: "#ef4444"   # 负向/失败/护栏违反（红色）
+    neutral: "#94a3b8"  # 平稳/中性（灰色）
+    
+  typography:
+    heading_font: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+    body_font: 同上
+    monospace_font: "'Monaco', 'Menlo', 'Consolas', monospace"
+    
+  spacing:
+    section_margin: "32px"
+    card_padding: "16px"
+    element_gap: "12px"
+    
+  components:
+    decision_banner:
+      background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+      text_color: white
+      border_radius: "12px"
+      padding: "24px"
+      
+    heatmap_table:
+      header_bg: "#f1f5f9"
+      positive_row_bg: "#f0fdf4"
+      negative_row_bg: "#fef2f2"
+      border_radius: "8px"
+      
+    hypothesis_card:
+      supported_border: "#22c55e"
+      unsupported_border: "#ef4444"
+      shadow: "0 2px 8px rgba(0,0,0,0.1)"
+
+# 输出格式
+output_format: HTML  # 主格式为HTML（支持Markdown+CSS混排）
+supporting_files:
+  - significance_results.csv  # 显著性检验详细数据
+  - raw_data_snapshot.csv    # 原始数据快照（可选）
+
+# 交付要求
+delivery_requirements:
+  save_location: feishu_document  # 保存到飞书文档
+  update_table: true  # 更新统一链接表格
+  table_columns:
+    - 报告列: 报告文档URL
+    - 结论列: 一段话总结（<200字）

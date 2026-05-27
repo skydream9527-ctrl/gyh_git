@@ -1,0 +1,613 @@
+.adm-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+.adm-body {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  flex: 1;
+}
+.adm-sb {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  padding: 14px 0;
+  overflow-y: auto;
+}
+.adm-sb-group {
+  padding: 14px 16px 4px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+.adm-sb-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 16px;
+  text-decoration: none;
+  color: var(--text-dim);
+  font-size: 13px;
+  border-left: 2px solid transparent;
+}
+.adm-sb-item:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+.adm-sb-item.active {
+  background: var(--primary-dim);
+  color: var(--primary);
+  border-left-color: var(--primary);
+}
+.adm-sb-item .ico {
+  width: 18px;
+}
+.adm-sb-item .lock {
+  margin-left: auto;
+  font-size: 10px;
+  opacity: 0.6;
+}
+.adm-main {
+  padding: 28px 32px;
+  overflow-y: auto;
+}
+
+.adm-page-head {
+  margin-bottom: 24px;
+}
+.adm-page-head h1 {
+  font-family: var(--font-head);
+  font-size: 22px;
+  margin: 0 0 4px;
+}
+.adm-page-head p {
+  color: var(--text-dim);
+  font-size: 13px;
+  margin: 0;
+}
+/* 用量 / SQL 审计这类带「期段切换 + CSV 导出」工具条的页头：左侧标题，
+   右侧工具条；窄屏自动换行（不再溢出，不再被裁剪）。 */
+.adm-page-head-with-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.adm-period-toolbar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Agent 编辑页 4-Tab：桌面正常，窄屏支持横向滚而不是折行错位。 */
+.adm-edit-tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 18px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+.adm-edit-tabs::-webkit-scrollbar {
+  display: none;
+}
+.adm-edit-tab {
+  background: transparent;
+  border: none;
+  padding: 10px 18px;
+  font-size: 13px;
+  cursor: pointer;
+  color: var(--text-dim);
+  border-bottom: 2px solid transparent;
+  font-family: inherit;
+  white-space: nowrap;
+  flex-shrink: 0;
+  min-height: 40px;
+}
+.adm-edit-tab.active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+}
+
+.adm-alert-card {
+  background: linear-gradient(135deg, var(--warning-dim), var(--error-dim));
+  border: 1px solid var(--warning);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  margin-bottom: 24px;
+}
+.adm-alert-card h3 {
+  font-family: var(--font-head);
+  font-size: 14px;
+  margin: 0 0 10px;
+  color: var(--warning);
+}
+.adm-alert-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.adm-alert-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+.adm-alert-item a {
+  margin-left: auto;
+  color: var(--primary);
+  text-decoration: none;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.adm-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.adm-stat {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+}
+.adm-stat-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+.adm-stat-val {
+  font-family: var(--font-head);
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.adm-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+.adm-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+}
+.adm-section h3 {
+  font-family: var(--font-head);
+  font-size: 14px;
+  margin: 0 0 10px;
+}
+.adm-list-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+.adm-list-item:last-child {
+  border-bottom: none;
+}
+.adm-list-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: var(--primary-on);
+  font-size: 11px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.adm-list-info {
+  flex: 1;
+}
+.adm-list-info .name {
+  font-weight: 500;
+}
+.adm-list-info .meta {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.adm-list-time {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.adm-rank-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.adm-rank-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.adm-rank-num {
+  width: 24px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+.adm-rank-num.top {
+  color: var(--primary);
+}
+.adm-rank-bar {
+  height: 5px;
+  background: var(--surface-2);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 4px;
+}
+.adm-rank-bar-fill {
+  height: 100%;
+  background: var(--primary);
+}
+
+/* user management */
+.adm-toolbar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.adm-toolbar input,
+.adm-toolbar select {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  padding: 7px 12px;
+  font-size: 12px;
+  outline: none;
+}
+.adm-toolbar input {
+  flex: 1;
+}
+
+.adm-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.adm-table th,
+.adm-table td {
+  text-align: left;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.adm-table th {
+  background: var(--surface-2);
+  font-weight: 500;
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.adm-table tr:last-child td {
+  border-bottom: none;
+}
+.adm-table .role-badge {
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.adm-table .role-super_admin {
+  background: var(--agent-dim);
+  color: var(--agent);
+}
+.adm-table .role-admin {
+  background: var(--primary-dim);
+  color: var(--primary);
+}
+.adm-table .role-user {
+  background: var(--surface-3);
+  color: var(--text-dim);
+}
+.adm-status-active {
+  color: var(--success);
+  font-size: 11px;
+}
+.adm-status-disabled {
+  color: var(--text-muted);
+  font-size: 11px;
+}
+.adm-table .row-actions button {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  cursor: pointer;
+  margin-right: 4px;
+}
+.adm-table .row-actions button:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+.adm-table .row-actions button.danger:hover {
+  border-color: var(--error);
+  color: var(--error);
+}
+
+.adm-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.adm-form-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+.adm-form-grid input,
+.adm-form-grid select {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  padding: 8px 12px;
+  font-size: 13px;
+  outline: none;
+}
+
+.adm-agent-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 14px;
+}
+.adm-agent-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-decoration: none;
+  color: var(--text);
+}
+.adm-agent-card:hover {
+  border-color: var(--primary);
+}
+.adm-agent-icon {
+  font-size: 24px;
+}
+.adm-agent-name {
+  font-family: var(--font-head);
+  font-size: 14px;
+  font-weight: 600;
+}
+.adm-agent-paradigm {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.adm-agent-desc {
+  color: var(--text-dim);
+  font-size: 12px;
+}
+
+.adm-audit-log {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+.adm-audit-row {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+}
+.adm-audit-row:last-child {
+  border-bottom: none;
+}
+.adm-audit-summary {
+  display: grid;
+  grid-template-columns: 180px 100px 100px 1fr;
+  align-items: center;
+  cursor: pointer;
+  width: 100%;
+  gap: 8px;
+}
+.adm-audit-time {
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+}
+.adm-audit-action {
+  background: var(--surface-2);
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 11px;
+  display: inline-block;
+  justify-self: start;
+}
+.adm-audit-target-type {
+  color: var(--text-dim);
+}
+.adm-audit-target-id {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+@media (max-width: 800px) {
+  .adm-audit-summary {
+    /* 窄屏：时间一行，action+type+id 一行；4 列固定宽 380px+gap 在 360px viewport
+       会溢出，改成两行流式布局。 */
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+  .adm-audit-time {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 800px) {
+  .adm-body {
+    grid-template-columns: 1fr !important;
+  }
+  .adm-sb {
+    display: none;
+    position: fixed;
+    top: 52px;
+    bottom: 0;
+    left: 0;
+    width: 260px;
+    z-index: 60;
+    box-shadow: var(--shadow-3);
+    background: var(--surface);
+  }
+  .adm-sb.mobile-open {
+    display: block;
+  }
+  /* 抽屉打开时的半透明遮罩，点遮罩关闭抽屉。z-index 略低于抽屉本体（60），
+     高于 TopNav (50)，覆盖主区。 */
+  .adm-sb-backdrop {
+    position: fixed;
+    top: 52px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 55;
+    cursor: pointer;
+  }
+  .adm-mobile-menu {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 6px 12px;
+    border-radius: var(--radius-pill);
+    font-size: 13px;
+    cursor: pointer;
+    margin-right: 6px;
+    min-height: 32px;
+  }
+  .adm-main {
+    padding: 14px 14px 60px;
+  }
+  .adm-page-head h1 {
+    font-size: 18px;
+  }
+  .adm-stat-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+  .adm-stat {
+    padding: 12px;
+    border-radius: var(--radius-sm);
+  }
+  .adm-two-col {
+    grid-template-columns: 1fr;
+  }
+  /* 表格在小屏支持横向滚（fallback for tables without .adm-table-cards） */
+  .adm-table {
+    font-size: 12px;
+    overflow-x: auto;
+    display: block;
+    white-space: nowrap;
+  }
+  /* adm-table-cards：明确卡片化的表格在小屏渲染为卡片堆叠 */
+  .adm-table.adm-table-cards,
+  .adm-table.adm-table-cards thead,
+  .adm-table.adm-table-cards tbody,
+  .adm-table.adm-table-cards tr,
+  .adm-table.adm-table-cards td {
+    display: block;
+    width: 100%;
+    overflow: visible;
+    white-space: normal;
+  }
+  .adm-table.adm-table-cards thead {
+    display: none;
+  }
+  .adm-table.adm-table-cards tr {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    margin-bottom: 10px;
+    padding: 12px 14px;
+  }
+  .adm-table.adm-table-cards td {
+    border: none;
+    padding: 4px 0;
+    font-size: 13px;
+  }
+  .adm-table.adm-table-cards td[data-label]::before {
+    content: attr(data-label) "：";
+    color: var(--text-muted);
+    font-size: 11px;
+    margin-right: 6px;
+  }
+  .adm-table.adm-table-cards td.row-actions {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--border-soft);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .adm-table.adm-table-cards td.row-actions::before {
+    display: none;
+  }
+  .adm-table.adm-table-cards td.row-actions button {
+    flex: 1 1 30%;
+  }
+  /* agent 卡片网格收缩到 1 列（避免 minmax 260 横滚） */
+  .adm-agent-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px;
+  }
+  .adm-form-grid {
+    grid-template-columns: 1fr;
+  }
+  .adm-toolbar {
+    flex-direction: column;
+  }
+  .adm-toolbar input,
+  .adm-toolbar select {
+    width: 100%;
+  }
+  .adm-alert-card {
+    padding: 14px;
+  }
+}
+@media (max-width: 480px) {
+  .adm-stat-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.adm-mobile-menu {
+  display: none;
+}

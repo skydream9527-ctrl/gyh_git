@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ICE Workbench v5 · Login (登录页 桌面+手机)</title>
+<script>(function(){var t=localStorage.getItem('ice-v5-theme')||'light';document.documentElement.dataset.theme=t;})();</script>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root[data-theme="light"]{
+  --bg:#faf4ed;--surface:#ffffff;--surface-2:#f5efe4;--surface-3:#ece3d3;--paper-deep:#f0e9dc;
+  --border:#e5dcc8;--border-soft:#ede5d2;--border-strong:#d4c8ad;
+  --text:#1a1612;--text-dim:#5b5246;--text-muted:#8a7e69;--text-inv:#faf4ed;
+  --accent:#cc785c;--accent-hover:#b8624a;--accent-soft:#f5e8e2;--accent-text:#8a3a23;
+  --success:#5a7a4f;--success-soft:#e6ede0;
+  --warning:#b07d2a;--warning-soft:#f5ead0;
+  --error:#b54a3a;--error-soft:#f5dfd9;
+  --p-ab:#5e7d6a;--p-ab-soft:#e6ede6;
+  --p-biz:#b86b3a;--p-biz-soft:#f5e3d0;
+  --p-data:#4a7c8b;--p-data-soft:#d8e5ea;
+  --p-wave:#b04f5f;--p-wave-soft:#f0d8dc;
+  --accent-grad:linear-gradient(135deg,#cc785c 0%,#e89e83 100%);
+  --accent-shadow:0 1px 0 rgba(166,84,57,.30),0 4px 14px rgba(204,120,92,.18),inset 0 1px 0 rgba(255,255,255,.24);
+  --icon-emboss:inset 0 1px 0 rgba(255,255,255,.55),inset 0 -1px 0 rgba(26,22,18,.04);
+  --icon-shadow:0 1px 2px rgba(26,22,18,.06);
+  --shadow-1:0 1px 0 rgba(26,22,18,.04);
+  --shadow-2:0 1px 2px rgba(26,22,18,.06),0 4px 16px rgba(26,22,18,.04);
+  --shadow-3:0 8px 32px rgba(26,22,18,.08);
+  --ring:0 0 0 3px rgba(204,120,92,.20);
+  --canvas:#f0e9dc;
+}
+:root[data-theme="dark"]{
+  --bg:#1f1d1a;--surface:#2a2723;--surface-2:#322e29;--surface-3:#3d3831;--paper-deep:#262320;
+  --border:#44403a;--border-soft:#322e29;--border-strong:#5a544c;
+  --text:#f5f0e6;--text-dim:#bdb19c;--text-muted:#8c8270;--text-inv:#1a1612;
+  --accent:#e89e83;--accent-hover:#f5b39a;--accent-soft:rgba(232,158,131,.16);--accent-text:#f0b59c;
+  --success:#8aa680;--success-soft:rgba(138,166,128,.14);
+  --warning:#d4a463;--warning-soft:rgba(212,164,99,.14);
+  --error:#d4756a;--error-soft:rgba(212,117,106,.14);
+  --p-ab:#8aa68f;--p-ab-soft:rgba(138,166,143,.14);
+  --p-biz:#d49070;--p-biz-soft:rgba(212,144,112,.14);
+  --p-data:#7aa5b3;--p-data-soft:rgba(122,165,179,.14);
+  --p-wave:#d4868f;--p-wave-soft:rgba(212,134,143,.14);
+  --accent-grad:linear-gradient(135deg,#e89e83 0%,#f5b39a 100%);
+  --accent-shadow:0 1px 0 rgba(0,0,0,.45),0 4px 14px rgba(232,158,131,.22),inset 0 1px 0 rgba(255,255,255,.18);
+  --icon-emboss:inset 0 1px 0 rgba(255,255,255,.10),inset 0 -1px 0 rgba(0,0,0,.20);
+  --icon-shadow:0 1px 2px rgba(0,0,0,.30);
+  --shadow-1:0 1px 0 rgba(0,0,0,.3);
+  --shadow-2:0 4px 16px rgba(0,0,0,.4),0 1px 2px rgba(0,0,0,.4);
+  --shadow-3:0 16px 48px rgba(0,0,0,.5);
+  --ring:0 0 0 3px rgba(232,158,131,.30);
+  --canvas:#1a1815;
+}
+*{box-sizing:border-box}html,body{margin:0;padding:0}
+body{background:var(--canvas);color:var(--text);
+  font-family:'Inter','PingFang SC',-apple-system,system-ui,sans-serif;
+  font-size:15px;line-height:1.6;letter-spacing:-.003em;
+  -webkit-font-smoothing:antialiased;font-feature-settings:'ss01','cv11';padding:32px 0}
+.serif{font-family:'Fraunces',serif;font-variation-settings:'opsz' 144;font-feature-settings:'ss01'}
+.tnum{font-variant-numeric:tabular-nums}
+
+/* ===== outer canvas bar ===== */
+.outer-bar{max-width:1900px;margin:0 auto 24px;padding:0 32px;display:flex;align-items:center;gap:14px}
+.outer-tag{display:inline-flex;align-items:center;gap:8px;padding:5px 12px;
+  background:var(--accent-soft);color:var(--accent-text);border-radius:4px;font-size:11px;font-weight:500;
+  font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.06em}
+.outer-tag .dot{width:6px;height:6px;border-radius:50%;background:var(--accent)}
+.outer-bar .spacer{flex:1}
+.outer-bar a{color:var(--text-dim);font-size:13px;text-decoration:none;padding:6px 12px;border-radius:6px}
+.outer-bar a:hover{background:var(--surface-2);color:var(--text)}
+.outer-bar button{background:var(--surface);border:1px solid var(--border);color:var(--text);
+  height:36px;padding:0 14px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:500;
+  display:inline-flex;align-items:center;gap:6px}
+
+/* ===== two-up canvas ===== */
+.canvas{max-width:1900px;margin:0 auto;padding:0 32px;
+  display:grid;grid-template-columns:1fr 420px;gap:32px;align-items:flex-start}
+@media (max-width:1500px){.canvas{grid-template-columns:1fr}}
+
+/* ===== browser frame ===== */
+.browser{background:var(--surface);border:1px solid var(--border);border-radius:10px;
+  overflow:hidden;box-shadow:var(--shadow-3)}
+.browser-bar{height:36px;background:var(--surface-2);border-bottom:1px solid var(--border-soft);
+  display:flex;align-items:center;padding:0 14px;gap:8px}
+.browser-dots{display:flex;gap:6px}
+.browser-dots span{width:11px;height:11px;border-radius:50%}
+.browser-dots span:nth-child(1){background:#cc6c5e}
+.browser-dots span:nth-child(2){background:#c4a55a}
+.browser-dots span:nth-child(3){background:#7a9a6e}
+.browser-url{flex:1;text-align:center;font-family:'JetBrains Mono',monospace;font-size:11.5px;
+  color:var(--text-muted);background:var(--surface);padding:5px 12px;border-radius:5px;
+  margin:0 80px;border:1px solid var(--border-soft)}
+
+/* ===== Login page · split (left 56% / right 44%) ===== */
+.viewport{height:760px;background:var(--bg);overflow:hidden;display:grid;
+  grid-template-columns:56fr 44fr}
+
+/* ===== Left · brand + product narrative ===== */
+.l-left{padding:48px 64px 40px;display:flex;flex-direction:column;background:var(--bg);
+  border-right:1px solid var(--border-soft);position:relative;overflow:hidden}
+.l-brand{display:flex;align-items:center;gap:10px}
+.l-brand .brand-mark{width:32px;height:32px;border-radius:8px;background:var(--accent-grad);
+  display:grid;place-items:center;color:#faf4ed;font-weight:600;font-size:15px;
+  font-family:'Fraunces',serif;font-variation-settings:'opsz' 144;
+  box-shadow:var(--accent-shadow)}
+.l-brand-name{font-family:'Fraunces',serif;font-weight:600;font-size:18px;letter-spacing:-.015em;
+  font-variation-settings:'opsz' 144}
+
+.l-hero{margin-top:auto;margin-bottom:36px}
+.l-tag{display:inline-flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;
+  font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;
+  font-weight:500;margin-bottom:24px}
+.l-tag::before{content:"";width:24px;height:1px;background:var(--accent)}
+.l-hero h1{font-family:'Fraunces',serif;font-size:54px;font-weight:500;letter-spacing:-.035em;
+  line-height:1.05;margin:0 0 18px;font-variation-settings:'opsz' 144,'wght' 500;max-width:560px}
+.l-hero h1 em{font-style:italic;color:var(--accent);font-weight:500}
+.l-hero p{color:var(--text-dim);font-size:16px;margin:0;max-width:480px;line-height:1.55}
+
+/* loop demo · 三步演示 */
+.l-loop{display:flex;flex-direction:column;gap:10px;max-width:480px;margin-bottom:48px}
+.l-step{display:flex;align-items:center;gap:14px;background:var(--surface);
+  border:1px solid var(--border-soft);border-radius:10px;padding:14px 16px;
+  box-shadow:var(--shadow-1)}
+.l-step .l-ico{width:36px;height:36px;border-radius:9px;display:grid;place-items:center;
+  font-size:16px;flex-shrink:0;background:var(--accent-soft);color:var(--accent);
+  box-shadow:var(--icon-emboss),var(--icon-shadow)}
+.l-step.s-tool .l-ico{background:var(--p-biz-soft);color:var(--p-biz)}
+.l-step.s-agent .l-ico{background:var(--p-data-soft);color:var(--p-data)}
+.l-step .body{flex:1;min-width:0}
+.l-step .role{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-muted);
+  text-transform:uppercase;letter-spacing:.08em;font-weight:500;margin-bottom:2px}
+.l-step .text{font-family:'Fraunces',serif;font-size:14.5px;font-weight:500;line-height:1.4;letter-spacing:-.005em;
+  font-variation-settings:'opsz' 144}
+.l-step .text code{font-family:'JetBrains Mono',monospace;background:var(--surface-2);padding:1px 5px;
+  border-radius:3px;font-size:12.5px;color:var(--accent-text);font-weight:400;
+  border:1px solid var(--border-soft)}
+.l-arrow{align-self:center;color:var(--text-muted);font-size:14px;margin:-6px 0;
+  font-family:'JetBrains Mono',monospace}
+
+.l-foot{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);
+  display:flex;gap:20px;margin-top:auto;padding-top:24px;border-top:1px solid var(--border-soft)}
+.l-foot a{color:var(--text-dim);text-decoration:none}
+.l-foot a:hover{color:var(--text)}
+
+/* ===== Right · form ===== */
+.l-right{padding:64px 64px 40px;display:flex;flex-direction:column;background:var(--surface);
+  position:relative}
+.l-right-inner{margin:auto 0;width:100%;max-width:380px;align-self:center}
+
+.l-right h2{font-family:'Fraunces',serif;font-size:32px;font-weight:500;letter-spacing:-.025em;
+  line-height:1.1;margin:0 0 8px;font-variation-settings:'opsz' 144;text-align:center}
+.l-right .sub{color:var(--text-dim);font-size:14.5px;margin:0 0 32px;text-align:center}
+
+/* method tabs (米盾 / 账号密码) - 改为 segmented control 风 */
+.l-tabs{display:flex;background:var(--surface-2);border:1px solid var(--border-soft);
+  border-radius:10px;padding:4px;gap:2px;margin-bottom:24px}
+.l-tab{flex:1;background:transparent;border:none;font-family:inherit;font-size:13px;font-weight:500;
+  color:var(--text-dim);padding:9px 12px;border-radius:7px;cursor:pointer;transition:all .15s;
+  display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.l-tab:hover{color:var(--text)}
+.l-tab.active{background:var(--surface);color:var(--text);box-shadow:var(--shadow-1)}
+
+/* mode pill (登录 / 注册) — width:fit-content 让 pill 只占内容宽度
+   margin:0 auto 让 pill 在 block 父中水平居中
+   手机端用 inline style width:100% 覆盖（撑满，auto margin 自动失效） */
+.l-mode{display:flex;width:fit-content;border:1px solid var(--border);border-radius:999px;padding:3px;
+  gap:2px;margin:0 auto 20px;background:var(--surface-2)}
+.l-mode-btn{background:transparent;border:none;font-family:inherit;font-size:12.5px;font-weight:500;
+  color:var(--text-muted);padding:5px 18px;border-radius:999px;cursor:pointer;transition:all .15s}
+.l-mode-btn:hover:not(.active){color:var(--text)}
+.l-mode-btn.active{background:var(--accent-grad);color:#faf4ed;box-shadow:var(--accent-shadow)}
+
+/* form */
+.l-form{display:flex;flex-direction:column;gap:14px}
+.l-field{display:flex;flex-direction:column;gap:6px}
+.l-field label{font-size:13px;font-weight:500;color:var(--text);letter-spacing:-.005em}
+.l-field label .opt{color:var(--text-muted);font-weight:400;font-size:12px}
+.l-field input{height:44px;padding:0 14px;border:1px solid var(--border);
+  border-radius:8px;background:var(--surface);color:var(--text);font-family:inherit;
+  font-size:14.5px;outline:none;transition:all .15s}
+.l-field input:hover{border-color:var(--border-strong)}
+.l-field input:focus{border-color:var(--accent);box-shadow:var(--ring)}
+.l-field input::placeholder{color:var(--text-muted)}
+
+.l-cta{height:44px;background:var(--accent-grad);color:#faf4ed;border:none;border-radius:8px;
+  font-family:inherit;font-size:14.5px;font-weight:500;cursor:pointer;letter-spacing:-.005em;
+  box-shadow:var(--accent-shadow);margin-top:6px;display:inline-flex;align-items:center;
+  justify-content:center;gap:8px;transition:all .15s}
+.l-cta:hover{background:linear-gradient(135deg,#b8624a 0%,#cc785c 100%)}
+.l-cta-secondary{background:var(--surface-2);color:var(--text);border:1px solid var(--border);
+  box-shadow:var(--shadow-1)}
+.l-cta-secondary:hover{background:var(--surface-3)}
+
+.l-foot-text{font-size:13px;color:var(--text-dim);text-align:center;margin-top:18px}
+.l-foot-text a{color:var(--accent-text);font-weight:500;text-decoration:none}
+.l-foot-text a:hover{color:var(--accent)}
+
+/* hint card (米盾态) */
+.l-hint{background:var(--accent-soft);border:1px solid transparent;border-radius:10px;
+  padding:18px;display:flex;flex-direction:column;gap:12px;margin-bottom:18px}
+.l-hint.warn{background:var(--warning-soft);color:var(--warning)}
+.l-hint.info{background:var(--info-soft,var(--accent-soft));color:var(--accent-text)}
+.l-hint .lh-title{font-family:'Fraunces',serif;font-size:16px;font-weight:600;letter-spacing:-.01em;
+  color:var(--text);font-variation-settings:'opsz' 144}
+.l-hint .lh-body{font-size:13.5px;color:var(--text-dim);line-height:1.55}
+.l-hint code{font-family:'JetBrains Mono',monospace;background:var(--surface);padding:2px 6px;
+  border-radius:4px;font-size:12px;color:var(--accent-text);border:1px solid var(--border-soft)}
+
+/* ===== Phone preview ===== */
+.phone-wrap{background:var(--surface);border:1px solid var(--border);border-radius:10px;
+  box-shadow:var(--shadow-3);padding:32px 28px 36px;text-align:center}
+.phone-wrap .phone-tag{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;
+  background:var(--accent-soft);color:var(--accent-text);border-radius:4px;font-size:10.5px;font-weight:500;
+  letter-spacing:.06em;margin-bottom:8px;font-family:'JetBrains Mono',monospace;text-transform:uppercase}
+.phone-wrap .phone-name{font-family:'Fraunces',serif;font-size:18px;font-weight:600;letter-spacing:-.015em;margin-bottom:4px;
+  font-variation-settings:'opsz' 144}
+.phone-wrap .phone-meta{font-size:12px;color:var(--text-muted);margin-bottom:18px;font-family:'JetBrains Mono',monospace}
+.phone{width:360px;height:760px;background:#1a1612;border-radius:42px;padding:10px;
+  box-shadow:0 24px 64px rgba(26,22,18,.3);position:relative;margin:0 auto}
+.phone-screen{width:100%;height:100%;background:var(--bg);border-radius:32px;overflow:hidden;
+  position:relative;display:flex;flex-direction:column}
+.phone-notch{position:absolute;top:14px;left:50%;transform:translateX(-50%);
+  width:104px;height:28px;background:#000;border-radius:99px;z-index:10}
+
+.p-content{padding:60px 22px 28px;flex:1;overflow-y:auto;display:flex;flex-direction:column}
+
+.p-brand{display:flex;align-items:center;gap:10px;margin-bottom:32px}
+.p-brand .brand-mark{width:30px;height:30px;border-radius:7px;background:var(--accent-grad);
+  display:grid;place-items:center;color:#faf4ed;font-weight:600;font-size:14px;
+  font-family:'Fraunces',serif;font-variation-settings:'opsz' 144;
+  box-shadow:var(--accent-shadow)}
+.p-brand .brand-name{font-family:'Fraunces',serif;font-weight:600;font-size:16px;letter-spacing:-.015em;
+  font-variation-settings:'opsz' 144}
+
+.p-h1{font-family:'Fraunces',serif;font-size:30px;font-weight:500;letter-spacing:-.025em;line-height:1.1;
+  margin:0 0 8px;font-variation-settings:'opsz' 144}
+.p-sub{color:var(--text-dim);font-size:14px;margin:0 0 28px;line-height:1.55}
+
+/* phone tabs */
+.p-tabs{display:flex;background:var(--surface-2);border:1px solid var(--border-soft);
+  border-radius:10px;padding:4px;gap:2px;margin-bottom:22px}
+.p-tab{flex:1;background:transparent;border:none;font-family:inherit;font-size:13px;font-weight:500;
+  color:var(--text-dim);padding:10px 12px;border-radius:7px;cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.p-tab.active{background:var(--surface);color:var(--text);box-shadow:var(--shadow-1)}
+
+/* phone form */
+.p-form{display:flex;flex-direction:column;gap:14px}
+.p-field{display:flex;flex-direction:column;gap:6px}
+.p-field label{font-size:13px;font-weight:500;color:var(--text)}
+.p-field input{height:48px;padding:0 14px;border:1px solid var(--border);
+  border-radius:8px;background:var(--surface);color:var(--text);font-family:inherit;
+  font-size:16px;outline:none}
+.p-field input:focus{border-color:var(--accent);box-shadow:var(--ring)}
+
+.p-cta{height:48px;background:var(--accent-grad);color:#faf4ed;border:none;border-radius:8px;
+  font-family:inherit;font-size:15px;font-weight:500;cursor:pointer;
+  box-shadow:var(--accent-shadow);margin-top:6px}
+
+.p-foot{font-size:13px;color:var(--text-dim);text-align:center;margin-top:18px;padding-bottom:20px}
+.p-foot a{color:var(--accent-text);font-weight:500;text-decoration:none}
+
+.p-bottom{margin-top:auto;font-family:'JetBrains Mono',monospace;font-size:10.5px;
+  color:var(--text-muted);text-align:center;padding-top:24px;
+  border-top:1px solid var(--border-soft);margin:24px -22px 0;padding:14px 22px 0;display:flex;justify-content:space-between}
+.p-bottom a{color:var(--text-dim);text-decoration:none}
+
+/* ===== state preview row ===== */
+.states{max-width:1900px;margin:32px auto 0;padding:0 32px}
+.states-h{font-family:'Fraunces',serif;font-size:22px;font-weight:500;letter-spacing:-.02em;
+  margin:0 0 14px;font-variation-settings:'opsz' 144}
+.states-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+.state-card{background:var(--surface);border:1px solid var(--border-soft);border-radius:10px;
+  overflow:hidden;box-shadow:var(--shadow-1)}
+.state-head{padding:14px 18px;border-bottom:1px solid var(--border-soft);
+  display:flex;align-items:center;justify-content:space-between}
+.state-name{font-family:'Fraunces',serif;font-size:15px;font-weight:600;letter-spacing:-.01em;
+  font-variation-settings:'opsz' 144}
+.state-tag{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--text-muted);
+  text-transform:uppercase;letter-spacing:.06em}
+.state-body{padding:24px;background:var(--bg);min-height:300px}
+
+/* spec footer */
+.spec{max-width:1900px;margin:32px auto 0;padding:0 32px}
+.spec-card{background:var(--surface);border:1px solid var(--border-soft);border-radius:10px;
+  padding:24px 28px;box-shadow:var(--shadow-1)}
+.spec-card h3{font-family:'Fraunces',serif;font-size:18px;font-weight:600;margin:0 0 10px;letter-spacing:-.015em;
+  font-variation-settings:'opsz' 144}
+.spec-card ul{margin:0;padding-left:20px;font-size:13.5px;color:var(--text-dim);line-height:1.85}
+.spec-card code{background:var(--surface-2);padding:1px 6px;border-radius:4px;
+  font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--accent-text);
+  border:1px solid var(--border-soft)}
+.spec-card b{color:var(--text);font-weight:600}
+
+/* password rules small list */
+.pw-rules{margin:6px 0 0;padding:10px 14px;background:var(--surface-2);border:1px solid var(--border-soft);
+  border-radius:8px;font-size:11.5px;line-height:1.7;color:var(--text-dim);
+  list-style:none}
+.pw-rules li{display:flex;align-items:flex-start;gap:6px}
+.pw-rules li[data-status="ok"]{color:var(--success)}
+.pw-rules li[data-status="fail"]{color:var(--error)}
+.pw-rules .mark{font-weight:700;width:12px;text-align:center;flex:0 0 12px}
+</style>
+</head>
+<body>
+
+<div class="outer-bar">
+  <span class="outer-tag"><span class="dot"></span>v5 · Login · 桌面 + 手机 + 状态</span>
+  <span style="color:var(--text-muted);font-size:13px;font-family:'JetBrains Mono',monospace">基于 [LoginPage.tsx](../frontend/src/pages/login/LoginPage.tsx)</span>
+  <div class="spacer"></div>
+  <a href="00_design_system.html">← Design System</a>
+  <a href="01_dashboard.html">Dashboard →</a>
+  <button onclick="toggleTheme()">
+    <span class="t-light">🌙 暗夜</span><span class="t-dark" style="display:none">☀️ 日间</span>
+  </button>
+</div>
+
+<script>
+function toggleTheme(){
+  var cur=document.documentElement.dataset.theme||'light';
+  var next=cur==='light'?'dark':'light';
+  document.documentElement.dataset.theme=next;
+  localStorage.setItem('ice-v5-theme',next);
+  document.querySelectorAll('.t-light').forEach(e=>e.style.display=next==='light'?'inline':'none');
+  document.querySelectorAll('.t-dark').forEach(e=>e.style.display=next==='dark'?'inline':'none');
+}
+(function(){if(document.documentElement.dataset.theme==='dark'){
+  document.querySelectorAll('.t-light').forEach(e=>e.style.display='none');
+  document.querySelectorAll('.t-dark').forEach(e=>e.style.display='inline');
+}})();
+</script>
+
+<div class="canvas">
+
+  <!-- ===== Desktop · split layout (左 56% 品牌叙事 / 右 44% 表单) ===== -->
+  <div class="browser">
+    <div class="browser-bar">
+      <div class="browser-dots"><span></span><span></span><span></span></div>
+      <div class="browser-url">ice.workbench.local / login</div>
+    </div>
+    <div class="viewport">
+
+      <!-- LEFT · brand + product narrative -->
+      <aside class="l-left">
+        <div class="l-brand">
+          <div class="brand-mark">i</div>
+          <div class="l-brand-name">ICE Workbench</div>
+        </div>
+
+        <div class="l-hero">
+          <div class="l-tag">AI Data Workflow Workbench</div>
+          <h1 class="serif">从问题到结论，<br/>只走<em>一段对话</em>。</h1>
+          <p>用自然语言描述指标异动，让 Agent 自动调用 SQL、Skill、可视化工具，给出可下结论的数据报告。</p>
+        </div>
+
+        <div class="l-loop">
+          <div class="l-step s-user">
+            <div class="l-ico">💬</div>
+            <div class="body">
+              <div class="role">USER</div>
+              <div class="text serif">上周新版本的留存数据怎么样？</div>
+            </div>
+          </div>
+          <div class="l-arrow">↓</div>
+          <div class="l-step s-tool">
+            <div class="l-ico">⚡</div>
+            <div class="body">
+              <div class="role">TOOL · KYUUBI</div>
+              <div class="text serif">运行 <code>SELECT * FROM dwd_retention…</code></div>
+            </div>
+          </div>
+          <div class="l-arrow">↓</div>
+          <div class="l-step s-agent">
+            <div class="l-ico">📊</div>
+            <div class="body">
+              <div class="role">AGENT · DATA-ANALYSIS</div>
+              <div class="text serif">D7 留存 <em>+5.6pp</em>，主要来自付费用户群</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="l-foot">
+          <a href="#">📖 文档</a>
+          <a href="#">🎯 范式</a>
+          <a href="#">🤖 Agent 池</a>
+          <span style="margin-left:auto">© 2026 · Xiaomi</span>
+        </div>
+      </aside>
+
+      <!-- RIGHT · form -->
+      <main class="l-right">
+        <div class="l-right-inner">
+          <h2 class="serif">登录</h2>
+          <p class="sub">使用账号 / 邮箱登录</p>
+
+          <div class="l-mode" role="tablist">
+            <button class="l-mode-btn active">登录</button>
+            <button class="l-mode-btn">注册</button>
+          </div>
+
+          <form class="l-form">
+            <div class="l-field">
+              <label>账号</label>
+              <input type="text" placeholder="账号或邮箱" autocomplete="username" value="admin">
+            </div>
+            <div class="l-field">
+              <label>密码</label>
+              <input type="password" placeholder="输入密码" autocomplete="current-password" value="••••••••">
+            </div>
+            <button class="l-cta" type="submit">登录 →</button>
+          </form>
+
+          <div class="l-foot-text">
+            还没有账号？<a href="#">去注册</a>
+          </div>
+        </div>
+      </main>
+
+    </div>
+  </div>
+
+  <!-- ===== Phone preview · 单栏全屏 ===== -->
+  <div class="phone-wrap">
+    <div class="phone-tag"><span style="width:6px;height:6px;border-radius:50%;background:var(--accent)"></span>iPhone 14 Pro · 390 × 844</div>
+    <div class="phone-name">登录 · 移动版</div>
+    <div class="phone-meta">/ login</div>
+
+    <div class="phone">
+      <div class="phone-notch"></div>
+      <div class="phone-screen">
+        <div class="p-content">
+
+          <div class="p-brand">
+            <div class="brand-mark">i</div>
+            <div class="brand-name">ICE Workbench</div>
+          </div>
+
+          <div class="p-h1 serif">登录</div>
+          <div class="p-sub">使用账号 / 邮箱登录</div>
+
+          <div class="l-mode" style="display:flex;width:100%;margin-bottom:18px">
+            <button class="l-mode-btn active" style="flex:1">登录</button>
+            <button class="l-mode-btn" style="flex:1">注册</button>
+          </div>
+
+          <form class="p-form">
+            <div class="p-field">
+              <label>账号</label>
+              <input type="text" placeholder="账号或邮箱" value="admin">
+            </div>
+            <div class="p-field">
+              <label>密码</label>
+              <input type="password" placeholder="输入密码" value="••••••••">
+            </div>
+            <button class="p-cta" type="submit">登录 →</button>
+          </form>
+
+          <div class="p-foot">还没有账号？<a href="#">去注册</a></div>
+
+          <div class="p-bottom">
+            <a href="#">文档</a>
+            <a href="#">条款</a>
+            <span>© 2026</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== 三种状态预览 ===== -->
+<div class="states">
+  <h2 class="states-h serif">关键状态</h2>
+  <div class="states-grid">
+
+    <!-- 状态 1: 注册（带密码规则清单） -->
+    <div class="state-card">
+      <div class="state-head">
+        <span class="state-name serif">🔑 注册 · 密码规则实时校验</span>
+        <span class="state-tag">tab=password · mode=register</span>
+      </div>
+      <div class="state-body">
+        <h2 class="serif" style="font-size:24px;font-weight:500;letter-spacing:-.02em;margin:0 0 6px">登录</h2>
+        <p style="color:var(--text-dim);font-size:13.5px;margin:0 0 14px">使用账号 / 邮箱登录</p>
+        <div class="l-mode" style="margin-bottom:14px">
+          <button class="l-mode-btn">登录</button>
+          <button class="l-mode-btn active">注册</button>
+        </div>
+        <div class="l-form">
+          <div class="l-field">
+            <label>账号</label>
+            <input type="text" placeholder="账号或邮箱" value="yunhe">
+          </div>
+          <div class="l-field">
+            <label>姓名</label>
+            <input type="text" placeholder="展示用名字" value="龚云鹤">
+          </div>
+          <div class="l-field">
+            <label>密码</label>
+            <input type="password" placeholder="至少 10 位" value="•••••••••••">
+          </div>
+          <ul class="pw-rules">
+            <li data-status="ok"><span class="mark">✓</span><span>长度 10–128 位</span></li>
+            <li data-status="ok"><span class="mark">✓</span><span>至少 3 类字符</span></li>
+            <li data-status="ok"><span class="mark">✓</span><span>非常见弱口令</span></li>
+            <li data-status="fail"><span class="mark">✗</span><span>不能有 4 个以上重复字符</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- 状态 2: 待审批 -->
+    <div class="state-card">
+      <div class="state-head">
+        <span class="state-name serif">🕓 注册申请已提交</span>
+        <span class="state-tag">submittedForApproval</span>
+      </div>
+      <div class="state-body">
+        <h2 class="serif" style="font-size:24px;font-weight:500;letter-spacing:-.02em;margin:0 0 6px">登录</h2>
+        <p style="color:var(--text-dim);font-size:13.5px;margin:0 0 18px">使用账号 / 邮箱登录</p>
+        <div class="l-hint" style="background:var(--warning-soft);border-color:transparent">
+          <div class="lh-title serif">🕓 账号申请已提交，等待管理员审批</div>
+          <div class="lh-body">
+            账号：<code>yunhe</code><br/>
+            申请人：龚云鹤
+            <div style="margin-top:8px;color:var(--text-muted)">已通知管理员，预计 1 个工作日内审核完成。</div>
+          </div>
+        </div>
+        <button class="l-cta" style="width:100%;margin-top:14px">回到登录页</button>
+        <button class="l-cta l-cta-secondary" style="width:100%;margin-top:8px">再申请一个账号</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="spec">
+  <div class="spec-card">
+    <h3 class="serif">📐 这张稿的布局重设计</h3>
+    <ul>
+      <li><b>原版</b>：居中卡片（左 360 brand + 右 420 form），卡片外有 grid 网格 + 双 orb 模糊球背景。</li>
+      <li><b>v5</b>：<b>全屏 split</b>（左 56% 品牌叙事 / 右 44% 表单），砍掉 orb 模糊球（与暖米白纸张感冲突），grid 也去掉。左侧暖米白底，右侧白色 surface 形成层级。</li>
+      <li><b>左侧叙事区</b>：顶 brand → 中部 hero（衬线大标题 "从问题到结论，只走一段对话" + 副本）→ 下部三步循环演示（USER → TOOL → AGENT，立体卡 + 范式色 ico）→ 底部链接 footer</li>
+      <li><b>右侧表单区</b>：表单宽度 max 380，顶部 h2 "登录"（衬线）→ pill 切换（登录 / 注册，激活态铜橙渐变，<code>width:fit-content</code> 只占内容宽度，不撑满父）→ 输入框 44px 高 / 8px 圆角 → CTA 按钮 44px / 铜橙渐变带"→"</li>
+      <li><b>米盾入口隐藏</b>：当前先隐藏米盾 tab（设置层关），登录页只剩账号 / 邮箱。tabs 容器整个移除，副标题改成 "使用账号 / 邮箱登录"</li>
+      <li><b>密码规则清单</b>：保留功能（6 条），但用 surface-2 卡 + Mono 字 + ✓/✗ 着色（success/error token）</li>
+      <li><b>移动端</b>：左侧叙事整个隐藏，单栏布局：brand → 标题 → mode → form → 底部链接。input height 48 / font-size 16（防 iOS zoom）。mode pill 用 inline style 撑满 100%</li>
+    </ul>
+
+    <h3 class="serif" style="margin-top:24px">两个关键状态展示</h3>
+    <ul>
+      <li><b>注册 + 密码规则</b>：pw-rules 清单 ✓/✗ 实时反馈，与后端 _validate_password_strength 完全对齐</li>
+      <li><b>待审批</b>：warning 色 hint card + 申请信息 + 双按钮（回登录 / 再申请）</li>
+    </ul>
+
+    <h3 class="serif" style="margin-top:24px">和 v4 / 当前实现的差异</h3>
+    <ul>
+      <li>背景：grid 网格 + 双 orb 模糊球 → <b>纯纸张暖米白</b></li>
+      <li>容器：居中卡片（780×?） → <b>全屏 split</b>（左右 panel）</li>
+      <li>左侧叙事：仅 brand + 简单 loop → <b>大衬线 hero + 立体三步循环卡</b></li>
+      <li>登录方式入口：双 tab（米盾 / 账号密码） → <b>米盾先隐藏，整个 tabs 移除</b></li>
+      <li>登录/注册切换：pill → <b>pill（保留）但激活态用铜橙渐变 + width:fit-content 修复未居中</b></li>
+      <li>CTA 按钮：实色蓝 → <b>铜橙渐变 + 阴影 + 内 24% 白高光 + 末尾 →</b></li>
+    </ul>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,126 @@
+import { Link, useNavigate } from "react-router-dom";
+import { ReactNode, useEffect, useRef, useState } from "react";
+import { useAuthStore } from "@/stores/authStore";
+import { useUIStore } from "@/stores/uiStore";
+import { InviteInbox } from "./InviteInbox";
+import { AccountModal } from "./AccountModal";
+import "./TopNav.css";
+
+type Mode = "dashboard" | "workspace" | "admin" | "introduce";
+
+interface Props {
+  mode: Mode;
+  crumb?: ReactNode;
+  agentChip?: ReactNode;
+  rightActions?: ReactNode;
+}
+
+export function TopNav({ mode, crumb, agentChip, rightActions }: Props) {
+  const user = useAuthStore((s) => s.user);
+  const logout = useAuthStore((s) => s.logout);
+  const theme = useUIStore((s) => s.theme);
+  const toggleTheme = useUIStore((s) => s.toggleTheme);
+  const navigate = useNavigate();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", onClickOutside);
+    return () => document.removeEventListener("mousedown", onClickOutside);
+  }, [menuOpen]);
+
+  const handleLogout = async () => {
+    setMenuOpen(false);
+    try {
+      await Promise.resolve(logout());
+    } finally {
+      navigate("/login?logout=1", { replace: true });
+    }
+  };
+
+  return (
+    <nav className={`topnav topnav-${mode}`}>
+      <Link to="/dashboard" className="brand">
+        <div className="brand-logo" aria-hidden="true">
+          <svg viewBox="0 0 32 32" width="22" height="22" fill="none" className="brand-logo-svg">
+            <rect x="2" y="2" width="28" height="28" rx="8" className="bl-bg" />
+            <path d="M9 11h10M9 16h14M9 21h7" className="bl-stroke" strokeWidth="2" strokeLinecap="round" />
+            <circle cx="22" cy="21" r="3" className="bl-dot" strokeWidth="1.5" />
+          </svg>
+        </div>
+        <span className="brand-name">
+          <span className="brand-accent">ICE</span>{" "}
+          {mode === "admin" ? "管理后台" : "Workbench"}
+        </span>
+      </Link>
+      {crumb && <div className="crumb">{crumb}</div>}
+      {agentChip && <div className="agent-chip">{agentChip}</div>}
+      <div className="right">
+        {rightActions}
+        {user && <InviteInbox />}
+        <button className="icon-btn" onClick={toggleTheme} aria-label="theme">
+          {theme === "dark" ? "🌓" : "☀"}
+        </button>
+        {user && (
+          <div className="user-menu" ref={menuRef}>
+            <button
+              className="user-pill"
+              onClick={() => setMenuOpen((v) => !v)}
+              aria-haspopup="menu"
+              aria-expanded={menuOpen}
+            >
+              <span className="avatar">{user.name?.[0] || "U"}</span>
+              <span className="uname">{user.name}</span>
+              <span className="caret">▾</span>
+            </button>
+            {menuOpen && (
+              <div className="user-menu-pop" role="menu">
+                <div className="umi-head">
+                  <span className="avatar lg">{user.name?.[0] || "U"}</span>
+                  <div className="umi-info">
+                    <div className="umi-name">{user.name}</div>
+                    {user.auth_role && (
+                      <div className="umi-role">{user.auth_role}</div>
+                    )}
+                  </div>
+                </div>
+                <div className="umi-divider" />
+                <button
+                  className="umi-item"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    setAccountOpen(true);
+                  }}
+                  role="menuitem"
+                >
+                  ✏ 编辑账户
+                </button>
+                <button
+                  className="umi-item"
+                  onClick={() => {
+                    toggleTheme();
+                  }}
+                  role="menuitem"
+                >
+                  {theme === "dark" ? "☀ 浅色主题" : "🌓 深色主题"}
+                </button>
+                <div className="umi-divider" />
+                <button className="umi-item danger" onClick={handleLogout} role="menuitem">
+                  🚪 退出登录
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+      <AccountModal open={accountOpen} onClose={() => setAccountOpen(false)} />
+    </nav>
+  );
+}

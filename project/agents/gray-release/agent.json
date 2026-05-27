@@ -1,0 +1,9 @@
+{
+  "id": "gray-release",
+  "name": "灰度版本 Agent",
+  "paradigm": "gray",
+  "icon": "🌐",
+  "color": "#9b8ec4",
+  "description": "版本灰度 SOP · 决策矩阵 · AI 下钻 · 放量决策（V1.2）",
+  "publish_status": "published"
+}
