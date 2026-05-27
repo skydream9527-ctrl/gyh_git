@@ -1,7 +1,7 @@
 # ICE Data Workbench v3 · 使用指南
 
 > 源仓库：`https://git.n.xiaomi.com/gongyunhe/ice-workbench`
-> 同目录代码副本：[`../project/`](../project/)
+> 同目录代码副本：[`../project/ice-workbench/`](../project/ice-workbench/)
 > 整理时间：2026-05-27
 
 ---
@@ -339,7 +339,7 @@ make install-sandbox   # 一次性 bootstrap backend/.venv-sandbox/
 
 ## 十一、源码导航
 
-代码副本完整保存在 [`../project/`](../project/)，关键路径：
+代码副本完整保存在 [`../project/ice-workbench/`](../project/ice-workbench/)，关键路径：
 
 | 路径 | 说明 |
 |---|---|
