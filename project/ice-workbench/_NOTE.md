@@ -24,7 +24,7 @@
 ## 用本副本起项目
 
 ```bash
-cd project/
+cd project/ice-workbench/
 
 # 1. 复制 .env.example 并填好 mify 凭证（向 ice-workbench 维护者要）
 cp .env.example .env
@@ -39,4 +39,4 @@ make dev          # dev 双端口（:5173 + :8000）
 ./deploy.sh --prod # 生产单端口（:8000）
 ```
 
-详细操作见同级目录 `README.md` 与 [`../references/ice-workbench-usage-guide.md`](../references/ice-workbench-usage-guide.md)。
+详细操作见同级目录 `README.md` 与 [`../../references/ice-workbench-usage-guide.md`](../../references/ice-workbench-usage-guide.md)。
