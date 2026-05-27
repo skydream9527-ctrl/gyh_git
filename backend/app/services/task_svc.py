@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 
 from ..core.errors import APIError, ErrorCode
 from ..core.storage import file_transaction, get_index_db, get_paths, read_json, write_json
-from . import agent_snapshot_svc
+from . import agent_snapshot_svc, task_intent_svc
 
 
 def _discover_default_skill_ids() -> list[str]:
@@ -48,6 +48,12 @@ async def create_task(
     db = get_index_db()
     tid = _new_id()
     cid = _new_id()
+    effective_agent_id, intent = task_intent_svc.choose_agent_for_task(
+        requested_agent_id=agent_id,
+        name=name,
+        description=description,
+        initial_prompt=initial_prompt,
+    )
     # 未指定 skill_ids 或传空数组 → 默认全量注入 skills/ 下的 agentic skill；
     # 显式给定非空数组按用户意图执行。
     effective_skills = list(skill_ids) if skill_ids else _discover_default_skill_ids()
@@ -55,11 +61,12 @@ async def create_task(
         "id": tid,
         "name": name,
         "paradigm": paradigm,
-        "agent_id": agent_id,
+        "agent_id": effective_agent_id,
         "owner_id": owner_id,
         "description": description,
         "initial_prompt": initial_prompt,
         "skill_ids": effective_skills,
+        "intent": intent.as_dict(),
         "visibility": visibility,
         "publish_status": "draft",
         "status": "active",
@@ -132,11 +139,11 @@ async def create_task(
         ])
         # Agent files are plain shutil copies (not transactional) because they
         # live outside the tx's managed paths; the tx still holds the meta lock.
-        agent_snapshot_svc.snapshot_agent_into_task(task_id=tid, agent_id=agent_id)
+        agent_snapshot_svc.snapshot_agent_into_task(task_id=tid, agent_id=effective_agent_id)
         agent_snapshot_svc.snapshot_skills_into_task(task_id=tid, skill_ids=effective_skills)
         snap = {
             "mode": "live",
-            "agent_source_version": agent_snapshot_svc.compute_agent_version(agent_id) if agent_id else None,
+            "agent_source_version": agent_snapshot_svc.compute_agent_version(effective_agent_id) if effective_agent_id else None,
             "frozen_at": None,
             "frozen_by": None,
             "last_manual_update_at": None,
@@ -158,7 +165,7 @@ async def create_task(
             "owner_id": owner_id,
             "name": name,
             "paradigm": paradigm,
-            "agent_id": agent_id,
+            "agent_id": effective_agent_id,
             "status": "active",
             "visibility": visibility,
             "publish_status": "draft",

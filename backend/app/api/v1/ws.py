@@ -30,6 +30,7 @@ from ...services import (
     inflight_svc,
     llm_gateway,
     sysconfig_svc,
+    task_intent_svc,
     task_svc,
     tool_runner,
     usage_svc,
@@ -711,6 +712,11 @@ async def _handle_user_message(
         plan_mode=plan_mode,
         task_skill_ids=list(task.get("skill_ids") or []),
     )
+    runtime_hint = task_intent_svc.build_runtime_hint(
+        content, task_name=task.get("name")
+    )
+    if runtime_hint:
+        system_prompt = f"{system_prompt}\n\n---\n\n{runtime_hint}"
     # Resolve per-agent overrides on top of global env flags. agent.json
     # `features.<name>` (true/false) wins; missing → falls back to env.
     feature_flags = {
@@ -724,6 +730,7 @@ async def _handle_user_message(
         feature_flags=feature_flags,
         tool_whitelist=agents_svc.get_agent_tools(agent_id),
         task_skill_ids=list(task.get("skill_ids") or []),
+        spawn_targets=agents_svc.list_spawnable_agent_ids(agent_id),
     )
     # Per-message > task workspace > agent.json.model > settings default
     model_id = (
@@ -762,6 +769,9 @@ async def _handle_user_message(
 
     final_text = ""
     files_created: list[dict] = []
+    tool_attempt_count = 0
+    tool_success_count = 0
+    tool_failure_count = 0
     # keepalive sidecar：每 20s 发一帧 {"type":"keepalive"}，给反代和底层 ws
     # 协议一个非 idle 信号。多会话并行时——某个会话在压缩/工具/慢 LLM
     # 期间没有自然下行字节，原本会让 ws ping 超时被误关。
@@ -951,7 +961,9 @@ async def _handle_user_message(
                 async def _runner():
                     return await tool_runner.execute_tool(tu_name, tu_input, ctx=tool_ctx)
 
-                return await llm_gateway.run_tool_with_timeout(_runner)
+                timeout = llm_gateway.tool_timeout_for(tu_name, sys_params)
+                outcome = await llm_gateway.run_tool_with_timeout(_runner, timeout=timeout)
+                return llm_gateway.normalize_tool_outcome(outcome)
 
             outcomes: list[dict] = [None] * len(tool_uses)  # type: ignore
             if parallel_idx:
@@ -999,6 +1011,11 @@ async def _handle_user_message(
                 tu_name = tu.get("name")
                 tu_input = tu.get("input") or {}
                 outcome = outcomes[i] or {"status": "error", "success": False, "error": {}}
+                tool_attempt_count += 1
+                if outcome.get("success"):
+                    tool_success_count += 1
+                else:
+                    tool_failure_count += 1
                 await _send_run_event(
                     "tool",
                     f"{tool_runner.get_display_name(tu_name)} 执行结束",
@@ -1111,6 +1128,39 @@ async def _handle_user_message(
                 )
                 return
 
+        if not final_text and tool_attempt_count:
+            fallback_msg_id = _new_id()
+            fallback_text = (
+                "这轮执行已经结束，但模型没有生成最终说明。\n\n"
+                f"已执行工具 {tool_attempt_count} 步，其中成功 {tool_success_count} 步、"
+                f"失败 {tool_failure_count} 步，生成文件 {len(files_created)} 个。"
+                "请查看上方工具执行记录；你也可以直接追问“继续整理结果”或“失败项原因”。"
+            )
+            await _send_run_event(
+                "completed",
+                "执行结束但缺少最终回复，已补充状态说明",
+                status="warning",
+                detail=f"工具 {tool_attempt_count} 步 · 失败 {tool_failure_count} 步",
+            )
+            await _send(ws, {"type": "agent_message", "message_id": fallback_msg_id, "content": fallback_text})
+            await asyncio.to_thread(
+                append_jsonl,
+                conv_path,
+                {
+                    "id": fallback_msg_id,
+                    "role": "assistant",
+                    "content": fallback_text,
+                    "tool_uses": [],
+                    "agent_id": agent_id,
+                    "run_id": run_id,
+                    "stop_reason": "empty_final_fallback",
+                    "usage": {},
+                    "created_at": _now(),
+                },
+            )
+            await conversation_svc.touch_last_message(task_id=task_id, conv_id=conversation_id)
+            final_text = fallback_text
+
         await _send_run_event("completed", "执行完成", status="done", detail=f"生成 {len(files_created)} 个文件")
         await _send(ws, {"type": "agent_message_done", "files_created": files_created})
     except APIError as e:
@@ -1169,19 +1219,7 @@ def _latest_tool_call(tool_path, tool_call_id: str) -> dict | None:
 
 
 def _normalize_tool_outcome(outcome: dict) -> dict:
-    if outcome.get("success") and isinstance(outcome.get("result"), dict):
-        result = outcome["result"]
-        code = result.get("error_code") or result.get("code")
-        if code:
-            return {
-                "success": False,
-                "status": "error",
-                "error": {
-                    "code": code,
-                    "message": result.get("message") or str(result)[:300],
-                },
-            }
-    return outcome
+    return llm_gateway.normalize_tool_outcome(outcome)
 
 
 async def _handle_retry_tool_call(
@@ -1256,7 +1294,9 @@ async def _handle_retry_tool_call(
     async def _runner():
         return await tool_runner.execute_tool(tool_name, tool_args, ctx=tool_ctx)
 
-    outcome = _normalize_tool_outcome(await llm_gateway.run_tool_with_timeout(_runner))
+    sys_params = sysconfig_svc.get_system_params()
+    timeout = llm_gateway.tool_timeout_for(tool_name, sys_params)
+    outcome = _normalize_tool_outcome(await llm_gateway.run_tool_with_timeout(_runner, timeout=timeout))
     ended_at = _now()
     await asyncio.to_thread(
         append_jsonl,

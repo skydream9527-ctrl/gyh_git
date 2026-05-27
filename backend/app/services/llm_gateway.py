@@ -31,6 +31,17 @@ log = logging.getLogger("llm_gateway")
 # so the gateway has a safety net even if a caller forgets to clamp.
 MAX_TOOL_ROUNDS = 50
 TOOL_TIMEOUT_SEC = 30
+MAX_TOOL_TIMEOUT_SEC = 600
+
+_TOOL_TIMEOUT_FLOORS = {
+    # kyuubi_query wraps a CLI call that may legitimately wait up to 300s.
+    # Keep the outer asyncio timeout above that inner deadline so the tool can
+    # return a structured Kyuubi result instead of being cut off at 30s.
+    "kyuubi_query": 330,
+    "volcano_abtest_analyze": 340,
+    "feishu_publish": 120,
+    "feishu_upload_image": 90,
+}
 
 
 def assert_configured() -> None:
@@ -662,6 +673,48 @@ async def run_tool_with_timeout(coro_factory, *, timeout: int = TOOL_TIMEOUT_SEC
             "error": {"code": "TOOL_ERROR", "message": str(e)},
             "status": "error",
         }
+
+
+def normalize_tool_outcome(outcome: dict) -> dict:
+    """Treat structured tool-level error payloads as failed calls.
+
+    Some tools return {"error_code": "..."} instead of raising. The runner
+    itself succeeded in that case, but the tool operation did not.
+    """
+    if outcome.get("success") and isinstance(outcome.get("result"), dict):
+        result = outcome["result"]
+        code = result.get("error_code") or result.get("code")
+        if code:
+            return {
+                "success": False,
+                "status": "error",
+                "error": {
+                    "code": code,
+                    "message": result.get("message") or str(result)[:300],
+                },
+            }
+    return outcome
+
+
+def tool_timeout_for(tool_name: str | None, sys_params: dict | None = None) -> int:
+    """Resolve the live timeout for one tool call.
+
+    Most tools use the admin-tunable `tool_call_timeout_s`. Long-running data
+    tools get a floor so data work is not incorrectly failed by the generic
+    chat-loop timeout.
+    """
+    raw = None
+    if isinstance(sys_params, dict):
+        raw = sys_params.get("tool_call_timeout_s")
+    try:
+        base = int(raw if raw is not None else TOOL_TIMEOUT_SEC)
+    except (TypeError, ValueError):
+        base = TOOL_TIMEOUT_SEC
+    timeout = max(5, base)
+    floor = _TOOL_TIMEOUT_FLOORS.get(str(tool_name or ""))
+    if floor is not None:
+        timeout = max(timeout, floor)
+    return min(timeout, MAX_TOOL_TIMEOUT_SEC)
 
 
 # Now that we know the gateway expects owner/* prefixes, restore them in PRESETS.

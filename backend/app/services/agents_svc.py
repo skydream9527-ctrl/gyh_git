@@ -266,6 +266,22 @@ def get_agent_spawn_targets(agent_id: str) -> list[str] | None:
     return None
 
 
+def list_spawnable_agent_ids(agent_id: str) -> list[str]:
+    """Return concrete, existing published agent ids this agent may spawn."""
+    whitelist = get_agent_spawn_targets(agent_id)
+    out: list[str] = []
+    for agent in list_agents():
+        aid = agent.get("id")
+        if not isinstance(aid, str) or aid == agent_id:
+            continue
+        if agent.get("publish_status") not in ("published", None):
+            continue
+        if whitelist is not None and aid not in whitelist:
+            continue
+        out.append(aid)
+    return out
+
+
 def get_agent_skills(agent_id: str) -> list[str]:
     """Documentation-type skill hints (agent.json `skills: [str]`).
 

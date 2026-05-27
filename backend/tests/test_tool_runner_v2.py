@@ -144,6 +144,28 @@ async def test_todo_write_persists_and_emits(isolated_data_root):
 
 
 @pytest.mark.asyncio
+async def test_todo_write_accepts_legacy_todos_json_string(isolated_data_root):
+    """Older prompts sometimes sent todos as a JSON string; keep progress live."""
+    ctx = {"task_id": "t-todo-legacy", "user_id": "u1", "agent_id": "x", "conversation_id": "c"}
+    r = await tool_runner._tool_todo_write(
+        {
+            "todos": json.dumps(
+                [
+                    {"content": "查数", "activeForm": "正在查数", "status": "in_progress"},
+                    {"content": "写报告", "activeForm": "正在写报告", "status": "pending"},
+                ],
+                ensure_ascii=False,
+            )
+        },
+        ctx=ctx,
+    )
+    assert r["updated"] is True
+    assert r["count"] == 2
+    data = json.loads(get_paths().task_todos("t-todo-legacy").read_text())
+    assert data["items"][0]["content"] == "查数"
+
+
+@pytest.mark.asyncio
 async def test_todo_write_replace_all_semantics(isolated_data_root):
     """Second todo_write fully replaces the first — no diff-merge."""
     ctx = {"task_id": "t-r", "user_id": "u1", "agent_id": "x", "conversation_id": "c"}

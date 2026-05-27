@@ -11,6 +11,8 @@ Tools available regardless of which Agent the conversation is bound to:
 from __future__ import annotations
 
 import asyncio
+import copy
+import json
 import os
 import uuid
 from datetime import datetime, timezone
@@ -687,6 +689,7 @@ def get_anthropic_tools(
     feature_flags: dict | None = None,
     tool_whitelist: list[str] | None = None,
     task_skill_ids: list[str] | None = None,
+    spawn_targets: list[str] | None = None,
 ) -> list[dict]:
     """Convert BUILTIN_TOOL_SCHEMAS to Anthropic native tool schema.
 
@@ -704,6 +707,8 @@ def get_anthropic_tools(
     hardcoded example list (kyuubi, nl-sql, ...) is replaced by the actual
     bound ids. Pass [] to advertise "no agentic skills bound". Pass None for
     contexts without a task (admin sandbox, scheduler one-shot completion).
+    `spawn_targets` (when not None) constrains spawn_subagent.agent_id to a
+    concrete enum of existing published agents the parent may spawn.
     """
     out = []
     whitelist_set = set(tool_whitelist) if tool_whitelist is not None else None
@@ -718,16 +723,33 @@ def get_anthropic_tools(
             flag = feature_flags.get(fn["name"])
             if flag is False:
                 continue
+        if fn["name"] == "spawn_subagent" and spawn_targets is not None and not spawn_targets:
+            continue
         if whitelist_set is not None and fn["name"] not in whitelist_set:
             continue
         description = fn["description"]
         if task_skill_ids is not None and fn["name"] == "read_skill":
             description = _read_skill_description_for_task(task_skill_ids)
+        input_schema = fn["parameters"]
+        if fn["name"] == "spawn_subagent" and spawn_targets is not None:
+            input_schema = copy.deepcopy(input_schema)
+            props = input_schema.setdefault("properties", {})
+            agent_prop = props.setdefault("agent_id", {"type": "string"})
+            agent_prop["enum"] = list(spawn_targets)
+            if spawn_targets:
+                agent_prop["description"] = (
+                    "The agent to delegate to. Must be one of the listed "
+                    "existing spawn targets."
+                )
+            else:
+                agent_prop["description"] = (
+                    "No spawn targets are available in this context; do not call this tool."
+                )
         out.append(
             {
                 "name": fn["name"],
                 "description": description,
-                "input_schema": fn["parameters"],
+                "input_schema": input_schema,
             }
         )
     return out
@@ -1833,6 +1855,17 @@ async def _tool_todo_write(args: dict, ctx: dict | None = None) -> Any:
         return {"error_code": "VALIDATION_ERROR", "message": "todo_write needs a task context"}
 
     raw_items = args.get("items")
+    # Compatibility for older prompts / model slips that send
+    # {"todos": "[...]"} or {"todos": [...]} even though the schema says
+    # `items`. Keeping this here makes the progress panel resilient without
+    # broadening the advertised contract.
+    if raw_items is None and "todos" in args:
+        raw_items = args.get("todos")
+        if isinstance(raw_items, str):
+            try:
+                raw_items = json.loads(raw_items)
+            except json.JSONDecodeError:
+                return {"error_code": "VALIDATION_ERROR", "message": "todos must be valid JSON array"}
     if not isinstance(raw_items, list):
         return {"error_code": "VALIDATION_ERROR", "message": "items must be an array"}
 
@@ -1980,6 +2013,15 @@ async def _tool_spawn_subagent(args: dict, ctx: dict | None = None) -> Any:
     # it and the resulting TypeError got swallowed, so the check was dead.)
     if not agents_svc.get_agent(agent_id):
         return {"error_code": "AGENT_NOT_FOUND", "message": f"agent '{agent_id}' not found"}
+    parent_agent_id = (parent_ctx.get("agent_id") or "").strip()
+    if parent_agent_id:
+        allowed_targets = agents_svc.list_spawnable_agent_ids(parent_agent_id)
+        if agent_id not in allowed_targets:
+            return {
+                "error_code": "AGENT_NOT_ALLOWED",
+                "message": f"agent '{agent_id}' is not an allowed spawn target for '{parent_agent_id}'",
+                "allowed_targets": allowed_targets,
+            }
 
     run_id = f"sub_{uuid.uuid4().hex[:12]}"
     paths = get_paths()

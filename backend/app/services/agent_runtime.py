@@ -20,7 +20,7 @@ from pathlib import Path
 from typing import Any
 
 from ..core.storage import append_jsonl
-from . import event_log, llm_gateway, tool_runner
+from . import event_log, llm_gateway, sysconfig_svc, tool_runner
 
 
 def _now() -> str:
@@ -55,6 +55,7 @@ async def run_agent_turn(
     final_text = ""
     stop_reason = "end_turn"
     resolved_model = llm_gateway.resolve_model(model)
+    sys_params = sysconfig_svc.get_system_params()
     last_round = 0
 
     # ctx 由调用方注入（spawn_subagent / run_background）；带上 task_id / run_id
@@ -154,7 +155,10 @@ async def run_agent_turn(
             async def _runner(_name=tu_name, _input=tu_input):
                 return await tool_runner.execute_tool(_name, _input, ctx=ctx)
 
-            outcome = await llm_gateway.run_tool_with_timeout(_runner)
+            timeout = llm_gateway.tool_timeout_for(tu_name, sys_params)
+            outcome = llm_gateway.normalize_tool_outcome(
+                await llm_gateway.run_tool_with_timeout(_runner, timeout=timeout)
+            )
             entry = {
                 "id": tu_id,
                 "name": tu_name,

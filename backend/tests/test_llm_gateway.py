@@ -8,6 +8,8 @@ from app.services.llm_gateway import (
     _anthropic_tools_to_openai,
     _messages_to_openai,
     _normalize_stop_reason,
+    normalize_tool_outcome,
+    tool_timeout_for,
 )
 
 
@@ -99,3 +101,28 @@ def test_route_resolution():
     assert _route("ppio/pa/claude-opus-4-7") == "anthropic_native"
     assert _route("ppio/pa/claude-sonnet-4-6") == "anthropic_native"
     assert _route("azure_openai/gpt-5.4") == "openai_responses"
+
+
+def test_tool_timeout_uses_admin_setting_for_normal_tools():
+    assert tool_timeout_for("read_skill", {"tool_call_timeout_s": 45}) == 45
+
+
+def test_tool_timeout_keeps_kyuubi_above_inner_cli_deadline():
+    assert tool_timeout_for("kyuubi_query", {"tool_call_timeout_s": 30}) == 330
+
+
+def test_tool_timeout_is_capped():
+    assert tool_timeout_for("read_skill", {"tool_call_timeout_s": 9999}) == 600
+
+
+def test_normalize_tool_outcome_converts_error_payload_to_failure():
+    out = normalize_tool_outcome(
+        {
+            "success": True,
+            "status": "done",
+            "result": {"error_code": "KYUUBI_CLI_ERROR", "message": "bad sql"},
+        }
+    )
+    assert out["success"] is False
+    assert out["status"] == "error"
+    assert out["error"]["code"] == "KYUUBI_CLI_ERROR"
