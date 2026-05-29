@@ -5,6 +5,7 @@ import { authApi, sysApi } from "@/api/endpoints";
 import type { GlobalToggles } from "@/types/api";
 import { useUIStore } from "@/stores/uiStore";
 import { checkLoginLimit, clearLoginLimit, recordLoginFailure } from "@/utils/loginRateLimit";
+import { ThemeSelect } from "@/components/shell/ThemeSelect";
 import "./Login.css";
 
 /**
@@ -352,8 +353,13 @@ export function LoginPage() {
         </aside>
 
         <main className="login-right">
-          <h1>登录</h1>
-          <p className="login-sub">两种登录方式任选其一</p>
+          <div className="login-right-head">
+            <div>
+              <h1>登录</h1>
+              <p className="login-sub">两种登录方式任选其一</p>
+            </div>
+            <ThemeSelect />
+          </div>
 
           <div className="login-tabs">
             {aegisTabVisible && (

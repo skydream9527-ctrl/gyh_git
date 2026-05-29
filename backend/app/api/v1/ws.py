@@ -637,6 +637,20 @@ async def _handle_user_message(
                 "created_at": _now(),
             },
         )
+        task_svc.append_run_event(
+            task_id,
+            conversation_id,
+            {
+                "type": "run_event",
+                "run_id": run_id,
+                "stage": stage,
+                "label": label,
+                "status": status,
+                "detail": detail,
+                "payload": payload or {},
+                "created_at": _now(),
+            },
+        )
 
     if not content:
         await _send_error(ws, ErrorCode.VALIDATION_ERROR, "empty message")
@@ -651,6 +665,7 @@ async def _handle_user_message(
         message=f"len={len(content)}",
         payload={"content_preview": content[:80]},
     )
+    await task_svc.set_task_status(task_id, "running", only_if={"active", "failed"})
     await _send_run_event("received", "收到用户消息", detail=content[:80])
 
     user_record = {
@@ -707,16 +722,6 @@ async def _handle_user_message(
     agent_id = task.get("agent_id") or "biz-insight"
     plan_state = await conversation_svc.get_plan_mode(task_id=task_id, conv_id=conversation_id)
     plan_mode = bool(plan_state.get("plan_mode"))
-    system_prompt = experience_card_svc.merged_system_prompt(
-        agent_id,
-        plan_mode=plan_mode,
-        task_skill_ids=list(task.get("skill_ids") or []),
-    )
-    runtime_hint = task_intent_svc.build_runtime_hint(
-        content, task_name=task.get("name")
-    )
-    if runtime_hint:
-        system_prompt = f"{system_prompt}\n\n---\n\n{runtime_hint}"
     # Resolve per-agent overrides on top of global env flags. agent.json
     # `features.<name>` (true/false) wins; missing → falls back to env.
     feature_flags = {
@@ -732,6 +737,17 @@ async def _handle_user_message(
         task_skill_ids=list(task.get("skill_ids") or []),
         spawn_targets=agents_svc.list_spawnable_agent_ids(agent_id),
     )
+    system_prompt = experience_card_svc.merged_system_prompt(
+        agent_id,
+        plan_mode=plan_mode,
+        task_skill_ids=list(task.get("skill_ids") or []),
+        callable_tool_names=[t["name"] for t in tools],
+    )
+    runtime_hint = task_intent_svc.build_runtime_hint(
+        content, task_name=task.get("name")
+    )
+    if runtime_hint:
+        system_prompt = f"{system_prompt}\n\n---\n\n{runtime_hint}"
     # Per-message > task workspace > agent.json.model > settings default
     model_id = (
         msg.get("model")
@@ -1006,6 +1022,7 @@ async def _handle_user_message(
             # tool_result array but keeping it simplifies debugging).
             tool_results: list[dict] = []
             plan_proposed_payload: dict | None = None
+            human_intervention_payload: dict | None = None
             for i, tu in enumerate(tool_uses):
                 tu_id = tu.get("id")
                 tu_name = tu.get("name")
@@ -1110,7 +1127,28 @@ async def _handle_user_message(
                     and outcome["result"].get("plan_id")
                 ):
                     plan_proposed_payload = outcome["result"]
+                if (
+                    tu_name == "request_human_input"
+                    and outcome.get("success")
+                    and isinstance(outcome.get("result"), dict)
+                    and outcome["result"].get("waiting_for_human")
+                ):
+                    human_intervention_payload = outcome["result"]
             api_messages.append({"role": "user", "content": tool_results})
+
+            if human_intervention_payload is not None:
+                await _send_run_event("waiting_user", "等待人工确认", status="waiting")
+                await _send(ws, {"type": "agent_typing", "status": "stop"})
+                await _send(
+                    ws,
+                    {
+                        "type": "agent_message_done",
+                        "files_created": files_created,
+                        "human_intervention": human_intervention_payload,
+                        "stop_reason": "human_intervention",
+                    },
+                )
+                return
 
             # If a plan was proposed this round, stop the outer loop without
             # feeding tool_results back to the LLM — the user must approve.
@@ -1208,6 +1246,7 @@ async def _handle_user_message(
             await keepalive_task
         except BaseException:
             pass
+        await task_svc.set_task_status(task_id, "active", only_if={"running"})
 
 
 def _latest_tool_call(tool_path, tool_call_id: str) -> dict | None:

@@ -1,12 +1,12 @@
 # data-analysis Agent
 
-互联网内容分发与浏览器工具赛道的数据分析师，覆盖 **BM/BF/CC** 业务线（SR/NV 因 nl-sql 索引未配齐暂不支持）。
+互联网内容分发与浏览器工具赛道的数据分析师，覆盖 **BM/BF/CC** 业务线（SR/NV 因 SQL 索引未配齐暂不支持）。
 
 ## 能力栈
 
 | 层 | 能力 | 实现 |
 |---|---|---|
-| 取数 | NL → SQL → kyuubi 执行 | `nl-sql` skill + `kyuubi_query` 工具 |
+| 取数 | NL → SQL → kyuubi 执行 | `nl-mapping-table-sql` skill + `kyuubi_query` 工具 |
 | 落地 | CSV / Excel / SQL 留档 | `write_file` 工具 |
 | 统计 / 预测 / 可视化 | NL → Python → 沙箱执行 | `nl-python` skill + `execute_python` 工具 |
 | 报告 | 飞书 docx + 嵌图 | `feishu_publish` + `feishu_upload_image` |
@@ -34,7 +34,7 @@
 4. **SQL → Python → 校对**（每个子任务循环）
    - 4a 生成 SQL → 4b 执行 kyuubi → 4c 落 CSV → 4d 异常门
    - 4e 生成 Python（按范式 tag）→ 4f 沙箱执行 → 4g 用户校对关键数字
-5. **综合报告** — 7 项自检 → feishu docx create → upload-image 嵌图
+5. **综合报告** — 7 项自检 → `feishu_publish` → `feishu_upload_image` 嵌图
 
 详见 [`prompt/system.md`](prompt/system.md)。
 
@@ -52,6 +52,6 @@
 
 - Python 永远是 SQL 的下游，**不直连数据源**
 - 预测必带置信区间 + 显式假设 + 失效条件 + 置信度
-- SR/NV 业务线 nl-sql 索引未配齐 → 终止并提示 gongyunhe
+- SR/NV 业务线 SQL 索引未配齐 → 终止并提示 gongyunhe
 - 结论必须基于本次 kyuubi + Python 沙箱结果，不凭印象
 - 写飞书前读 `feishu/reference/extended-markdown.md`，避免 `overwrite`

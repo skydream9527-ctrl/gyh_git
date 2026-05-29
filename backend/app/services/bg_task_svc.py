@@ -80,9 +80,6 @@ async def _run(
     try:
         meta = read_json(paths.task_meta(task_id)) or {}
         skill_ids = list(meta.get("skill_ids") or [])
-        system_prompt = experience_card_svc.merged_system_prompt(
-            agent_id, task_skill_ids=skill_ids
-        )
         tools = tool_runner.get_anthropic_tools(
             feature_flags={
                 # Background jobs can use normal tools but can't recurse or re-enqueue.
@@ -90,7 +87,13 @@ async def _run(
                 "run_background": False,
                 "exit_plan_mode": False,
             },
+            tool_whitelist=agents_svc.get_agent_tools(agent_id),
             task_skill_ids=skill_ids,
+        )
+        system_prompt = experience_card_svc.merged_system_prompt(
+            agent_id,
+            task_skill_ids=skill_ids,
+            callable_tool_names=[t["name"] for t in tools],
         )
         ctx = {
             "user_id": user_id,

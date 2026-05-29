@@ -349,7 +349,11 @@ BUILTIN_TOOL_SCHEMAS: list[dict] = [
                 "collaborators (those with a xiaomi_email on file) are "
                 "auto-granted the FEISHU_AUTO_PERM_LEVEL permission; passing "
                 "extra `share_to` emails grants them too. Returns the doc URL "
-                "on success — INCLUDE the URL in your reply."
+                "on success — INCLUDE the URL in your reply. "
+                "图表必须用 PNG（execute_python 出图 → feishu_upload_image 嵌入），"
+                "不要在 markdown 里写 ```mermaid``` 块——飞书 PlantUML 渲染未开通，"
+                "mermaid 会变成空白画板。返回值若带 content_warnings/hint 字段，"
+                "说明文档里有渲染失败的块，按 hint 指引重试。"
             ),
             "parameters": {
                 "type": "object",
@@ -457,7 +461,7 @@ BUILTIN_TOOL_SCHEMAS: list[dict] = [
             "name": "read_skill",
             "description": (
                 "Fetch the skill's instruction file. Call this BEFORE executing "
-                "an agentic skill (e.g. `kyuubi`, `nl-sql`, `nl-mapping-table-sql`, "
+                "an agentic skill (e.g. `kyuubi`, `nl-mapping-table-sql`, "
                 "`feishu`, `docx`, `xlsx`, `pptx`, `pdf`) when the user's request "
                 "matches its trigger. Default (no `path`) = returns SKILL.md. To "
                 "read a sibling reference file that the SKILL.md points you to "
@@ -472,7 +476,7 @@ BUILTIN_TOOL_SCHEMAS: list[dict] = [
                 "properties": {
                     "skill_id": {
                         "type": "string",
-                        "description": "Skill id, e.g. 'nl-sql', 'nl-mapping-table-sql', 'feishu'.",
+                        "description": "Skill id, e.g. 'nl-mapping-table-sql', 'kyuubi', 'feishu'.",
                     },
                     "path": {
                         "type": "string",
@@ -539,6 +543,68 @@ BUILTIN_TOOL_SCHEMAS: list[dict] = [
             "side_effect": "write",
             "parallel_safe": False,
             "plan_mode_allowed": True,  # todo list is plan-scaffolding, not business data
+            "subagent_exposable": True,
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "request_human_input",
+            "description": (
+                "Pause the current task and ask the user to provide a concrete "
+                "decision, correction, approval, or missing business context. "
+                "Use this only when continuing without a human answer would be "
+                "unsafe, ambiguous, or likely to produce incorrect results. "
+                "After calling this tool, stop and wait for the user's response."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "title": {"type": "string", "description": "Short request title."},
+                    "message": {"type": "string", "description": "What you need from the user and why."},
+                    "fields": {
+                        "type": "array",
+                        "description": "Optional input fields for the UI.",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "id": {"type": "string"},
+                                "label": {"type": "string"},
+                                "value": {"type": "string"},
+                                "placeholder": {"type": "string"},
+                                "required": {"type": "boolean"},
+                            },
+                        },
+                    },
+                    "table": {
+                        "type": "object",
+                        "description": "Optional rows needing review, e.g. {columns:[...], rows:[{...}]}",
+                    },
+                    "actions": {
+                        "type": "array",
+                        "description": "Suggested action buttons.",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "id": {"type": "string"},
+                                "label": {"type": "string"},
+                                "kind": {"type": "string", "enum": ["primary", "secondary", "danger"]},
+                            },
+                        },
+                    },
+                    "resume_prompt": {
+                        "type": "string",
+                        "description": "Instruction to follow after the user resolves the request.",
+                    },
+                },
+                "required": ["title", "message"],
+            },
+        },
+        "_meta": {
+            "display_name": "请求人工确认",
+            "side_effect": "write",
+            "parallel_safe": False,
+            "plan_mode_allowed": False,
             "subagent_exposable": True,
         },
     },
@@ -704,7 +770,7 @@ def get_anthropic_tools(
     None / missing field = no whitelist restriction (every tool stays).
     `task_skill_ids` (when not None) rewrites the read_skill tool description
     so the LLM only sees the agentic skills bound to the current task — the
-    hardcoded example list (kyuubi, nl-sql, ...) is replaced by the actual
+    hardcoded example list (kyuubi, nl-mapping-table-sql, ...) is replaced by the actual
     bound ids. Pass [] to advertise "no agentic skills bound". Pass None for
     contexts without a task (admin sandbox, scheduler one-shot completion).
     `spawn_targets` (when not None) constrains spawn_subagent.agent_id to a
@@ -1472,11 +1538,32 @@ async def _tool_feishu_publish(args: dict, ctx: dict | None = None) -> Any:
             if not ok:
                 perm_warnings.append(f"{em} ({p}): {msg}"[:200])
 
+    # Surface CLI's content-write warnings (e.g. "Whiteboard write failed: 404"
+    # when Feishu app lacks PlantUML scope — produces empty 「空白画板」 in the doc).
+    # Without this, the agent flies blind and can't retry with PNG charts.
+    cli_warnings = data.get("warnings") or []
+    if not isinstance(cli_warnings, list):
+        cli_warnings = [str(cli_warnings)]
+
+    hint: str | None = None
+    if any("Whiteboard write failed" in w for w in cli_warnings):
+        hint = (
+            "飞书 mermaid 渲染失败（whiteboard PlantUML scope 未开通），文档里 "
+            "mermaid block 全部是空白画板。请用 execute_python 出 PNG 图表落到 "
+            "files/output/charts/，再调 feishu_upload_image 嵌入；不要在 markdown "
+            "里写 ```mermaid``` 块。"
+        )
+
     return {
         "url": data.get("url", ""),
         "doc_token": doc_token,
         "title": title,
         "location": location,
+        "blocks_added": data.get("blocks_added"),
+        "images_processed": data.get("images_processed"),
+        "whiteboards_created": data.get("whiteboards_created"),
+        "content_warnings": cli_warnings or None,
+        "hint": hint,
         "perm_grants": perm_results,
         "perm_warnings": perm_warnings or None,
         "warning": err_s.strip() if proc.returncode in (2, 3) else None,
@@ -1981,6 +2068,41 @@ async def _tool_exit_plan_mode(args: dict, ctx: dict | None = None) -> Any:
     return {"waiting_for_approval": True, "plan_id": plan_id}
 
 
+async def _tool_request_human_input(args: dict, ctx: dict | None = None) -> Any:
+    from . import hitl_svc
+
+    task_id = (ctx or {}).get("task_id")
+    if not task_id:
+        return {"error_code": "VALIDATION_ERROR", "message": "request_human_input needs a task context"}
+    title = (args.get("title") or "").strip()
+    message = (args.get("message") or "").strip()
+    if not title or not message:
+        return {"error_code": "VALIDATION_ERROR", "message": "title and message are required"}
+
+    req = await hitl_svc.create_request(
+        task_id=task_id,
+        conv_id=(ctx or {}).get("conversation_id"),
+        created_by=(ctx or {}).get("user_id"),
+        title=title,
+        message=message,
+        fields=args.get("fields") if isinstance(args.get("fields"), list) else None,
+        table=args.get("table") if isinstance(args.get("table"), dict) else None,
+        actions=args.get("actions") if isinstance(args.get("actions"), list) else None,
+        resume_prompt=args.get("resume_prompt"),
+        source="tool",
+    )
+
+    emit = (ctx or {}).get("emit_event")
+    if callable(emit):
+        try:
+            maybe = emit({"type": "hitl_requested", "request": req})
+            if asyncio.iscoroutine(maybe):
+                await maybe
+        except Exception:
+            pass
+    return {"waiting_for_human": True, "request": req}
+
+
 async def _tool_spawn_subagent(args: dict, ctx: dict | None = None) -> Any:
     """Run a bounded sub-agent and return only its final text."""
     import uuid
@@ -2028,12 +2150,36 @@ async def _tool_spawn_subagent(args: dict, ctx: dict | None = None) -> Any:
     transcript_path = paths.task_subagent_run(task_id, run_id)
     transcript_path.parent.mkdir(parents=True, exist_ok=True)
 
+    async def _emit_subagent_event(
+        *,
+        label: str,
+        status: str = "running",
+        detail: str | None = None,
+    ) -> None:
+        emit = parent_ctx.get("emit_event")
+        if not callable(emit):
+            return
+        try:
+            maybe = emit(
+                {
+                    "type": "run_event",
+                    "run_id": run_id,
+                    "stage": "subagent",
+                    "label": label,
+                    "status": status,
+                    "detail": detail,
+                    "payload": {"agent_id": agent_id},
+                    "created_at": datetime.now(tz=timezone.utc).isoformat(),
+                }
+            )
+            if asyncio.iscoroutine(maybe):
+                await maybe
+        except Exception:
+            pass
+
     from ..core.storage import read_json as _read_json
     parent_meta = _read_json(paths.task_meta(task_id)) or {}
     parent_skill_ids = list(parent_meta.get("skill_ids") or [])
-    system_prompt = experience_card_svc.merged_system_prompt(
-        agent_id, task_skill_ids=parent_skill_ids
-    )
     # Effective tool whitelist for the child = intersection of:
     #   1. the child agent's own `agent.json.tools` (None if unrestricted)
     #   2. parent-passed `allowed_tools` arg (LLM's runtime choice)
@@ -2048,6 +2194,11 @@ async def _tool_spawn_subagent(args: dict, ctx: dict | None = None) -> Any:
         in_subagent=True,
         tool_whitelist=effective_whitelist,
         task_skill_ids=parent_skill_ids,
+    )
+    system_prompt = experience_card_svc.merged_system_prompt(
+        agent_id,
+        task_skill_ids=parent_skill_ids,
+        callable_tool_names=[t["name"] for t in tools],
     )
 
     child_ctx = {
@@ -2076,6 +2227,7 @@ async def _tool_spawn_subagent(args: dict, ctx: dict | None = None) -> Any:
     # Per-message arg > child agent's agent.json.model > runtime default.
     child_model = args.get("model") or agents_svc.get_agent_model(agent_id)
     try:
+        await _emit_subagent_event(label=f"子 Agent {agent_id} 开始执行")
         result = await asyncio.wait_for(
             agent_runtime.run_agent_turn(
                 system_prompt=system_prompt,
@@ -2091,6 +2243,11 @@ async def _tool_spawn_subagent(args: dict, ctx: dict | None = None) -> Any:
         )
     except asyncio.TimeoutError:
         append_jsonl(transcript_path, {"event": "timeout", "at": datetime.now(tz=timezone.utc).isoformat()})
+        await _emit_subagent_event(
+            label=f"子 Agent {agent_id} 执行超时",
+            status="error",
+            detail=f"{s.ICE_SUBAGENT_TIMEOUT_SEC}s",
+        )
         return {
             "error_code": "SUBAGENT_TIMEOUT",
             "message": f"sub-agent exceeded {s.ICE_SUBAGENT_TIMEOUT_SEC}s",
@@ -2098,6 +2255,11 @@ async def _tool_spawn_subagent(args: dict, ctx: dict | None = None) -> Any:
         }
     except Exception as exc:
         append_jsonl(transcript_path, {"event": "error", "message": str(exc)[:500]})
+        await _emit_subagent_event(
+            label=f"子 Agent {agent_id} 执行失败",
+            status="error",
+            detail=str(exc)[:160],
+        )
         return {"error_code": "SUBAGENT_FAILED", "message": str(exc)[:300], "run_id": run_id}
 
     duration_ms = int((datetime.now(tz=timezone.utc) - started).total_seconds() * 1000)
@@ -2109,6 +2271,11 @@ async def _tool_spawn_subagent(args: dict, ctx: dict | None = None) -> Any:
             "duration_ms": duration_ms,
             "tool_count": len(result.get("tool_uses_log") or []),
         },
+    )
+    await _emit_subagent_event(
+        label=f"子 Agent {agent_id} 执行完成",
+        status="done",
+        detail=f"{len(result.get('tool_uses_log') or [])} 个工具 · {duration_ms}ms",
     )
     return {
         "final_text": result.get("final_text", ""),
@@ -2167,6 +2334,7 @@ _DISPATCH = {
     "read_skill": _tool_read_skill,
     "read_agent_knowledge": _tool_read_agent_knowledge,
     "todo_write": _tool_todo_write,
+    "request_human_input": _tool_request_human_input,
     "exit_plan_mode": _tool_exit_plan_mode,
     "spawn_subagent": _tool_spawn_subagent,
     "run_background": _tool_run_background,

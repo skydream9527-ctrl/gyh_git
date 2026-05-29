@@ -10,16 +10,24 @@ interface Props {
 
 export function ModelSelector({ value, onChange, compact }: Props) {
   const [items, setItems] = useState<ModelOption[]>([]);
+  const [defaultModel, setDefaultModel] = useState("");
+
   useEffect(() => {
     modelApi
       .list()
       .then((r) => {
         setItems(r.items);
-        if (!value && r.default) onChange(r.default);
+        setDefaultModel(r.default);
       })
       .catch(() => {});
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (!items.length || !defaultModel) return;
+    if (!value || !items.some((m) => m.id === value)) {
+      onChange(defaultModel);
+    }
+  }, [defaultModel, items, onChange, value]);
 
   return (
     <select

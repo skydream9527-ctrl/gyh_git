@@ -17,7 +17,6 @@
     "feishu_publish",
     "feishu_upload_image",
     "read_skill",
-    "read_agent_knowledge",
     "todo_write",
     "exit_plan_mode",
     "spawn_subagent",

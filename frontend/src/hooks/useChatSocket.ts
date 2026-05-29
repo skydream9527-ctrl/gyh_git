@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import axios from "axios";
-import { clearTokens, getAccessToken, setTokens } from "@/api/client";
+import http, { clearTokens, getAccessToken, setTokens } from "@/api/client";
 import { useUIStore } from "@/stores/uiStore";
-import type { ApiEnvelope, ChatMessage, ToolCall } from "@/types/api";
+import type { ApiEnvelope, ChatMessage, HitlRequest, ToolCall } from "@/types/api";
 
 const REFRESH_KEY = "ice-refresh-token";
 
@@ -71,6 +71,7 @@ interface UseChatSocketOpts {
   onError?: (errorCode: string, message: string) => void;
   onFileCreated?: (file: { id: string; name: string }) => void;
   onTodosUpdated?: (items: TodoItem[], updatedAt: string) => void;
+  onHitlRequested?: (request: HitlRequest) => void;
 }
 
 interface SocketState {
@@ -101,7 +102,7 @@ interface SocketState {
   inflightUser: InflightUser | null;
 }
 
-export function useChatSocket({ taskId, conversationId, onError, onFileCreated, onTodosUpdated }: UseChatSocketOpts): SocketState {
+export function useChatSocket({ taskId, conversationId, onError, onFileCreated, onTodosUpdated, onHitlRequested }: UseChatSocketOpts): SocketState {
   const pushToast = useUIStore((s) => s.pushToast);
   const [status, setStatus] = useState<SocketState["status"]>("idle");
   const [phase, setPhase] = useState<StreamPhase>("idle");
@@ -450,6 +451,18 @@ export function useChatSocket({ taskId, conversationId, onError, onFileCreated, 
           });
         }
         commitPartial(() => null);
+        if (ev.plan_proposed?.plan_id && typeof ev.plan_proposed.plan_text === "string") {
+          setPendingPlan({
+            plan_id: ev.plan_proposed.plan_id,
+            plan_text: ev.plan_proposed.plan_text,
+          });
+        }
+        if (ev.human_intervention?.request?.id) {
+          onHitlRequested?.(ev.human_intervention.request as HitlRequest);
+          if (!onHitlRequested) {
+            pushToast("info", ev.human_intervention.request.title || "任务等待人工确认");
+          }
+        }
         setPhase("done");
         break;
       }
@@ -472,6 +485,14 @@ export function useChatSocket({ taskId, conversationId, onError, onFileCreated, 
       case "plan_proposed":
         if (ev.plan_id && typeof ev.plan_text === "string") {
           setPendingPlan({ plan_id: ev.plan_id, plan_text: ev.plan_text });
+        }
+        break;
+      case "hitl_requested":
+        if (ev.request?.id) {
+          onHitlRequested?.(ev.request as HitlRequest);
+          if (!onHitlRequested) {
+            pushToast("info", ev.request.title || "任务等待人工确认");
+          }
         }
         break;
       case "plan_resolved":
@@ -518,7 +539,20 @@ export function useChatSocket({ taskId, conversationId, onError, onFileCreated, 
     streamBufferRef.current = null;
     clearStreamFlush();
     partialRef.current = null;
-  }, [clearStreamFlush, conversationId]);
+
+    if (taskId && conversationId) {
+      http
+        .get<ApiEnvelope<{ items: RunEvent[] }>>(`/tasks/${taskId}/run-events`, {
+          params: { conv_id: conversationId, limit: 40 },
+        })
+        .then((r) => {
+          if (r.data.code === 0 && Array.isArray(r.data.data.items)) {
+            setRunEvents(r.data.data.items);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [clearStreamFlush, conversationId, taskId]);
 
   useEffect(() => {
     connect();

@@ -11,10 +11,10 @@
 | 动作 | 工具 | 说明 |
 |---|---|---|
 | 读取知识库 | `read_agent_knowledge(path="<相对路径>")` | 路径相对 `agents/ab-experiment/knowledge/`，例如 `"metrics/data_dictionary.yaml"` |
-| 查询埋点 SQLite | `sqlite_query` Skill 或 shell `sqlite3 <path> "<sql>"` | 目标文件：`event_tracking/event_tracking.db`、`event_tracking/browser_event_tracking.db` |
-| 执行 Kyuubi SQL | `kyuubi_query` Skill | 返回 DataFrame-like 结果；优先级 1 的数据通道 |
-| 产出文件 | `write_file(path, content)` | 报告、SQL 脚本、临时模板等最终交付物 |
-| Python 计算 | shell `python3 <script>` | 统计检验结果**必须写 JSON 中转**（见下），不依赖 stdout |
+| 查询埋点 SQLite | `execute_python(code=...)` | 用 Python 标准库 `sqlite3` 读取 `knowledge/event_tracking/*.db`；不要调用未注册的 `sqlite_query` |
+| 执行 Kyuubi SQL | `kyuubi_query(sql, limit?)` | 服务端已配置 region / workspace / catalog / engine；直接传 SELECT SQL |
+| 产出文件 | `write_file(name, content)` | 报告、SQL 脚本、临时模板等最终交付物，文件名可带 `reports/`、`sql/` 等相对目录 |
+| Python 计算 | `execute_python(code, description?, timeout_sec?)` | 统计检验结果**必须写 JSON / CSV 中转**并落任务工作区，不依赖 stdout |
 
 ---
 
@@ -107,7 +107,7 @@
 
 **优先级 1 · Kyuubi SQL（默认）**
 
-1. **前置检查**：`kyuubi_query` Skill 不可用时，提示用户安装 Kyuubi CLI（参考 <https://mi.feishu.cn/wiki/XHRVwuMzpiTwVLkddEqcixYwnfc>）；**不主动执行安装**，仅引导，并给出备选方案"也可上传 CSV/Excel"；等待用户确认。
+1. **前置检查**：若 `kyuubi_query` 工具返回未配置 / 不可用，提示用户联系管理员配置 Kyuubi 或上传 CSV/Excel；**不主动执行安装**，等待用户确认。
 2. **确认查询参数**：
    - AB 日期 = 用户提供的实验期；若未足够长，参考 `rules/rollout_phases.yaml#min_duration`
    - AA 日期 = AB 开始日期前 7 天（见 `rules/rollout_phases.yaml#aa_duration`）

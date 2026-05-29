@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { TopNav } from "@/components/shell/TopNav";
+import { AppSideNav } from "@/components/shell/AppSideNav";
 import { MobileBottomBar } from "@/components/shell/MobileBottomBar";
 import { Skeleton } from "@/components/feedback/Skeleton";
 import { ErrorState } from "@/components/feedback/ErrorState";
@@ -51,65 +52,68 @@ export function GuidePage() {
   return (
     <div className="gd-page">
       <TopNav mode="workspace" crumb={<span>首页 / <span className="current">使用指南</span></span>} />
-      <div className="gd-body">
-        <aside className="gd-toc">
-          <div className="gd-toc-head">📑 目录</div>
-          <input
-            className="gd-search"
-            placeholder="🔍 关键词高亮"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-          <ul>
-            {toc.map((t) => (
-              <li key={t.id} className={`gd-toc-l${t.level}`}>
-                <a href={`#${t.id}`}>{t.text}</a>
-              </li>
-            ))}
-          </ul>
-        </aside>
-        <main className="gd-content has-bottombar">
-          {toc.length > 0 && (
-            <select
-              className="gd-jump-mobile"
-              defaultValue=""
-              onChange={(e) => {
-                const id = e.target.value;
-                if (id) {
-                  document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
-                  e.target.value = "";
-                }
-              }}
-            >
-              <option value="">📑 跳转到章节…</option>
-              {toc.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {"　".repeat(Math.max(0, t.level - 2))}
-                  {t.text}
-                </option>
-              ))}
-            </select>
-          )}
-          <div className="gd-info">
-            <span>📅 最后更新 2026-05-07</span>
-            <button onClick={() => window.print()} className="btn-ghost">🖨 打印</button>
-            <a href="mailto:gongyunhe@example.com" className="btn-ghost">✉ 反馈</a>
-          </div>
-          {error ? (
-            <ErrorState
-              icon="🚫"
-              title="加载失败"
-              description={error}
-              errorCode="GUIDE_LOAD_FAILED"
+      <div className="app-shell">
+        <AppSideNav active="guide" />
+        <div className="gd-body app-shell-main">
+          <aside className="gd-toc">
+            <div className="gd-toc-head">📑 目录</div>
+            <input
+              className="gd-search"
+              placeholder="🔍 关键词高亮"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
             />
-          ) : content === null ? (
-            <Skeleton lines={8} />
-          ) : (
-            <article className="gd-article">
-              <MarkdownRenderer content={display} />
-            </article>
-          )}
-        </main>
+            <ul>
+              {toc.map((t) => (
+                <li key={t.id} className={`gd-toc-l${t.level}`}>
+                  <a href={`#${t.id}`}>{t.text}</a>
+                </li>
+              ))}
+            </ul>
+          </aside>
+          <main className="gd-content has-bottombar">
+            {toc.length > 0 && (
+              <select
+                className="gd-jump-mobile"
+                defaultValue=""
+                onChange={(e) => {
+                  const id = e.target.value;
+                  if (id) {
+                    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+                    e.target.value = "";
+                  }
+                }}
+              >
+                <option value="">📑 跳转到章节…</option>
+                {toc.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {"　".repeat(Math.max(0, t.level - 2))}
+                    {t.text}
+                  </option>
+                ))}
+              </select>
+            )}
+            <div className="gd-info">
+              <span>📅 最后更新 2026-05-07</span>
+              <button onClick={() => window.print()} className="btn-ghost">🖨 打印</button>
+              <a href="mailto:gongyunhe@example.com" className="btn-ghost">✉ 反馈</a>
+            </div>
+            {error ? (
+              <ErrorState
+                icon="🚫"
+                title="加载失败"
+                description={error}
+                errorCode="GUIDE_LOAD_FAILED"
+              />
+            ) : content === null ? (
+              <Skeleton lines={8} />
+            ) : (
+              <article className="gd-article">
+                <MarkdownRenderer content={display} />
+              </article>
+            )}
+          </main>
+        </div>
       </div>
       <MobileBottomBar />
     </div>

@@ -14,7 +14,7 @@
 4. **范式 tag 必带**: 每个子任务必须打 1 个分析范式 tag (`[对比] / [拆解] / [波动] / [漏斗] / [分布] / [趋势] / [留存] / [预测]`),决定走 SQL-only 还是 SQL+Python。详见 [analysis-paradigms.md](analysis-paradigms.md)。
 5. **异常必归因**: Phase 4d 同比 / 环比 |Δ| 触及业务线阈值 (BF>15% / BM>10% / CC>8%) 必须追加一轮下钻,不能直接带数字进 Phase 5。
 6. **预测必带置信信息**: 预测输出必带 (a) 置信区间 / 误差带 (b) 显式假设 (c) ≥ 2 条失效条件 (d) 置信度高/中/低 标注;R²/MAPE 不达标必标 `[低置信]`。
-7. **发布前 7 项自检**: Phase 5 调 `feishu docx create` 前必须全通过自检清单。
+7. **发布前 7 项自检**: Phase 5 调 `feishu_publish` 前必须全通过自检清单。
 8. **派单边界**: 命题里出现实验 ID / AA / 放量阶段 → 提示用户改用 `ab-experiment`;业务线落到 djy / 自建组 → spawn `zijian-data-analysis`;异常归因需要纵深下钻 → spawn `wave-attribution`;飞书归档 → spawn `know`。
 
 ## 数据契约
@@ -28,4 +28,4 @@
 
 - 不替用户做不可逆决策 (放量 / 回滚 / 删数据 / 发飞书) —— 给方案,让用户批。
 - 不使用 WebFetch 读飞书内容 (无认证),读飞书资源只走 `feishu fetch` skill。
-- 中文回复,保留必要英文术语 (DAU/UV/VV/p-value/MAPE/R²/xychart-beta 等)。
+- 中文回复,保留必要英文术语 (DAU/UV/VV/p-value/MAPE/R² 等)。

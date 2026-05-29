@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { settingsApi } from "@/api/endpoints";
 import type {
   Announcement,
   LLMConfig,
   LLMModel,
   SystemParams,
+  TestModelResp,
   Toggles,
 } from "@/api/endpoints";
 import { ConfirmModal } from "@/components/feedback/ConfirmModal";
@@ -248,6 +249,17 @@ function LLMTab({
   const [budget, setBudget] = useState(llm.budget_monthly_usd);
   const [threshold, setThreshold] = useState(llm.budget_alert_threshold);
   const [editing, setEditing] = useState<LLMModel | null>(null);
+  const [testing, setTesting] = useState<LLMModel | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const [query, setQuery] = useState("");
+
+  const filteredModels = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return llm.models;
+    return llm.models.filter((m) => {
+      return m.id.toLowerCase().includes(q) || m.label.toLowerCase().includes(q);
+    });
+  }, [llm.models, query]);
 
   const saveBudget = async () => {
     try {
@@ -267,6 +279,41 @@ function LLMTab({
       await onSaved();
     } catch (err) {
       pushToast("error", (err as Error).message);
+    }
+  };
+
+  const toggleVisibility = async (m: LLMModel, visible: boolean) => {
+    try {
+      await settingsApi.updateModel(m.id, { visible_to_user: visible });
+      await onSaved();
+    } catch (err) {
+      pushToast("error", (err as Error).message);
+    }
+  };
+
+  const setDefault = async (model_id: string | null) => {
+    try {
+      await settingsApi.updateDefaultModel(model_id);
+      pushToast("success", model_id ? "默认模型已更新" : "已清除默认模型");
+      await onSaved();
+    } catch (err) {
+      pushToast("error", (err as Error).message);
+    }
+  };
+
+  const refreshMifyModels = async () => {
+    setRefreshing(true);
+    try {
+      const r = await settingsApi.refreshMifyModels();
+      pushToast(
+        "success",
+        `Mify 已刷新：新增 ${r.summary.inserted}，补齐 ${r.summary.updated}，LLM ${r.summary.llm}`,
+      );
+      await onSaved();
+    } catch (err) {
+      pushToast("error", (err as Error).message);
+    } finally {
+      setRefreshing(false);
     }
   };
 
@@ -309,6 +356,36 @@ function LLMTab({
       )}
 
       <h3 style={{ fontFamily: "var(--font-head)", fontSize: 14, marginTop: 24 }}>模型与单价（USD / 1M tokens）</h3>
+      <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: -4, marginBottom: 10 }}>
+        「启用」是系统级开关（关闭则全员包括 admin 都用不了）；「用户可见」控制普通用户在 workspace 选择列表里能否看到，admin/super_admin 不受限。
+        「默认」用于用户未显式选择模型时的会话；为空时回落到 <code>MIFY_DEFAULT_MODEL</code> 环境变量。
+      </p>
+      <div
+        style={{
+          display: "flex",
+          gap: 8,
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginBottom: 10,
+          flexWrap: "wrap",
+        }}
+      >
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="搜索模型 ID / 显示名"
+          style={{ maxWidth: 320 }}
+          aria-label="搜索模型"
+        />
+        <div style={{ display: "flex", gap: 8, alignItems: "center", fontSize: 12, color: "var(--text-muted)" }}>
+          <span>
+            {filteredModels.length} / {llm.models.length}
+          </span>
+          <button className="btn-secondary" onClick={refreshMifyModels} disabled={refreshing}>
+            {refreshing ? "刷新中..." : "从 Mify 刷新模型"}
+          </button>
+        </div>
+      </div>
       <table className="adm-table">
         <thead>
           <tr>
@@ -317,11 +394,13 @@ function LLMTab({
             <th style={{ textAlign: "right" }}>输入</th>
             <th style={{ textAlign: "right" }}>输出</th>
             <th>启用</th>
-            <th style={{ width: 100 }}>操作</th>
+            <th>用户可见</th>
+            <th style={{ textAlign: "center" }}>默认</th>
+            <th style={{ width: 140 }}>操作</th>
           </tr>
         </thead>
         <tbody>
-          {llm.models.map((m) => (
+          {filteredModels.map((m) => (
             <tr key={m.id}>
               <td style={{ fontFamily: "var(--font-mono)", fontSize: 12 }}>{m.id}</td>
               <td>{m.label}</td>
@@ -329,20 +408,62 @@ function LLMTab({
               <td style={{ textAlign: "right", fontFamily: "var(--font-mono)" }}>${m.output_unit_price.toFixed(2)}</td>
               <td>{m.enabled ? "✅" : "—"}</td>
               <td>
-                <button className="btn-ghost" onClick={() => setEditing({ ...m })} style={{ fontSize: 11 }}>
-                  编辑
+                <input
+                  type="checkbox"
+                  checked={m.visible_to_user}
+                  disabled={!m.enabled}
+                  onChange={(e) => toggleVisibility(m, e.target.checked)}
+                  aria-label="用户可见"
+                />
+              </td>
+              <td style={{ textAlign: "center" }}>
+                <input
+                  type="radio"
+                  name="default-model"
+                  checked={llm.default_model_id === m.id}
+                  disabled={!m.enabled}
+                  onChange={() => setDefault(m.id)}
+                  aria-label="设为默认"
+                />
+              </td>
+              <td className="row-actions">
+                <button onClick={() => setEditing({ ...m })}>编辑</button>
+                <button onClick={() => setTesting(m)} disabled={!m.enabled}>
+                  测试
                 </button>
               </td>
             </tr>
           ))}
+          {filteredModels.length === 0 && (
+            <tr>
+              <td colSpan={8} style={{ textAlign: "center", color: "var(--text-muted)", padding: 18 }}>
+                没有匹配的模型
+              </td>
+            </tr>
+          )}
         </tbody>
       </table>
+      {llm.default_model_id && (
+        <div style={{ marginTop: 8, fontSize: 11, color: "var(--text-muted)" }}>
+          当前默认：<code>{llm.default_model_id}</code>
+          <button
+            className="btn-ghost"
+            onClick={() => setDefault(null)}
+            style={{ marginLeft: 10, fontSize: 11 }}
+          >
+            清除默认（回落到 .env）
+          </button>
+        </div>
+      )}
       {editing && (
         <ModelEditModal
           model={editing}
           onClose={() => setEditing(null)}
           onSave={saveModel}
         />
+      )}
+      {testing && (
+        <ModelTestModal model={testing} onClose={() => setTesting(null)} />
       )}
     </div>
   );
@@ -380,6 +501,16 @@ function ModelEditModal({
               </select>
             </label>
             <label>
+              用户可见
+              <select
+                value={m.visible_to_user ? "1" : "0"}
+                onChange={(e) => setM({ ...m, visible_to_user: e.target.value === "1" })}
+              >
+                <option value="1">对用户可见</option>
+                <option value="0">对用户隐藏（仅 admin 可见）</option>
+              </select>
+            </label>
+            <label>
               输入单价 USD/1M
               <input
                 type="number"
@@ -405,6 +536,120 @@ function ModelEditModal({
           </button>
           <button className="btn-primary" onClick={() => onSave(m)}>
             保存
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ModelTestModal({ model, onClose }: { model: LLMModel; onClose: () => void }) {
+  const pushToast = useUIStore((s) => s.pushToast);
+  const [prompt, setPrompt] = useState("用一句话介绍你自己。");
+  const [running, setRunning] = useState(false);
+  const [result, setResult] = useState<TestModelResp | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const backdrop = useBackdropClose(onClose);
+
+  const send = async () => {
+    const p = prompt.trim();
+    if (!p) {
+      pushToast("warning", "请输入测试 prompt");
+      return;
+    }
+    setRunning(true);
+    setError(null);
+    setResult(null);
+    try {
+      const r = await settingsApi.testModel(model.id, p);
+      setResult(r);
+    } catch (err) {
+      setError((err as Error).message);
+    } finally {
+      setRunning(false);
+    }
+  };
+
+  return (
+    <div className="cm-overlay" {...backdrop}>
+      <div className="cm-card" style={{ minWidth: 560, maxWidth: 720 }}>
+        <h3>测试 {model.label}</h3>
+        <div className="cm-body" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <div style={{ fontSize: 11, color: "var(--text-muted)" }}>
+            <code>{model.id}</code>
+            ｜ 单轮对话，max_tokens=256，prompt ≤ 500 字。
+          </div>
+          <label className="ct-field">
+            <span>Prompt</span>
+            <textarea
+              rows={3}
+              maxLength={500}
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              disabled={running}
+            />
+            <span style={{ fontSize: 10, color: "var(--text-muted)", textAlign: "right" }}>
+              {prompt.length} / 500
+            </span>
+          </label>
+          {error && (
+            <div
+              style={{
+                background: "var(--error-dim)",
+                color: "var(--error)",
+                padding: "8px 10px",
+                borderRadius: 6,
+                fontSize: 12,
+              }}
+            >
+              ❌ {error}
+            </div>
+          )}
+          {result && (
+            <div
+              style={{
+                background: "var(--surface-2)",
+                border: "1px solid var(--border)",
+                borderRadius: 6,
+                padding: 12,
+                display: "flex",
+                flexDirection: "column",
+                gap: 6,
+              }}
+            >
+              <div style={{ fontSize: 11, color: "var(--text-muted)", display: "flex", gap: 12 }}>
+                <span>
+                  模型：<code>{result.model}</code>
+                </span>
+                <span>耗时：{result.latency_ms} ms</span>
+                {result.usage && (
+                  <span>
+                    tokens：in {result.usage.input_tokens} / out {result.usage.output_tokens}
+                  </span>
+                )}
+              </div>
+              <pre
+                style={{
+                  whiteSpace: "pre-wrap",
+                  wordBreak: "break-word",
+                  fontFamily: "var(--font-mono)",
+                  fontSize: 12,
+                  margin: 0,
+                  maxHeight: 280,
+                  overflow: "auto",
+                }}
+              >
+                {result.reply || "（模型未返回文本）"}
+              </pre>
+            </div>
+          )}
+        </div>
+        <div className="cm-actions">
+          <button className="btn-secondary" onClick={onClose} disabled={running}>
+            关闭
+          </button>
+          <button className="btn-primary" onClick={send} disabled={running}>
+            {running ? "测试中…" : "▶ 发送"}
           </button>
         </div>
       </div>

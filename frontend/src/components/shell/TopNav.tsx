@@ -1,9 +1,10 @@
 import { Link, useNavigate } from "react-router-dom";
 import { ReactNode, useEffect, useRef, useState } from "react";
 import { useAuthStore } from "@/stores/authStore";
-import { useUIStore } from "@/stores/uiStore";
+import { useUIStore, getThemeIcon, getThemeName } from "@/stores/uiStore";
 import { InviteInbox } from "./InviteInbox";
 import { AccountModal } from "./AccountModal";
+import { ThemeSelect } from "./ThemeSelect";
 import "./TopNav.css";
 
 type Mode = "dashboard" | "workspace" | "admin" | "introduce";
@@ -49,11 +50,7 @@ export function TopNav({ mode, crumb, agentChip, rightActions }: Props) {
     <nav className={`topnav topnav-${mode}`}>
       <Link to="/dashboard" className="brand">
         <div className="brand-logo" aria-hidden="true">
-          <svg viewBox="0 0 32 32" width="22" height="22" fill="none" className="brand-logo-svg">
-            <rect x="2" y="2" width="28" height="28" rx="8" className="bl-bg" />
-            <path d="M9 11h10M9 16h14M9 21h7" className="bl-stroke" strokeWidth="2" strokeLinecap="round" />
-            <circle cx="22" cy="21" r="3" className="bl-dot" strokeWidth="1.5" />
-          </svg>
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" style={{color: "var(--primary)"}}><path d="M12 2L2 7l10 5 10-5-10-5zm0 7.5l-10-5v10l10 5 10-5v-10l-10 5z"/></svg>
         </div>
         <span className="brand-name">
           <span className="brand-accent">ICE</span>{" "}
@@ -65,9 +62,7 @@ export function TopNav({ mode, crumb, agentChip, rightActions }: Props) {
       <div className="right">
         {rightActions}
         {user && <InviteInbox />}
-        <button className="icon-btn" onClick={toggleTheme} aria-label="theme">
-          {theme === "dark" ? "🌓" : "☀"}
-        </button>
+        <ThemeSelect />
         {user && (
           <div className="user-menu" ref={menuRef}>
             <button
@@ -101,15 +96,6 @@ export function TopNav({ mode, crumb, agentChip, rightActions }: Props) {
                   role="menuitem"
                 >
                   ✏ 编辑账户
-                </button>
-                <button
-                  className="umi-item"
-                  onClick={() => {
-                    toggleTheme();
-                  }}
-                  role="menuitem"
-                >
-                  {theme === "dark" ? "☀ 浅色主题" : "🌓 深色主题"}
                 </button>
                 <div className="umi-divider" />
                 <button className="umi-item danger" onClick={handleLogout} role="menuitem">

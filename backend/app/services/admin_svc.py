@@ -351,8 +351,18 @@ def update_agent_prompt(*, aid: str, new_prompt: str, operator: dict, change_not
     cfg = read_json(cfg_path)
     if not cfg:
         raise APIError(404, ErrorCode.RESOURCE_NOT_FOUND, "Agent 不存在")
-    md_path = paths.agents / aid / "prompt" / "system.md"
-    old_prompt = md_path.read_text(encoding="utf-8") if md_path.exists() else cfg.get("system_prompt", "")
+    prompt_dir = paths.agents / aid / "prompt"
+    if cfg.get("prompt_layout") == "v3":
+        # Admin still has a single prompt editor. For v3 agents, persist edits
+        # into sop.md so runtime prompt assembly actually sees the change.
+        # The old prompt snapshot remains the merged editable view.
+        from . import agents_svc
+
+        md_path = prompt_dir / "sop.md"
+        old_prompt = agents_svc.get_agent_system_prompt(aid)
+    else:
+        md_path = prompt_dir / "system.md"
+        old_prompt = md_path.read_text(encoding="utf-8") if md_path.exists() else cfg.get("system_prompt", "")
     snapshot = {
         "id": _new_id(),
         "agent_id": aid,
@@ -365,9 +375,9 @@ def update_agent_prompt(*, aid: str, new_prompt: str, operator: dict, change_not
     append_jsonl(_agent_history_path(aid), snapshot)
     md_path.parent.mkdir(parents=True, exist_ok=True)
     md_path.write_text(new_prompt, encoding="utf-8")
-    # agent.json no longer carries system_prompt — system.md is the only
-    # source of truth, history.jsonl carries snapshots. If a legacy agent.json
-    # still has the field (pre-migration), strip it on the way through.
+    # agent.json no longer carries system_prompt. Prompt markdown is the source
+    # of truth, history.jsonl carries snapshots. If a legacy agent.json still
+    # has the field (pre-migration), strip it on the way through.
     if cfg.pop("system_prompt", None) is not None:
         write_json(cfg_path, cfg)
     return cfg

@@ -20,7 +20,7 @@
 
 ## 必嵌可视化
 
-- xychart-beta 时间序列 + ±2σ 上下带（PNG 来自 Python STL 分解）
+- 时间序列 + ±2σ 上下带 PNG（来自 Python STL 分解；matplotlib 出图）
 
 ## SQL（基础版：均值 / σ + 异动天数）
 

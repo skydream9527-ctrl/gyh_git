@@ -27,6 +27,37 @@ _REPO_ROOT = _SANDBOX_DIR.parents[3]
 DEFAULT_VENV_PYTHON = _REPO_ROOT / "backend" / ".venv-sandbox" / "bin" / "python"
 
 
+def _count_uid_tasks() -> int:
+    """Count tasks (procs + threads) owned by current UID via /proc.
+
+    RLIMIT_NPROC on Linux counts tasks (each thread is a task), so a sandbox
+    nproc cap below the parent UID's current task count makes pthread_create
+    fail immediately — breaks matplotlib's font-cache thread, BLAS imports.
+    Returning 0 disables the dynamic bump (caller falls back to absolute nproc).
+    """
+    if platform.system() != "Linux":
+        return 0
+    try:
+        my_uid = os.getuid()
+    except AttributeError:
+        return 0
+    count = 0
+    try:
+        for entry in os.listdir("/proc"):
+            if not entry.isdigit():
+                continue
+            try:
+                if os.stat(f"/proc/{entry}").st_uid != my_uid:
+                    continue
+                # add this proc's thread count
+                count += len(os.listdir(f"/proc/{entry}/task"))
+            except (FileNotFoundError, PermissionError, NotADirectoryError):
+                continue
+    except (FileNotFoundError, PermissionError):
+        return 0
+    return count
+
+
 def _resolve_executable(custom: str | None = None) -> Path:
     # IMPORTANT: do NOT call `.resolve()` — that follows symlinks, and
     # `.venv-sandbox/bin/python` is a symlink chain to `/usr/bin/python3`.
@@ -254,11 +285,20 @@ async def run_python(
         venv_python=venv_py, task_dir=task_dir, allow_cli=allow_cli
     )
 
+    # RLIMIT_NPROC is shared per-UID — on a busy host the parent UID may
+    # already have more tasks than the requested nproc cap, which makes any
+    # pthread_create() in the child (matplotlib font cache, BLAS) fail with
+    # "can't start new thread". Bump the cap to (current_tasks + nproc) so
+    # the sandbox always has `nproc` headroom regardless of what else the
+    # user is running. Falls back to absolute nproc if /proc is unreadable.
+    current_tasks = _count_uid_tasks()
+    effective_nproc = nproc if current_tasks == 0 else current_tasks + nproc
+
     preexec = make_preexec(
         cpu_sec=timeout_sec,
         memory_mb=memory_mb,
         fsize_mb=fsize_mb,
-        nproc=nproc,
+        nproc=effective_nproc,
         nofile=nofile,
         apply_as=not allow_cli,
     ) if platform.system() in ("Linux", "Darwin") else None

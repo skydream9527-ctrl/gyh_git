@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
 from ...core.config import get_settings
+from ...core.deps import get_current_user
 from ...core.errors import ok
 from ...services import sysconfig_svc
 
@@ -41,14 +42,26 @@ async def public_announcements():
 
 
 @router.get("/models")
-async def public_models():
-    """Models that are enabled in admin settings — for ModelSelector UI.
-    Authenticated read of (id + label) only; pricing stays admin-only."""
+async def public_models(_: dict = Depends(get_current_user)):
+    """Models for ModelSelector UI. (id + label) only; pricing stays admin-only.
+
+    enabled=false -> hidden from everyone (system-level).
+    visible_to_user=false -> hidden from every workspace selector, including
+    admin/super_admin. Admins can still inspect and test all models from the
+    dedicated admin settings page.
+    """
     cfg = sysconfig_svc.get_llm_config()
-    items = [
-        {"id": m["id"], "label": m["label"]}
-        for m in cfg.get("models") or []
-        if m.get("enabled", True)
-    ]
-    default_id = items[0]["id"] if items else sysconfig_svc.DEFAULTS["llm"]["models"][0]["id"]
+    items = []
+    for m in cfg.get("models") or []:
+        if not m.get("enabled", True):
+            continue
+        if not m.get("visible_to_user", True):
+            continue
+        items.append({"id": m["id"], "label": m["label"]})
+
+    default_id = sysconfig_svc.get_default_model_id()
+    if default_id and not any(it["id"] == default_id for it in items):
+        default_id = None
+    if not default_id:
+        default_id = items[0]["id"] if items else sysconfig_svc.DEFAULTS["llm"]["models"][0]["id"]
     return ok({"items": items, "default": default_id})

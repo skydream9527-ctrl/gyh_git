@@ -6,5 +6,30 @@
   "color": "#4f9ea3",
   "description": "都江堰自建信息流数据分析 · CTE+model.sql 取数 · 7 大分析框架（下钻/转化/对比/异动/筛选/假设/链路）· 飞书报告输出",
   "publish_status": "published",
-  "created_at": "2026-05-22T00:00:00+00:00"
+  "prompt_layout": "v3",
+  "created_at": "2026-05-22T00:00:00+00:00",
+  "tools": [
+    "now",
+    "kyuubi_query",
+    "execute_python",
+    "write_file",
+    "read_file",
+    "list_files",
+    "feishu_publish",
+    "feishu_upload_image",
+    "read_skill",
+    "read_agent_knowledge",
+    "todo_write",
+    "request_human_input",
+    "exit_plan_mode",
+    "spawn_subagent"
+  ],
+  "model": null,
+  "spawn_targets": ["ab-experiment", "volcano-abtest", "know", "data-analysis"],
+  "skills": ["kyuubi", "feishu", "nl-python"],
+  "features": {
+    "todo_write": true,
+    "exit_plan_mode": true,
+    "spawn_subagent": true
+  }
 }

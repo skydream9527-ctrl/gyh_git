@@ -61,6 +61,8 @@ ice-workbench-*.zip
 # update_file/ : skill 上传 zip 暂存
 # test_file/   : agent 测试样本
 # SQL 口径...  : 工作底稿（需要保留时单独 git add -f）
+# rewrite_guide.py : 一次性 design 改写脚本
 update_file/
 test_file/
 SQL口径与取数表清单.md
+rewrite_guide.py

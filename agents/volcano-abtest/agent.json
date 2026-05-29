@@ -5,5 +5,26 @@
   "icon": "🌋",
   "color": "#e76f51",
   "description": "火山引擎 ABtest · 浏览器 / 桌面内容中心实验数据查询与涨跌报告",
-  "publish_status": "published"
+  "publish_status": "published",
+  "tools": [
+    "now",
+    "volcano_abtest_analyze",
+    "write_file",
+    "read_file",
+    "list_files",
+    "feishu_publish",
+    "read_skill",
+    "todo_write",
+    "request_human_input",
+    "exit_plan_mode",
+    "spawn_subagent"
+  ],
+  "model": null,
+  "spawn_targets": ["data-analysis", "wave-attribution", "ab-experiment", "know"],
+  "skills": ["feishu"],
+  "features": {
+    "todo_write": true,
+    "exit_plan_mode": true,
+    "spawn_subagent": true
+  }
 }

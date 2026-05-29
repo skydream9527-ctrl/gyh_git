@@ -73,6 +73,11 @@ async def list_my(user: dict = Depends(get_current_user)):
     return ok({"items": items, "total": len(items)})
 
 
+@router.get("/summary")
+async def summary(user: dict = Depends(get_current_user)):
+    return ok(scheduler_svc.summary_for_user(user["id"]))
+
+
 @router.get("/by-task/{task_id}")
 async def list_by_task(task_id: str, user: dict = Depends(get_current_user)):
     await task_svc.get_task(task_id, user["id"])

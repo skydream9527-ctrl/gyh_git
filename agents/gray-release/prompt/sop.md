@@ -11,10 +11,10 @@
 | 动作 | 工具 | 说明 |
 |---|---|---|
 | 读取知识库 | `read_agent_knowledge(path="<相对路径>")` | 路径相对 `agents/gray-release/knowledge/`，例如 `"rules/decision_matrix.yaml"` |
-| 执行 Kyuubi SQL | `kyuubi_query` Skill | 优先级 1 的数据通道；不可用时降级提示用户安装 |
+| 执行 Kyuubi SQL | `kyuubi_query(sql, limit?)` | 服务端已配置 region / workspace / catalog / engine；直接传 SELECT SQL |
 | 飞书发布 | `feishu_publish` / `feishu_upload_image` | 报告统一发到飞书文档，回填统一链接表格 |
-| 产出文件 | `write_file(path, content)` | 报告、SQL 脚本、`tmp_*` 临时模板等交付物 |
-| Python 计算 | shell `python3 <script>` 或 `execute_python` | 显著性 / 统计量结果**必须写 JSON 中转**，不依赖 stdout |
+| 产出文件 | `write_file(name, content)` | 报告、SQL 脚本、`tmp_*` 临时模板等交付物，文件名可带相对目录 |
+| Python 计算 | `execute_python(code, description?, timeout_sec?)` | 显著性 / 统计量结果**必须写 JSON / CSV 中转**并落任务工作区，不依赖 stdout |
 
 ---
 
@@ -106,7 +106,7 @@ experiment_context = {
 
 | 优先级 | 数据源 | 依赖 | 说明 |
 |---|---|---|---|
-| 1（最高） | Kyuubi SQL | `kyuubi_query` Skill | **默认方式**，从数据库直接查询 |
+| 1（最高） | Kyuubi SQL | `kyuubi_query(sql, limit?)` | **默认方式**，从数据库直接查询 |
 | 2 | 文件上传 | 无 | 用户上传 CSV / Excel |
 | 3 | 飞书表格 | `feishu` Skill | 从飞书多维表格读取 |
 

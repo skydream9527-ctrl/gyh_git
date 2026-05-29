@@ -19,7 +19,7 @@
 | 2 · 可视化 | 趋势 / 分布 / 对比 / 热力 | `execute_python` 沙箱 |
 | 3 · 飞书报告 | 5 项自检 → 创建 docx → 嵌图 | `feishu_publish` + `feishu_upload_image` |
 
-详见 [`prompt/system.md`](prompt/system.md) 与 [`prompt/analysis-frameworks.md`](prompt/analysis-frameworks.md)。
+详见 [`prompt/identity.md`](prompt/identity.md)、[`prompt/sop.md`](prompt/sop.md) 与 [`prompt/analysis-frameworks.md`](prompt/analysis-frameworks.md)。
 
 ## 目录
 
@@ -28,7 +28,8 @@ zijian-data-analysis/
 ├── agent.json
 ├── README.md
 ├── prompt/
-│   ├── system.md                # 主 prompt（5 阶段 SOP）
+│   ├── identity.md              # v3 身份与关键承诺
+│   ├── sop.md                   # 主 SOP（5 阶段流程）
 │   ├── analysis-frameworks.md   # 7 大分析框架
 │   └── cards.md                 # 经验卡（自动累积）
 └── knowledge/                   # 通过 read_agent_knowledge 工具读取
@@ -57,7 +58,7 @@ zijian-data-analysis/
 | Agent | 覆盖范围 | 用什么取数 |
 |---|---|---|
 | **zijian-data-analysis**（本 Agent） | 仅都江堰自建信息流 | model.sql CTE 模式 |
-| `data-analysis` | BM/BF/CC 三业务线（NL→SQL） | `nl-sql` skill |
+| `data-analysis` | BM/BF/CC 三业务线（NL→SQL） | `nl-mapping-table-sql` skill |
 | `volcano-abtest` | 火山引擎 ABtest 实验 | `datum` CLI |
 | `ab-experiment` | AB 显著性下钻 | knowledge/sql_templates |
 

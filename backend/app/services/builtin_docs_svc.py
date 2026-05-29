@@ -201,11 +201,21 @@ def _render_agent_doc(agent_dir: Path, cfg: dict) -> str:
     icon = cfg.get("icon", "")
     desc = cfg.get("description", "")
     system_prompt = cfg.get("system_prompt", "")
-    sp_file = agent_dir / "prompt" / "system.md"
-    if sp_file.exists():
-        sp_text = _safe_read(sp_file).strip()
-        if sp_text:
-            system_prompt = sp_text
+    prompt_dir = agent_dir / "prompt"
+    if cfg.get("prompt_layout") == "v3":
+        prompt_parts = []
+        for name in ("identity.md", "sop.md"):
+            text = _safe_read(prompt_dir / name).strip()
+            if text:
+                prompt_parts.append(text)
+        if prompt_parts:
+            system_prompt = "\n\n---\n\n".join(prompt_parts)
+    else:
+        sp_file = prompt_dir / "system.md"
+        if sp_file.exists():
+            sp_text = _safe_read(sp_file).strip()
+            if sp_text:
+                system_prompt = sp_text
 
     parts: list[str] = []
     parts.append(f"# {icon} {name}".strip())

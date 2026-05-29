@@ -1,45 +1,54 @@
 # skills/ — 本地 Skill 目录
 
-> 25 个 Skill，启动时自动发现（解析 SKILL.md），可被 LLM function-calling 调用
+本目录存放项目可发现的 agentic skills。后端启动时通过 `skills/*/SKILL.md`
+自动识别，任务创建时会快照到 `tasks/{tid}/skills/`，运行中通过
+`read_skill(skill_id=...)` 读取说明并按步骤执行。
 
 ## 当前清单
 
-文档 / 内容生成：`docx` `pptx` `xlsx` `pdf` `remotion`
-知识 / 搜索：`notebooklm` `enhanced-web-search` `feishu` `paper-2-web` `knowledge-2-web`
-数据 / SQL：`kyuubi` `nl-sql`
-可视化：`imagen` `manimgl-best-practices` `article-illustration-generator`
-UI / 前端：`frontend-design` `playwright` `fad-executor-ui-figma` `fad-verifier-qc`
-工程 / 规划：`fad-brownfield-style` `fad-plan-checker-gates` `fad-planner-align` `fad-doc-export-spreadsheet` `planning-with-files` `skill-creator`
+| Skill | 用途 |
+|---|---|
+| `daily-news-collector` | 每日科技新闻收集、筛选与分发 |
+| `data.an` | 数据查询、分析报告、可视化和飞书交付 |
+| `datum-cli` | datum CLI 使用说明 |
+| `docx` | Word / docx 文档生成与处理 |
+| `feishu` | 飞书文档 / 多维表格 / 图片等 CLI 能力 |
+| `feishu-pyramid-writer` | 按金字塔原理撰写飞书文档 |
+| `kyuubi` | Kyuubi SQL 查询 |
+| `mify-knowledge-base` | Mify 知识库创建、上传、更新和搜索 |
+| `mify-model-gateway` | 小米 Mify 大模型网关查询、测试和接入 |
+| `nl-mapping-table-sql` | 自然语言生成映射表 SQL |
+| `nl-python` | Python 数据分析和可视化 |
+| `pdf` | PDF 读取、转换和生成 |
+| `pptx` | PPTX 生成与处理 |
+| `schedule-send` | 定时日报发送到飞书多维表格 |
+| `sql` | 数据工场 DataWorks SQL 查询 |
+| `text2html2png` | 文本生成 HTML 图表并截图为 PNG |
 
 ## 子目录约定
 
 ```text
-skills/{skill_name}/
-├── SKILL.md            # 必需：tool_schema (JSON) + tool_entry + 描述
-├── scripts/            # 可执行脚本（python / shell）
+skills/{skill_id}/
+├── SKILL.md            # 必需：frontmatter + 使用说明
+├── INTRO.zh.md         # 必需：中文展示简介
+├── scripts/            # 可执行脚本（可选）
 ├── references/         # 参考资料（可选）
 └── assets/             # 资源（可选）
 ```
 
-## SKILL.md 必含 frontmatter
+## 调用方式
 
-```yaml
----
-name: {skill_name}
-description: {一句话说明}
-category: SQL | 统计 | 分析 | 输出 | ETL | 监控 | 其他
-tool_schema:
-  name: {function_name}
-  description: ...
-  parameters: { ... OpenAI function format ... }
-tool_entry: {module:function}        # 例: tool_executor:query_data
-source: local                         # local | managed
----
+这些 skill 不是独立 function tool。Agent 需要先调用：
+
+```text
+read_skill(skill_id="<skill_id>")
 ```
 
-## 与决策的关联
+如果 `SKILL.md` 指向同目录参考资料，再用：
 
-- **D38**：工具显示名从 SKILL.md 的 `name` 字段取（不再硬编码）
-- **D116**：tool_schema 编辑器需 JSON Schema validator + 格式化按钮
-- **D117**：每个 Skill 支持沙盒"测试运行"
-- **D52**：文件上传统一 hook（含 Skill 调用产生的文件落到 `tasks/{tid}/files/output/`）
+```text
+read_skill(skill_id="<skill_id>", path="references/example.md")
+```
+
+任务内只能读取该任务已绑定并快照的 skill；新建任务默认会注入当前目录下的
+agentic skills，已有任务可在工作区右栏 Skills 面板添加。

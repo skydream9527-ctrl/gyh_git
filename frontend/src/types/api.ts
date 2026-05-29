@@ -208,6 +208,41 @@ export interface NotificationItem {
   created_at: string;
 }
 
+export interface RunEvent {
+  run_id: string;
+  stage: string;
+  label: string;
+  status: "running" | "done" | "error" | "warning" | "waiting" | "aborted";
+  detail?: string | null;
+  payload?: Record<string, unknown>;
+  created_at: string;
+}
+
+export interface HitlRequest {
+  id: string;
+  task_id: string;
+  conversation_id?: string | null;
+  status: "pending" | "resolved";
+  title: string;
+  message: string;
+  fields?: Array<{
+    id: string;
+    label: string;
+    value?: string;
+    placeholder?: string;
+    required?: boolean;
+  }>;
+  table?: {
+    columns?: string[];
+    rows?: Array<Record<string, unknown>>;
+  } | null;
+  actions?: Array<{ id: string; label: string; kind?: "primary" | "secondary" | "danger" }>;
+  resume_prompt?: string | null;
+  created_at: string;
+  resolved_at?: string | null;
+  resolution?: { decision: string; payload: Record<string, unknown>; note?: string } | null;
+}
+
 export interface ChatMessage {
   id: string;
   role: "user" | "assistant" | "system";

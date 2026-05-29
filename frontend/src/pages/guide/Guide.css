@@ -7,6 +7,11 @@
   max-width: 1200px;
   margin: 0 auto;
 }
+.app-shell .gd-body {
+  max-width: none;
+  margin: 0;
+  width: 100%;
+}
 @media (max-width: 900px) {
   .gd-body {
     grid-template-columns: 1fr;
@@ -20,8 +25,8 @@
   border-right: 1px solid var(--border);
   padding: 24px 16px;
   position: sticky;
-  top: 52px;
-  height: calc(100vh - 52px);
+  top: 56px;
+  height: calc(100vh - 56px);
   overflow-y: auto;
 }
 .gd-toc-head {

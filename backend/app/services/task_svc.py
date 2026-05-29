@@ -5,7 +5,7 @@ import uuid
 from datetime import datetime, timezone
 
 from ..core.errors import APIError, ErrorCode
-from ..core.storage import file_transaction, get_index_db, get_paths, read_json, write_json
+from ..core.storage import append_jsonl, file_transaction, get_index_db, get_paths, read_json, read_jsonl, write_json
 from . import agent_snapshot_svc, task_intent_svc
 
 
@@ -31,6 +31,10 @@ def _now() -> str:
 
 def _new_id() -> str:
     return uuid.uuid4().hex
+
+
+_TASK_STATUSES = {"active", "running", "paused", "failed", "archived"}
+_TASK_VISIBILITIES = {"private", "public"}
 
 
 async def create_task(
@@ -345,6 +349,114 @@ async def update_skills(
         [meta["updated_at"], task_id],
     )
     return {"task_id": task_id, "skill_ids": clean}
+
+
+async def update_task(
+    task_id: str,
+    user_id: str,
+    patch: dict,
+    *,
+    is_admin: bool = False,
+    allow_visibility: bool = False,
+) -> dict:
+    paths = get_paths()
+    meta = read_json(paths.task_meta(task_id))
+    if not meta:
+        raise APIError(404, ErrorCode.RESOURCE_NOT_FOUND, "任务不存在")
+    if not is_admin and meta.get("owner_id") != user_id:
+        collaborators = read_json(paths.task_collaborators(task_id), default=[]) or []
+        if not any(
+            c.get("user_id") == user_id and c.get("status") == "active" and c.get("role") == "editor"
+            for c in collaborators
+        ):
+            raise APIError(403, ErrorCode.PERMISSION_DENIED, "当前身份无此权限")
+
+    updates: dict = {}
+    if "name" in patch and patch.get("name") is not None:
+        name = str(patch.get("name") or "").strip()
+        if not name:
+            raise APIError(400, ErrorCode.VALIDATION_ERROR, "任务名称不能为空")
+        if len(name) > 120:
+            raise APIError(400, ErrorCode.VALIDATION_ERROR, "任务名称过长")
+        updates["name"] = name
+    if "description" in patch:
+        desc = patch.get("description")
+        updates["description"] = str(desc) if desc is not None else None
+    if "status" in patch and patch.get("status") is not None:
+        status = str(patch.get("status") or "").strip()
+        if status not in _TASK_STATUSES:
+            raise APIError(400, ErrorCode.VALIDATION_ERROR, "任务状态无效")
+        updates["status"] = status
+    if "visibility" in patch and patch.get("visibility") is not None:
+        if not allow_visibility and not is_admin and meta.get("owner_id") != user_id:
+            raise APIError(403, ErrorCode.PERMISSION_DENIED, "仅任务创建者可修改可见性")
+        visibility = str(patch.get("visibility") or "").strip()
+        if visibility not in _TASK_VISIBILITIES:
+            raise APIError(400, ErrorCode.VALIDATION_ERROR, "任务可见性无效")
+        updates["visibility"] = visibility
+
+    if not updates:
+        return await get_task(task_id, user_id, is_admin=is_admin)
+
+    meta.update(updates)
+    meta["updated_at"] = _now()
+    locks = [paths.task_meta(task_id), paths.user_tasks_index(meta["owner_id"])]
+    with file_transaction(locks) as tx:
+        tx.write_json(paths.task_meta(task_id), meta)
+        if "name" in updates:
+            user_index = tx.read_json(paths.user_tasks_index(meta["owner_id"]), default=[]) or []
+            for entry in user_index:
+                if entry.get("task_id") == task_id:
+                    entry["name"] = updates["name"]
+            tx.write_json(paths.user_tasks_index(meta["owner_id"]), user_index)
+
+    db = get_index_db()
+    await db.execute(
+        """
+        UPDATE tasks_index
+        SET name = COALESCE(?, name),
+            status = COALESCE(?, status),
+            visibility = COALESCE(?, visibility),
+            updated_at = ?
+        WHERE id = ?
+        """,
+        [
+            updates.get("name"),
+            updates.get("status"),
+            updates.get("visibility"),
+            meta["updated_at"],
+            task_id,
+        ],
+    )
+    return await get_task(task_id, user_id, is_admin=is_admin)
+
+
+async def set_task_status(task_id: str, status: str, *, only_if: set[str] | None = None) -> dict | None:
+    if status not in _TASK_STATUSES:
+        raise APIError(400, ErrorCode.VALIDATION_ERROR, "任务状态无效")
+    paths = get_paths()
+    meta = read_json(paths.task_meta(task_id))
+    if not meta:
+        return None
+    if only_if is not None and meta.get("status") not in only_if:
+        return meta
+    meta["status"] = status
+    meta["updated_at"] = _now()
+    write_json(paths.task_meta(task_id), meta)
+    await get_index_db().execute(
+        "UPDATE tasks_index SET status = ?, updated_at = ? WHERE id = ?",
+        [status, meta["updated_at"], task_id],
+    )
+    return meta
+
+
+def append_run_event(task_id: str, conv_id: str, event: dict) -> None:
+    append_jsonl(get_paths().task_run_events(task_id, conv_id), event)
+
+
+def list_run_events(task_id: str, conv_id: str, *, limit: int = 80) -> list[dict]:
+    rows = read_jsonl(get_paths().task_run_events(task_id, conv_id))
+    return rows[-limit:]
 
 
 async def delete_task(task_id: str, user_id: str, *, is_admin: bool = False) -> None:

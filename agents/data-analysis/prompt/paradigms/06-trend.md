@@ -20,7 +20,7 @@
 
 ## 必嵌可视化
 
-- xychart-beta（原始 + 平滑双线）→ Mermaid 双 series
+- 双线趋势图（原始 + 平滑 MA）→ PNG（matplotlib，含 title / 轴标签 / 图例）
 - 变点检测的 PNG（来自 Python ruptures）
 
 ## SQL（基础趋势 + MA）

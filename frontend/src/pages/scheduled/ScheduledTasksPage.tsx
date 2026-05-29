@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { TopNav } from "@/components/shell/TopNav";
+import { AppSideNav } from "@/components/shell/AppSideNav";
 import { MobileBottomBar } from "@/components/shell/MobileBottomBar";
 import { ConfirmModal } from "@/components/feedback/ConfirmModal";
 import { EmptyState } from "@/components/feedback/ErrorState";
@@ -30,12 +31,19 @@ export function ScheduledTasksPage() {
   const [editing, setEditing] = useState<ScheduledTask | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<ScheduledTask | null>(null);
   const [expandedRuns, setExpandedRuns] = useState<Record<string, ScheduledRun[]>>({});
+  const [summary, setSummary] = useState<{
+    enabled: number;
+    paused: number;
+    today_runs: number;
+    failed_7d: number;
+  } | null>(null);
 
   const reload = async () => {
     setLoading(true);
     try {
       const r = await scheduledApi.listMine();
       setItems(r.items.filter((s) => !filterTaskId || s.task_id === filterTaskId));
+      scheduledApi.summary().then(setSummary).catch(() => setSummary(null));
     } finally {
       setLoading(false);
     }
@@ -57,6 +65,9 @@ export function ScheduledTasksPage() {
       }),
     [items, filterEnabled, search],
   );
+  const enabledCount = items.filter((s) => s.enabled).length;
+  const pausedCount = items.length - enabledCount;
+  const firedToday = items.filter((s) => isToday(s.last_fire_at)).length;
 
   const toggle = async (s: ScheduledTask) => {
     try {
@@ -111,16 +122,38 @@ export function ScheduledTasksPage() {
   return (
     <div className="sc-page">
       <TopNav mode="workspace" crumb={<span>首页 / <span className="current">定时任务</span></span>} />
-      <main className="sc-main has-bottombar">
-        <header className="sc-head">
+      <div className="app-shell">
+        <AppSideNav active="scheduled" />
+        <main className="sc-main app-shell-main has-bottombar">
+        <header className="sc-head sc-v6-head">
           <div>
-            <h1>⏱ 定时任务</h1>
-            <p>每个任务可绑定多个 cron 触发器；执行历史可查。</p>
+            <div className="sc-v6-kicker">Cron · Agent-driven</div>
+            <h1>定时调度 Tasks</h1>
+            <p>每个手动跑通的 Workspace 都可以绑定 cron，转成后台持续执行的工作流。</p>
           </div>
           <button className="btn-primary" onClick={() => setShowCreate(true)}>
             + 创建定时任务
           </button>
         </header>
+
+        <section className="sc-v6-stats" aria-label="定时任务统计">
+          <div className="sc-v6-stat">
+            <span>运行中任务</span>
+            <b>{summary && !filterTaskId ? summary.enabled : enabledCount}</b>
+          </div>
+          <div className="sc-v6-stat muted">
+            <span>已暂停</span>
+            <b>{summary && !filterTaskId ? summary.paused : pausedCount}</b>
+          </div>
+          <div className="sc-v6-stat">
+            <span>今日已执行</span>
+            <b>{summary && !filterTaskId ? summary.today_runs : firedToday}</b>
+          </div>
+          <div className="sc-v6-stat danger">
+            <span>近7天失败</span>
+            <b>{summary && !filterTaskId ? summary.failed_7d : "—"}</b>
+          </div>
+        </section>
 
         <div className="sc-filter">
           <div className="sc-chips">
@@ -156,7 +189,14 @@ export function ScheduledTasksPage() {
             }
           />
         ) : (
-          <div className="sc-list">
+          <div className="sc-list sc-v6-table">
+            <div className="sc-v6-table-head">
+              <span>定时任务 / 绑定工作流</span>
+              <span>执行频率</span>
+              <span>下次执行时间</span>
+              <span>最近执行状态</span>
+              <span>启停控制</span>
+            </div>
             {filtered.map((s) => (
               <div key={s.id} className="sc-card">
                 <div className="sc-card-head">
@@ -253,7 +293,8 @@ export function ScheduledTasksPage() {
             ))}
           </div>
         )}
-      </main>
+        </main>
+      </div>
 
       {(showCreate || editing) && (
         <ScheduleEditModal
@@ -287,6 +328,13 @@ function fmt(iso: string | null): string {
   if (!iso) return "-";
   const d = new Date(iso);
   return d.toLocaleString();
+}
+
+function isToday(iso: string | null): boolean {
+  if (!iso) return false;
+  const d = new Date(iso);
+  const now = new Date();
+  return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate();
 }
 
 function readableCron(expr: string): string {

@@ -149,6 +149,11 @@
   flex-direction: column;
   gap: 12px;
 }
+.login-right-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
 .login-right h1 {
   font-family: var(--font-head);
   font-size: 24px;

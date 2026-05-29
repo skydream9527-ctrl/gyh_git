@@ -59,11 +59,13 @@ Phase 2 拆解任务时，**每个子任务必须打 1 个 paradigm tag**。Phas
 
 不允许 callout 超过一句。
 
-### Mermaid 模板（强制）
+### 图表模板（强制 PNG）
 
-- `xychart-beta` 必有：title / x-axis label / y-axis label / unit
-- `flowchart` 必有：start node + 终点 node 标记
-- `pie` 仅用于 ≤ 6 segment 的结构；> 6 切 stacked bar
+所有图表用 execute_python（matplotlib / seaborn）出 PNG 落 `charts/T{n}_*.png`，再调 `feishu_upload_image` 嵌入。**飞书 mermaid 渲染未开通，禁止在 markdown 里写 ```mermaid``` 块。**
+
+- 趋势图：必有 title / x-axis label / y-axis label / 单位 / 图例（双线时）
+- 因果链 / 流程图：必有 start node + 终点 node 标记，可用 networkx + matplotlib 或 graphviz
+- 饼图：仅用于 ≤ 6 segment 的结构；> 6 切 stacked bar
 
 ### 禁用语言清单
 

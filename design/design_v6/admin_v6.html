@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ICE Workbench v6 · 管理后台</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          bg: '#faf4ed', surface: '#ffffff', 'surface-2': '#f5efe4', border: '#e5dcc8', 'border-soft': '#ede5d2',
+          text: '#1a1612', 'text-dim': '#5b5246', 'text-muted': '#8a7e69', primary: '#cc785c', 'primary-soft': '#f5e8e2', warning: '#b07d2a', error: '#b54a3a'
+        },
+        fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
+        boxShadow: { 'card': '0 2px 8px rgba(26, 22, 18, 0.04), 0 1px 2px rgba(26, 22, 18, 0.02)' }
+      }
+    }
+  }
+</script>
+<style>body { background-color: theme('colors.bg'); color: theme('colors.text'); }</style>
+</head>
+<body class="h-screen flex flex-col font-sans overflow-hidden">
+  
+  <header class="h-14 bg-surface border-b border-border flex items-center justify-between px-6 shrink-0 z-20">
+    <div class="flex items-center gap-4 text-sm">
+      <div class="flex items-center gap-2 text-text font-semibold mr-2">
+        <svg class="w-5 h-5 text-primary" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zm0 7.5l-10-5v10l10 5 10-5v-10l-10 5z"/></svg>
+        <span>ICE Admin</span>
+      </div>
+      <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-error/10 text-error border border-error/20">SUPER_ADMIN</span>
+    </div>
+    <div class="flex items-center gap-4">
+      <a href="dashboard_v6.html" class="text-sm font-medium text-text-muted hover:text-primary transition-colors">返回工作台</a>
+      <div class="w-8 h-8 rounded-full bg-surface-2 border border-border flex items-center justify-center font-medium">A</div>
+    </div>
+  </header>
+
+  <main class="flex-1 flex overflow-hidden">
+    <!-- Left Sidebar -->
+    <aside class="w-64 bg-surface-2 border-r border-border shrink-0 flex flex-col py-4">
+      <div class="px-4 mb-2 text-[11px] font-mono text-text-muted uppercase tracking-wider">Overview</div>
+      <a href="#" class="px-4 py-2 mx-2 rounded-lg bg-primary-soft text-primary font-medium flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+        全盘数据
+      </a>
+      
+      <div class="px-4 mt-6 mb-2 text-[11px] font-mono text-text-muted uppercase tracking-wider">Management</div>
+      <a href="#" class="px-4 py-2 mx-2 rounded-lg hover:bg-surface text-text-dim hover:text-text transition-colors flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+        用户与权限
+      </a>
+      <a href="#" class="px-4 py-2 mx-2 rounded-lg hover:bg-surface text-text-dim hover:text-text transition-colors flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+        系统配置
+      </a>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="flex-1 overflow-y-auto p-8">
+      <h1 class="text-2xl font-semibold mb-6">全盘数据概览</h1>
+      
+      <!-- Stats -->
+      <div class="grid grid-cols-3 gap-6 mb-8">
+        <div class="bg-surface border border-border rounded-xl p-5 shadow-card">
+          <div class="text-sm font-medium text-text-dim mb-2">平台总注册用户</div>
+          <div class="text-4xl font-semibold text-text">1,248</div>
+          <div class="text-xs text-text-muted mt-2 font-mono">+12 THIS WEEK</div>
+        </div>
+        <div class="bg-surface border border-border rounded-xl p-5 shadow-card">
+          <div class="text-sm font-medium text-text-dim mb-2">活跃 Agent 会话数</div>
+          <div class="text-4xl font-semibold text-text">43,091</div>
+          <div class="text-xs text-text-muted mt-2 font-mono">+891 THIS WEEK</div>
+        </div>
+        <div class="bg-surface border border-error/30 rounded-xl p-5 shadow-card">
+          <div class="text-sm font-medium text-text-dim mb-2">Tokens 预算消耗</div>
+          <div class="text-4xl font-semibold text-error">$ 420.5</div>
+          <div class="text-xs text-error mt-2 font-mono">EXCEEDS 80% OF BUDGET</div>
+        </div>
+      </div>
+
+      <!-- Recent Users Table -->
+      <h2 class="text-lg font-semibold mb-4">最新注册用户</h2>
+      <div class="bg-surface border border-border shadow-card rounded-xl overflow-hidden">
+        <table class="w-full text-left text-sm">
+          <thead class="bg-surface-2 text-text-muted font-mono text-[11px] border-b border-border">
+            <tr>
+              <th class="p-4 font-medium">用户邮箱 / ID</th>
+              <th class="p-4 font-medium">角色权限</th>
+              <th class="p-4 font-medium">注册时间</th>
+              <th class="p-4 font-medium">操作</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-border">
+            <tr class="hover:bg-surface-2 transition-colors">
+              <td class="p-4">
+                <div class="font-medium text-text">zhangsan@xiaomi.com</div>
+                <div class="text-[11px] text-text-muted font-mono mt-0.5">user_8f72a1...</div>
+              </td>
+              <td class="p-4"><span class="px-2 py-0.5 rounded text-[11px] font-mono bg-blue-50 text-blue-600 border border-blue-100">USER</span></td>
+              <td class="p-4 text-text-dim font-mono text-[12px]">2026-05-27 10:22:15</td>
+              <td class="p-4 text-primary font-medium cursor-pointer hover:underline">编辑</td>
+            </tr>
+            <tr class="hover:bg-surface-2 transition-colors">
+              <td class="p-4">
+                <div class="font-medium text-text">wangwu@xiaomi.com</div>
+                <div class="text-[11px] text-text-muted font-mono mt-0.5">user_9b31c4...</div>
+              </td>
+              <td class="p-4"><span class="px-2 py-0.5 rounded text-[11px] font-mono bg-warning/10 text-warning border border-warning/20">ADMIN</span></td>
+              <td class="p-4 text-text-dim font-mono text-[12px]">2026-05-26 15:40:02</td>
+              <td class="p-4 text-primary font-medium cursor-pointer hover:underline">编辑</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

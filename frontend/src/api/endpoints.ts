@@ -8,6 +8,7 @@ import type {
   FileRefreshResult,
   GlobalToggles,
   JoinRequest,
+  HitlRequest,
   LoginResponse,
   NotificationItem,
   PageData,
@@ -15,6 +16,7 @@ import type {
   SkillCard,
   TaskDetail,
   TaskSummary,
+  RunEvent,
   UserPublic,
 } from "@/types/api";
 
@@ -67,6 +69,15 @@ export const taskApi = {
     visibility?: string;
   }) => api<TaskDetail>(http.post("/tasks", body)),
   detail: (id: string) => api<TaskDetail>(http.get(`/tasks/${id}`)),
+  update: (
+    id: string,
+    body: {
+      name?: string;
+      description?: string | null;
+      status?: string;
+      visibility?: string;
+    },
+  ) => api<TaskDetail>(http.patch(`/tasks/${id}`, body)),
   conversation: (id: string, opts?: { limit?: number; before?: number | null }) =>
     api<ConversationMessagesPage>(
       http.get(`/tasks/${id}/conversation`, {
@@ -82,6 +93,19 @@ export const taskApi = {
     api<{ task_id: string; skill_ids: string[] }>(
       http.patch(`/tasks/${id}/skills`, { skill_ids }),
     ),
+  runEvents: (id: string, convId?: string | null, limit = 80) =>
+    api<{ items: RunEvent[]; total: number; task_id: string; conversation_id: string }>(
+      http.get(`/tasks/${id}/run-events`, { params: { conv_id: convId || undefined, limit } }),
+    ),
+  listHitl: (id: string, status: "pending" | "resolved" | "" = "pending") =>
+    api<PageData<HitlRequest>>(
+      http.get(`/tasks/${id}/hitl`, { params: status ? { status } : {} }),
+    ),
+  resolveHitl: (
+    id: string,
+    requestId: string,
+    body: { decision: string; payload?: Record<string, unknown>; note?: string },
+  ) => api<HitlRequest>(http.post(`/tasks/${id}/hitl/${requestId}/resolve`, body)),
 };
 
 export const fileApi = {
@@ -314,6 +338,15 @@ export interface ScheduledRun {
 
 export const scheduledApi = {
   listMine: () => api<PageData<ScheduledTask>>(http.get("/scheduled-tasks")),
+  summary: () =>
+    api<{
+      total: number;
+      enabled: number;
+      paused: number;
+      today_runs: number;
+      failed_7d: number;
+      last_runs: ScheduledRun[];
+    }>(http.get("/scheduled-tasks/summary")),
   listByTask: (taskId: string) =>
     api<PageData<ScheduledTask>>(http.get(`/scheduled-tasks/by-task/${taskId}`)),
   create: (taskId: string, body: Partial<ScheduledTask>) =>
@@ -476,11 +509,28 @@ export interface LLMModel {
   input_unit_price: number;
   output_unit_price: number;
   enabled: boolean;
+  visible_to_user: boolean;
 }
 export interface LLMConfig {
   budget_monthly_usd: number;
   budget_alert_threshold: number;
+  default_model_id: string | null;
   models: LLMModel[];
+}
+export interface MifyModelRefreshSummary {
+  fetched: number;
+  llm: number;
+  inserted: number;
+  updated: number;
+  kept_existing: number;
+  skipped_non_llm: number;
+  skipped_invalid: number;
+}
+export interface TestModelResp {
+  model: string;
+  reply: string;
+  usage: { input_tokens: number; output_tokens: number } | null;
+  latency_ms: number;
 }
 export interface SystemParams {
   upload_max_size_mb: number;
@@ -529,6 +579,16 @@ export const settingsApi = {
     ),
   updateModel: (model_id: string, patch: Partial<LLMModel>) =>
     api<LLMModel>(http.patch(`/admin/settings/llm/models/${model_id}`, patch)),
+  refreshMifyModels: () =>
+    api<{ llm: LLMConfig; summary: MifyModelRefreshSummary }>(
+      http.post("/admin/settings/llm/models/refresh-mify"),
+    ),
+  updateDefaultModel: (model_id: string | null) =>
+    api<{ default_model_id: string | null }>(
+      http.patch("/admin/settings/llm/default-model", { model_id }),
+    ),
+  testModel: (model_id: string, prompt: string) =>
+    api<TestModelResp>(http.post("/admin/settings/llm/test", { model_id, prompt })),
   listAnnouncements: () =>
     api<{ items: Announcement[] }>(http.get("/admin/settings/announcements")),
   createAnnouncement: (body: Partial<Announcement>) =>

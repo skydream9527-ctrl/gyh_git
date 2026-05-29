@@ -8,6 +8,9 @@ Default values live in DEFAULTS; overrides are merged on read.
 """
 from __future__ import annotations
 
+import json
+import subprocess
+import sys
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
@@ -52,15 +55,21 @@ DEFAULTS: dict = {
     "llm": {
         "budget_monthly_usd": 2000.0,
         "budget_alert_threshold": 0.8,
+        # 默认模型（None = fallback 到 .env 的 MIFY_DEFAULT_MODEL）。在 admin
+        # settings UI 配置；llm_gateway.resolve_model 优先读这里。
+        "default_model_id": None,
+        # visible_to_user：普通 user 在 workspace 模型下拉里能否看到这个模型；
+        # admin/super_admin 不受此约束，能看到所有 enabled=true 的模型。
+        # enabled 是系统级开关（false 全员都用不了），visible_to_user 是用户级。
         "models": [
-            {"id": "ppio/pa/claude-opus-4-7", "label": "Claude Opus 4.7", "input_unit_price": 15.0, "output_unit_price": 75.0, "enabled": True},
-            {"id": "ppio/pa/claude-opus-4-6", "label": "Claude Opus 4.6", "input_unit_price": 15.0, "output_unit_price": 75.0, "enabled": True},
-            {"id": "ppio/pa/claude-sonnet-4-6", "label": "Claude Sonnet 4.6", "input_unit_price": 3.0, "output_unit_price": 15.0, "enabled": True},
-            {"id": "azure_openai/gpt-5.4", "label": "GPT-5.4", "input_unit_price": 5.0, "output_unit_price": 25.0, "enabled": True},
-            {"id": "azure_openai/gpt-5.3-codex", "label": "GPT-5.3 Codex", "input_unit_price": 5.0, "output_unit_price": 25.0, "enabled": True},
-            {"id": "vertex_ai/gemini-3.1-pro-preview", "label": "Gemini 3.1 Pro", "input_unit_price": 2.5, "output_unit_price": 12.5, "enabled": True},
-            {"id": "xiaomi/glm-5", "label": "GLM-5 (Xiaomi)", "input_unit_price": 1.0, "output_unit_price": 4.0, "enabled": True},
-            {"id": "xiaomi/mimo-v2.5-pro", "label": "MiMo v2.5 Pro (Xiaomi)", "input_unit_price": 1.0, "output_unit_price": 4.0, "enabled": True},
+            {"id": "ppio/pa/claude-opus-4-7", "label": "Claude Opus 4.7", "input_unit_price": 15.0, "output_unit_price": 75.0, "enabled": True, "visible_to_user": True},
+            {"id": "ppio/pa/claude-opus-4-6", "label": "Claude Opus 4.6", "input_unit_price": 15.0, "output_unit_price": 75.0, "enabled": True, "visible_to_user": True},
+            {"id": "ppio/pa/claude-sonnet-4-6", "label": "Claude Sonnet 4.6", "input_unit_price": 3.0, "output_unit_price": 15.0, "enabled": True, "visible_to_user": True},
+            {"id": "azure_openai/gpt-5.4", "label": "GPT-5.4", "input_unit_price": 5.0, "output_unit_price": 25.0, "enabled": True, "visible_to_user": True},
+            {"id": "azure_openai/gpt-5.3-codex", "label": "GPT-5.3 Codex", "input_unit_price": 5.0, "output_unit_price": 25.0, "enabled": True, "visible_to_user": True},
+            {"id": "vertex_ai/gemini-3.1-pro-preview", "label": "Gemini 3.1 Pro", "input_unit_price": 2.5, "output_unit_price": 12.5, "enabled": True, "visible_to_user": True},
+            {"id": "xiaomi/glm-5", "label": "GLM-5 (Xiaomi)", "input_unit_price": 1.0, "output_unit_price": 4.0, "enabled": True, "visible_to_user": True},
+            {"id": "xiaomi/mimo-v2.5-pro", "label": "MiMo v2.5 Pro (Xiaomi)", "input_unit_price": 1.0, "output_unit_price": 4.0, "enabled": True, "visible_to_user": True},
         ],
     },
     "announcements": [],
@@ -120,6 +129,10 @@ def _save(cfg: dict) -> None:
     write_json(_config_path(), cfg)
 
 
+def _repo_root() -> Path:
+    return Path(__file__).resolve().parents[3]
+
+
 # ---- public API ----
 
 
@@ -166,6 +179,7 @@ def get_llm_config() -> dict:
     return {
         "budget_monthly_usd": cfg["llm"]["budget_monthly_usd"],
         "budget_alert_threshold": cfg["llm"]["budget_alert_threshold"],
+        "default_model_id": cfg["llm"].get("default_model_id"),
         "models": cfg["llm"]["models"],
     }
 
@@ -189,7 +203,7 @@ def update_llm_model(model_id: str, patch: dict) -> dict:
     found = False
     for m in cfg["llm"]["models"]:
         if m["id"] == model_id:
-            for k in ("label", "input_unit_price", "output_unit_price", "enabled"):
+            for k in ("label", "input_unit_price", "output_unit_price", "enabled", "visible_to_user"):
                 if k in patch:
                     m[k] = patch[k]
             found = True
@@ -203,10 +217,156 @@ def update_llm_model(model_id: str, patch: dict) -> dict:
                 "input_unit_price": float(patch.get("input_unit_price", 0)),
                 "output_unit_price": float(patch.get("output_unit_price", 0)),
                 "enabled": bool(patch.get("enabled", True)),
+                "visible_to_user": bool(patch.get("visible_to_user", True)),
             }
         )
+    # 模型被禁用且它正好是当前默认 → 把 default_model_id 清掉，避免悬挂引用
+    if cfg["llm"].get("default_model_id") == model_id:
+        target = next((m for m in cfg["llm"]["models"] if m["id"] == model_id), None)
+        if target and not target.get("enabled", True):
+            cfg["llm"]["default_model_id"] = None
     _save(cfg)
     return next(m for m in cfg["llm"]["models"] if m["id"] == model_id)
+
+
+def get_default_model_id() -> str | None:
+    """Return the admin-configured default model id, or None to fall back to env."""
+    cfg = _read()
+    mid = cfg["llm"].get("default_model_id")
+    if not mid:
+        return None
+    # 防御：如果默认模型已被禁用或删除，返回 None 让上游 fallback env
+    for m in cfg["llm"]["models"]:
+        if m["id"] == mid:
+            return mid if m.get("enabled", True) else None
+    return None
+
+
+def update_llm_default_model(model_id: str | None) -> dict:
+    """Set or clear the default model. None clears it (fallback to env).
+    Non-None must reference an existing enabled model."""
+    cfg = _read()
+    if model_id is None or model_id == "":
+        cfg["llm"]["default_model_id"] = None
+    else:
+        target = next((m for m in cfg["llm"]["models"] if m["id"] == model_id), None)
+        if not target:
+            raise APIError(400, ErrorCode.VALIDATION_ERROR, f"模型不存在：{model_id}")
+        if not target.get("enabled", True):
+            raise APIError(400, ErrorCode.VALIDATION_ERROR, f"模型已禁用，不能设为默认：{model_id}")
+        cfg["llm"]["default_model_id"] = model_id
+    _save(cfg)
+    return {"default_model_id": cfg["llm"]["default_model_id"]}
+
+
+def _list_mify_gateway_llm_models() -> list[dict]:
+    script = _repo_root() / "skills" / "mify-model-gateway" / "scripts" / "list_models.py"
+    if not script.exists():
+        raise APIError(500, ErrorCode.INTERNAL_ERROR, "mify-model-gateway skill 未安装，无法刷新模型列表")
+    try:
+        proc = subprocess.run(
+            [sys.executable, str(script), "--type", "llm", "--json"],
+            cwd=str(_repo_root()),
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+    except subprocess.TimeoutExpired as e:
+        raise APIError(504, "MIFY_GATEWAY_TIMEOUT", "刷新 Mify 模型列表超时，请稍后重试") from e
+
+    if proc.returncode != 0:
+        msg = (proc.stderr or proc.stdout or "").strip()
+        if "Missing $MIFY_API_KEY" in msg or "MIFY_API_KEY" in msg:
+            msg = "MIFY_API_KEY 未配置，请先按 mify-model-gateway skill 配置网关 token"
+        elif not msg:
+            msg = "Mify 模型列表刷新失败"
+        raise APIError(502, "MIFY_GATEWAY_ERROR", msg[:500])
+
+    try:
+        payload = json.loads(proc.stdout or "[]")
+    except json.JSONDecodeError as e:
+        raise APIError(502, "MIFY_GATEWAY_ERROR", "Mify 模型列表返回了无法解析的 JSON") from e
+    if not isinstance(payload, list):
+        raise APIError(502, "MIFY_GATEWAY_ERROR", "Mify 模型列表返回格式异常")
+    return payload
+
+
+def _normalize_mify_model(row: dict) -> dict | None:
+    raw_id = str(row.get("id") or "").strip()
+    owner = str(row.get("owned_by") or "").strip()
+    if not raw_id or not owner:
+        return None
+    return {
+        "id": f"{owner}/{raw_id}",
+        "label": f"{raw_id} ({owner})",
+        "input_unit_price": 0.0,
+        "output_unit_price": 0.0,
+        "enabled": True,
+        # New gateway models become admin-selectable first; admins decide what
+        # to expose to normal users via the existing visibility switch.
+        "visible_to_user": False,
+    }
+
+
+def _merge_mify_llm_models(existing_models: list[dict], rows: list[dict]) -> tuple[list[dict], dict]:
+    by_id = {str(m.get("id")): dict(m) for m in existing_models if m.get("id")}
+    ordered_ids = [str(m.get("id")) for m in existing_models if m.get("id")]
+    fetched_ids: set[str] = set()
+    inserted = 0
+    updated = 0
+    skipped_invalid = 0
+    skipped_non_llm = 0
+
+    for row in rows:
+        if not isinstance(row, dict):
+            skipped_invalid += 1
+            continue
+        if str(row.get("model_type") or "").lower() != "llm":
+            skipped_non_llm += 1
+            continue
+        model = _normalize_mify_model(row)
+        if not model:
+            skipped_invalid += 1
+            continue
+        mid = model["id"]
+        fetched_ids.add(mid)
+        if mid not in by_id:
+            by_id[mid] = model
+            ordered_ids.append(mid)
+            inserted += 1
+            continue
+
+        current = by_id[mid]
+        before = dict(current)
+        current.setdefault("label", model["label"])
+        current.setdefault("input_unit_price", 0.0)
+        current.setdefault("output_unit_price", 0.0)
+        current.setdefault("enabled", True)
+        current.setdefault("visible_to_user", False)
+        if current != before:
+            updated += 1
+
+    merged = [by_id[mid] for mid in ordered_ids if mid in by_id]
+    summary = {
+        "fetched": len(rows),
+        "llm": len(fetched_ids),
+        "inserted": inserted,
+        "updated": updated,
+        "kept_existing": len([m for m in existing_models if str(m.get("id")) not in fetched_ids]),
+        "skipped_non_llm": skipped_non_llm,
+        "skipped_invalid": skipped_invalid,
+    }
+    return merged, summary
+
+
+def refresh_llm_models_from_mify() -> dict:
+    rows = _list_mify_gateway_llm_models()
+    cfg = _read()
+    merged, summary = _merge_mify_llm_models(cfg["llm"]["models"], rows)
+    cfg["llm"]["models"] = merged
+    _save(cfg)
+    return {"llm": get_llm_config(), "summary": summary}
 
 
 def get_model_pricing(model_id: str) -> tuple[float, float]:

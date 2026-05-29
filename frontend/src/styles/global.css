@@ -479,3 +479,76 @@ select {
     /* 让样式回到 normal 态：不依赖 hover 也要美观 */
   }
 }
+
+/* =========================================
+   V6 GLOBAL UTILITIES & OVERRIDES
+   ========================================= */
+
+/* V6 Buttons */
+.v6-btn-primary {
+  background: var(--accent-grad);
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: var(--shadow-btn);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: opacity 0.2s;
+}
+.v6-btn-primary:hover {
+  opacity: 0.9;
+}
+.v6-btn-outline {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: var(--shadow-1);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.2s;
+}
+.v6-btn-outline:hover {
+  background: var(--surface-2);
+}
+
+/* V6 Cards */
+.v6-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow-2);
+  padding: 16px;
+}
+
+/* V6 Tag / Badge */
+.v6-badge {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.v6-badge-warning {
+  background: rgba(176, 125, 42, 0.1);
+  color: var(--warning);
+  border: 1px solid rgba(176, 125, 42, 0.2);
+}
+.v6-badge-success {
+  background: rgba(90, 122, 79, 0.1);
+  color: var(--success);
+  border: 1px solid rgba(90, 122, 79, 0.2);
+}

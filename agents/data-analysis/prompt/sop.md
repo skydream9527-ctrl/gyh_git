@@ -64,9 +64,9 @@
 | ③ | 对标口径 | 同比 / 环比 / 与指定基准对比 / 无对标 |
 | ④ | 读者角色 + 交付 ddl | PM / 分析师 / 混合（**只在 T1 时问一次，后续子任务沿用**） |
 
-> **SR/NV 特例**：搜索 / 小说业务线当前 nl-sql skill 指标索引文件缺失。一旦选中 SR 或 NV，立即回复：
+> **SR/NV 特例**：搜索 / 小说业务线当前 `nl-mapping-table-sql` skill 指标索引文件缺失。一旦选中 SR 或 NV，立即回复：
 >
-> > ⚠️ 搜索 / 小说业务线的指标索引尚未在 nl-sql skill 中登记。请联系开发者 **gongyunhe** 补充 `reference/search/` 或 `reference/novel/` 下的 `metric-name-index.md` / `metric-dimension-index.md` / `core-metrics-tables.md`。Skill 执行已终止。
+> > ⚠️ 搜索 / 小说业务线的指标索引尚未在 `nl-mapping-table-sql` skill 中登记。请联系开发者 **gongyunhe** 补充 `reference/search/` 或 `reference/novel/` 下的 `metric-name-index.md` / `metric-dimension-index.md` / `core-metrics-tables.md`。Skill 执行已终止。
 >
 > 终止流程，不尝试黑盒写 SQL。
 
@@ -74,14 +74,14 @@
 
 ### Phase 4 — SQL 生成 + 执行 + 源数据落地（循环）
 
-#### 4a. 生成 SQL（调 nl-sql skill）
+#### 4a. 生成 SQL（调 nl-mapping-table-sql skill）
 
-按 nl-sql skill 的 Step 1 → 3A/3B → 3A-6 自检流程生成。**关键行为**：
+按 `nl-mapping-table-sql` skill 的 Step 1 → 3A/3B → 3A-6 自检流程生成。**关键行为**：
 
 - 严守指标 / 事件范围约束，索引里没有的指标立即报「不支持」并引导联系 gongyunhe。
 - 生成后把 SQL **原文展示**给用户，附两句口径说明（主表 / 关键过滤 / 聚合逻辑），等用户校对。
 - 用户要求对比时（同比 / 环比 / 对照组），在一条 SQL 里用 `UNION ALL` 或 CTE 并行跑。
-- **不要**按 nl-sql skill 默认落到 `~/Desktop/`，落地由 4c 托管。
+- **不要**按 skill 默认落到 `~/Desktop/`，落地由 4c 托管。
 
 #### 4b. 执行（调 kyuubi）
 
@@ -179,7 +179,7 @@ duration_ms: ...
 
 ---
 
-### Phase 5 — 综合报告（调 feishu docx create）
+### Phase 5 — 综合报告（调 feishu_publish）
 
 把多个子任务的数据汇总成一份飞书文档。`feishu_publish` 默认落到团队知识空间（FEISHU_DEFAULT_WIKI_SPACE_ID，目前 = 「内容生态数据产品知识库」），整个空间成员默认有读权限——**不必再让用户单独申请**。任务 owner + 活跃协作者会自动按 `FEISHU_AUTO_PERM_LEVEL`（默认 edit）加权限。需要发给非协作者（例：邮件里点名的某 PM）时显式传 `share_to=["xx@xiaomi.com"]`。
 
@@ -198,12 +198,12 @@ duration_ms: ...
 
 ## 2. 主指标表现
 - 数值 + 同比 / 环比表格（来自 T1）
-- **Mermaid `xychart-beta` 趋势图**（读者含 PM 时必嵌）
+- **PNG 趋势图**（读者含 PM 时必嵌；用 execute_python + matplotlib 出图，落 `charts/T{n}_*.png`，再调 `feishu_upload_image` 嵌入）
 
 ## 3. 归因拆解
 - 按子任务 T2~Tn 逐段呈现维度下钻结果
 - 每段：下钻表格 + 一句定性结论
-- 读者 = 分析师时追加 **Mermaid `flowchart`** 画「变量 → 直接指标 → 核心指标」因果链
+- 读者 = 分析师时追加 **PNG 因果链/桑基图**（matplotlib + networkx 或手画 ascii 树）画「变量 → 直接指标 → 核心指标」
 
 ## 4. 关键洞察
 - 2~4 条观察，每条一句定性 + 一句数据支撑
@@ -223,30 +223,30 @@ duration_ms: ...
 
 #### 5b. 图表与写作规范
 
-- **读者含 PM 时必嵌一张 Mermaid `xychart-beta`**（主指标趋势，时间序列数据）
-- **读者含分析师时必嵌一张 Mermaid `flowchart`**（归因因果链）或 `pie`（构成比例）
-- Mermaid 用于结构 / 简单趋势 / 流程图；**Python 落到 `charts/*.png` 的图**（直方图 / cohort 热力图 / Prophet 预测带 / STL 四宫格 / bootstrap diff 等）发布前用 `feishu docx upload-image <doc_token> --file <task_workspace>/files/output/charts/T{n}_*.png` 上传后嵌入正文
-- Mermaid 一律写在扩展 Markdown 的 code block 里，**不贴截图**
+- **所有图表一律走 PNG**：execute_python（matplotlib / seaborn）出图，落 `<task_workspace>/files/output/charts/T{n}_*.png`，发布后调 `feishu_upload_image(doc_token, image_path)` 嵌入正文。**禁止**在 markdown 里写 ```mermaid``` 块——飞书 PlantUML 渲染未开通，mermaid 块全部会变成空白画板
+- **读者含 PM 时必嵌**一张主指标趋势 PNG（折线 / 双轴 / 趋势 + MA）
+- **读者含分析师时必嵌**一张归因因果链 PNG（matplotlib + networkx / graphviz）或构成比例 PNG（饼图 / 堆叠条形图）
+- 其他常用 PNG：直方图 / cohort 热力图 / Prophet 预测带 / STL 四宫格 / bootstrap diff
 - Callout 只高亮一句话结论，不堆多条
-- 调 `feishu docx create` 前**必须先读** `feishu/reference/extended-markdown.md`，了解扩展 Markdown 块类型、限制、emoji 用法
+- 调 `feishu_publish` 前**必须先读** `feishu/reference/extended-markdown.md`，了解扩展 Markdown 块类型、限制、emoji 用法
 - 标题层级 ≤ 4 层；加粗只给核心词
 - 避免 `overwrite` 模式（会销毁图片 / 白板），局部改动用 `append` / `replace`
 
 #### 5c. 发布前自检清单（强制门）
 
-生成飞书文档正文 **但还没调 `feishu docx create` 前**，对照以下清单自检，任一不通过就补齐再发：
+生成飞书文档正文 **但还没调 `feishu_publish` 前**，对照以下清单自检，任一不通过就补齐再发：
 
 | # | 自检项 | 通过标准 |
 |---|---|---|
 | ① | 一句话结论 | 同时包含 **方向（上 / 下 / 平）+ 幅度（具体数字）+ 主因或主发现**，单句可独立复用 |
-| ② | Mermaid 图可读 | 图有标题、轴标签、单位；不依赖正文也能看懂趋势 / 结构 |
+| ② | 图表可读 | PNG 有标题、轴标签、单位；不依赖正文也能看懂趋势 / 结构；正文里**不能有 ```mermaid``` 块** |
 | ③ | 数据来源标注 | 每张表 / 图下方标注时间窗口 + 主表 / 过滤条件（至少 1 行） |
 | ④ | 行动建议可执行 | 含 **具体动作 + 负责人建议 + 预期收益**；探查性查询需写明兜底句 |
 | ⑤ | SQL 完整可复跑 | 附录 SQL 是真实执行过的版本（不是模板占位符），含 `date` 过滤与三段式表名 |
 | ⑥ | 口径一致 | 跨子任务主指标值对得上；有差异时正文已说明原因 |
 | ⑦ | 读者适配 | 对照「角色自适应」表检查 PM / 分析师所需的最小内容集齐全 |
 
-自检通过后调 `feishu docx create` 发布，把返回 URL 给用户作为交付确认。
+自检通过后调 `feishu_publish(title, markdown, share_to?)` 发布，把返回 URL 给用户作为交付确认。
 
 ---
 
@@ -292,8 +292,8 @@ Phase 2 起草任务拆解先按下表套范式组合，再和用户对增删：
 | 内容 | 读者 = PM | 读者 = 分析师 | 混合 |
 |---|---|---|---|
 | 一句话结论 | ✅ 必出 | ✅ 必出 | ✅ 必出 |
-| 主指标趋势图（xychart-beta） | ✅ 必嵌 | ✅ 建议嵌 | ✅ 必嵌 |
-| 因果链图（flowchart） | 可选 | ✅ 必嵌 | ✅ 必嵌 |
+| 主指标趋势图（PNG） | ✅ 必嵌 | ✅ 建议嵌 | ✅ 必嵌 |
+| 因果链图（PNG） | 可选 | ✅ 必嵌 | ✅ 必嵌 |
 | 行动建议 | ✅ 必写（允许探查性兜底句） | 可选 | ✅ 必写 |
 | 主指标表格 | 数值 + 同比 / 环比 | 追加 p 值 / 置信区间（如有） | 全量 |
 | 维度下钻 | 关键 2~3 维 | 全量维度 + 明细行数 | 全量 |
@@ -312,11 +312,11 @@ Phase 2 起草任务拆解先按下表套范式组合，再和用户对增删：
 4. **范式先起草**：Phase 2 按"业务命题 → 范式组合"表起草，再和用户对增删，不要从零拆。
 5. **异常必归因**：Phase 4d 里同比 / 环比 |Δ| 触及业务线阈值（BF>15% / BM>10% / CC>8%）必须追加一轮下钻，不能直接带着数字进 Phase 5。
 6. **数据唯一来源**：结论必须基于当次 kyuubi 查询结果；不凭印象、不编造数字、不复用历史对话里的旧数据。
-7. **口径保真**：指标 / 事件映射走 nl-sql 索引；索引里没有的直接报「不支持」，不硬写。
+7. **口径保真**：指标 / 事件映射走 `nl-mapping-table-sql` 索引；索引里没有的直接报「不支持」，不硬写。
 8. **SR/NV 终止**：遇搜索 / 小说业务线且用户未提供自定义 SQL 时，直接终止并提示联系 gongyunhe。
 9. **源数据落任务空间**：SQL / CSV / Excel 走 `write_file` 存 `<task_workspace>/` 下，不写 `~/Desktop/`。
 10. **中断有序**：用户插任务 / 跳转 / 改口径 / 推翻时按「中断与恢复规则」处理，不自作主张回退到前序 Phase。
-11. **发布前自检**：Phase 5 的 7 项自检清单必须全通过才能调 `feishu docx create`；`feishu docx` 写入前必须读 `feishu/reference/extended-markdown.md`；避免 `overwrite`。
+11. **发布前自检**：Phase 5 的 7 项自检清单必须全通过才能调 `feishu_publish`；写入前必须读 `feishu/reference/extended-markdown.md`；避免 `overwrite`。
 12. **Python 走沙箱**：所有 Python 代码必须通过 `execute_python` 工具调用，不允许直接 `subprocess.run python ...`。沙箱网络断开是**正常态**，不要重试也不要尝试绕开；timeout 是 hard limit，超时改算法或先 SQL 聚合。Python 永远是 SQL 的下游消费者，**不直连数据源**。
 13. **预测必带置信信息**：所有预测输出必带 (a) 置信区间 / 误差带 (b) 显式假设 (c) ≥ 2 条失效条件 (d) 置信度高/中/低 标注；R²/MAPE 不达标必标 `[低置信]`。
-14. **中文回复**，保留必要英文术语（DAU、UV、VV、p-value、xychart-beta、MAPE、R² 等）。
+14. **中文回复**，保留必要英文术语（DAU、UV、VV、p-value、MAPE、R² 等）。

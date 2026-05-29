@@ -25,6 +25,7 @@ import type {
   ChatMessage,
   ConversationMessagesPage,
   FileMeta,
+  HitlRequest,
   SkillCard,
   TaskDetail,
 } from "@/types/api";
@@ -90,6 +91,8 @@ export function WorkspacePage() {
   const [kbArticles, setKbArticles] = useState<Record<string, KBArticle[]>>({});
   const [kbBusy, setKbBusy] = useState<string | null>(null);
   const [scheduledItems, setScheduledItems] = useState<ScheduledTask[]>([]);
+  const [hitlRequests, setHitlRequests] = useState<HitlRequest[]>([]);
+  const [hitlBusy, setHitlBusy] = useState(false);
   const [activeFile, setActiveFile] = useState<FileMeta | null>(null);
   const [activeContent, setActiveContent] = useState<string | null>(null);
   const [loadErr, setLoadErr] = useState<string | null>(null);
@@ -103,6 +106,8 @@ export function WorkspacePage() {
   const [voiceConvOpen, setVoiceConvOpen] = useState(false);
   // viewer 是否已经申请编辑权限（提交成功 / 后端返回已 pending 都视为已申请）
   const [editAccessRequested, setEditAccessRequested] = useState(false);
+  const taskNeedsHuman =
+    hitlRequests.length > 0 || /paused|pending|approval|error/i.test(String(task?.status || ""));
 
   // ---- 左右栏可拖拽宽度（localStorage 持久化）----
   const LS_LEFT = "ws-left-w";
@@ -163,6 +168,13 @@ export function WorkspacePage() {
         .then((r) => setFiles(r.items))
         .catch(() => {});
     },
+    onHitlRequested: (request) => {
+      setHitlRequests((arr) => {
+        if (arr.some((it) => it.id === request.id)) return arr;
+        return [request, ...arr];
+      });
+      pushToast("info", request.title || "任务等待人工确认");
+    },
   });
 
   const applyHistoryPage = useCallback(
@@ -199,14 +211,16 @@ export function WorkspacePage() {
       taskApi.detail(taskId),
       taskApi.conversation(taskId, { limit: HISTORY_PAGE_SIZE }),
       fileApi.listTask(taskId),
+      taskApi.listHitl(taskId).catch(() => ({ items: [] as HitlRequest[] })),
       skillApi.list().catch(() => ({ items: [] as SkillCard[] })),
     ])
-      .then(async ([t, conv, fs, skills]) => {
+      .then(async ([t, conv, fs, hitl, skills]) => {
         if (cancelled) return;
         setTask(t);
         setConversationId(conv.conversation_id);
         applyHistoryPage(conv);
         setFiles(fs.items);
+        setHitlRequests(hitl.items);
         setAllSkills(skills.items);
         if (t.workspace?.model) setModel(t.workspace.model);
         if (t.agent_id) {
@@ -252,6 +266,15 @@ export function WorkspacePage() {
     reloadScheduled();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [taskId]);
+
+  const reloadHitl = async () => {
+    try {
+      const r = await taskApi.listHitl(taskId);
+      setHitlRequests(r.items);
+    } catch {
+      setHitlRequests([]);
+    }
+  };
 
   const loadKbArticles = async (kb: KBSummary) => {
     if (kbArticles[kb.id]) return;
@@ -346,8 +369,10 @@ export function WorkspacePage() {
     try {
       const t = await taskApi.detail(taskId);
       const fs = await fileApi.listTask(taskId);
+      const hitl = await taskApi.listHitl(taskId).catch(() => ({ items: [] as HitlRequest[] }));
       setTask(t);
       setFiles(fs.items);
+      setHitlRequests(hitl.items);
       if (conversationId) {
         const conv = await conversationApi.get(taskId, conversationId, { limit: HISTORY_PAGE_SIZE });
         applyHistoryPage(conv);
@@ -369,6 +394,16 @@ export function WorkspacePage() {
   useEffect(() => {
     setConvListReloadKey((k) => k + 1);
   }, [socket.finalized.length, conversationId]);
+
+  useEffect(() => {
+    if (socket.phase !== "done") return;
+    taskApi
+      .detail(taskId)
+      .then((t) => setTask(t))
+      .catch(() => {});
+    reloadHitl();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [socket.phase, taskId]);
 
   // 当前对话从「后台还在跑」转为「跑完了」时，自动拉一次最新历史。
   // 关键：仅在本地 finalized 为空时拉——说明用户不在场（切走又切回的场景）。
@@ -616,6 +651,19 @@ export function WorkspacePage() {
     }
   };
 
+  const renameTask = async () => {
+    const next = window.prompt("新的任务名称", task.name);
+    const name = (next || "").trim();
+    if (!name || name === task.name) return;
+    try {
+      const updated = await taskApi.update(taskId, { name });
+      setTask(updated);
+      pushToast("success", "任务已重命名");
+    } catch (err) {
+      pushToast("error", `重命名失败：${(err as Error).message}`);
+    }
+  };
+
   return (
     <div className="ws">
       <TopNav
@@ -632,7 +680,30 @@ export function WorkspacePage() {
               ← 首页
             </button>
             <span className="ws-crumb-sep">/</span>
-            <span className="current">{task.name}</span>
+            <details className="ws-task-menu">
+              <summary className="current">
+                <span>{task.name}</span>
+                <span className="ws-task-menu-caret">▾</span>
+              </summary>
+              <div className="ws-task-menu-pop">
+                <div className="ws-task-menu-title">任务操作</div>
+                <button type="button" onClick={renameTask} disabled={!canWrite} title={canWrite ? "修改任务名称" : "当前身份无权修改"}>
+                  重命名任务
+                </button>
+                <button type="button" onClick={() => navigate(`/scheduled-tasks?taskId=${taskId}`)}>
+                  配置定时调度
+                  <small>{scheduledItems.length > 0 ? `${scheduledItems.length} 个` : "Off"}</small>
+                </button>
+                <button type="button" onClick={exportConversation}>导出结果文件</button>
+                <button type="button" className="danger" onClick={() => navigate("/dashboard")}>返回仪表盘</button>
+              </div>
+            </details>
+            {taskNeedsHuman && (
+              <span className="ws-v6-status-pill">
+                <span className="v6-pulse" />
+                等待处理
+              </span>
+            )}
           </span>
         }
         agentChip={
@@ -749,7 +820,7 @@ export function WorkspacePage() {
         <aside className="ws-sidebar">
           <div className="ws-sb-section">
             <div className="ws-sb-head">
-              <span>📂 工作文件</span>
+              <h3 className="v6-pane-title">Context & Data</h3>
               {canWrite && (
                 <label className="ws-upload">
                   + 上传
@@ -1076,6 +1147,34 @@ export function WorkspacePage() {
               setTask(t);
             }}
           />
+          {taskNeedsHuman && (
+            <V6HumanInterventionCard
+              taskName={task.name}
+              request={hitlRequests[0] || null}
+              busy={hitlBusy}
+              onOpenSandbox={() => setActiveRightTab("agent")}
+              onContinue={async (payload, decision, note) => {
+                const req = hitlRequests[0];
+                if (!req) {
+                  pushToast("info", "当前没有待处理的人工干预请求");
+                  return;
+                }
+                setHitlBusy(true);
+                try {
+                  await taskApi.resolveHitl(taskId, req.id, { decision, payload, note });
+                  await reloadHitl();
+                  const t = await taskApi.detail(taskId);
+                  setTask(t);
+                  pushToast("success", "已记录人工处理结果，正在继续执行");
+                  socket.send("请基于刚才的人工修正继续执行。", { model });
+                } catch (err) {
+                  pushToast("error", `处理失败：${(err as Error).message}`);
+                } finally {
+                  setHitlBusy(false);
+                }
+              }}
+            />
+          )}
           {wsErrCode && (
             <div className="ws-banner">
               <ErrorState
@@ -1270,6 +1369,15 @@ export function WorkspacePage() {
         />
 
         <aside className="ws-right">
+          <div className="v6-pane-header"><h3 className="v6-pane-title">Execution & Tools</h3></div>
+          <V6ExecutionPlan
+            todos={socket.todos}
+            phase={socket.phase}
+            pendingPlan={Boolean(socket.pendingPlan)}
+            inflightName={socket.inflightUser?.name || null}
+            scheduledCount={scheduledItems.length}
+            agentName={agent?.name || task.agent_id || "Agent"}
+          />
           <div className="ws-right-tabs">
             {(
               [
@@ -1743,6 +1851,157 @@ export function WorkspacePage() {
         >
           🤖 详情
         </button>
+      </div>
+    </div>
+  );
+}
+
+function V6ExecutionPlan({
+  todos,
+  phase,
+  pendingPlan,
+  inflightName,
+  scheduledCount,
+  agentName,
+}: {
+  todos: Array<{ id: string; content: string; status: "pending" | "in_progress" | "completed" }>;
+  phase: string;
+  pendingPlan: boolean;
+  inflightName: string | null;
+  scheduledCount: number;
+  agentName: string;
+}) {
+  const active = ["typing", "streaming", "tool"].includes(phase);
+  type NodeStatus = "completed" | "running" | "pending";
+  const fallbackNodes: Array<{ id: string; title: string; meta: string; status: NodeStatus }> = [
+    { id: "intent", title: "理解意图与拆解计划", meta: agentName, status: active || pendingPlan ? "completed" : "pending" },
+    { id: "execute", title: "数据提取与工具调用", meta: inflightName ? `${inflightName} 占用中` : active ? "执行中" : "等待指令", status: active ? "running" : "pending" },
+    { id: "report", title: "归因分析与报告生成", meta: "报告节点 · 等待中", status: "pending" },
+    { id: "deliver", title: "结果交付与定时化", meta: scheduledCount > 0 ? `${scheduledCount} 个 Cron 已绑定` : "可转为 Cron", status: scheduledCount > 0 ? "completed" : "pending" },
+  ];
+  const nodes =
+    todos.length > 0
+      ? todos.map((t) => ({
+          id: t.id,
+          title: t.content,
+          meta:
+            t.status === "completed"
+              ? "已完成"
+              : t.status === "in_progress"
+                ? `${agentName} · 执行中`
+                : "等待中",
+          status:
+            t.status === "completed"
+              ? "completed"
+              : t.status === "in_progress"
+                ? "running"
+                : "pending",
+        }))
+      : fallbackNodes;
+
+  return (
+    <div className="v6-exec-panel">
+      <div className="v6-exec-summary">
+        <span className={active || pendingPlan ? "v6-badge v6-badge-warning" : "v6-badge"}>
+          {pendingPlan ? "等待审批" : active ? "执行中" : "就绪"}
+        </span>
+        <small>{todos.length > 0 ? "来自 Agent Todo" : "工作流预览"}</small>
+      </div>
+      <div className="v6-exec-tree">
+        <div className="v6-exec-line" />
+        {nodes.map((n) => (
+          <div key={n.id} className="v6-exec-node">
+            <div className={`v6-exec-dot ${n.status}`}>
+              {n.status === "completed" ? "✓" : n.status === "running" ? <span className="v6-pulse" /> : null}
+            </div>
+            <div className="v6-exec-content">
+              <div className="v6-exec-title">{n.title}</div>
+              <div className={`v6-exec-meta ${n.status}`}>{n.meta}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function V6HumanInterventionCard({
+  taskName,
+  request,
+  busy,
+  onOpenSandbox,
+  onContinue,
+}: {
+  taskName: string;
+  request: HitlRequest | null;
+  busy: boolean;
+  onOpenSandbox: () => void;
+  onContinue: (payload: Record<string, unknown>, decision: string, note: string) => void | Promise<void>;
+}) {
+  const [values, setValues] = useState<Record<string, string>>({});
+  const fields = request?.fields?.length
+    ? request.fields
+    : [
+        { id: "note", label: "处理说明", value: "", placeholder: "补充判断依据或修正口径" },
+      ];
+  const columns = request?.table?.columns || [];
+  const rows = request?.table?.rows || [];
+  const primaryAction = request?.actions?.[0]?.id || "continue";
+  const note = values.note || "";
+  const submit = (decision: string) => {
+    const payload = {
+      fields: Object.fromEntries(fields.map((f) => [f.id, values[f.id] ?? f.value ?? ""])),
+      table_rows: rows,
+    };
+    onContinue(payload, decision, note);
+  };
+
+  return (
+    <div className="v6-hitl-card v6-hitl-inline">
+      <div className="v6-hitl-head">
+        <div className="v6-hitl-title">
+          <span className="v6-pulse" />
+          检测到需要人工确认的节点
+        </div>
+        <span className="v6-badge v6-badge-warning">HITL</span>
+      </div>
+      <div className="v6-hitl-body">
+        <p>
+          {request?.message || `工作流「${taskName}」已挂起。请补充处理口径，确认后 Agent 会继续执行。`}
+        </p>
+        {rows.length > 0 && columns.length > 0 && (
+          <div className="v6-hitl-table">
+            <div className="v6-hitl-tr head">
+              {columns.map((c) => <span key={c}>{c}</span>)}
+            </div>
+            {rows.slice(0, 4).map((row, idx) => (
+              <div className="v6-hitl-tr" key={idx}>
+                {columns.map((c) => <span key={c}>{String(row[c] ?? "")}</span>)}
+              </div>
+            ))}
+          </div>
+        )}
+        <div className="v6-hitl-table">
+          {fields.map((field) => (
+            <div className="v6-hitl-tr" key={field.id}>
+              <span>{field.label}</span>
+              <input
+                value={values[field.id] ?? field.value ?? ""}
+                onChange={(e) => setValues((cur) => ({ ...cur, [field.id]: e.target.value }))}
+                placeholder={field.placeholder || "请输入"}
+              />
+            </div>
+          ))}
+        </div>
+        <div className="v6-hitl-actions">
+          <button type="button" className="v6-btn-primary" disabled={busy || !request} onClick={() => submit(primaryAction)}>
+            {busy ? "处理中..." : request?.actions?.[0]?.label || "确认并继续"}
+          </button>
+          <button type="button" className="v6-btn-outline" disabled={busy || !request} onClick={() => submit("skip")}>
+            跳过该节点
+          </button>
+          <button type="button" className="v6-hitl-link" onClick={onOpenSandbox}>打开沙盒</button>
+        </div>
       </div>
     </div>
   );

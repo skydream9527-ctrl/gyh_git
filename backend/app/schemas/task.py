@@ -15,6 +15,13 @@ class TaskCreate(BaseModel):
     visibility: str = "private"
 
 
+class TaskUpdate(BaseModel):
+    name: str | None = Field(default=None, max_length=120)
+    description: str | None = None
+    status: str | None = None
+    visibility: str | None = None
+
+
 class TaskSummary(BaseModel):
     id: str
     name: str

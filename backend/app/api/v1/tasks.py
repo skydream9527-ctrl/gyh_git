@@ -7,8 +7,8 @@ from fastapi import APIRouter, Depends, Query
 from ...core.deps import TaskRole, get_current_user, require_task_role
 from ...core.errors import APIError, ErrorCode, ok
 from ...core.storage import file_transaction, get_paths, read_json
-from ...schemas.task import TaskCreate
-from ...services import agent_snapshot_svc, conversation_svc, join_request_svc, task_svc
+from ...schemas.task import TaskCreate, TaskUpdate
+from ...services import agent_snapshot_svc, conversation_svc, hitl_svc, join_request_svc, task_svc
 
 router = APIRouter()
 
@@ -45,6 +45,24 @@ async def get_task(task_id: str, user: dict = Depends(get_current_user)):
     return ok(
         await task_svc.get_task(
             task_id, user["id"], is_admin=bool(user.get("is_admin"))
+        )
+    )
+
+
+@router.patch("/{task_id}")
+async def update_task(
+    task_id: str,
+    body: TaskUpdate,
+    role: TaskRole = Depends(require_task_role(TaskRole.EDITOR, TaskRole.OWNER, TaskRole.ADMIN)),
+    user: dict = Depends(get_current_user),
+):
+    return ok(
+        await task_svc.update_task(
+            task_id,
+            user["id"],
+            body.model_dump(exclude_unset=True),
+            is_admin=role == TaskRole.ADMIN or bool(user.get("is_admin")),
+            allow_visibility=role in (TaskRole.OWNER, TaskRole.ADMIN),
         )
     )
 
@@ -172,6 +190,72 @@ async def get_task_todos(task_id: str, user: dict = Depends(get_current_user)):
     if not isinstance(payload, dict):
         return ok({"task_id": task_id, "items": [], "updated_at": None})
     return ok(payload)
+
+
+@router.get("/{task_id}/run-events")
+async def get_run_events(
+    task_id: str,
+    user: dict = Depends(get_current_user),
+    conv_id: str | None = None,
+    limit: int = Query(80, ge=1, le=200),
+):
+    await task_svc.get_task(task_id, user["id"], is_admin=bool(user.get("is_admin")))
+    if not conv_id:
+        conv_id = await task_svc.get_or_create_default_conversation(task_id)
+    items = task_svc.list_run_events(task_id, conv_id, limit=limit)
+    return ok({"task_id": task_id, "conversation_id": conv_id, "items": items, "total": len(items)})
+
+
+@router.get("/{task_id}/hitl")
+async def list_hitl(
+    task_id: str,
+    status: str | None = "pending",
+    user: dict = Depends(get_current_user),
+):
+    await task_svc.get_task(task_id, user["id"], is_admin=bool(user.get("is_admin")))
+    items = await hitl_svc.list_requests(task_id, status=status)
+    return ok({"items": items, "total": len(items)})
+
+
+@router.post("/{task_id}/hitl")
+async def create_hitl(
+    task_id: str,
+    body: dict,
+    role: TaskRole = Depends(require_task_role(TaskRole.EDITOR, TaskRole.OWNER, TaskRole.ADMIN)),
+    user: dict = Depends(get_current_user),
+):
+    req = await hitl_svc.create_request(
+        task_id=task_id,
+        conv_id=body.get("conversation_id"),
+        created_by=user["id"],
+        title=body.get("title") or "需要人工确认",
+        message=body.get("message") or "",
+        fields=body.get("fields") if isinstance(body.get("fields"), list) else None,
+        table=body.get("table") if isinstance(body.get("table"), dict) else None,
+        actions=body.get("actions") if isinstance(body.get("actions"), list) else None,
+        resume_prompt=body.get("resume_prompt"),
+        source="api",
+    )
+    return ok(req)
+
+
+@router.post("/{task_id}/hitl/{request_id}/resolve")
+async def resolve_hitl(
+    task_id: str,
+    request_id: str,
+    body: dict,
+    role: TaskRole = Depends(require_task_role(TaskRole.EDITOR, TaskRole.OWNER, TaskRole.ADMIN)),
+    user: dict = Depends(get_current_user),
+):
+    req = await hitl_svc.resolve_request(
+        task_id=task_id,
+        request_id=request_id,
+        user_id=user["id"],
+        decision=body.get("decision") or "continue",
+        payload=body.get("payload") if isinstance(body.get("payload"), dict) else {},
+        note=body.get("note"),
+    )
+    return ok(req)
 
 
 @router.get("/{task_id}/conversations/{conv_id}/plan-state")

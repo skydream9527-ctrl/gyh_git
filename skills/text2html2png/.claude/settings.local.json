@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//home/mi/work/claudeworkplace/langgraphgo/examples/comic_skill_example/skills/**)",
+      "Bash(zip -r /home/mi/text2html2png.zip text2html2png/)",
+      "Read(//home/mi/.claude/skills/**)",
+      "Read(//home/mi/.claude/**)",
+      "Bash(cp:*)"
+    ]
+  }
+}

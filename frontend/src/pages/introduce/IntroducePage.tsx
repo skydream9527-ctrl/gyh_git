@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { agentApi } from "@/api/endpoints";
 import type { AgentCard } from "@/types/api";
-import { useUIStore } from "@/stores/uiStore";
+import { ThemeSelect } from "@/components/shell/ThemeSelect";
 import "./Introduce.css";
 
 const PARADIGM_DESC: Record<string, string> = {
@@ -15,8 +15,6 @@ const PARADIGM_DESC: Record<string, string> = {
 
 export function IntroducePage() {
   const [agents, setAgents] = useState<AgentCard[]>([]);
-  const toggleTheme = useUIStore((s) => s.toggleTheme);
-  const theme = useUIStore((s) => s.theme);
 
   useEffect(() => {
     agentApi.list().then((r) => setAgents(r.items)).catch(() => {});
@@ -47,9 +45,7 @@ export function IntroducePage() {
           <a href="#features">功能特性</a>
         </div>
         <div className="intro-nav-actions">
-          <button className="icon-btn" onClick={toggleTheme}>
-            {theme === "dark" ? "🌓" : "☀"}
-          </button>
+          <ThemeSelect />
           <Link to="/login" className="cta-nav">
             立即体验 →
           </Link>
@@ -58,14 +54,14 @@ export function IntroducePage() {
 
       <main className="intro-container">
         <section className="intro-hero">
-          <span className="intro-tag">AI 数据工作流</span>
+        <span className="intro-tag">ICE v6 全新发布</span>
           <h1>
-            用 <span className="intro-accent">对话</span> 完成
+            基于 <span className="intro-accent">多智能体协同</span> 的
             <br />
-            所有数据任务
+            数据工作舱
           </h1>
           <p>
-            通过 Agent + 对话驱动，帮助产品团队高效完成数据分析、实验评估、经营洞察等任务。Agent 在每次对话中持续进化。
+            告别脆弱的一问一答脚本。ICE v6 引入子智能体调度网络、Human-in-the-loop 人工介入和飞书活数据挂载，让数据清洗、归因分析到报告推送形成可监控的企业级工作流。
           </p>
           <div className="intro-cta-row">
             <Link to="/login" className="btn-primary intro-cta">
@@ -98,12 +94,12 @@ export function IntroducePage() {
         <section className="intro-section" id="concepts">
           <h2>核心概念</h2>
           <div className="intro-concept-grid">
-            <Concept icon="📋" name="任务" desc="一次完整的数据工作流，独立工作空间，记录对话与产出" />
-            <Concept icon="🤖" name="Agent" desc="公共智能体，与范式 1:1 绑定，越用越聪明" />
-            <Concept icon="⚡" name="Skill" desc="可执行工具，Agent 通过 function calling 调用" />
-            <Concept icon="✨" name="经验卡片" desc="对话中提炼的规则，审批后注入 Agent 上下文" />
-            <Concept icon="🎯" name="工作范式" desc="5 种范式预绑定 Agent + Skills + Prompt" />
-            <Concept icon="🌐" name="公共区" desc="团队共享的 Agents、Skills、文件、模板" />
+            <Concept icon="▦" name="Multi-Agent 工作流" desc="Planner 拆解目标，数据分析、检索、报告节点分工执行" />
+            <Concept icon="!" name="Human-in-the-loop" desc="发现异常或高危操作时自动挂起，等待人工确认后继续" />
+            <Concept icon="↯" name="异步后台运行" desc="解绑浏览器连接，关掉页面后仍可跑批并通过通知回捞" />
+            <Concept icon="◎" name="飞书活数据挂载" desc="多维表格、Wiki、文档可作为任务上下文随取随用" />
+            <Concept icon="⏱" name="Cron 调度转化" desc="手动跑通的 Workspace 可一键绑定定时调度" />
+            <Concept icon="▤" name="执行计划可视化" desc="右侧执行树展示每个子节点的状态、耗时和阻塞原因" />
           </div>
         </section>
 
@@ -133,17 +129,17 @@ export function IntroducePage() {
         <section className="intro-section" id="features">
           <h2>覆盖完整功能</h2>
           <div className="intro-feat-grid">
-            <Feature n="01" title="认证与三级角色" desc="飞书 OAuth + JWT 双 token + super/admin/user" />
-            <Feature n="02" title="Workspace 三栏" desc="文件 + 流式对话 + Tool Calling + 文件预览" />
-            <Feature n="03" title="Agent 进化" desc="Prompt 版本历史 + 测试沙盒 + 经验卡片" />
-            <Feature n="04" title="文件优先存储" desc="文件系统是 source of truth，SQLite 仅 cache" />
-            <Feature n="05" title="定时任务" desc="cron + Agent 自动执行 + 推送" />
-            <Feature n="06" title="管理后台" desc="用户 / Agent / Skill / KB / 审计 / 用量" />
+            <Feature n="01" title="三栏数据工作台" desc="Context & Data / Chat & Action / Execution Plan" />
+            <Feature n="02" title="富交互审批卡片" desc="表格、输入框、确认按钮承接人工介入流程" />
+            <Feature n="03" title="Agent 编排拓扑" desc="可视化配置 Planner 与下游执行节点关系" />
+            <Feature n="04" title="后台运行与通知" desc="异步任务集中展示进度，挂起时回到待处理队列" />
+            <Feature n="05" title="定时调度大盘" desc="cron + Agent 自动执行 + 飞书 / 文件交付" />
+            <Feature n="06" title="治理与成本管理" desc="用户、Agent、用量、审计和系统配置统一管理" />
           </div>
         </section>
       </main>
 
-      <footer className="intro-footer">ICE Data Workbench v3 · 2026-05-07</footer>
+      <footer className="intro-footer">ICE Data Workbench v6 · Multi-Agent Data Workspace</footer>
     </div>
   );
 }

@@ -147,7 +147,7 @@ export function AgentDetailPage() {
         }
       />
 
-      <main className="ad-main has-bottombar">
+      <main className="ad-main ad-v6-main has-bottombar">
         <header className="ad-header">
           <div className="ad-icon" style={{ background: `${agent.color}22`, color: agent.color }}>
             {agent.icon}
@@ -161,6 +161,40 @@ export function AgentDetailPage() {
             + 用此 Agent 创建任务
           </button>
         </header>
+
+        <section className="ad-section ad-v6-orchestration">
+          <div className="ad-v6-section-head">
+            <div>
+              <h2>下游节点拓扑</h2>
+              <p className="ad-section-desc">配置 Planner Agent 可以调度的执行节点，并用右侧沙盒验证路由是否符合预期。</p>
+            </div>
+            <span className="v6-badge v6-badge-success">已发布</span>
+          </div>
+          <div className="ad-v6-topology">
+            <div className="ad-v6-root">
+              <strong>{agent.name}</strong>
+              <span>主调度器</span>
+            </div>
+            <div className="ad-v6-branch" aria-hidden />
+            <div className="ad-v6-child-grid">
+              <div className="ad-v6-child">
+                <div className="ad-v6-child-head"><span className="ad-v6-node-mark data">DA</span><b>数据分析师</b></div>
+                <p>专精 SQL、Pandas 清洗、指标口径核对。</p>
+                <div className="ad-v6-tools"><code>kyuubi_cli</code><code>python</code></div>
+              </div>
+              <div className="ad-v6-child">
+                <div className="ad-v6-child-head"><span className="ad-v6-node-mark rag">RA</span><b>文档检索器</b></div>
+                <p>读取飞书文档、RAG 知识库和任务挂载资料。</p>
+                <div className="ad-v6-tools"><code>feishu_fetch</code><code>read_file</code></div>
+              </div>
+              <div className="ad-v6-child">
+                <div className="ad-v6-child-head"><span className="ad-v6-node-mark report">RG</span><b>报告生成节点</b></div>
+                <p>汇总结论、产出 Markdown 报告并准备交付。</p>
+                <div className="ad-v6-tools"><code>write_file</code><code>feishu_publish</code></div>
+              </div>
+            </div>
+          </div>
+        </section>
 
         <section className="ad-section">
           <h2>能力</h2>

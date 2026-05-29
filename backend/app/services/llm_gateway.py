@@ -54,6 +54,12 @@ def resolve_model(requested: str | None) -> str:
     s = get_settings()
     if requested:
         return requested
+    # admin-configured default takes precedence over env fallback. local import
+    # keeps this services-layer file from forming an import cycle at module load.
+    from . import sysconfig_svc
+    admin_default = sysconfig_svc.get_default_model_id()
+    if admin_default:
+        return admin_default
     if s.gateway_enabled:
         return s.MIFY_DEFAULT_MODEL
     return s.ANTHROPIC_MODEL

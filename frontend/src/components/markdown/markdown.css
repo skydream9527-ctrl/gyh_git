@@ -133,7 +133,18 @@
   line-height: 1.55;
   overflow-x: auto;
 }
-:root[data-theme="dark"] .md-code-plain {
+:root[data-theme="dark"] .md-code-plain,
+:root[data-theme="su7-olive"] .md-code-plain,
+:root[data-theme="su7-purple"] .md-code-plain,
+:root[data-theme="su7-cambrian"] .md-code-plain,
+:root[data-theme="su7-diamond"] .md-code-plain,
+:root[data-theme="yu7-night"] .md-code-plain,
+:root[data-theme="yu7-forest"] .md-code-plain,
+:root[data-theme="ip13p-alpine"] .md-code-plain,
+:root[data-theme="ip14p-purple"] .md-code-plain,
+:root[data-theme="ip14p-space"] .md-code-plain,
+:root[data-theme="ip15p-blue"] .md-code-plain,
+:root[data-theme="ip16-teal"] .md-code-plain {
   background: #1e1e1e;
   color: #d4d4d4;
 }

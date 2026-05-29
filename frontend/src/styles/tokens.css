@@ -215,3 +215,1597 @@
   --m-bottombar-h: 60px;
   --m-fab-size: 56px;
 }
+
+/* 海湾蓝 */
+:root[data-theme="su7-gulf"] {
+  --bg: hsl(195, 75%, 90%);
+  --paper-deep: hsl(195, 75%, 85%);
+  --surface: #ffffff;
+  --surface-2: hsl(195, 75%, 88%);
+  --surface-3: hsl(195, 75%, 83%);
+
+  --border: hsl(195, 75%, 75%);
+  --border-soft: hsl(195, 75%, 82%);
+  --border-light: hsl(195, 75%, 78%);
+  --border-strong: hsl(195, 75%, 65%);
+  --divider: hsl(195, 75%, 80%);
+
+  --text: hsl(195, 65%, 15%);
+  --text-dim: hsl(195, 65%, 35%);
+  --text-muted: hsl(195, 65%, 50%);
+
+  --primary: hsl(195, 80%, 50%);
+  --primary-hover: hsl(195, 80%, 40%);
+  --primary-pressed: hsl(195, 80%, 30%);
+  --primary-on: #ffffff;
+  --primary-dim: hsla(195, 80%, 50%, 0.15);
+  --primary-glow: hsla(195, 80%, 50%, 0.25);
+  --primary-soft: hsl(195, 80%, 92%);
+
+  --accent: var(--primary);
+  --accent-hover: var(--primary-hover);
+  --accent-soft: var(--primary-soft);
+  --accent-text: hsl(195, 80%, 30%);
+
+  --accent-grad: linear-gradient(135deg, hsl(195, 80%, 50%) 0%, hsl(195, 90%, 65%) 100%);
+  --accent-shadow: 0 1px 0 hsla(195, 80%, 40%, 0.3), 0 4px 14px hsla(195, 80%, 50%, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  --ring: 0 0 0 2px hsla(195, 80%, 50%, 0.3);
+
+  --code-bg: hsl(195, 65%, 15%);
+  --code-text: hsl(195, 75%, 95%);
+  --code-border: hsl(195, 65%, 25%);
+
+  --p-ab: #5e7d6a; --p-ab-dim: rgba(94, 125, 106, 0.12); --p-ab-soft: #e6ede6;
+  --p-biz: #b86b3a; --p-biz-dim: rgba(184, 107, 58, 0.12); --p-biz-soft: #f5e3d0;
+  --p-data: #4a7c8b; --p-data-dim: rgba(74, 124, 139, 0.12); --p-data-soft: #d8e5ea;
+  --p-wave: #b04f5f; --p-wave-dim: rgba(176, 79, 95, 0.12); --p-wave-soft: #f0d8dc;
+  --p-gray: #7a6b8e; --p-gray-dim: rgba(122, 107, 142, 0.12); --p-gray-soft: #ebe5ee;
+  --agent: var(--p-gray); --agent-dim: var(--p-gray-dim);
+  --success: #5a7a4f; --success-dim: rgba(90, 122, 79, 0.12); --success-soft: #e6ede0;
+  --warning: #b07d2a; --warning-dim: rgba(176, 125, 42, 0.12); --warning-soft: #f5ead0;
+  --error: #b54a3a; --error-dim: rgba(181, 74, 58, 0.12); --error-soft: #f5dfd9;
+  --info: var(--p-data); --info-dim: var(--p-data-dim); --info-soft: var(--p-data-soft);
+  --shadow: rgba(0,0,0, 0.08);
+  --shadow-1: 0 1px 2px rgba(0,0,0, 0.05);
+  --shadow-2: 0 2px 8px rgba(0,0,0, 0.04), 0 1px 2px rgba(0,0,0, 0.02);
+  --shadow-3: 0 12px 32px rgba(0,0,0, 0.08), 0 4px 12px rgba(0,0,0, 0.04), 0 0 0 1px var(--border-soft);
+  --shadow-inner: inset 0 1px 3px rgba(0,0,0, 0.04);
+  --shadow-btn: 0 1px 2px rgba(0,0,0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  --icon-emboss: inset 0 1px 0 rgba(255, 255, 255, 0.55), inset 0 -1px 0 rgba(0,0,0, 0.04);
+  --icon-shadow: 0 1px 2px rgba(0,0,0, 0.08);
+}
+
+/* 雅灰 */
+:root[data-theme="su7-elegant"] {
+  --bg: hsl(210, 10%, 88%);
+  --paper-deep: hsl(210, 10%, 83%);
+  --surface: #ffffff;
+  --surface-2: hsl(210, 10%, 86%);
+  --surface-3: hsl(210, 10%, 81%);
+
+  --border: hsl(210, 10%, 73%);
+  --border-soft: hsl(210, 10%, 80%);
+  --border-light: hsl(210, 10%, 76%);
+  --border-strong: hsl(210, 10%, 63%);
+  --divider: hsl(210, 10%, 78%);
+
+  --text: hsl(0, 0%, 15%);
+  --text-dim: hsl(0, 0%, 35%);
+  --text-muted: hsl(0, 0%, 50%);
+
+  --primary: hsl(210, 15%, 50%);
+  --primary-hover: hsl(210, 15%, 40%);
+  --primary-pressed: hsl(210, 15%, 30%);
+  --primary-on: #ffffff;
+  --primary-dim: hsla(210, 15%, 50%, 0.15);
+  --primary-glow: hsla(210, 15%, 50%, 0.25);
+  --primary-soft: hsl(210, 15%, 92%);
+
+  --accent: var(--primary);
+  --accent-hover: var(--primary-hover);
+  --accent-soft: var(--primary-soft);
+  --accent-text: hsl(210, 15%, 30%);
+
+  --accent-grad: linear-gradient(135deg, hsl(210, 15%, 50%) 0%, hsl(210, 25%, 65%) 100%);
+  --accent-shadow: 0 1px 0 hsla(210, 15%, 40%, 0.3), 0 4px 14px hsla(210, 15%, 50%, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  --ring: 0 0 0 2px hsla(210, 15%, 50%, 0.3);
+
+  --code-bg: hsl(0, 0%, 15%);
+  --code-text: hsl(210, 10%, 95%);
+  --code-border: hsl(0, 0%, 25%);
+
+  --p-ab: #5e7d6a; --p-ab-dim: rgba(94, 125, 106, 0.12); --p-ab-soft: #e6ede6;
+  --p-biz: #b86b3a; --p-biz-dim: rgba(184, 107, 58, 0.12); --p-biz-soft: #f5e3d0;
+  --p-data: #4a7c8b; --p-data-dim: rgba(74, 124, 139, 0.12); --p-data-soft: #d8e5ea;
+  --p-wave: #b04f5f; --p-wave-dim: rgba(176, 79, 95, 0.12); --p-wave-soft: #f0d8dc;
+  --p-gray: #7a6b8e; --p-gray-dim: rgba(122, 107, 142, 0.12); --p-gray-soft: #ebe5ee;
+  --agent: var(--p-gray); --agent-dim: var(--p-gray-dim);
+  --success: #5a7a4f; --success-dim: rgba(90, 122, 79, 0.12); --success-soft: #e6ede0;
+  --warning: #b07d2a; --warning-dim: rgba(176, 125, 42, 0.12); --warning-soft: #f5ead0;
+  --error: #b54a3a; --error-dim: rgba(181, 74, 58, 0.12); --error-soft: #f5dfd9;
+  --info: var(--p-data); --info-dim: var(--p-data-dim); --info-soft: var(--p-data-soft);
+  --shadow: rgba(0,0,0, 0.08);
+  --shadow-1: 0 1px 2px rgba(0,0,0, 0.05);
+  --shadow-2: 0 2px 8px rgba(0,0,0, 0.04), 0 1px 2px rgba(0,0,0, 0.02);
+  --shadow-3: 0 12px 32px rgba(0,0,0, 0.08), 0 4px 12px rgba(0,0,0, 0.04), 0 0 0 1px var(--border-soft);
+  --shadow-inner: inset 0 1px 3px rgba(0,0,0, 0.04);
+  --shadow-btn: 0 1px 2px rgba(0,0,0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  --icon-emboss: inset 0 1px 0 rgba(255, 255, 255, 0.55), inset 0 -1px 0 rgba(0,0,0, 0.04);
+  --icon-shadow: 0 1px 2px rgba(0,0,0, 0.08);
+}
+
+/* 橄榄绿 */
+:root[data-theme="su7-olive"] {
+  --bg: hsl(100, 25%, 20%);
+  --paper-deep: hsl(100, 25%, 17%);
+  --surface: hsl(100, 25%, 25%);
+  --surface-2: hsl(100, 25%, 30%);
+  --surface-3: hsl(100, 25%, 35%);
+
+  --border: hsl(100, 25%, 38%);
+  --border-soft: hsl(100, 25%, 30%);
+  --border-light: hsl(100, 25%, 42%);
+  --border-strong: hsl(100, 25%, 50%);
+  --divider: hsl(100, 25%, 32%);
+
+  --text: hsl(100, 15%, 90%);
+  --text-dim: hsl(100, 15%, 70%);
+  --text-muted: hsl(100, 15%, 55%);
+
+  --primary: hsl(100, 30%, 65%);
+  --primary-hover: hsl(100, 30%, 75%);
+  --primary-pressed: hsl(100, 30%, 55%);
+  --primary-on: #000000;
+  --primary-dim: hsla(100, 30%, 65%, 0.2);
+  --primary-glow: hsla(100, 30%, 65%, 0.3);
+  --primary-soft: hsla(100, 30%, 65%, 0.25);
+
+  --accent: var(--primary);
+  --accent-hover: var(--primary-hover);
+  --accent-soft: var(--primary-soft);
+  --accent-text: hsl(100, 30%, 85%);
+
+  --accent-grad: linear-gradient(135deg, hsl(100, 30%, 65%) 0%, hsl(100, 30%, 75%) 100%);
+  --accent-shadow: 0 2px 8px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  --ring: 0 0 0 2px hsla(100, 30%, 65%, 0.4);
+
+  --code-bg: hsl(100, 25%, 15%);
+  --code-text: hsl(100, 15%, 85%);
+  --code-border: hsl(100, 25%, 25%);
+
+  --p-ab: #5e7d6a; --p-ab-dim: rgba(94, 125, 106, 0.12); --p-ab-soft: #e6ede6;
+  --p-biz: #b86b3a; --p-biz-dim: rgba(184, 107, 58, 0.12); --p-biz-soft: #f5e3d0;
+  --p-data: #4a7c8b; --p-data-dim: rgba(74, 124, 139, 0.12); --p-data-soft: #d8e5ea;
+  --p-wave: #b04f5f; --p-wave-dim: rgba(176, 79, 95, 0.12); --p-wave-soft: #f0d8dc;
+  --p-gray: #7a6b8e; --p-gray-dim: rgba(122, 107, 142, 0.12); --p-gray-soft: #ebe5ee;
+  --agent: var(--p-gray); --agent-dim: var(--p-gray-dim);
+  --success: #5a7a4f; --success-dim: rgba(90, 122, 79, 0.12); --success-soft: #e6ede0;
+  --warning: #b07d2a; --warning-dim: rgba(176, 125, 42, 0.12); --warning-soft: #f5ead0;
+  --error: #b54a3a; --error-dim: rgba(181, 74, 58, 0.12); --error-soft: #f5dfd9;
+  --info: var(--p-data); --info-dim: var(--p-data-dim); --info-soft: var(--p-data-soft);
+  --shadow: rgba(0, 0, 0, 0.5);
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-2: 0 4px 16px rgba(0, 0, 0, 0.45);
+  --shadow-3: 0 12px 32px rgba(0, 0, 0, 0.55), 0 0 0 1px var(--border-soft);
+  --shadow-inner: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+  --shadow-btn: 0 1px 2px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  --icon-emboss: inset 0 1px 0 rgba(255, 255, 255, 0.06), inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+  --icon-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* 霞光紫 */
+:root[data-theme="su7-purple"] {
+  --bg: hsl(285, 30%, 22%);
+  --paper-deep: hsl(285, 30%, 19%);
+  --surface: hsl(285, 30%, 27%);
+  --surface-2: hsl(285, 30%, 32%);
+  --surface-3: hsl(285, 30%, 37%);
+
+  --border: hsl(285, 30%, 40%);
+  --border-soft: hsl(285, 30%, 32%);
+  --border-light: hsl(285, 30%, 44%);
+  --border-strong: hsl(285, 30%, 52%);
+  --divider: hsl(285, 30%, 34%);
+
+  --text: hsl(285, 20%, 90%);
+  --text-dim: hsl(285, 20%, 70%);
+  --text-muted: hsl(285, 20%, 55%);
+
+  --primary: hsl(285, 40%, 65%);
+  --primary-hover: hsl(285, 40%, 75%);
+  --primary-pressed: hsl(285, 40%, 55%);
+  --primary-on: #000000;
+  --primary-dim: hsla(285, 40%, 65%, 0.2);
+  --primary-glow: hsla(285, 40%, 65%, 0.3);
+  --primary-soft: hsla(285, 40%, 65%, 0.25);
+
+  --accent: var(--primary);
+  --accent-hover: var(--primary-hover);
+  --accent-soft: var(--primary-soft);
+  --accent-text: hsl(285, 40%, 85%);
+
+  --accent-grad: linear-gradient(135deg, hsl(285, 40%, 65%) 0%, hsl(285, 40%, 75%) 100%);
+  --accent-shadow: 0 2px 8px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  --ring: 0 0 0 2px hsla(285, 40%, 65%, 0.4);
+
+  --code-bg: hsl(285, 30%, 17%);
+  --code-text: hsl(285, 20%, 85%);
+  --code-border: hsl(285, 30%, 27%);
+
+  --p-ab: #5e7d6a; --p-ab-dim: rgba(94, 125, 106, 0.12); --p-ab-soft: #e6ede6;
+  --p-biz: #b86b3a; --p-biz-dim: rgba(184, 107, 58, 0.12); --p-biz-soft: #f5e3d0;
+  --p-data: #4a7c8b; --p-data-dim: rgba(74, 124, 139, 0.12); --p-data-soft: #d8e5ea;
+  --p-wave: #b04f5f; --p-wave-dim: rgba(176, 79, 95, 0.12); --p-wave-soft: #f0d8dc;
+  --p-gray: #7a6b8e; --p-gray-dim: rgba(122, 107, 142, 0.12); --p-gray-soft: #ebe5ee;
+  --agent: var(--p-gray); --agent-dim: var(--p-gray-dim);
+  --success: #5a7a4f; --success-dim: rgba(90, 122, 79, 0.12); --success-soft: #e6ede0;
+  --warning: #b07d2a; --warning-dim: rgba(176, 125, 42, 0.12); --warning-soft: #f5ead0;
+  --error: #b54a3a; --error-dim: rgba(181, 74, 58, 0.12); --error-soft: #f5dfd9;
+  --info: var(--p-data); --info-dim: var(--p-data-dim); --info-soft: var(--p-data-soft);
+  --shadow: rgba(0, 0, 0, 0.5);
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-2: 0 4px 16px rgba(0, 0, 0, 0.45);
+  --shadow-3: 0 12px 32px rgba(0, 0, 0, 0.55), 0 0 0 1px var(--border-soft);
+  --shadow-inner: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+  --shadow-btn: 0 1px 2px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  --icon-emboss: inset 0 1px 0 rgba(255, 255, 255, 0.06), inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+  --icon-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* 流星蓝 */
+:root[data-theme="su7-meteor"] {
+  --bg: hsl(215, 60%, 88%);
+  --paper-deep: hsl(215, 60%, 83%);
+  --surface: #ffffff;
+  --surface-2: hsl(215, 60%, 86%);
+  --surface-3: hsl(215, 60%, 81%);
+
+  --border: hsl(215, 60%, 73%);
+  --border-soft: hsl(215, 60%, 80%);
+  --border-light: hsl(215, 60%, 76%);
+  --border-strong: hsl(215, 60%, 63%);
+  --divider: hsl(215, 60%, 78%);
+
+  --text: hsl(215, 50%, 15%);
+  --text-dim: hsl(215, 50%, 35%);
+  --text-muted: hsl(215, 50%, 50%);
+
+  --primary: hsl(215, 70%, 50%);
+  --primary-hover: hsl(215, 70%, 40%);
+  --primary-pressed: hsl(215, 70%, 30%);
+  --primary-on: #ffffff;
+  --primary-dim: hsla(215, 70%, 50%, 0.15);
+  --primary-glow: hsla(215, 70%, 50%, 0.25);
+  --primary-soft: hsl(215, 70%, 92%);
+
+  --accent: var(--primary);
+  --accent-hover: var(--primary-hover);
+  --accent-soft: var(--primary-soft);
+  --accent-text: hsl(215, 70%, 30%);
+
+  --accent-grad: linear-gradient(135deg, hsl(215, 70%, 50%) 0%, hsl(215, 80%, 65%) 100%);
+  --accent-shadow: 0 1px 0 hsla(215, 70%, 40%, 0.3), 0 4px 14px hsla(215, 70%, 50%, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  --ring: 0 0 0 2px hsla(215, 70%, 50%, 0.3);
+
+  --code-bg: hsl(215, 50%, 15%);
+  --code-text: hsl(215, 60%, 95%);
+  --code-border: hsl(215, 50%, 25%);
+
+  --p-ab: #5e7d6a; --p-ab-dim: rgba(94, 125, 106, 0.12); --p-ab-soft: #e6ede6;
+  --p-biz: #b86b3a; --p-biz-dim: rgba(184, 107, 58, 0.12); --p-biz-soft: #f5e3d0;
+  --p-data: #4a7c8b; --p-data-dim: rgba(74, 124, 139, 0.12); --p-data-soft: #d8e5ea;
+  --p-wave: #b04f5f; --p-wave-dim: rgba(176, 79, 95, 0.12); --p-wave-soft: #f0d8dc;
+  --p-gray: #7a6b8e; --p-gray-dim: rgba(122, 107, 142, 0.12); --p-gray-soft: #ebe5ee;
+  --agent: var(--p-gray); --agent-dim: var(--p-gray-dim);
+  --success: #5a7a4f; --success-dim: rgba(90, 122, 79, 0.12); --success-soft: #e6ede0;
+  --warning: #b07d2a; --warning-dim: rgba(176, 125, 42, 0.12); --warning-soft: #f5ead0;
+  --error: #b54a3a; --error-dim: rgba(181, 74, 58, 0.12); --error-soft: #f5dfd9;
+  --info: var(--p-data); --info-dim: var(--p-data-dim); --info-soft: var(--p-data-soft);
+  --shadow: rgba(0,0,0, 0.08);
+  --shadow-1: 0 1px 2px rgba(0,0,0, 0.05);
+  --shadow-2: 0 2px 8px rgba(0,0,0, 0.04), 0 1px 2px rgba(0,0,0, 0.02);
+  --shadow-3: 0 12px 32px rgba(0,0,0, 0.08), 0 4px 12px rgba(0,0,0, 0.04), 0 0 0 1px var(--border-soft);
+  --shadow-inner: inset 0 1px 3px rgba(0,0,0, 0.04);
+  --shadow-btn: 0 1px 2px rgba(0,0,0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  --icon-emboss: inset 0 1px 0 rgba(255, 255, 255, 0.55), inset 0 -1px 0 rgba(0,0,0, 0.04);
+  --icon-shadow: 0 1px 2px rgba(0,0,0, 0.08);
+}
+
+/* 寒武岩灰 */
+:root[data-theme="su7-cambrian"] {
+  --bg: hsl(210, 15%, 25%);
+  --paper-deep: hsl(210, 15%, 22%);
+  --surface: hsl(210, 15%, 30%);
+  --surface-2: hsl(210, 15%, 35%);
+  --surface-3: hsl(210, 15%, 40%);
+
+  --border: hsl(210, 15%, 43%);
+  --border-soft: hsl(210, 15%, 35%);
+  --border-light: hsl(210, 15%, 47%);
+  --border-strong: hsl(210, 15%, 55%);
+  --divider: hsl(210, 15%, 37%);
+
+  --text: hsl(210, 5%, 90%);
+  --text-dim: hsl(210, 5%, 70%);
+  --text-muted: hsl(210, 5%, 55%);
+
+  --primary: hsl(210, 20%, 65%);
+  --primary-hover: hsl(210, 20%, 75%);
+  --primary-pressed: hsl(210, 20%, 55%);
+  --primary-on: #000000;
+  --primary-dim: hsla(210, 20%, 65%, 0.2);
+  --primary-glow: hsla(210, 20%, 65%, 0.3);
+  --primary-soft: hsla(210, 20%, 65%, 0.25);
+
+  --accent: var(--primary);
+  --accent-hover: var(--primary-hover);
+  --accent-soft: var(--primary-soft);
+  --accent-text: hsl(210, 20%, 85%);
+
+  --accent-grad: linear-gradient(135deg, hsl(210, 20%, 65%) 0%, hsl(210, 20%, 75%) 100%);
+  --accent-shadow: 0 2px 8px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  --ring: 0 0 0 2px hsla(210, 20%, 65%, 0.4);
+
+  --code-bg: hsl(210, 15%, 20%);
+  --code-text: hsl(210, 5%, 85%);
+  --code-border: hsl(210, 15%, 30%);
+
+  --p-ab: #5e7d6a; --p-ab-dim: rgba(94, 125, 106, 0.12); --p-ab-soft: #e6ede6;
+  --p-biz: #b86b3a; --p-biz-dim: rgba(184, 107, 58, 0.12); --p-biz-soft: #f5e3d0;
+  --p-data: #4a7c8b; --p-data-dim: rgba(74, 124, 139, 0.12); --p-data-soft: #d8e5ea;
+  --p-wave: #b04f5f; --p-wave-dim: rgba(176, 79, 95, 0.12); --p-wave-soft: #f0d8dc;
+  --p-gray: #7a6b8e; --p-gray-dim: rgba(122, 107, 142, 0.12); --p-gray-soft: #ebe5ee;
+  --agent: var(--p-gray); --agent-dim: var(--p-gray-dim);
+  --success: #5a7a4f; --success-dim: rgba(90, 122, 79, 0.12); --success-soft: #e6ede0;
+  --warning: #b07d2a; --warning-dim: rgba(176, 125, 42, 0.12); --warning-soft: #f5ead0;
+  --error: #b54a3a; --error-dim: rgba(181, 74, 58, 0.12); --error-soft: #f5dfd9;
+  --info: var(--p-data); --info-dim: var(--p-data-dim); --info-soft: var(--p-data-soft);
+  --shadow: rgba(0, 0, 0, 0.5);
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-2: 0 4px 16px rgba(0, 0, 0, 0.45);
+  --shadow-3: 0 12px 32px rgba(0, 0, 0, 0.55), 0 0 0 1px var(--border-soft);
+  --shadow-inner: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+  --shadow-btn: 0 1px 2px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  --icon-emboss: inset 0 1px 0 rgba(255, 255, 255, 0.06), inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+  --icon-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* 珍珠白 */
+:root[data-theme="su7-pearl"] {
+  --bg: hsl(0, 0%, 96%);
+  --paper-deep: hsl(0, 0%, 91%);
+  --surface: #ffffff;
+  --surface-2: hsl(0, 0%, 94%);
+  --surface-3: hsl(0, 0%, 89%);
+
+  --border: hsl(0, 0%, 81%);
+  --border-soft: hsl(0, 0%, 88%);
+  --border-light: hsl(0, 0%, 84%);
+  --border-strong: hsl(0, 0%, 71%);
+  --divider: hsl(0, 0%, 86%);
+
+  --text: hsl(0, 0%, 15%);
+  --text-dim: hsl(0, 0%, 35%);
+  --text-muted: hsl(0, 0%, 50%);
+
+  --primary: hsl(0, 0%, 50%);
+  --primary-hover: hsl(0, 0%, 40%);
+  --primary-pressed: hsl(0, 0%, 30%);
+  --primary-on: #ffffff;
+  --primary-dim: hsla(0, 0%, 50%, 0.15);
+  --primary-glow: hsla(0, 0%, 50%, 0.25);
+  --primary-soft: hsl(0, 0%, 92%);
+
+  --accent: var(--primary);
+  --accent-hover: var(--primary-hover);
+  --accent-soft: var(--primary-soft);
+  --accent-text: hsl(0, 0%, 30%);
+
+  --accent-grad: linear-gradient(135deg, hsl(0, 0%, 50%) 0%, hsl(0, 10%, 65%) 100%);
+  --accent-shadow: 0 1px 0 hsla(0, 0%, 40%, 0.3), 0 4px 14px hsla(0, 0%, 50%, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  --ring: 0 0 0 2px hsla(0, 0%, 50%, 0.3);
+
+  --code-bg: hsl(0, 0%, 15%);
+  --code-text: hsl(0, 0%, 95%);
+  --code-border: hsl(0, 0%, 25%);
+
+  --p-ab: #5e7d6a; --p-ab-dim: rgba(94, 125, 106, 0.12); --p-ab-soft: #e6ede6;
+  --p-biz: #b86b3a; --p-biz-dim: rgba(184, 107, 58, 0.12); --p-biz-soft: #f5e3d0;
+  --p-data: #4a7c8b; --p-data-dim: rgba(74, 124, 139, 0.12); --p-data-soft: #d8e5ea;
+  --p-wave: #b04f5f; --p-wave-dim: rgba(176, 79, 95, 0.12); --p-wave-soft: #f0d8dc;
+  --p-gray: #7a6b8e; --p-gray-dim: rgba(122, 107, 142, 0.12); --p-gray-soft: #ebe5ee;
+  --agent: var(--p-gray); --agent-dim: var(--p-gray-dim);
+  --success: #5a7a4f; --success-dim: rgba(90, 122, 79, 0.12); --success-soft: #e6ede0;
+  --warning: #b07d2a; --warning-dim: rgba(176, 125, 42, 0.12); --warning-soft: #f5ead0;
+  --error: #b54a3a; --error-dim: rgba(181, 74, 58, 0.12); --error-soft: #f5dfd9;
+  --info: var(--p-data); --info-dim: var(--p-data-dim); --info-soft: var(--p-data-soft);
+  --shadow: rgba(0,0,0, 0.08);
+  --shadow-1: 0 1px 2px rgba(0,0,0, 0.05);
+  --shadow-2: 0 2px 8px rgba(0,0,0, 0.04), 0 1px 2px rgba(0,0,0, 0.02);
+  --shadow-3: 0 12px 32px rgba(0,0,0, 0.08), 0 4px 12px rgba(0,0,0, 0.04), 0 0 0 1px var(--border-soft);
+  --shadow-inner: inset 0 1px 3px rgba(0,0,0, 0.04);
+  --shadow-btn: 0 1px 2px rgba(0,0,0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  --icon-emboss: inset 0 1px 0 rgba(255, 255, 255, 0.55), inset 0 -1px 0 rgba(0,0,0, 0.04);
+  --icon-shadow: 0 1px 2px rgba(0,0,0, 0.08);
+}
+
+/* 钻石黑 */
+:root[data-theme="su7-diamond"] {
+  --bg: hsl(0, 0%, 12%);
+  --paper-deep: hsl(0, 0%, 9%);
+  --surface: hsl(0, 0%, 17%);
+  --surface-2: hsl(0, 0%, 22%);
+  --surface-3: hsl(0, 0%, 27%);
+
+  --border: hsl(0, 0%, 30%);
+  --border-soft: hsl(0, 0%, 22%);
+  --border-light: hsl(0, 0%, 34%);
+  --border-strong: hsl(0, 0%, 42%);
+  --divider: hsl(0, 0%, 24%);
+
+  --text: hsl(0, 0%, 90%);
+  --text-dim: hsl(0, 0%, 70%);
+  --text-muted: hsl(0, 0%, 55%);
+
+  --primary: hsl(0, 0%, 65%);
+  --primary-hover: hsl(0, 0%, 75%);
+  --primary-pressed: hsl(0, 0%, 55%);
+  --primary-on: #000000;
+  --primary-dim: hsla(0, 0%, 65%, 0.2);
+  --primary-glow: hsla(0, 0%, 65%, 0.3);
+  --primary-soft: hsla(0, 0%, 65%, 0.25);
+
+  --accent: var(--primary);
+  --accent-hover: var(--primary-hover);
+  --accent-soft: var(--primary-soft);
+  --accent-text: hsl(0, 0%, 85%);
+
+  --accent-grad: linear-gradient(135deg, hsl(0, 0%, 65%) 0%, hsl(0, 0%, 75%) 100%);
+  --accent-shadow: 0 2px 8px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  --ring: 0 0 0 2px hsla(0, 0%, 65%, 0.4);
+
+  --code-bg: hsl(0, 0%, 7%);
+  --code-text: hsl(0, 0%, 85%);
+  --code-border: hsl(0, 0%, 17%);
+
+  --p-ab: #5e7d6a; --p-ab-dim: rgba(94, 125, 106, 0.12); --p-ab-soft: #e6ede6;
+  --p-biz: #b86b3a; --p-biz-dim: rgba(184, 107, 58, 0.12); --p-biz-soft: #f5e3d0;
+  --p-data: #4a7c8b; --p-data-dim: rgba(74, 124, 139, 0.12); --p-data-soft: #d8e5ea;
+  --p-wave: #b04f5f; --p-wave-dim: rgba(176, 79, 95, 0.12); --p-wave-soft: #f0d8dc;
+  --p-gray: #7a6b8e; --p-gray-dim: rgba(122, 107, 142, 0.12); --p-gray-soft: #ebe5ee;
+  --agent: var(--p-gray); --agent-dim: var(--p-gray-dim);
+  --success: #5a7a4f; --success-dim: rgba(90, 122, 79, 0.12); --success-soft: #e6ede0;
+  --warning: #b07d2a; --warning-dim: rgba(176, 125, 42, 0.12); --warning-soft: #f5ead0;
+  --error: #b54a3a; --error-dim: rgba(181, 74, 58, 0.12); --error-soft: #f5dfd9;
+  --info: var(--p-data); --info-dim: var(--p-data-dim); --info-soft: var(--p-data-soft);
+  --shadow: rgba(0, 0, 0, 0.5);
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-2: 0 4px 16px rgba(0, 0, 0, 0.45);
+  --shadow-3: 0 12px 32px rgba(0, 0, 0, 0.55), 0 0 0 1px var(--border-soft);
+  --shadow-inner: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+  --shadow-btn: 0 1px 2px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  --icon-emboss: inset 0 1px 0 rgba(255, 255, 255, 0.06), inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+  --icon-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* 月光银 */
+:root[data-theme="yu7-moon"] {
+  --bg: hsl(220, 10%, 92%);
+  --paper-deep: hsl(220, 10%, 87%);
+  --surface: #ffffff;
+  --surface-2: hsl(220, 10%, 90%);
+  --surface-3: hsl(220, 10%, 85%);
+
+  --border: hsl(220, 10%, 77%);
+  --border-soft: hsl(220, 10%, 84%);
+  --border-light: hsl(220, 10%, 80%);
+  --border-strong: hsl(220, 10%, 67%);
+  --divider: hsl(220, 10%, 82%);
+
+  --text: hsl(0, 0%, 15%);
+  --text-dim: hsl(0, 0%, 35%);
+  --text-muted: hsl(0, 0%, 50%);
+
+  --primary: hsl(220, 15%, 50%);
+  --primary-hover: hsl(220, 15%, 40%);
+  --primary-pressed: hsl(220, 15%, 30%);
+  --primary-on: #ffffff;
+  --primary-dim: hsla(220, 15%, 50%, 0.15);
+  --primary-glow: hsla(220, 15%, 50%, 0.25);
+  --primary-soft: hsl(220, 15%, 92%);
+
+  --accent: var(--primary);
+  --accent-hover: var(--primary-hover);
+  --accent-soft: var(--primary-soft);
+  --accent-text: hsl(220, 15%, 30%);
+
+  --accent-grad: linear-gradient(135deg, hsl(220, 15%, 50%) 0%, hsl(220, 25%, 65%) 100%);
+  --accent-shadow: 0 1px 0 hsla(220, 15%, 40%, 0.3), 0 4px 14px hsla(220, 15%, 50%, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  --ring: 0 0 0 2px hsla(220, 15%, 50%, 0.3);
+
+  --code-bg: hsl(0, 0%, 15%);
+  --code-text: hsl(220, 10%, 95%);
+  --code-border: hsl(0, 0%, 25%);
+
+  --p-ab: #5e7d6a; --p-ab-dim: rgba(94, 125, 106, 0.12); --p-ab-soft: #e6ede6;
+  --p-biz: #b86b3a; --p-biz-dim: rgba(184, 107, 58, 0.12); --p-biz-soft: #f5e3d0;
+  --p-data: #4a7c8b; --p-data-dim: rgba(74, 124, 139, 0.12); --p-data-soft: #d8e5ea;
+  --p-wave: #b04f5f; --p-wave-dim: rgba(176, 79, 95, 0.12); --p-wave-soft: #f0d8dc;
+  --p-gray: #7a6b8e; --p-gray-dim: rgba(122, 107, 142, 0.12); --p-gray-soft: #ebe5ee;
+  --agent: var(--p-gray); --agent-dim: var(--p-gray-dim);
+  --success: #5a7a4f; --success-dim: rgba(90, 122, 79, 0.12); --success-soft: #e6ede0;
+  --warning: #b07d2a; --warning-dim: rgba(176, 125, 42, 0.12); --warning-soft: #f5ead0;
+  --error: #b54a3a; --error-dim: rgba(181, 74, 58, 0.12); --error-soft: #f5dfd9;
+  --info: var(--p-data); --info-dim: var(--p-data-dim); --info-soft: var(--p-data-soft);
+  --shadow: rgba(0,0,0, 0.08);
+  --shadow-1: 0 1px 2px rgba(0,0,0, 0.05);
+  --shadow-2: 0 2px 8px rgba(0,0,0, 0.04), 0 1px 2px rgba(0,0,0, 0.02);
+  --shadow-3: 0 12px 32px rgba(0,0,0, 0.08), 0 4px 12px rgba(0,0,0, 0.04), 0 0 0 1px var(--border-soft);
+  --shadow-inner: inset 0 1px 3px rgba(0,0,0, 0.04);
+  --shadow-btn: 0 1px 2px rgba(0,0,0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  --icon-emboss: inset 0 1px 0 rgba(255, 255, 255, 0.55), inset 0 -1px 0 rgba(0,0,0, 0.04);
+  --icon-shadow: 0 1px 2px rgba(0,0,0, 0.08);
+}
+
+/* 极夜黑 */
+:root[data-theme="yu7-night"] {
+  --bg: hsl(240, 15%, 14%);
+  --paper-deep: hsl(240, 15%, 11%);
+  --surface: hsl(240, 15%, 19%);
+  --surface-2: hsl(240, 15%, 24%);
+  --surface-3: hsl(240, 15%, 29%);
+
+  --border: hsl(240, 15%, 32%);
+  --border-soft: hsl(240, 15%, 24%);
+  --border-light: hsl(240, 15%, 36%);
+  --border-strong: hsl(240, 15%, 44%);
+  --divider: hsl(240, 15%, 26%);
+
+  --text: hsl(240, 5%, 90%);
+  --text-dim: hsl(240, 5%, 70%);
+  --text-muted: hsl(240, 5%, 55%);
+
+  --primary: hsl(240, 20%, 65%);
+  --primary-hover: hsl(240, 20%, 75%);
+  --primary-pressed: hsl(240, 20%, 55%);
+  --primary-on: #000000;
+  --primary-dim: hsla(240, 20%, 65%, 0.2);
+  --primary-glow: hsla(240, 20%, 65%, 0.3);
+  --primary-soft: hsla(240, 20%, 65%, 0.25);
+
+  --accent: var(--primary);
+  --accent-hover: var(--primary-hover);
+  --accent-soft: var(--primary-soft);
+  --accent-text: hsl(240, 20%, 85%);
+
+  --accent-grad: linear-gradient(135deg, hsl(240, 20%, 65%) 0%, hsl(240, 20%, 75%) 100%);
+  --accent-shadow: 0 2px 8px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  --ring: 0 0 0 2px hsla(240, 20%, 65%, 0.4);
+
+  --code-bg: hsl(240, 15%, 9%);
+  --code-text: hsl(240, 5%, 85%);
+  --code-border: hsl(240, 15%, 19%);
+
+  --p-ab: #5e7d6a; --p-ab-dim: rgba(94, 125, 106, 0.12); --p-ab-soft: #e6ede6;
+  --p-biz: #b86b3a; --p-biz-dim: rgba(184, 107, 58, 0.12); --p-biz-soft: #f5e3d0;
+  --p-data: #4a7c8b; --p-data-dim: rgba(74, 124, 139, 0.12); --p-data-soft: #d8e5ea;
+  --p-wave: #b04f5f; --p-wave-dim: rgba(176, 79, 95, 0.12); --p-wave-soft: #f0d8dc;
+  --p-gray: #7a6b8e; --p-gray-dim: rgba(122, 107, 142, 0.12); --p-gray-soft: #ebe5ee;
+  --agent: var(--p-gray); --agent-dim: var(--p-gray-dim);
+  --success: #5a7a4f; --success-dim: rgba(90, 122, 79, 0.12); --success-soft: #e6ede0;
+  --warning: #b07d2a; --warning-dim: rgba(176, 125, 42, 0.12); --warning-soft: #f5ead0;
+  --error: #b54a3a; --error-dim: rgba(181, 74, 58, 0.12); --error-soft: #f5dfd9;
+  --info: var(--p-data); --info-dim: var(--p-data-dim); --info-soft: var(--p-data-soft);
+  --shadow: rgba(0, 0, 0, 0.5);
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-2: 0 4px 16px rgba(0, 0, 0, 0.45);
+  --shadow-3: 0 12px 32px rgba(0, 0, 0, 0.55), 0 0 0 1px var(--border-soft);
+  --shadow-inner: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+  --shadow-btn: 0 1px 2px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  --icon-emboss: inset 0 1px 0 rgba(255, 255, 255, 0.06), inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+  --icon-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* 远空蓝 */
+:root[data-theme="yu7-sky"] {
+  --bg: hsl(200, 40%, 90%);
+  --paper-deep: hsl(200, 40%, 85%);
+  --surface: #ffffff;
+  --surface-2: hsl(200, 40%, 88%);
+  --surface-3: hsl(200, 40%, 83%);
+
+  --border: hsl(200, 40%, 75%);
+  --border-soft: hsl(200, 40%, 82%);
+  --border-light: hsl(200, 40%, 78%);
+  --border-strong: hsl(200, 40%, 65%);
+  --divider: hsl(200, 40%, 80%);
+
+  --text: hsl(200, 30%, 15%);
+  --text-dim: hsl(200, 30%, 35%);
+  --text-muted: hsl(200, 30%, 50%);
+
+  --primary: hsl(200, 50%, 50%);
+  --primary-hover: hsl(200, 50%, 40%);
+  --primary-pressed: hsl(200, 50%, 30%);
+  --primary-on: #ffffff;
+  --primary-dim: hsla(200, 50%, 50%, 0.15);
+  --primary-glow: hsla(200, 50%, 50%, 0.25);
+  --primary-soft: hsl(200, 50%, 92%);
+
+  --accent: var(--primary);
+  --accent-hover: var(--primary-hover);
+  --accent-soft: var(--primary-soft);
+  --accent-text: hsl(200, 50%, 30%);
+
+  --accent-grad: linear-gradient(135deg, hsl(200, 50%, 50%) 0%, hsl(200, 60%, 65%) 100%);
+  --accent-shadow: 0 1px 0 hsla(200, 50%, 40%, 0.3), 0 4px 14px hsla(200, 50%, 50%, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  --ring: 0 0 0 2px hsla(200, 50%, 50%, 0.3);
+
+  --code-bg: hsl(200, 30%, 15%);
+  --code-text: hsl(200, 40%, 95%);
+  --code-border: hsl(200, 30%, 25%);
+
+  --p-ab: #5e7d6a; --p-ab-dim: rgba(94, 125, 106, 0.12); --p-ab-soft: #e6ede6;
+  --p-biz: #b86b3a; --p-biz-dim: rgba(184, 107, 58, 0.12); --p-biz-soft: #f5e3d0;
+  --p-data: #4a7c8b; --p-data-dim: rgba(74, 124, 139, 0.12); --p-data-soft: #d8e5ea;
+  --p-wave: #b04f5f; --p-wave-dim: rgba(176, 79, 95, 0.12); --p-wave-soft: #f0d8dc;
+  --p-gray: #7a6b8e; --p-gray-dim: rgba(122, 107, 142, 0.12); --p-gray-soft: #ebe5ee;
+  --agent: var(--p-gray); --agent-dim: var(--p-gray-dim);
+  --success: #5a7a4f; --success-dim: rgba(90, 122, 79, 0.12); --success-soft: #e6ede0;
+  --warning: #b07d2a; --warning-dim: rgba(176, 125, 42, 0.12); --warning-soft: #f5ead0;
+  --error: #b54a3a; --error-dim: rgba(181, 74, 58, 0.12); --error-soft: #f5dfd9;
+  --info: var(--p-data); --info-dim: var(--p-data-dim); --info-soft: var(--p-data-soft);
+  --shadow: rgba(0,0,0, 0.08);
+  --shadow-1: 0 1px 2px rgba(0,0,0, 0.05);
+  --shadow-2: 0 2px 8px rgba(0,0,0, 0.04), 0 1px 2px rgba(0,0,0, 0.02);
+  --shadow-3: 0 12px 32px rgba(0,0,0, 0.08), 0 4px 12px rgba(0,0,0, 0.04), 0 0 0 1px var(--border-soft);
+  --shadow-inner: inset 0 1px 3px rgba(0,0,0, 0.04);
+  --shadow-btn: 0 1px 2px rgba(0,0,0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  --icon-emboss: inset 0 1px 0 rgba(255, 255, 255, 0.55), inset 0 -1px 0 rgba(0,0,0, 0.04);
+  --icon-shadow: 0 1px 2px rgba(0,0,0, 0.08);
+}
+
+/* 旷野绿 */
+:root[data-theme="yu7-forest"] {
+  --bg: hsl(150, 20%, 22%);
+  --paper-deep: hsl(150, 20%, 19%);
+  --surface: hsl(150, 20%, 27%);
+  --surface-2: hsl(150, 20%, 32%);
+  --surface-3: hsl(150, 20%, 37%);
+
+  --border: hsl(150, 20%, 40%);
+  --border-soft: hsl(150, 20%, 32%);
+  --border-light: hsl(150, 20%, 44%);
+  --border-strong: hsl(150, 20%, 52%);
+  --divider: hsl(150, 20%, 34%);
+
+  --text: hsl(150, 10%, 90%);
+  --text-dim: hsl(150, 10%, 70%);
+  --text-muted: hsl(150, 10%, 55%);
+
+  --primary: hsl(150, 30%, 65%);
+  --primary-hover: hsl(150, 30%, 75%);
+  --primary-pressed: hsl(150, 30%, 55%);
+  --primary-on: #000000;
+  --primary-dim: hsla(150, 30%, 65%, 0.2);
+  --primary-glow: hsla(150, 30%, 65%, 0.3);
+  --primary-soft: hsla(150, 30%, 65%, 0.25);
+
+  --accent: var(--primary);
+  --accent-hover: var(--primary-hover);
+  --accent-soft: var(--primary-soft);
+  --accent-text: hsl(150, 30%, 85%);
+
+  --accent-grad: linear-gradient(135deg, hsl(150, 30%, 65%) 0%, hsl(150, 30%, 75%) 100%);
+  --accent-shadow: 0 2px 8px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  --ring: 0 0 0 2px hsla(150, 30%, 65%, 0.4);
+
+  --code-bg: hsl(150, 20%, 17%);
+  --code-text: hsl(150, 10%, 85%);
+  --code-border: hsl(150, 20%, 27%);
+
+  --p-ab: #5e7d6a; --p-ab-dim: rgba(94, 125, 106, 0.12); --p-ab-soft: #e6ede6;
+  --p-biz: #b86b3a; --p-biz-dim: rgba(184, 107, 58, 0.12); --p-biz-soft: #f5e3d0;
+  --p-data: #4a7c8b; --p-data-dim: rgba(74, 124, 139, 0.12); --p-data-soft: #d8e5ea;
+  --p-wave: #b04f5f; --p-wave-dim: rgba(176, 79, 95, 0.12); --p-wave-soft: #f0d8dc;
+  --p-gray: #7a6b8e; --p-gray-dim: rgba(122, 107, 142, 0.12); --p-gray-soft: #ebe5ee;
+  --agent: var(--p-gray); --agent-dim: var(--p-gray-dim);
+  --success: #5a7a4f; --success-dim: rgba(90, 122, 79, 0.12); --success-soft: #e6ede0;
+  --warning: #b07d2a; --warning-dim: rgba(176, 125, 42, 0.12); --warning-soft: #f5ead0;
+  --error: #b54a3a; --error-dim: rgba(181, 74, 58, 0.12); --error-soft: #f5dfd9;
+  --info: var(--p-data); --info-dim: var(--p-data-dim); --info-soft: var(--p-data-soft);
+  --shadow: rgba(0, 0, 0, 0.5);
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-2: 0 4px 16px rgba(0, 0, 0, 0.45);
+  --shadow-3: 0 12px 32px rgba(0, 0, 0, 0.55), 0 0 0 1px var(--border-soft);
+  --shadow-inner: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+  --shadow-btn: 0 1px 2px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  --icon-emboss: inset 0 1px 0 rgba(255, 255, 255, 0.06), inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+  --icon-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* 粉色 */
+:root[data-theme="ip13-pink"] {
+  --bg: hsl(340, 60%, 96%);
+  --paper-deep: hsl(340, 60%, 91%);
+  --surface: #ffffff;
+  --surface-2: hsl(340, 60%, 94%);
+  --surface-3: hsl(340, 60%, 89%);
+
+  --border: hsl(340, 60%, 81%);
+  --border-soft: hsl(340, 60%, 88%);
+  --border-light: hsl(340, 60%, 84%);
+  --border-strong: hsl(340, 60%, 71%);
+  --divider: hsl(340, 60%, 86%);
+
+  --text: hsl(340, 50%, 15%);
+  --text-dim: hsl(340, 50%, 35%);
+  --text-muted: hsl(340, 50%, 50%);
+
+  --primary: hsl(340, 60%, 50%);
+  --primary-hover: hsl(340, 60%, 40%);
+  --primary-pressed: hsl(340, 60%, 30%);
+  --primary-on: #ffffff;
+  --primary-dim: hsla(340, 60%, 50%, 0.15);
+  --primary-glow: hsla(340, 60%, 50%, 0.25);
+  --primary-soft: hsl(340, 60%, 92%);
+
+  --accent: var(--primary);
+  --accent-hover: var(--primary-hover);
+  --accent-soft: var(--primary-soft);
+  --accent-text: hsl(340, 60%, 30%);
+
+  --accent-grad: linear-gradient(135deg, hsl(340, 60%, 50%) 0%, hsl(340, 70%, 65%) 100%);
+  --accent-shadow: 0 1px 0 hsla(340, 60%, 40%, 0.3), 0 4px 14px hsla(340, 60%, 50%, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  --ring: 0 0 0 2px hsla(340, 60%, 50%, 0.3);
+
+  --code-bg: hsl(340, 50%, 15%);
+  --code-text: hsl(340, 60%, 95%);
+  --code-border: hsl(340, 50%, 25%);
+
+  --p-ab: #5e7d6a; --p-ab-dim: rgba(94, 125, 106, 0.12); --p-ab-soft: #e6ede6;
+  --p-biz: #b86b3a; --p-biz-dim: rgba(184, 107, 58, 0.12); --p-biz-soft: #f5e3d0;
+  --p-data: #4a7c8b; --p-data-dim: rgba(74, 124, 139, 0.12); --p-data-soft: #d8e5ea;
+  --p-wave: #b04f5f; --p-wave-dim: rgba(176, 79, 95, 0.12); --p-wave-soft: #f0d8dc;
+  --p-gray: #7a6b8e; --p-gray-dim: rgba(122, 107, 142, 0.12); --p-gray-soft: #ebe5ee;
+  --agent: var(--p-gray); --agent-dim: var(--p-gray-dim);
+  --success: #5a7a4f; --success-dim: rgba(90, 122, 79, 0.12); --success-soft: #e6ede0;
+  --warning: #b07d2a; --warning-dim: rgba(176, 125, 42, 0.12); --warning-soft: #f5ead0;
+  --error: #b54a3a; --error-dim: rgba(181, 74, 58, 0.12); --error-soft: #f5dfd9;
+  --info: var(--p-data); --info-dim: var(--p-data-dim); --info-soft: var(--p-data-soft);
+  --shadow: rgba(0,0,0, 0.08);
+  --shadow-1: 0 1px 2px rgba(0,0,0, 0.05);
+  --shadow-2: 0 2px 8px rgba(0,0,0, 0.04), 0 1px 2px rgba(0,0,0, 0.02);
+  --shadow-3: 0 12px 32px rgba(0,0,0, 0.08), 0 4px 12px rgba(0,0,0, 0.04), 0 0 0 1px var(--border-soft);
+  --shadow-inner: inset 0 1px 3px rgba(0,0,0, 0.04);
+  --shadow-btn: 0 1px 2px rgba(0,0,0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  --icon-emboss: inset 0 1px 0 rgba(255, 255, 255, 0.55), inset 0 -1px 0 rgba(0,0,0, 0.04);
+  --icon-shadow: 0 1px 2px rgba(0,0,0, 0.08);
+}
+
+/* 蓝色 */
+:root[data-theme="ip13-blue"] {
+  --bg: hsl(210, 50%, 94%);
+  --paper-deep: hsl(210, 50%, 89%);
+  --surface: #ffffff;
+  --surface-2: hsl(210, 50%, 92%);
+  --surface-3: hsl(210, 50%, 87%);
+
+  --border: hsl(210, 50%, 79%);
+  --border-soft: hsl(210, 50%, 86%);
+  --border-light: hsl(210, 50%, 82%);
+  --border-strong: hsl(210, 50%, 69%);
+  --divider: hsl(210, 50%, 84%);
+
+  --text: hsl(210, 40%, 15%);
+  --text-dim: hsl(210, 40%, 35%);
+  --text-muted: hsl(210, 40%, 50%);
+
+  --primary: hsl(210, 50%, 50%);
+  --primary-hover: hsl(210, 50%, 40%);
+  --primary-pressed: hsl(210, 50%, 30%);
+  --primary-on: #ffffff;
+  --primary-dim: hsla(210, 50%, 50%, 0.15);
+  --primary-glow: hsla(210, 50%, 50%, 0.25);
+  --primary-soft: hsl(210, 50%, 92%);
+
+  --accent: var(--primary);
+  --accent-hover: var(--primary-hover);
+  --accent-soft: var(--primary-soft);
+  --accent-text: hsl(210, 50%, 30%);
+
+  --accent-grad: linear-gradient(135deg, hsl(210, 50%, 50%) 0%, hsl(210, 60%, 65%) 100%);
+  --accent-shadow: 0 1px 0 hsla(210, 50%, 40%, 0.3), 0 4px 14px hsla(210, 50%, 50%, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  --ring: 0 0 0 2px hsla(210, 50%, 50%, 0.3);
+
+  --code-bg: hsl(210, 40%, 15%);
+  --code-text: hsl(210, 50%, 95%);
+  --code-border: hsl(210, 40%, 25%);
+
+  --p-ab: #5e7d6a; --p-ab-dim: rgba(94, 125, 106, 0.12); --p-ab-soft: #e6ede6;
+  --p-biz: #b86b3a; --p-biz-dim: rgba(184, 107, 58, 0.12); --p-biz-soft: #f5e3d0;
+  --p-data: #4a7c8b; --p-data-dim: rgba(74, 124, 139, 0.12); --p-data-soft: #d8e5ea;
+  --p-wave: #b04f5f; --p-wave-dim: rgba(176, 79, 95, 0.12); --p-wave-soft: #f0d8dc;
+  --p-gray: #7a6b8e; --p-gray-dim: rgba(122, 107, 142, 0.12); --p-gray-soft: #ebe5ee;
+  --agent: var(--p-gray); --agent-dim: var(--p-gray-dim);
+  --success: #5a7a4f; --success-dim: rgba(90, 122, 79, 0.12); --success-soft: #e6ede0;
+  --warning: #b07d2a; --warning-dim: rgba(176, 125, 42, 0.12); --warning-soft: #f5ead0;
+  --error: #b54a3a; --error-dim: rgba(181, 74, 58, 0.12); --error-soft: #f5dfd9;
+  --info: var(--p-data); --info-dim: var(--p-data-dim); --info-soft: var(--p-data-soft);
+  --shadow: rgba(0,0,0, 0.08);
+  --shadow-1: 0 1px 2px rgba(0,0,0, 0.05);
+  --shadow-2: 0 2px 8px rgba(0,0,0, 0.04), 0 1px 2px rgba(0,0,0, 0.02);
+  --shadow-3: 0 12px 32px rgba(0,0,0, 0.08), 0 4px 12px rgba(0,0,0, 0.04), 0 0 0 1px var(--border-soft);
+  --shadow-inner: inset 0 1px 3px rgba(0,0,0, 0.04);
+  --shadow-btn: 0 1px 2px rgba(0,0,0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  --icon-emboss: inset 0 1px 0 rgba(255, 255, 255, 0.55), inset 0 -1px 0 rgba(0,0,0, 0.04);
+  --icon-shadow: 0 1px 2px rgba(0,0,0, 0.08);
+}
+
+/* 远峰蓝 */
+:root[data-theme="ip13p-sierra"] {
+  --bg: hsl(205, 30%, 92%);
+  --paper-deep: hsl(205, 30%, 87%);
+  --surface: #ffffff;
+  --surface-2: hsl(205, 30%, 90%);
+  --surface-3: hsl(205, 30%, 85%);
+
+  --border: hsl(205, 30%, 77%);
+  --border-soft: hsl(205, 30%, 84%);
+  --border-light: hsl(205, 30%, 80%);
+  --border-strong: hsl(205, 30%, 67%);
+  --divider: hsl(205, 30%, 82%);
+
+  --text: hsl(205, 20%, 15%);
+  --text-dim: hsl(205, 20%, 35%);
+  --text-muted: hsl(205, 20%, 50%);
+
+  --primary: hsl(205, 40%, 50%);
+  --primary-hover: hsl(205, 40%, 40%);
+  --primary-pressed: hsl(205, 40%, 30%);
+  --primary-on: #ffffff;
+  --primary-dim: hsla(205, 40%, 50%, 0.15);
+  --primary-glow: hsla(205, 40%, 50%, 0.25);
+  --primary-soft: hsl(205, 40%, 92%);
+
+  --accent: var(--primary);
+  --accent-hover: var(--primary-hover);
+  --accent-soft: var(--primary-soft);
+  --accent-text: hsl(205, 40%, 30%);
+
+  --accent-grad: linear-gradient(135deg, hsl(205, 40%, 50%) 0%, hsl(205, 50%, 65%) 100%);
+  --accent-shadow: 0 1px 0 hsla(205, 40%, 40%, 0.3), 0 4px 14px hsla(205, 40%, 50%, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  --ring: 0 0 0 2px hsla(205, 40%, 50%, 0.3);
+
+  --code-bg: hsl(205, 20%, 15%);
+  --code-text: hsl(205, 30%, 95%);
+  --code-border: hsl(205, 20%, 25%);
+
+  --p-ab: #5e7d6a; --p-ab-dim: rgba(94, 125, 106, 0.12); --p-ab-soft: #e6ede6;
+  --p-biz: #b86b3a; --p-biz-dim: rgba(184, 107, 58, 0.12); --p-biz-soft: #f5e3d0;
+  --p-data: #4a7c8b; --p-data-dim: rgba(74, 124, 139, 0.12); --p-data-soft: #d8e5ea;
+  --p-wave: #b04f5f; --p-wave-dim: rgba(176, 79, 95, 0.12); --p-wave-soft: #f0d8dc;
+  --p-gray: #7a6b8e; --p-gray-dim: rgba(122, 107, 142, 0.12); --p-gray-soft: #ebe5ee;
+  --agent: var(--p-gray); --agent-dim: var(--p-gray-dim);
+  --success: #5a7a4f; --success-dim: rgba(90, 122, 79, 0.12); --success-soft: #e6ede0;
+  --warning: #b07d2a; --warning-dim: rgba(176, 125, 42, 0.12); --warning-soft: #f5ead0;
+  --error: #b54a3a; --error-dim: rgba(181, 74, 58, 0.12); --error-soft: #f5dfd9;
+  --info: var(--p-data); --info-dim: var(--p-data-dim); --info-soft: var(--p-data-soft);
+  --shadow: rgba(0,0,0, 0.08);
+  --shadow-1: 0 1px 2px rgba(0,0,0, 0.05);
+  --shadow-2: 0 2px 8px rgba(0,0,0, 0.04), 0 1px 2px rgba(0,0,0, 0.02);
+  --shadow-3: 0 12px 32px rgba(0,0,0, 0.08), 0 4px 12px rgba(0,0,0, 0.04), 0 0 0 1px var(--border-soft);
+  --shadow-inner: inset 0 1px 3px rgba(0,0,0, 0.04);
+  --shadow-btn: 0 1px 2px rgba(0,0,0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  --icon-emboss: inset 0 1px 0 rgba(255, 255, 255, 0.55), inset 0 -1px 0 rgba(0,0,0, 0.04);
+  --icon-shadow: 0 1px 2px rgba(0,0,0, 0.08);
+}
+
+/* 苍岭绿 */
+:root[data-theme="ip13p-alpine"] {
+  --bg: hsl(130, 15%, 20%);
+  --paper-deep: hsl(130, 15%, 17%);
+  --surface: hsl(130, 15%, 25%);
+  --surface-2: hsl(130, 15%, 30%);
+  --surface-3: hsl(130, 15%, 35%);
+
+  --border: hsl(130, 15%, 38%);
+  --border-soft: hsl(130, 15%, 30%);
+  --border-light: hsl(130, 15%, 42%);
+  --border-strong: hsl(130, 15%, 50%);
+  --divider: hsl(130, 15%, 32%);
+
+  --text: hsl(130, 5%, 90%);
+  --text-dim: hsl(130, 5%, 70%);
+  --text-muted: hsl(130, 5%, 55%);
+
+  --primary: hsl(130, 25%, 65%);
+  --primary-hover: hsl(130, 25%, 75%);
+  --primary-pressed: hsl(130, 25%, 55%);
+  --primary-on: #000000;
+  --primary-dim: hsla(130, 25%, 65%, 0.2);
+  --primary-glow: hsla(130, 25%, 65%, 0.3);
+  --primary-soft: hsla(130, 25%, 65%, 0.25);
+
+  --accent: var(--primary);
+  --accent-hover: var(--primary-hover);
+  --accent-soft: var(--primary-soft);
+  --accent-text: hsl(130, 25%, 85%);
+
+  --accent-grad: linear-gradient(135deg, hsl(130, 25%, 65%) 0%, hsl(130, 25%, 75%) 100%);
+  --accent-shadow: 0 2px 8px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  --ring: 0 0 0 2px hsla(130, 25%, 65%, 0.4);
+
+  --code-bg: hsl(130, 15%, 15%);
+  --code-text: hsl(130, 5%, 85%);
+  --code-border: hsl(130, 15%, 25%);
+
+  --p-ab: #5e7d6a; --p-ab-dim: rgba(94, 125, 106, 0.12); --p-ab-soft: #e6ede6;
+  --p-biz: #b86b3a; --p-biz-dim: rgba(184, 107, 58, 0.12); --p-biz-soft: #f5e3d0;
+  --p-data: #4a7c8b; --p-data-dim: rgba(74, 124, 139, 0.12); --p-data-soft: #d8e5ea;
+  --p-wave: #b04f5f; --p-wave-dim: rgba(176, 79, 95, 0.12); --p-wave-soft: #f0d8dc;
+  --p-gray: #7a6b8e; --p-gray-dim: rgba(122, 107, 142, 0.12); --p-gray-soft: #ebe5ee;
+  --agent: var(--p-gray); --agent-dim: var(--p-gray-dim);
+  --success: #5a7a4f; --success-dim: rgba(90, 122, 79, 0.12); --success-soft: #e6ede0;
+  --warning: #b07d2a; --warning-dim: rgba(176, 125, 42, 0.12); --warning-soft: #f5ead0;
+  --error: #b54a3a; --error-dim: rgba(181, 74, 58, 0.12); --error-soft: #f5dfd9;
+  --info: var(--p-data); --info-dim: var(--p-data-dim); --info-soft: var(--p-data-soft);
+  --shadow: rgba(0, 0, 0, 0.5);
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-2: 0 4px 16px rgba(0, 0, 0, 0.45);
+  --shadow-3: 0 12px 32px rgba(0, 0, 0, 0.55), 0 0 0 1px var(--border-soft);
+  --shadow-inner: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+  --shadow-btn: 0 1px 2px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  --icon-emboss: inset 0 1px 0 rgba(255, 255, 255, 0.06), inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+  --icon-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* 黄色 */
+:root[data-theme="ip14-yellow"] {
+  --bg: hsl(50, 70%, 95%);
+  --paper-deep: hsl(50, 70%, 90%);
+  --surface: #ffffff;
+  --surface-2: hsl(50, 70%, 93%);
+  --surface-3: hsl(50, 70%, 88%);
+
+  --border: hsl(50, 70%, 80%);
+  --border-soft: hsl(50, 70%, 87%);
+  --border-light: hsl(50, 70%, 83%);
+  --border-strong: hsl(50, 70%, 70%);
+  --divider: hsl(50, 70%, 85%);
+
+  --text: hsl(50, 60%, 15%);
+  --text-dim: hsl(50, 60%, 35%);
+  --text-muted: hsl(50, 60%, 50%);
+
+  --primary: hsl(45, 80%, 50%);
+  --primary-hover: hsl(45, 80%, 40%);
+  --primary-pressed: hsl(45, 80%, 30%);
+  --primary-on: #ffffff;
+  --primary-dim: hsla(45, 80%, 50%, 0.15);
+  --primary-glow: hsla(45, 80%, 50%, 0.25);
+  --primary-soft: hsl(45, 80%, 92%);
+
+  --accent: var(--primary);
+  --accent-hover: var(--primary-hover);
+  --accent-soft: var(--primary-soft);
+  --accent-text: hsl(45, 80%, 30%);
+
+  --accent-grad: linear-gradient(135deg, hsl(45, 80%, 50%) 0%, hsl(45, 90%, 65%) 100%);
+  --accent-shadow: 0 1px 0 hsla(45, 80%, 40%, 0.3), 0 4px 14px hsla(45, 80%, 50%, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  --ring: 0 0 0 2px hsla(45, 80%, 50%, 0.3);
+
+  --code-bg: hsl(50, 60%, 15%);
+  --code-text: hsl(50, 70%, 95%);
+  --code-border: hsl(50, 60%, 25%);
+
+  --p-ab: #5e7d6a; --p-ab-dim: rgba(94, 125, 106, 0.12); --p-ab-soft: #e6ede6;
+  --p-biz: #b86b3a; --p-biz-dim: rgba(184, 107, 58, 0.12); --p-biz-soft: #f5e3d0;
+  --p-data: #4a7c8b; --p-data-dim: rgba(74, 124, 139, 0.12); --p-data-soft: #d8e5ea;
+  --p-wave: #b04f5f; --p-wave-dim: rgba(176, 79, 95, 0.12); --p-wave-soft: #f0d8dc;
+  --p-gray: #7a6b8e; --p-gray-dim: rgba(122, 107, 142, 0.12); --p-gray-soft: #ebe5ee;
+  --agent: var(--p-gray); --agent-dim: var(--p-gray-dim);
+  --success: #5a7a4f; --success-dim: rgba(90, 122, 79, 0.12); --success-soft: #e6ede0;
+  --warning: #b07d2a; --warning-dim: rgba(176, 125, 42, 0.12); --warning-soft: #f5ead0;
+  --error: #b54a3a; --error-dim: rgba(181, 74, 58, 0.12); --error-soft: #f5dfd9;
+  --info: var(--p-data); --info-dim: var(--p-data-dim); --info-soft: var(--p-data-soft);
+  --shadow: rgba(0,0,0, 0.08);
+  --shadow-1: 0 1px 2px rgba(0,0,0, 0.05);
+  --shadow-2: 0 2px 8px rgba(0,0,0, 0.04), 0 1px 2px rgba(0,0,0, 0.02);
+  --shadow-3: 0 12px 32px rgba(0,0,0, 0.08), 0 4px 12px rgba(0,0,0, 0.04), 0 0 0 1px var(--border-soft);
+  --shadow-inner: inset 0 1px 3px rgba(0,0,0, 0.04);
+  --shadow-btn: 0 1px 2px rgba(0,0,0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  --icon-emboss: inset 0 1px 0 rgba(255, 255, 255, 0.55), inset 0 -1px 0 rgba(0,0,0, 0.04);
+  --icon-shadow: 0 1px 2px rgba(0,0,0, 0.08);
+}
+
+/* 暗紫色 */
+:root[data-theme="ip14p-purple"] {
+  --bg: hsl(270, 20%, 15%);
+  --paper-deep: hsl(270, 20%, 12%);
+  --surface: hsl(270, 20%, 20%);
+  --surface-2: hsl(270, 20%, 25%);
+  --surface-3: hsl(270, 20%, 30%);
+
+  --border: hsl(270, 20%, 33%);
+  --border-soft: hsl(270, 20%, 25%);
+  --border-light: hsl(270, 20%, 37%);
+  --border-strong: hsl(270, 20%, 45%);
+  --divider: hsl(270, 20%, 27%);
+
+  --text: hsl(270, 10%, 90%);
+  --text-dim: hsl(270, 10%, 70%);
+  --text-muted: hsl(270, 10%, 55%);
+
+  --primary: hsl(275, 30%, 65%);
+  --primary-hover: hsl(275, 30%, 75%);
+  --primary-pressed: hsl(275, 30%, 55%);
+  --primary-on: #000000;
+  --primary-dim: hsla(275, 30%, 65%, 0.2);
+  --primary-glow: hsla(275, 30%, 65%, 0.3);
+  --primary-soft: hsla(275, 30%, 65%, 0.25);
+
+  --accent: var(--primary);
+  --accent-hover: var(--primary-hover);
+  --accent-soft: var(--primary-soft);
+  --accent-text: hsl(275, 30%, 85%);
+
+  --accent-grad: linear-gradient(135deg, hsl(275, 30%, 65%) 0%, hsl(275, 30%, 75%) 100%);
+  --accent-shadow: 0 2px 8px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  --ring: 0 0 0 2px hsla(275, 30%, 65%, 0.4);
+
+  --code-bg: hsl(270, 20%, 10%);
+  --code-text: hsl(270, 10%, 85%);
+  --code-border: hsl(270, 20%, 20%);
+
+  --p-ab: #5e7d6a; --p-ab-dim: rgba(94, 125, 106, 0.12); --p-ab-soft: #e6ede6;
+  --p-biz: #b86b3a; --p-biz-dim: rgba(184, 107, 58, 0.12); --p-biz-soft: #f5e3d0;
+  --p-data: #4a7c8b; --p-data-dim: rgba(74, 124, 139, 0.12); --p-data-soft: #d8e5ea;
+  --p-wave: #b04f5f; --p-wave-dim: rgba(176, 79, 95, 0.12); --p-wave-soft: #f0d8dc;
+  --p-gray: #7a6b8e; --p-gray-dim: rgba(122, 107, 142, 0.12); --p-gray-soft: #ebe5ee;
+  --agent: var(--p-gray); --agent-dim: var(--p-gray-dim);
+  --success: #5a7a4f; --success-dim: rgba(90, 122, 79, 0.12); --success-soft: #e6ede0;
+  --warning: #b07d2a; --warning-dim: rgba(176, 125, 42, 0.12); --warning-soft: #f5ead0;
+  --error: #b54a3a; --error-dim: rgba(181, 74, 58, 0.12); --error-soft: #f5dfd9;
+  --info: var(--p-data); --info-dim: var(--p-data-dim); --info-soft: var(--p-data-soft);
+  --shadow: rgba(0, 0, 0, 0.5);
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-2: 0 4px 16px rgba(0, 0, 0, 0.45);
+  --shadow-3: 0 12px 32px rgba(0, 0, 0, 0.55), 0 0 0 1px var(--border-soft);
+  --shadow-inner: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+  --shadow-btn: 0 1px 2px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  --icon-emboss: inset 0 1px 0 rgba(255, 255, 255, 0.06), inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+  --icon-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* 空间黑 */
+:root[data-theme="ip14p-space"] {
+  --bg: hsl(0, 0%, 10%);
+  --paper-deep: hsl(0, 0%, 7%);
+  --surface: hsl(0, 0%, 15%);
+  --surface-2: hsl(0, 0%, 20%);
+  --surface-3: hsl(0, 0%, 25%);
+
+  --border: hsl(0, 0%, 28%);
+  --border-soft: hsl(0, 0%, 20%);
+  --border-light: hsl(0, 0%, 32%);
+  --border-strong: hsl(0, 0%, 40%);
+  --divider: hsl(0, 0%, 22%);
+
+  --text: hsl(0, 0%, 90%);
+  --text-dim: hsl(0, 0%, 70%);
+  --text-muted: hsl(0, 0%, 55%);
+
+  --primary: hsl(0, 0%, 65%);
+  --primary-hover: hsl(0, 0%, 75%);
+  --primary-pressed: hsl(0, 0%, 55%);
+  --primary-on: #000000;
+  --primary-dim: hsla(0, 0%, 65%, 0.2);
+  --primary-glow: hsla(0, 0%, 65%, 0.3);
+  --primary-soft: hsla(0, 0%, 65%, 0.25);
+
+  --accent: var(--primary);
+  --accent-hover: var(--primary-hover);
+  --accent-soft: var(--primary-soft);
+  --accent-text: hsl(0, 0%, 85%);
+
+  --accent-grad: linear-gradient(135deg, hsl(0, 0%, 65%) 0%, hsl(0, 0%, 75%) 100%);
+  --accent-shadow: 0 2px 8px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  --ring: 0 0 0 2px hsla(0, 0%, 65%, 0.4);
+
+  --code-bg: hsl(0, 0%, 5%);
+  --code-text: hsl(0, 0%, 85%);
+  --code-border: hsl(0, 0%, 15%);
+
+  --p-ab: #5e7d6a; --p-ab-dim: rgba(94, 125, 106, 0.12); --p-ab-soft: #e6ede6;
+  --p-biz: #b86b3a; --p-biz-dim: rgba(184, 107, 58, 0.12); --p-biz-soft: #f5e3d0;
+  --p-data: #4a7c8b; --p-data-dim: rgba(74, 124, 139, 0.12); --p-data-soft: #d8e5ea;
+  --p-wave: #b04f5f; --p-wave-dim: rgba(176, 79, 95, 0.12); --p-wave-soft: #f0d8dc;
+  --p-gray: #7a6b8e; --p-gray-dim: rgba(122, 107, 142, 0.12); --p-gray-soft: #ebe5ee;
+  --agent: var(--p-gray); --agent-dim: var(--p-gray-dim);
+  --success: #5a7a4f; --success-dim: rgba(90, 122, 79, 0.12); --success-soft: #e6ede0;
+  --warning: #b07d2a; --warning-dim: rgba(176, 125, 42, 0.12); --warning-soft: #f5ead0;
+  --error: #b54a3a; --error-dim: rgba(181, 74, 58, 0.12); --error-soft: #f5dfd9;
+  --info: var(--p-data); --info-dim: var(--p-data-dim); --info-soft: var(--p-data-soft);
+  --shadow: rgba(0, 0, 0, 0.5);
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-2: 0 4px 16px rgba(0, 0, 0, 0.45);
+  --shadow-3: 0 12px 32px rgba(0, 0, 0, 0.55), 0 0 0 1px var(--border-soft);
+  --shadow-inner: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+  --shadow-btn: 0 1px 2px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  --icon-emboss: inset 0 1px 0 rgba(255, 255, 255, 0.06), inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+  --icon-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* 绿色 */
+:root[data-theme="ip15-green"] {
+  --bg: hsl(140, 40%, 94%);
+  --paper-deep: hsl(140, 40%, 89%);
+  --surface: #ffffff;
+  --surface-2: hsl(140, 40%, 92%);
+  --surface-3: hsl(140, 40%, 87%);
+
+  --border: hsl(140, 40%, 79%);
+  --border-soft: hsl(140, 40%, 86%);
+  --border-light: hsl(140, 40%, 82%);
+  --border-strong: hsl(140, 40%, 69%);
+  --divider: hsl(140, 40%, 84%);
+
+  --text: hsl(140, 30%, 15%);
+  --text-dim: hsl(140, 30%, 35%);
+  --text-muted: hsl(140, 30%, 50%);
+
+  --primary: hsl(140, 50%, 50%);
+  --primary-hover: hsl(140, 50%, 40%);
+  --primary-pressed: hsl(140, 50%, 30%);
+  --primary-on: #ffffff;
+  --primary-dim: hsla(140, 50%, 50%, 0.15);
+  --primary-glow: hsla(140, 50%, 50%, 0.25);
+  --primary-soft: hsl(140, 50%, 92%);
+
+  --accent: var(--primary);
+  --accent-hover: var(--primary-hover);
+  --accent-soft: var(--primary-soft);
+  --accent-text: hsl(140, 50%, 30%);
+
+  --accent-grad: linear-gradient(135deg, hsl(140, 50%, 50%) 0%, hsl(140, 60%, 65%) 100%);
+  --accent-shadow: 0 1px 0 hsla(140, 50%, 40%, 0.3), 0 4px 14px hsla(140, 50%, 50%, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  --ring: 0 0 0 2px hsla(140, 50%, 50%, 0.3);
+
+  --code-bg: hsl(140, 30%, 15%);
+  --code-text: hsl(140, 40%, 95%);
+  --code-border: hsl(140, 30%, 25%);
+
+  --p-ab: #5e7d6a; --p-ab-dim: rgba(94, 125, 106, 0.12); --p-ab-soft: #e6ede6;
+  --p-biz: #b86b3a; --p-biz-dim: rgba(184, 107, 58, 0.12); --p-biz-soft: #f5e3d0;
+  --p-data: #4a7c8b; --p-data-dim: rgba(74, 124, 139, 0.12); --p-data-soft: #d8e5ea;
+  --p-wave: #b04f5f; --p-wave-dim: rgba(176, 79, 95, 0.12); --p-wave-soft: #f0d8dc;
+  --p-gray: #7a6b8e; --p-gray-dim: rgba(122, 107, 142, 0.12); --p-gray-soft: #ebe5ee;
+  --agent: var(--p-gray); --agent-dim: var(--p-gray-dim);
+  --success: #5a7a4f; --success-dim: rgba(90, 122, 79, 0.12); --success-soft: #e6ede0;
+  --warning: #b07d2a; --warning-dim: rgba(176, 125, 42, 0.12); --warning-soft: #f5ead0;
+  --error: #b54a3a; --error-dim: rgba(181, 74, 58, 0.12); --error-soft: #f5dfd9;
+  --info: var(--p-data); --info-dim: var(--p-data-dim); --info-soft: var(--p-data-soft);
+  --shadow: rgba(0,0,0, 0.08);
+  --shadow-1: 0 1px 2px rgba(0,0,0, 0.05);
+  --shadow-2: 0 2px 8px rgba(0,0,0, 0.04), 0 1px 2px rgba(0,0,0, 0.02);
+  --shadow-3: 0 12px 32px rgba(0,0,0, 0.08), 0 4px 12px rgba(0,0,0, 0.04), 0 0 0 1px var(--border-soft);
+  --shadow-inner: inset 0 1px 3px rgba(0,0,0, 0.04);
+  --shadow-btn: 0 1px 2px rgba(0,0,0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  --icon-emboss: inset 0 1px 0 rgba(255, 255, 255, 0.55), inset 0 -1px 0 rgba(0,0,0, 0.04);
+  --icon-shadow: 0 1px 2px rgba(0,0,0, 0.08);
+}
+
+/* 蓝色钛金属 */
+:root[data-theme="ip15p-blue"] {
+  --bg: hsl(215, 25%, 25%);
+  --paper-deep: hsl(215, 25%, 22%);
+  --surface: hsl(215, 25%, 30%);
+  --surface-2: hsl(215, 25%, 35%);
+  --surface-3: hsl(215, 25%, 40%);
+
+  --border: hsl(215, 25%, 43%);
+  --border-soft: hsl(215, 25%, 35%);
+  --border-light: hsl(215, 25%, 47%);
+  --border-strong: hsl(215, 25%, 55%);
+  --divider: hsl(215, 25%, 37%);
+
+  --text: hsl(215, 15%, 90%);
+  --text-dim: hsl(215, 15%, 70%);
+  --text-muted: hsl(215, 15%, 55%);
+
+  --primary: hsl(215, 35%, 65%);
+  --primary-hover: hsl(215, 35%, 75%);
+  --primary-pressed: hsl(215, 35%, 55%);
+  --primary-on: #000000;
+  --primary-dim: hsla(215, 35%, 65%, 0.2);
+  --primary-glow: hsla(215, 35%, 65%, 0.3);
+  --primary-soft: hsla(215, 35%, 65%, 0.25);
+
+  --accent: var(--primary);
+  --accent-hover: var(--primary-hover);
+  --accent-soft: var(--primary-soft);
+  --accent-text: hsl(215, 35%, 85%);
+
+  --accent-grad: linear-gradient(135deg, hsl(215, 35%, 65%) 0%, hsl(215, 35%, 75%) 100%);
+  --accent-shadow: 0 2px 8px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  --ring: 0 0 0 2px hsla(215, 35%, 65%, 0.4);
+
+  --code-bg: hsl(215, 25%, 20%);
+  --code-text: hsl(215, 15%, 85%);
+  --code-border: hsl(215, 25%, 30%);
+
+  --p-ab: #5e7d6a; --p-ab-dim: rgba(94, 125, 106, 0.12); --p-ab-soft: #e6ede6;
+  --p-biz: #b86b3a; --p-biz-dim: rgba(184, 107, 58, 0.12); --p-biz-soft: #f5e3d0;
+  --p-data: #4a7c8b; --p-data-dim: rgba(74, 124, 139, 0.12); --p-data-soft: #d8e5ea;
+  --p-wave: #b04f5f; --p-wave-dim: rgba(176, 79, 95, 0.12); --p-wave-soft: #f0d8dc;
+  --p-gray: #7a6b8e; --p-gray-dim: rgba(122, 107, 142, 0.12); --p-gray-soft: #ebe5ee;
+  --agent: var(--p-gray); --agent-dim: var(--p-gray-dim);
+  --success: #5a7a4f; --success-dim: rgba(90, 122, 79, 0.12); --success-soft: #e6ede0;
+  --warning: #b07d2a; --warning-dim: rgba(176, 125, 42, 0.12); --warning-soft: #f5ead0;
+  --error: #b54a3a; --error-dim: rgba(181, 74, 58, 0.12); --error-soft: #f5dfd9;
+  --info: var(--p-data); --info-dim: var(--p-data-dim); --info-soft: var(--p-data-soft);
+  --shadow: rgba(0, 0, 0, 0.5);
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-2: 0 4px 16px rgba(0, 0, 0, 0.45);
+  --shadow-3: 0 12px 32px rgba(0, 0, 0, 0.55), 0 0 0 1px var(--border-soft);
+  --shadow-inner: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+  --shadow-btn: 0 1px 2px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  --icon-emboss: inset 0 1px 0 rgba(255, 255, 255, 0.06), inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+  --icon-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* 原色钛金属 */
+:root[data-theme="ip15p-natural"] {
+  --bg: hsl(30, 10%, 90%);
+  --paper-deep: hsl(30, 10%, 85%);
+  --surface: #ffffff;
+  --surface-2: hsl(30, 10%, 88%);
+  --surface-3: hsl(30, 10%, 83%);
+
+  --border: hsl(30, 10%, 75%);
+  --border-soft: hsl(30, 10%, 82%);
+  --border-light: hsl(30, 10%, 78%);
+  --border-strong: hsl(30, 10%, 65%);
+  --divider: hsl(30, 10%, 80%);
+
+  --text: hsl(0, 0%, 15%);
+  --text-dim: hsl(0, 0%, 35%);
+  --text-muted: hsl(0, 0%, 50%);
+
+  --primary: hsl(30, 20%, 50%);
+  --primary-hover: hsl(30, 20%, 40%);
+  --primary-pressed: hsl(30, 20%, 30%);
+  --primary-on: #ffffff;
+  --primary-dim: hsla(30, 20%, 50%, 0.15);
+  --primary-glow: hsla(30, 20%, 50%, 0.25);
+  --primary-soft: hsl(30, 20%, 92%);
+
+  --accent: var(--primary);
+  --accent-hover: var(--primary-hover);
+  --accent-soft: var(--primary-soft);
+  --accent-text: hsl(30, 20%, 30%);
+
+  --accent-grad: linear-gradient(135deg, hsl(30, 20%, 50%) 0%, hsl(30, 30%, 65%) 100%);
+  --accent-shadow: 0 1px 0 hsla(30, 20%, 40%, 0.3), 0 4px 14px hsla(30, 20%, 50%, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  --ring: 0 0 0 2px hsla(30, 20%, 50%, 0.3);
+
+  --code-bg: hsl(0, 0%, 15%);
+  --code-text: hsl(30, 10%, 95%);
+  --code-border: hsl(0, 0%, 25%);
+
+  --p-ab: #5e7d6a; --p-ab-dim: rgba(94, 125, 106, 0.12); --p-ab-soft: #e6ede6;
+  --p-biz: #b86b3a; --p-biz-dim: rgba(184, 107, 58, 0.12); --p-biz-soft: #f5e3d0;
+  --p-data: #4a7c8b; --p-data-dim: rgba(74, 124, 139, 0.12); --p-data-soft: #d8e5ea;
+  --p-wave: #b04f5f; --p-wave-dim: rgba(176, 79, 95, 0.12); --p-wave-soft: #f0d8dc;
+  --p-gray: #7a6b8e; --p-gray-dim: rgba(122, 107, 142, 0.12); --p-gray-soft: #ebe5ee;
+  --agent: var(--p-gray); --agent-dim: var(--p-gray-dim);
+  --success: #5a7a4f; --success-dim: rgba(90, 122, 79, 0.12); --success-soft: #e6ede0;
+  --warning: #b07d2a; --warning-dim: rgba(176, 125, 42, 0.12); --warning-soft: #f5ead0;
+  --error: #b54a3a; --error-dim: rgba(181, 74, 58, 0.12); --error-soft: #f5dfd9;
+  --info: var(--p-data); --info-dim: var(--p-data-dim); --info-soft: var(--p-data-soft);
+  --shadow: rgba(0,0,0, 0.08);
+  --shadow-1: 0 1px 2px rgba(0,0,0, 0.05);
+  --shadow-2: 0 2px 8px rgba(0,0,0, 0.04), 0 1px 2px rgba(0,0,0, 0.02);
+  --shadow-3: 0 12px 32px rgba(0,0,0, 0.08), 0 4px 12px rgba(0,0,0, 0.04), 0 0 0 1px var(--border-soft);
+  --shadow-inner: inset 0 1px 3px rgba(0,0,0, 0.04);
+  --shadow-btn: 0 1px 2px rgba(0,0,0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  --icon-emboss: inset 0 1px 0 rgba(255, 255, 255, 0.55), inset 0 -1px 0 rgba(0,0,0, 0.04);
+  --icon-shadow: 0 1px 2px rgba(0,0,0, 0.08);
+}
+
+/* 群青色 */
+:root[data-theme="ip16-ultra"] {
+  --bg: hsl(230, 60%, 90%);
+  --paper-deep: hsl(230, 60%, 85%);
+  --surface: #ffffff;
+  --surface-2: hsl(230, 60%, 88%);
+  --surface-3: hsl(230, 60%, 83%);
+
+  --border: hsl(230, 60%, 75%);
+  --border-soft: hsl(230, 60%, 82%);
+  --border-light: hsl(230, 60%, 78%);
+  --border-strong: hsl(230, 60%, 65%);
+  --divider: hsl(230, 60%, 80%);
+
+  --text: hsl(230, 50%, 15%);
+  --text-dim: hsl(230, 50%, 35%);
+  --text-muted: hsl(230, 50%, 50%);
+
+  --primary: hsl(230, 70%, 50%);
+  --primary-hover: hsl(230, 70%, 40%);
+  --primary-pressed: hsl(230, 70%, 30%);
+  --primary-on: #ffffff;
+  --primary-dim: hsla(230, 70%, 50%, 0.15);
+  --primary-glow: hsla(230, 70%, 50%, 0.25);
+  --primary-soft: hsl(230, 70%, 92%);
+
+  --accent: var(--primary);
+  --accent-hover: var(--primary-hover);
+  --accent-soft: var(--primary-soft);
+  --accent-text: hsl(230, 70%, 30%);
+
+  --accent-grad: linear-gradient(135deg, hsl(230, 70%, 50%) 0%, hsl(230, 80%, 65%) 100%);
+  --accent-shadow: 0 1px 0 hsla(230, 70%, 40%, 0.3), 0 4px 14px hsla(230, 70%, 50%, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  --ring: 0 0 0 2px hsla(230, 70%, 50%, 0.3);
+
+  --code-bg: hsl(230, 50%, 15%);
+  --code-text: hsl(230, 60%, 95%);
+  --code-border: hsl(230, 50%, 25%);
+
+  --p-ab: #5e7d6a; --p-ab-dim: rgba(94, 125, 106, 0.12); --p-ab-soft: #e6ede6;
+  --p-biz: #b86b3a; --p-biz-dim: rgba(184, 107, 58, 0.12); --p-biz-soft: #f5e3d0;
+  --p-data: #4a7c8b; --p-data-dim: rgba(74, 124, 139, 0.12); --p-data-soft: #d8e5ea;
+  --p-wave: #b04f5f; --p-wave-dim: rgba(176, 79, 95, 0.12); --p-wave-soft: #f0d8dc;
+  --p-gray: #7a6b8e; --p-gray-dim: rgba(122, 107, 142, 0.12); --p-gray-soft: #ebe5ee;
+  --agent: var(--p-gray); --agent-dim: var(--p-gray-dim);
+  --success: #5a7a4f; --success-dim: rgba(90, 122, 79, 0.12); --success-soft: #e6ede0;
+  --warning: #b07d2a; --warning-dim: rgba(176, 125, 42, 0.12); --warning-soft: #f5ead0;
+  --error: #b54a3a; --error-dim: rgba(181, 74, 58, 0.12); --error-soft: #f5dfd9;
+  --info: var(--p-data); --info-dim: var(--p-data-dim); --info-soft: var(--p-data-soft);
+  --shadow: rgba(0,0,0, 0.08);
+  --shadow-1: 0 1px 2px rgba(0,0,0, 0.05);
+  --shadow-2: 0 2px 8px rgba(0,0,0, 0.04), 0 1px 2px rgba(0,0,0, 0.02);
+  --shadow-3: 0 12px 32px rgba(0,0,0, 0.08), 0 4px 12px rgba(0,0,0, 0.04), 0 0 0 1px var(--border-soft);
+  --shadow-inner: inset 0 1px 3px rgba(0,0,0, 0.04);
+  --shadow-btn: 0 1px 2px rgba(0,0,0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  --icon-emboss: inset 0 1px 0 rgba(255, 255, 255, 0.55), inset 0 -1px 0 rgba(0,0,0, 0.04);
+  --icon-shadow: 0 1px 2px rgba(0,0,0, 0.08);
+}
+
+/* 深青色 */
+:root[data-theme="ip16-teal"] {
+  --bg: hsl(175, 40%, 25%);
+  --paper-deep: hsl(175, 40%, 22%);
+  --surface: hsl(175, 40%, 30%);
+  --surface-2: hsl(175, 40%, 35%);
+  --surface-3: hsl(175, 40%, 40%);
+
+  --border: hsl(175, 40%, 43%);
+  --border-soft: hsl(175, 40%, 35%);
+  --border-light: hsl(175, 40%, 47%);
+  --border-strong: hsl(175, 40%, 55%);
+  --divider: hsl(175, 40%, 37%);
+
+  --text: hsl(175, 30%, 90%);
+  --text-dim: hsl(175, 30%, 70%);
+  --text-muted: hsl(175, 30%, 55%);
+
+  --primary: hsl(175, 50%, 65%);
+  --primary-hover: hsl(175, 50%, 75%);
+  --primary-pressed: hsl(175, 50%, 55%);
+  --primary-on: #000000;
+  --primary-dim: hsla(175, 50%, 65%, 0.2);
+  --primary-glow: hsla(175, 50%, 65%, 0.3);
+  --primary-soft: hsla(175, 50%, 65%, 0.25);
+
+  --accent: var(--primary);
+  --accent-hover: var(--primary-hover);
+  --accent-soft: var(--primary-soft);
+  --accent-text: hsl(175, 50%, 85%);
+
+  --accent-grad: linear-gradient(135deg, hsl(175, 50%, 65%) 0%, hsl(175, 50%, 75%) 100%);
+  --accent-shadow: 0 2px 8px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  --ring: 0 0 0 2px hsla(175, 50%, 65%, 0.4);
+
+  --code-bg: hsl(175, 40%, 20%);
+  --code-text: hsl(175, 30%, 85%);
+  --code-border: hsl(175, 40%, 30%);
+
+  --p-ab: #5e7d6a; --p-ab-dim: rgba(94, 125, 106, 0.12); --p-ab-soft: #e6ede6;
+  --p-biz: #b86b3a; --p-biz-dim: rgba(184, 107, 58, 0.12); --p-biz-soft: #f5e3d0;
+  --p-data: #4a7c8b; --p-data-dim: rgba(74, 124, 139, 0.12); --p-data-soft: #d8e5ea;
+  --p-wave: #b04f5f; --p-wave-dim: rgba(176, 79, 95, 0.12); --p-wave-soft: #f0d8dc;
+  --p-gray: #7a6b8e; --p-gray-dim: rgba(122, 107, 142, 0.12); --p-gray-soft: #ebe5ee;
+  --agent: var(--p-gray); --agent-dim: var(--p-gray-dim);
+  --success: #5a7a4f; --success-dim: rgba(90, 122, 79, 0.12); --success-soft: #e6ede0;
+  --warning: #b07d2a; --warning-dim: rgba(176, 125, 42, 0.12); --warning-soft: #f5ead0;
+  --error: #b54a3a; --error-dim: rgba(181, 74, 58, 0.12); --error-soft: #f5dfd9;
+  --info: var(--p-data); --info-dim: var(--p-data-dim); --info-soft: var(--p-data-soft);
+  --shadow: rgba(0, 0, 0, 0.5);
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-2: 0 4px 16px rgba(0, 0, 0, 0.45);
+  --shadow-3: 0 12px 32px rgba(0, 0, 0, 0.55), 0 0 0 1px var(--border-soft);
+  --shadow-inner: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+  --shadow-btn: 0 1px 2px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  --icon-emboss: inset 0 1px 0 rgba(255, 255, 255, 0.06), inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+  --icon-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* 沙漠钛金属 */
+:root[data-theme="ip16p-desert"] {
+  --bg: hsl(35, 30%, 92%);
+  --paper-deep: hsl(35, 30%, 87%);
+  --surface: #ffffff;
+  --surface-2: hsl(35, 30%, 90%);
+  --surface-3: hsl(35, 30%, 85%);
+
+  --border: hsl(35, 30%, 77%);
+  --border-soft: hsl(35, 30%, 84%);
+  --border-light: hsl(35, 30%, 80%);
+  --border-strong: hsl(35, 30%, 67%);
+  --divider: hsl(35, 30%, 82%);
+
+  --text: hsl(35, 20%, 15%);
+  --text-dim: hsl(35, 20%, 35%);
+  --text-muted: hsl(35, 20%, 50%);
+
+  --primary: hsl(35, 40%, 50%);
+  --primary-hover: hsl(35, 40%, 40%);
+  --primary-pressed: hsl(35, 40%, 30%);
+  --primary-on: #ffffff;
+  --primary-dim: hsla(35, 40%, 50%, 0.15);
+  --primary-glow: hsla(35, 40%, 50%, 0.25);
+  --primary-soft: hsl(35, 40%, 92%);
+
+  --accent: var(--primary);
+  --accent-hover: var(--primary-hover);
+  --accent-soft: var(--primary-soft);
+  --accent-text: hsl(35, 40%, 30%);
+
+  --accent-grad: linear-gradient(135deg, hsl(35, 40%, 50%) 0%, hsl(35, 50%, 65%) 100%);
+  --accent-shadow: 0 1px 0 hsla(35, 40%, 40%, 0.3), 0 4px 14px hsla(35, 40%, 50%, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  --ring: 0 0 0 2px hsla(35, 40%, 50%, 0.3);
+
+  --code-bg: hsl(35, 20%, 15%);
+  --code-text: hsl(35, 30%, 95%);
+  --code-border: hsl(35, 20%, 25%);
+
+  --p-ab: #5e7d6a; --p-ab-dim: rgba(94, 125, 106, 0.12); --p-ab-soft: #e6ede6;
+  --p-biz: #b86b3a; --p-biz-dim: rgba(184, 107, 58, 0.12); --p-biz-soft: #f5e3d0;
+  --p-data: #4a7c8b; --p-data-dim: rgba(74, 124, 139, 0.12); --p-data-soft: #d8e5ea;
+  --p-wave: #b04f5f; --p-wave-dim: rgba(176, 79, 95, 0.12); --p-wave-soft: #f0d8dc;
+  --p-gray: #7a6b8e; --p-gray-dim: rgba(122, 107, 142, 0.12); --p-gray-soft: #ebe5ee;
+  --agent: var(--p-gray); --agent-dim: var(--p-gray-dim);
+  --success: #5a7a4f; --success-dim: rgba(90, 122, 79, 0.12); --success-soft: #e6ede0;
+  --warning: #b07d2a; --warning-dim: rgba(176, 125, 42, 0.12); --warning-soft: #f5ead0;
+  --error: #b54a3a; --error-dim: rgba(181, 74, 58, 0.12); --error-soft: #f5dfd9;
+  --info: var(--p-data); --info-dim: var(--p-data-dim); --info-soft: var(--p-data-soft);
+  --shadow: rgba(0,0,0, 0.08);
+  --shadow-1: 0 1px 2px rgba(0,0,0, 0.05);
+  --shadow-2: 0 2px 8px rgba(0,0,0, 0.04), 0 1px 2px rgba(0,0,0, 0.02);
+  --shadow-3: 0 12px 32px rgba(0,0,0, 0.08), 0 4px 12px rgba(0,0,0, 0.04), 0 0 0 1px var(--border-soft);
+  --shadow-inner: inset 0 1px 3px rgba(0,0,0, 0.04);
+  --shadow-btn: 0 1px 2px rgba(0,0,0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  --icon-emboss: inset 0 1px 0 rgba(255, 255, 255, 0.55), inset 0 -1px 0 rgba(0,0,0, 0.04);
+  --icon-shadow: 0 1px 2px rgba(0,0,0, 0.08);
+}
+
+/* 冰雪蓝 */
+:root[data-theme="ip17-ice"] {
+  --bg: hsl(195, 50%, 95%);
+  --paper-deep: hsl(195, 50%, 90%);
+  --surface: #ffffff;
+  --surface-2: hsl(195, 50%, 93%);
+  --surface-3: hsl(195, 50%, 88%);
+
+  --border: hsl(195, 50%, 80%);
+  --border-soft: hsl(195, 50%, 87%);
+  --border-light: hsl(195, 50%, 83%);
+  --border-strong: hsl(195, 50%, 70%);
+  --divider: hsl(195, 50%, 85%);
+
+  --text: hsl(195, 40%, 15%);
+  --text-dim: hsl(195, 40%, 35%);
+  --text-muted: hsl(195, 40%, 50%);
+
+  --primary: hsl(195, 60%, 50%);
+  --primary-hover: hsl(195, 60%, 40%);
+  --primary-pressed: hsl(195, 60%, 30%);
+  --primary-on: #ffffff;
+  --primary-dim: hsla(195, 60%, 50%, 0.15);
+  --primary-glow: hsla(195, 60%, 50%, 0.25);
+  --primary-soft: hsl(195, 60%, 92%);
+
+  --accent: var(--primary);
+  --accent-hover: var(--primary-hover);
+  --accent-soft: var(--primary-soft);
+  --accent-text: hsl(195, 60%, 30%);
+
+  --accent-grad: linear-gradient(135deg, hsl(195, 60%, 50%) 0%, hsl(195, 70%, 65%) 100%);
+  --accent-shadow: 0 1px 0 hsla(195, 60%, 40%, 0.3), 0 4px 14px hsla(195, 60%, 50%, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  --ring: 0 0 0 2px hsla(195, 60%, 50%, 0.3);
+
+  --code-bg: hsl(195, 40%, 15%);
+  --code-text: hsl(195, 50%, 95%);
+  --code-border: hsl(195, 40%, 25%);
+
+  --p-ab: #5e7d6a; --p-ab-dim: rgba(94, 125, 106, 0.12); --p-ab-soft: #e6ede6;
+  --p-biz: #b86b3a; --p-biz-dim: rgba(184, 107, 58, 0.12); --p-biz-soft: #f5e3d0;
+  --p-data: #4a7c8b; --p-data-dim: rgba(74, 124, 139, 0.12); --p-data-soft: #d8e5ea;
+  --p-wave: #b04f5f; --p-wave-dim: rgba(176, 79, 95, 0.12); --p-wave-soft: #f0d8dc;
+  --p-gray: #7a6b8e; --p-gray-dim: rgba(122, 107, 142, 0.12); --p-gray-soft: #ebe5ee;
+  --agent: var(--p-gray); --agent-dim: var(--p-gray-dim);
+  --success: #5a7a4f; --success-dim: rgba(90, 122, 79, 0.12); --success-soft: #e6ede0;
+  --warning: #b07d2a; --warning-dim: rgba(176, 125, 42, 0.12); --warning-soft: #f5ead0;
+  --error: #b54a3a; --error-dim: rgba(181, 74, 58, 0.12); --error-soft: #f5dfd9;
+  --info: var(--p-data); --info-dim: var(--p-data-dim); --info-soft: var(--p-data-soft);
+  --shadow: rgba(0,0,0, 0.08);
+  --shadow-1: 0 1px 2px rgba(0,0,0, 0.05);
+  --shadow-2: 0 2px 8px rgba(0,0,0, 0.04), 0 1px 2px rgba(0,0,0, 0.02);
+  --shadow-3: 0 12px 32px rgba(0,0,0, 0.08), 0 4px 12px rgba(0,0,0, 0.04), 0 0 0 1px var(--border-soft);
+  --shadow-inner: inset 0 1px 3px rgba(0,0,0, 0.04);
+  --shadow-btn: 0 1px 2px rgba(0,0,0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  --icon-emboss: inset 0 1px 0 rgba(255, 255, 255, 0.55), inset 0 -1px 0 rgba(0,0,0, 0.04);
+  --icon-shadow: 0 1px 2px rgba(0,0,0, 0.08);
+}
+
+/* 玫瑰钛金属 */
+:root[data-theme="ip17p-rose"] {
+  --bg: hsl(350, 25%, 90%);
+  --paper-deep: hsl(350, 25%, 85%);
+  --surface: #ffffff;
+  --surface-2: hsl(350, 25%, 88%);
+  --surface-3: hsl(350, 25%, 83%);
+
+  --border: hsl(350, 25%, 75%);
+  --border-soft: hsl(350, 25%, 82%);
+  --border-light: hsl(350, 25%, 78%);
+  --border-strong: hsl(350, 25%, 65%);
+  --divider: hsl(350, 25%, 80%);
+
+  --text: hsl(350, 15%, 15%);
+  --text-dim: hsl(350, 15%, 35%);
+  --text-muted: hsl(350, 15%, 50%);
+
+  --primary: hsl(350, 35%, 50%);
+  --primary-hover: hsl(350, 35%, 40%);
+  --primary-pressed: hsl(350, 35%, 30%);
+  --primary-on: #ffffff;
+  --primary-dim: hsla(350, 35%, 50%, 0.15);
+  --primary-glow: hsla(350, 35%, 50%, 0.25);
+  --primary-soft: hsl(350, 35%, 92%);
+
+  --accent: var(--primary);
+  --accent-hover: var(--primary-hover);
+  --accent-soft: var(--primary-soft);
+  --accent-text: hsl(350, 35%, 30%);
+
+  --accent-grad: linear-gradient(135deg, hsl(350, 35%, 50%) 0%, hsl(350, 45%, 65%) 100%);
+  --accent-shadow: 0 1px 0 hsla(350, 35%, 40%, 0.3), 0 4px 14px hsla(350, 35%, 50%, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  --ring: 0 0 0 2px hsla(350, 35%, 50%, 0.3);
+
+  --code-bg: hsl(350, 15%, 15%);
+  --code-text: hsl(350, 25%, 95%);
+  --code-border: hsl(350, 15%, 25%);
+
+  --p-ab: #5e7d6a; --p-ab-dim: rgba(94, 125, 106, 0.12); --p-ab-soft: #e6ede6;
+  --p-biz: #b86b3a; --p-biz-dim: rgba(184, 107, 58, 0.12); --p-biz-soft: #f5e3d0;
+  --p-data: #4a7c8b; --p-data-dim: rgba(74, 124, 139, 0.12); --p-data-soft: #d8e5ea;
+  --p-wave: #b04f5f; --p-wave-dim: rgba(176, 79, 95, 0.12); --p-wave-soft: #f0d8dc;
+  --p-gray: #7a6b8e; --p-gray-dim: rgba(122, 107, 142, 0.12); --p-gray-soft: #ebe5ee;
+  --agent: var(--p-gray); --agent-dim: var(--p-gray-dim);
+  --success: #5a7a4f; --success-dim: rgba(90, 122, 79, 0.12); --success-soft: #e6ede0;
+  --warning: #b07d2a; --warning-dim: rgba(176, 125, 42, 0.12); --warning-soft: #f5ead0;
+  --error: #b54a3a; --error-dim: rgba(181, 74, 58, 0.12); --error-soft: #f5dfd9;
+  --info: var(--p-data); --info-dim: var(--p-data-dim); --info-soft: var(--p-data-soft);
+  --shadow: rgba(0,0,0, 0.08);
+  --shadow-1: 0 1px 2px rgba(0,0,0, 0.05);
+  --shadow-2: 0 2px 8px rgba(0,0,0, 0.04), 0 1px 2px rgba(0,0,0, 0.02);
+  --shadow-3: 0 12px 32px rgba(0,0,0, 0.08), 0 4px 12px rgba(0,0,0, 0.04), 0 0 0 1px var(--border-soft);
+  --shadow-inner: inset 0 1px 3px rgba(0,0,0, 0.04);
+  --shadow-btn: 0 1px 2px rgba(0,0,0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  --icon-emboss: inset 0 1px 0 rgba(255, 255, 255, 0.55), inset 0 -1px 0 rgba(0,0,0, 0.04);
+  --icon-shadow: 0 1px 2px rgba(0,0,0, 0.08);
+}
+

@@ -17,14 +17,13 @@
     "feishu_publish",
     "feishu_upload_image",
     "read_skill",
-    "read_agent_knowledge",
     "todo_write",
     "exit_plan_mode",
     "spawn_subagent"
   ],
   "model": null,
   "spawn_targets": ["wave-attribution", "zijian-data-analysis", "know"],
-  "skills": ["nl-sql", "kyuubi", "feishu", "nl-python"],
+  "skills": ["nl-mapping-table-sql", "kyuubi", "feishu", "nl-python"],
   "features": {
     "todo_write": true,
     "exit_plan_mode": true,

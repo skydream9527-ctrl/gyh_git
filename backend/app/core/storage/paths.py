@@ -140,6 +140,12 @@ class StoragePaths:
     def task_todos(self, task_id: str) -> Path:
         return self.task_dir(task_id) / "todos.json"
 
+    def task_run_events(self, task_id: str, conv_id: str) -> Path:
+        return self.task_dir(task_id) / "run_events" / f"{conv_id}.jsonl"
+
+    def task_hitl_requests(self, task_id: str) -> Path:
+        return self.task_dir(task_id) / "hitl_requests.json"
+
     def task_subagent_run(self, task_id: str, run_id: str) -> Path:
         return self.task_dir(task_id) / "subagent_runs" / f"{run_id}.jsonl"
 

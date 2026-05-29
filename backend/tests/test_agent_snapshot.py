@@ -47,6 +47,25 @@ def test_snapshot_agent_copies_files(agent_fs):
     assert paths.task_agent_json(tid).exists()
 
 
+def test_snapshot_v3_agent_writes_identity_and_sop_snapshot(isolated_data_root):
+    paths = get_paths()
+    aid = "v3-agent"
+    adir = paths.agents / aid
+    (adir / "prompt").mkdir(parents=True)
+    (adir / "prompt" / "identity.md").write_text("# Identity\nhello")
+    (adir / "prompt" / "sop.md").write_text("## SOP\nsteps")
+    write_json(paths.agent_json(aid), {"id": aid, "name": "V3", "prompt_layout": "v3"})
+
+    tid = "t-v3"
+    (paths.task_dir(tid) / "conversations").mkdir(parents=True)
+    svc.snapshot_agent_into_task(task_id=tid, agent_id=aid)
+
+    snap_text = paths.task_agent_system_md(tid).read_text()
+    assert "# Identity" in snap_text
+    assert "## SOP" in snap_text
+    assert paths.task_agent_json(tid).exists()
+
+
 def test_snapshot_agent_missing_cards_creates_empty(agent_fs):
     paths, aid = agent_fs
     paths.agent_prompt_cards_md(aid).unlink()

@@ -32,6 +32,14 @@ def test_skills_directory_not_empty():
     assert REAL_SKILL_IDS, f"skills/ 下没有任何 SKILL.md，实际目录: {SKILLS_DIR}"
 
 
+def test_skill_index_mentions_every_real_skill():
+    index = SKILLS_DIR / "INDEX.md"
+    assert index.exists(), "skills/INDEX.md 不存在"
+    text = index.read_text(encoding="utf-8")
+    for skill_id in REAL_SKILL_IDS:
+        assert f"`{skill_id}`" in text, f"skills/INDEX.md 未收录 skill `{skill_id}`"
+
+
 @pytest.mark.parametrize("skill_id", REAL_SKILL_IDS)
 def test_each_skill_has_zh_intro(skill_id: str):
     intro = SKILLS_DIR / skill_id / "INTRO.zh.md"

@@ -169,16 +169,18 @@ def build_base_prompt(agent_id: str) -> str:
     if sop:
         parts.append(sop)
 
-    spawn_intro = _read_text(partials / "spawn_routing.md")
-    spawn_table = _render_spawn_targets(agent_id)
-    if spawn_intro or spawn_table:
-        # Both pieces are optional; only emit a section when at least one
-        # exists. Spawn_intro is shared advice; spawn_table is per-agent.
-        chunk = "\n\n".join(p for p in (spawn_intro, spawn_table) if p)
-        parts.append(chunk)
-
     cfg = agents_svc.get_agent(agent_id) or {}
     features = cfg.get("features") or {}
+
+    if features.get("spawn_subagent"):
+        spawn_intro = _read_text(partials / "spawn_routing.md")
+        spawn_table = _render_spawn_targets(agent_id)
+        if spawn_intro or spawn_table:
+            # Both pieces are optional; only emit a section when at least one
+            # exists. Spawn_intro is shared advice; spawn_table is per-agent.
+            chunk = "\n\n".join(p for p in (spawn_intro, spawn_table) if p)
+            parts.append(chunk)
+
     if features.get("exit_plan_mode"):
         plan_partial = _read_text(partials / "plan_mode.md")
         if plan_partial:

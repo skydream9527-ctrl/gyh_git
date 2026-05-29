@@ -269,7 +269,8 @@ _TODO_INSTRUCTIONS = (
 _PLAN_MODE_BANNER = (
     "# 当前处于 Plan Mode（计划模式）\n"
     "**禁止**任何有副作用的工具：`write_file` / `feishu_publish` / `spawn_subagent` / `run_background` 都被后端闸门拦截。\n"
-    "允许：`list_files` / `read_file` / `read_skill` / `read_agent_knowledge` / `kyuubi_query`(SELECT) / `todo_write` / `now` / `echo`。\n"
+    "允许工具以当前 function tools 列表为准，通常只包括只读工具、`todo_write` 和 `exit_plan_mode`；"
+    "如果某个工具没有出现在当前工具列表中，不要承诺或调用。\n"
     "工作流：用只读工具充分调研 → 产出**完整、可执行**的方案 → 调用 `exit_plan_mode(plan=<markdown>)` 并**立刻停止生成**。"
     "不要在调用 `exit_plan_mode` 后继续说话——用户会审批，批准后你会自动被重新唤起执行。"
 )
@@ -280,6 +281,7 @@ def merged_system_prompt(
     *,
     plan_mode: bool = False,
     task_skill_ids: list[str] | None = None,
+    callable_tool_names: list[str] | None = None,
 ) -> str:
     """Agent base prompt + approved cards + skill catalog.
 
@@ -304,7 +306,10 @@ def merged_system_prompt(
     parts: list[str] = [base]
     if cards_path.exists():
         parts.append(cards_path.read_text(encoding="utf-8"))
-    skill_section = _build_skill_catalog_section(task_skill_ids=task_skill_ids)
+    skill_section = _build_skill_catalog_section(
+        task_skill_ids=task_skill_ids,
+        callable_tool_names=callable_tool_names,
+    )
     if skill_section:
         parts.append(skill_section)
     s = get_settings()
@@ -315,7 +320,11 @@ def merged_system_prompt(
     return "\n\n---\n\n".join(parts)
 
 
-def _build_skill_catalog_section(*, task_skill_ids: list[str] | None = None) -> str:
+def _build_skill_catalog_section(
+    *,
+    task_skill_ids: list[str] | None = None,
+    callable_tool_names: list[str] | None = None,
+) -> str:
     """Skill index for the system prompt.
 
     Strategy: list every skill's `id` + frontmatter `description` only (a few
@@ -336,21 +345,30 @@ def _build_skill_catalog_section(*, task_skill_ids: list[str] | None = None) -> 
     if not skills:
         return ""
 
-    callable_names = {
+    all_callable_names = {
         "now",
         "echo",
         "kyuubi_query",
+        "execute_python",
+        "volcano_abtest_analyze",
         "write_file",
         "list_files",
         "read_file",
         "feishu_publish",
+        "feishu_upload_image",
         "read_skill",
         "read_agent_knowledge",
         "todo_write",
+        "request_human_input",
         "exit_plan_mode",
         "spawn_subagent",
         "run_background",
     }
+    callable_names = (
+        all_callable_names
+        if callable_tool_names is None
+        else all_callable_names.intersection(callable_tool_names)
+    )
     from .tool_runner import _read_skill_description_for_task
 
     callable_lines: list[str] = []
@@ -361,7 +379,7 @@ def _build_skill_catalog_section(*, task_skill_ids: list[str] | None = None) -> 
         sid = s.get("id") or s.get("name") or ""
         name = s.get("name") or sid
         desc = (s.get("description") or "").strip().replace("\n", " ")
-        # `read_skill` 的官方描述硬编码了 kyuubi/nl-sql/docx/... 全集示例；
+        # `read_skill` 的官方描述硬编码了 kyuubi/nl-mapping-table-sql/docx/... 全集示例；
         # task 内必须用任务作用域的描述覆盖，否则 LLM 仍会从这条索引里读到全部
         # skill 名字并在回复里复述给用户。
         if sid == "read_skill" and bound_set is not None:
@@ -404,7 +422,7 @@ def _build_skill_catalog_section(*, task_skill_ids: list[str] | None = None) -> 
     elif bound_set is not None:
         out.append(
             "## Agentic Skills（说明书型）\n"
-            "本任务**未绑定任何 agentic skill**。如需 nl-sql / docx / pdf 之类，"
+            "本任务**未绑定任何 agentic skill**。如需 nl-mapping-table-sql / docx / pdf 之类，"
             "请提示用户去工作区右栏「🧰 本任务 Skills」点击 +添加。"
         )
     return "\n\n".join(out)

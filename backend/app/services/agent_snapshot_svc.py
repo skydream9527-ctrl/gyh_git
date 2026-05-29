@@ -1,7 +1,7 @@
 """Agent & skill snapshot into task workspace (C3 hybrid).
 
-- Agent: copies agent.json + prompt/system.md + prompt/cards.md into
-  tasks/{tid}/agent/. Missing cards.md → create empty file (for bootstrap
+- Agent: copies agent.json + a display/runtime prompt snapshot + prompt/cards.md into
+  tasks/{tid}/agent/. Missing cards.md -> create empty file (for bootstrap
   symmetry).
 - Skills: writes tasks/{tid}/skills/INDEX.json; for agentic skills, also
   copies SKILL.md into tasks/{tid}/skills/<sid>/.
@@ -52,12 +52,19 @@ def snapshot_agent_into_task(*, task_id: str, agent_id: str | None) -> None:
     if src_json.exists():
         shutil.copyfile(src_json, paths.task_agent_json(task_id))
 
-    # system.md
+    # system.md snapshot. Legacy agents copy prompt/system.md byte-for-byte;
+    # v3 agents no longer keep system.md, so snapshot the editable merged view
+    # (identity.md + sop.md) to preserve freeze/share compatibility.
     src_sys = paths.agent_prompt_system_md(agent_id)
     if src_sys.exists():
         shutil.copyfile(src_sys, paths.task_agent_system_md(task_id))
     else:
-        paths.task_agent_system_md(task_id).write_text("")
+        from . import agents_svc
+
+        paths.task_agent_system_md(task_id).write_text(
+            agents_svc.get_agent_system_prompt(agent_id),
+            encoding="utf-8",
+        )
 
     # cards.md (ensure exists even if source doesn't — bootstrap symmetry)
     src_cards = paths.agent_prompt_cards_md(agent_id)
@@ -173,7 +180,12 @@ async def refresh_task_snapshot(
         old_cards = _safe_read_text(paths.task_agent_cards_md(task_id))
         new_cards = _safe_read_text(paths.agent_prompt_cards_md(agent_id))
         old_system = _safe_read_text(paths.task_agent_system_md(task_id))
-        new_system = _safe_read_text(paths.agent_prompt_system_md(agent_id))
+        if paths.agent_prompt_system_md(agent_id).exists():
+            new_system = _safe_read_text(paths.agent_prompt_system_md(agent_id))
+        else:
+            from . import agents_svc
+
+            new_system = agents_svc.get_agent_system_prompt(agent_id)
         diff_summary = {
             "cards_added": max(new_cards.count("\n") - old_cards.count("\n"), 0),
             "cards_removed": max(old_cards.count("\n") - new_cards.count("\n"), 0),

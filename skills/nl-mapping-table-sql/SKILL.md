@@ -31,7 +31,7 @@ description: 根据用户自然语言输入生成映射表（dim/dm/ads）相关
 | 浏览器 | `reference/browser/` | 中间表 + 底表/宽表 |
 | 浏览器信息流 | `reference/browser-feed/` | 中间表 + 底表/宽表 |
 | 内容中心 | `reference/content-center/` | 中间表 + 底表/宽表 |
-| 搜索 | `reference/search/` | 中间表 + 底表/宽表（口径权威：[`reference/search/data_tables.yaml`](reference/search/data_tables.yaml)） |
+| 搜索 | `reference/search/` | 仅底表/宽表 |
 | 小说 | `reference/novel/` | 仅底表/宽表 |
 
 > **数据层级说明**：
@@ -276,9 +276,7 @@ SQL 生成完成后，向用户展示以下信息：
 - 内容中心底表埋点指标：`reference/content-center/raw-event-metrics-reference.md`
 - 内容中心底表指标名称索引：`reference/content-center/raw-metric-name-index.md`
 - 内容中心底表指标维度索引：`reference/content-center/raw-metric-dimension-index.md`
-- 搜索口径权威 YAML：`reference/search/data_tables.yaml`
-- 搜索表结构：`reference/search/table-schema.md`
-- 搜索核心指标（含 dm/ads 中间表 SQL）：`reference/search/raw-core-metrics-reference.md`
+- 搜索底表核心指标：`reference/search/raw-core-metrics-reference.md`
 - 搜索底表埋点指标：`reference/search/raw-event-metrics-reference.md`
 - 小说底表核心指标：`reference/novel/raw-core-metrics-reference.md`
 - 小说底表埋点指标：`reference/novel/raw-event-metrics-reference.md`

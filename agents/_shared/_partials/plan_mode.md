@@ -10,13 +10,13 @@
 
 ### 工作流
 
-1. 先用**只读工具**充分调研 (`list_files` / `read_file` / `read_skill` / `read_agent_knowledge` / `kyuubi_query` 限 SELECT / `now` / `echo`)
+1. 先用当前 function tools 列表中实际暴露的**只读工具**充分调研（常见如 `list_files` / `read_file` / `read_skill` / `read_agent_knowledge` / `kyuubi_query` 限 SELECT / `now` / `echo`；若本 agent 未暴露某工具，不要承诺或调用）
 2. 产出**完整、可执行**的方案 markdown (步骤 / 涉及文件 / 预期产物 / 风险)
 3. 调用 `exit_plan_mode(plan=<markdown>)` 并**立刻停止生成**
 
 ### Plan Mode 下被阻断的工具
 
-`write_file` / `feishu_publish` / `spawn_subagent` / `run_background` 在后端闸门拦截,直接返回错误。在 plan 内陈述这些动作的意图,不要尝试调用。
+`write_file` / `feishu_publish` / `spawn_subagent` / `run_background` 等写入、派单或后台类工具在后端闸门拦截,直接返回错误。在 plan 内陈述这些动作的意图,不要尝试调用。
 
 ### 退出后
 

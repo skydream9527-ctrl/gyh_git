@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import shutil
+import sqlite3
 import tempfile
 from pathlib import Path
 
@@ -28,6 +29,16 @@ def isolated_data_root(monkeypatch):
     cfg.get_settings.cache_clear()
     p.get_paths.cache_clear()
     index_db.get_index_db.cache_clear()
+
+    # Apply IndexDB schema so services that hit the cache (e.g. conversation_svc
+    # → user._name_map → users_index) don't trip on a missing table. In prod
+    # this is done via `await db.init()` from app/seed/runner.py; here we run
+    # the same SCHEMA via stdlib sqlite3 so the fixture stays sync.
+    db_path = cfg.get_settings().cache_db_path
+    db_path.parent.mkdir(parents=True, exist_ok=True)
+    with sqlite3.connect(db_path) as conn:
+        conn.executescript(index_db.SCHEMA)
+        conn.commit()
 
     yield tmp
     shutil.rmtree(tmp, ignore_errors=True)

@@ -188,6 +188,37 @@ def list_runs(task_id: str, sid: str, *, limit: int = 50) -> list[dict]:
     return rows[-limit:][::-1]
 
 
+def summary_for_user(user_id: str) -> dict:
+    items = list_for_user(user_id)
+    now = _now()
+    today = now.date()
+    week_ago = now - timedelta(days=7)
+    today_runs = 0
+    failed_7d = 0
+    last_runs: list[dict] = []
+    for s in items:
+        for run in list_runs(s["task_id"], s["id"], limit=100):
+            started_raw = run.get("started_at") or run.get("ended_at")
+            try:
+                started = datetime.fromisoformat(started_raw) if started_raw else None
+            except ValueError:
+                started = None
+            if started and started.date() == today:
+                today_runs += 1
+            if run.get("status") == "failed" and started and started >= week_ago:
+                failed_7d += 1
+            last_runs.append({**run, "schedule_name": s.get("name"), "task_name": s.get("task_name")})
+    last_runs.sort(key=lambda r: r.get("started_at") or "", reverse=True)
+    return {
+        "total": len(items),
+        "enabled": sum(1 for s in items if s.get("enabled")),
+        "paused": sum(1 for s in items if not s.get("enabled")),
+        "today_runs": today_runs,
+        "failed_7d": failed_7d,
+        "last_runs": last_runs[:10],
+    }
+
+
 async def run_now(task_id: str, sid: str, owner_id: str) -> dict:
     rec = get_one(task_id, sid)
     if not rec:

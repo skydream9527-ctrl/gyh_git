@@ -61,6 +61,124 @@
   font-size: 16px;
   margin: 0 0 6px;
 }
+.ad-v6-main {
+  max-width: 1180px;
+}
+.ad-v6-section-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+.ad-v6-section-head h2 {
+  margin-bottom: 4px;
+}
+.ad-v6-orchestration {
+  background: var(--surface-2);
+}
+.ad-v6-topology {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 0 4px;
+}
+.ad-v6-root {
+  width: min(320px, 100%);
+  background: var(--surface);
+  border: 1px solid color-mix(in srgb, var(--primary) 50%, var(--border));
+  border-top: 4px solid var(--primary);
+  border-radius: 12px;
+  box-shadow: var(--shadow-2);
+  padding: 16px;
+  text-align: center;
+}
+.ad-v6-root strong {
+  display: block;
+  font-size: 15px;
+  margin-bottom: 4px;
+}
+.ad-v6-root span {
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+.ad-v6-branch {
+  width: min(620px, 80%);
+  height: 38px;
+  border-top: 1px solid var(--border);
+  border-left: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  margin-top: 28px;
+}
+.ad-v6-child-grid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: -1px;
+}
+.ad-v6-child {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow-2);
+  padding: 16px;
+}
+.ad-v6-child:hover {
+  border-color: var(--primary);
+}
+.ad-v6-child-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.ad-v6-node-mark {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+}
+.ad-v6-node-mark.data {
+  background: var(--p-data);
+  color: #fff;
+}
+.ad-v6-node-mark.rag {
+  background: var(--p-gray-soft);
+  color: var(--p-gray);
+}
+.ad-v6-node-mark.report {
+  background: var(--p-biz-soft);
+  color: var(--p-biz);
+}
+.ad-v6-child p {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.ad-v6-tools {
+  border-top: 1px solid var(--border);
+  margin-top: 12px;
+  padding-top: 10px;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.ad-v6-tools code {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  padding: 2px 6px;
+}
 .ad-section h3 {
   font-family: var(--font-head);
   font-size: 13px;

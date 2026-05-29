@@ -134,7 +134,7 @@ T3. 筛选集内部分层（再下钻 1~2 维）
 **SQL 范式**：CTE → 外层 WHERE + GROUP BY；或两个子查询 EXCEPT
 
 **关键陷阱**：
-- 筛选条件用 fieldType=5 维度时，必须从 dimensions.csv 还原完整 CASE WHEN（详见 system.md「关键约束」）
+- 筛选条件用 fieldType=5 维度时，必须从 dimensions.csv 还原完整 CASE WHEN（详见 sop.md「关键约束」）
 - 筛选集太小（< 1k UV）的结论慎用，告知用户置信度低
 
 ---
