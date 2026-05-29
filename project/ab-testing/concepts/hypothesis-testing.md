@@ -127,6 +127,41 @@ t, p = ttest_ind(group_a_values, group_b_values, equal_var=False)
 
 正确做法：用 **Delta Method** 修正方差。`statsmodels` 没有现成函数，业界平台基本都自己实现。简化版：
 
+#### Delta Method 原理
+
+比率指标 R = X̄ / Ȳ 的分子 X̄ 和分母 Ȳ 都是随机变量，直接对每个用户算 ratio 再做 t 检验会**低估方差**——因为分母的波动被忽略了。
+
+Delta Method 的核心思路：对 R = g(X̄, Ȳ) = X̄ / Ȳ 做**一阶泰勒展开**，用线性近似推导 R 的方差。
+
+**推导过程**：
+
+```
+1. 定义：R = X̄ / Ȳ，其中 X̄ = Σxᵢ/n, Ȳ = Σyᵢ/n
+
+2. 对 g(X̄, Ȳ) = X̄ / Ȳ 在 (μx, μy) 处一阶泰勒展开：
+   g(X̄, Ȳ) ≈ μx/μy + (1/μy)(X̄ - μx) - (μx/μy²)(Ȳ - μy)
+
+3. 取方差（常数项方差为 0）：
+   Var(R) ≈ Var[(1/μy)X̄ - (μx/μy²)Ȳ]
+          = (1/μy²)Var(X̄) + (μx²/μy⁴)Var(Ȳ) - 2(μx/μy³)Cov(X̄, Ȳ)
+
+4. 代入样本估计量（μx → X̄, μy → Ȳ, R = X̄/Ȳ）：
+   Var(R) = [Var(X̄) + R²·Var(Ȳ) - 2R·Cov(X̄, Ȳ)] / Ȳ²
+```
+
+**关键洞察**：协方差项 `-2R·Cov(X̄, Ȳ)` 是 Delta Method 和"直接算 ratio"的本质区别。当分子分母正相关时（如"人均 GMV"——花钱多的人订单也多），协方差项为正，会**缩小**方差估计；如果忽略它，方差会被**高估**，导致检验过于保守。反之，负相关时忽略协方差会**低估**方差，导致假阳性升高。
+
+**典型比率指标**：
+
+| 指标 | 分子 X | 分母 Y | X 与 Y 的关系 |
+|---|---|---|---|
+| 人均 GMV | 总 GMV | 用户数 | 无关（Y 固定） |
+| 人均订单价 | 总订单额 | 订单数 | **正相关** |
+| 人均广告点击率 | 点击次数 | 曝光次数 | **正相关** |
+| 完播率 | 完播次数 | 播放次数 | **正相关** |
+
+> 当分母 Y 在用户间变化时（如"人均订单价"——不同用户订单数不同），Delta Method 必须使用。如果分母对每个用户都相同（如"人均 GMV"——分母恒为 1），则退化为普通的均值检验。
+
 ```python
 import numpy as np
 
@@ -139,6 +174,18 @@ def delta_method_ratio(num, den):
     ratio = mean_num / mean_den
     var_ratio = (var_num + ratio**2 * var_den - 2 * ratio * cov) / (n * mean_den**2)
     return ratio, var_ratio
+
+def delta_method_ab_test(num_a, den_a, num_b, den_b):
+    """两组比率指标的 AB 检验"""
+    r_a, var_a = delta_method_ratio(num_a, den_a)
+    r_b, var_b = delta_method_ratio(num_b, den_b)
+    diff = r_b - r_a
+    se = np.sqrt(var_a + var_b)
+    z = diff / se
+    p = 2 * (1 - norm.cdf(abs(z)))
+    ci_low = diff - 1.96 * se
+    ci_high = diff + 1.96 * se
+    return {"diff": diff, "z": z, "p": p, "ci": (ci_low, ci_high)}
 ```
 
 > **这是工业级实验平台和教科书最大的差距**——教科书几乎不讲 Delta Method，但你打开任何主流实验平台的源码都会看到它。
