@@ -82,22 +82,36 @@ agent-llm/
 │   ├── retrieval-basics.md
 │   ├── chunking-strategies.md
 │   ├── advanced-rag.md
+│   ├── agentic-rag-implementation.md  ← CRAG/Self-RAG 落地（LangGraph）
 │   └── evaluation.md
 ├── agents/                       ← Agent 架构
 │   ├── react-and-variants.md
-│   ├── multi-agent-frameworks.md
+│   ├── react-mechanism-and-strategy.md
+│   ├── tree-of-thoughts.md
+│   ├── multi-agent-frameworks.md       ← AutoGen / CrewAI / Agents SDK 深度
+│   ├── multi-agent-coordination.md     ← 5 种协商机制 + Anthropic 多 Agent 参考
+│   ├── subagent-patterns.md            ← Task vs Crew vs Subgraph 本质对比
+│   ├── long-task-agents.md             ← Claude Code/OpenHands/Manus/Devin + Cursor/Cline/Aider
+│   ├── skills-system-design.md         ← Skills + 动态召回 + LangGraph + Cline MCP
+│   ├── research-agent-architecture.md  ← 长任务研究 Agent 架构 + 产品级方案对比
 │   ├── memory-systems.md
+│   ├── openviking-vs-hindsight.md
 │   └── design-patterns.md
 ├── tools-protocols/              ← 工具协议
 │   ├── function-calling.md
 │   ├── mcp.md
+│   ├── browser-automation.md     ← Playwright vs Computer Use vs Browser-Use
 │   └── computer-use.md
 ├── evaluation/                   ← 评测
 │   ├── benchmarks.md
 │   ├── llm-as-judge.md
+│   ├── research-agent-evals.md   ← 3 层评测 + LLM-as-Judge 偏见防御
 │   └── agent-eval.md
 ├── production/                   ← 工程化
-│   ├── frameworks-comparison.md
+│   ├── frameworks-landscape.md         ← 主流框架四类全景（2026）
+│   ├── frameworks-comparison.md        ← LangChain/LangGraph/LlamaIndex 横向对比
+│   ├── langgraph-checkpoint-and-hitl.md ← Postgres 表结构 + HITL 落地
+│   ├── langgraph-research-agent-impl.md ← LangGraph 完整复刻研究 Agent（可运行代码）
 │   ├── observability.md
 │   └── cost-and-latency.md
 ├── case-studies/                 ← 业界案例
