@@ -311,7 +311,15 @@ Coding Agent（Cursor / Cline 风格）：
 
 ---
 
-## 十二、扩展阅读
+## 十二、纵深篇（深入到机制 + 应用策略）
+
+本篇是范式总览。深入版分别在：
+- [react-mechanism-and-strategy.md](react-mechanism-and-strategy.md) — ReAct 的微观机制（7 步循环 / prompt 模板 / 5 种失败模式）+ 在 ice-workbench 的实战接入
+- [tree-of-thoughts.md](tree-of-thoughts.md) — ToT 的搜索机制（4 要素 / 4 种典型配置）+ 成本经济学 + 在 ice-workbench 的"配置 D Hybrid"接法
+
+---
+
+## 十三、扩展阅读
 
 ### 必读论文
 - ReAct（Yao et al., 2022）—— *ReAct: Synergizing Reasoning and Acting in Language Models*

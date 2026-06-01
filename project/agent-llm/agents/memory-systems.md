@@ -363,6 +363,7 @@ LLM 通过工具调用在三层间"翻页"：
 ## 十一、扩展阅读
 
 - 本目录：[react-and-variants.md](react-and-variants.md)
+- **方案对比**：[openviking-vs-hindsight.md](openviking-vs-hindsight.md) — 两种主流"长期记忆 Provider"的原理 / 实现 / 在 ice-workbench 中怎么用
 - 相关：[../rag/retrieval-basics.md](../rag/retrieval-basics.md)、[../tools-protocols/mcp.md](../tools-protocols/mcp.md)
 - Packer et al. (2023) — *MemGPT: Towards LLMs as Operating Systems*
 - Letta（MemGPT 团队后续）：https://www.letta.com
