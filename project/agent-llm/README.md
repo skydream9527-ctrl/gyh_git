@@ -88,17 +88,20 @@ agent-llm/
 │   ├── react-and-variants.md
 │   ├── react-mechanism-and-strategy.md
 │   ├── tree-of-thoughts.md
+│   ├── agent-loop-architectures.md     ← 感知-行动 vs 状态机 vs ReAct 三种循环
 │   ├── multi-agent-frameworks.md       ← AutoGen / CrewAI / Agents SDK 深度
 │   ├── multi-agent-coordination.md     ← 5 种协商机制 + Anthropic 多 Agent 参考
 │   ├── subagent-patterns.md            ← Task vs Crew vs Subgraph 本质对比
 │   ├── long-task-agents.md             ← Claude Code/OpenHands/Manus/Devin + Cursor/Cline/Aider
 │   ├── skills-system-design.md         ← Skills + 动态召回 + LangGraph + Cline MCP
+│   ├── skills-vs-tools.md              ← Skill 和 Tool 的本质区别
 │   ├── research-agent-architecture.md  ← 长任务研究 Agent 架构 + 产品级方案对比
 │   ├── memory-systems.md
 │   ├── openviking-vs-hindsight.md
 │   └── design-patterns.md
 ├── tools-protocols/              ← 工具协议
 │   ├── function-calling.md
+│   ├── tool-development.md       ← API 工程师视角：schema 设计 / 参数校验 / 错误处理
 │   ├── mcp.md
 │   ├── browser-automation.md     ← Playwright vs Computer Use vs Browser-Use
 │   └── computer-use.md
@@ -112,6 +115,7 @@ agent-llm/
 │   ├── frameworks-comparison.md        ← LangChain/LangGraph/LlamaIndex 横向对比
 │   ├── langgraph-checkpoint-and-hitl.md ← Postgres 表结构 + HITL 落地
 │   ├── langgraph-research-agent-impl.md ← LangGraph 完整复刻研究 Agent（可运行代码）
+│   ├── latency-optimization.md         ← 7 个延迟优化杠杆 + 50% 降幅组合
 │   ├── observability.md
 │   └── cost-and-latency.md
 ├── case-studies/                 ← 业界案例
