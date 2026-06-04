@@ -70,6 +70,9 @@ agent-llm/
 ├── README.md                     ← 本文件
 ├── llm-fundamentals/             ← LLM 原理
 │   ├── transformer.md
+│   ├── modern-gpt-block.md           ← Pre-Norm / RMSNorm / RoPE / SwiGLU / GQA 五大改造
+│   ├── rope-and-positional-encoding.md ← RoPE 原理 + 长度外推（PI / NTK / YaRN）
+│   ├── mqa-gqa-and-kv-cache.md       ← KV Cache + GQA + 长 context 内存估算
 │   ├── training-stages.md
 │   ├── inference-optimization.md
 │   └── scaling-law.md
@@ -95,6 +98,7 @@ agent-llm/
 │   ├── long-task-agents.md             ← Claude Code/OpenHands/Manus/Devin + Cursor/Cline/Aider
 │   ├── skills-system-design.md         ← Skills + 动态召回 + LangGraph + Cline MCP
 │   ├── skills-vs-tools.md              ← Skill 和 Tool 的本质区别
+│   ├── interview-essentials.md         ← 手写 ReAct / MCP 辨析 / 记忆系统三道面试高频题
 │   ├── research-agent-architecture.md  ← 长任务研究 Agent 架构 + 产品级方案对比
 │   ├── memory-systems.md
 │   ├── openviking-vs-hindsight.md
@@ -122,7 +126,15 @@ agent-llm/
 │   ├── coding-agents.md
 │   ├── browser-agents.md
 │   └── ...
-└── papers/                       ← 论文摘要
+└── papers/                       ← 论文 / Talk 讨论
+    ├── README.md                                  ← 索引 + 阅读顺序建议
+    ├── harness-engineering-codex.md               ← OpenAI Codex 团队 harness engineering（2026-02）
+    ├── demystifying-evals-for-ai-agents.md        ← Anthropic Agent 评测体系（2026-01）
+    ├── building-effective-agents.md               ← Anthropic 5 种 workflow + agent + ACI（2024-12）
+    ├── multi-agent-research-system.md             ← Anthropic Multi-Agent Research（2025-06）
+    ├── react-yao-2022.md                          ← ReAct: Reasoning + Acting（Yao 2022）
+    ├── reflexion-shinn-2023.md                    ← Reflexion: Verbal RL（Shinn 2023）
+    └── lilian-weng-llm-agents.md                  ← Planning / Memory / Tool Use 分类法（2023-06）
 ```
 
 ## 关键参考
