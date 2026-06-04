@@ -68,6 +68,24 @@
 ```
 agent-llm/
 ├── README.md                     ← 本文件
+├── transformer-gpt-evolution/    ← Transformer 结构与 GPT 模型演进（新增专题）
+│   ├── README.md
+│   ├── 01-transformer-architecture.md
+│   ├── 02-architectural-evolution.md
+│   ├── 03-gpt-series-evolution.md
+│   └── 04-frontier-models.md
+├── agent-evaluation/             ← Agent 评测方法与主流方案（新增专题）
+│   ├── README.md
+│   ├── 01-evaluation-fundamentals.md
+│   ├── 02-evaluation-methods.md
+│   ├── 03-mainstream-benchmarks.md
+│   └── 04-business-eval-pipeline.md
+├── mcp-deep-dive/                ← MCP 原理/使用/开发/业界（新增专题）
+│   ├── README.md
+│   ├── 01-mcp-principles.md
+│   ├── 02-using-mcp.md
+│   ├── 03-developing-mcp-servers.md
+│   └── 04-industry-landscape.md
 ├── llm-fundamentals/             ← LLM 原理
 │   ├── transformer.md
 │   ├── modern-gpt-block.md           ← Pre-Norm / RMSNorm / RoPE / SwiGLU / GQA 五大改造
@@ -136,6 +154,16 @@ agent-llm/
     ├── reflexion-shinn-2023.md                    ← Reflexion: Verbal RL（Shinn 2023）
     └── lilian-weng-llm-agents.md                  ← Planning / Memory / Tool Use 分类法（2023-06）
 ```
+
+## 三大专题（新增，按时间线/方法论/协议组织）
+
+与上面"主题树"互补，下列三个专题是**自成体系的深度子目录**，每个含 README + 4 篇深度文章：
+
+| 专题 | 入口 | 解决 |
+|---|---|---|
+| Transformer 结构与 GPT 演进 | [transformer-gpt-evolution/](transformer-gpt-evolution/) | 从 2017 原始 Transformer 到 2026 LLaMA-style block + GPT-1 → o3 谱系 + 前沿模型选型 |
+| Agent 评测方法与主流方案 | [agent-evaluation/](agent-evaluation/) | 评测分层 / 5 种评测方法 / 主流 benchmark / 业务侧落地流水线 |
+| MCP 原理 / 使用 / 开发 / 业界 | [mcp-deep-dive/](mcp-deep-dive/) | 协议原理（JSON-RPC + lifecycle）/ 客户端配置 / SDK 写 server / 业界生态与安全治理 |
 
 ## 关键参考
 
