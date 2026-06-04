@@ -103,155 +103,185 @@ export function AdminUsers() {
   };
 
   return (
-    <div>
-      <div className="adm-page-head" style={{ display: "flex", justifyContent: "space-between" }}>
+    <>
+      <header className="v6-page-header">
         <div>
-          <h1>👥 用户管理</h1>
-          <p>三级角色：super_admin / admin / user</p>
+          <h1 style={{ display: "flex", alignItems: "center", gap: "8px" }}>用户管理 (Users)</h1>
         </div>
-        <button className="btn-primary" onClick={() => setShowCreate(true)}>
-          + 创建用户
-        </button>
-      </div>
+        <div style={{ display: "flex", gap: "12px" }}>
+          <div style={{ position: "relative" }}>
+            <i className="ph ph-magnifying-glass" style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "#94a3b8" }}></i>
+            <input
+              type="text"
+              placeholder="搜索邮箱 / 姓名..."
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && reload()}
+              style={{
+                padding: "8px 16px 8px 36px", border: "1px solid #cbd5e1", borderRadius: "8px", fontSize: "14px", outline: "none", width: "256px", boxShadow: "0 1px 2px 0 rgba(0,0,0,0.05)"
+              }}
+            />
+          </div>
+          {isSuper && (
+            <button
+              onClick={() => setShowCreate(true)}
+              style={{
+                background: "#f97316", color: "#fff", padding: "8px 16px", borderRadius: "8px", fontSize: "14px", fontWeight: 700, border: "none", cursor: "pointer", boxShadow: "0 1px 2px 0 rgba(249,115,22,0.2)", display: "flex", alignItems: "center", gap: "8px"
+              }}
+            >
+              <i className="ph-bold ph-plus"></i> 新建用户
+            </button>
+          )}
+        </div>
+      </header>
 
-      <div className="adm-toolbar">
-        <input
-          placeholder="🔍 搜索姓名 / 邮箱"
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && reload()}
-        />
-        <select value={role} onChange={(e) => setRole(e.target.value)}>
-          <option value="">全部角色</option>
-          <option value="super_admin">super_admin</option>
-          <option value="admin">admin</option>
-          <option value="user">user</option>
-        </select>
-        <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-          <option value="">全部状态</option>
-          <option value="pending">
-            {pendingCount > 0 && statusFilter === "pending" ? `待审批（${pendingCount}）` : "待审批"}
-          </option>
-          <option value="active">已启用</option>
-          <option value="rejected">已驳回</option>
-          <option value="disabled">已禁用</option>
-        </select>
-        <button className="btn-secondary" onClick={reload}>
-          搜索
-        </button>
-        {pendingCount > 0 && statusFilter !== "pending" && (
+      <div className="v6-page-content">
+        <div style={{ display: "flex", gap: "8px", marginBottom: "24px" }}>
           <button
-            className="btn-secondary"
-            onClick={() => setStatusFilter("pending")}
-            style={{ background: "#fef3c7", borderColor: "#fbbf24", color: "#92400e" }}
+            onClick={() => { setStatusFilter(""); setRole(""); reload(); }}
+            style={{
+              padding: "6px 16px", borderRadius: "999px", fontSize: "14px", fontWeight: 700,
+              background: statusFilter === "" && role === "" ? "#1e293b" : "#fff",
+              color: statusFilter === "" && role === "" ? "#fff" : "#475569",
+              border: statusFilter === "" && role === "" ? "none" : "1px solid #e2e8f0",
+              cursor: "pointer"
+            }}
           >
-            🕓 {pendingCount} 条账号申请待审批
+            全部 (All)
           </button>
-        )}
-      </div>
-
-      {loading ? (
-        <Skeleton lines={6} />
-      ) : (
-        <table className="adm-table adm-table-cards">
-          <thead>
-            <tr>
-              <th>姓名</th>
-              <th>邮箱</th>
-              <th>角色</th>
-              <th>飞书</th>
-              <th>状态</th>
-              <th>团队</th>
-              <th>注册时间</th>
-              <th style={{ width: 220 }}>操作</th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.map((u) => (
-              <tr key={u.id}>
-                <td data-label="姓名">{u.name}</td>
-                <td data-label="邮箱" style={{ fontFamily: "var(--font-mono)", fontSize: 12 }}>{u.email}</td>
-                <td data-label="角色">
-                  <span className={`role-badge role-${u.auth_role}`}>{u.auth_role}</span>
-                </td>
-                <td data-label="飞书">{u.feishu_bound ? "✅" : "—"}</td>
-                <td data-label="状态">
-                  <span
-                    className={`adm-status-${u.status}`}
-                    title={u.status === "rejected" && u.reject_reason ? u.reject_reason : undefined}
-                  >
-                    {u.status === "active"
-                      ? "启用"
-                      : u.status === "pending"
-                      ? "🕓 待审批"
-                      : u.status === "rejected"
-                      ? "❌ 已驳回"
-                      : "禁用"}
-                  </span>
-                </td>
-                <td data-label="团队">{u.team || "-"}</td>
-                <td data-label="注册时间" style={{ fontSize: 11, color: "var(--text-muted)" }}>
-                  {u.created_at ? new Date(u.created_at).toLocaleDateString() : "-"}
-                </td>
-                <td className="row-actions">
-                  {u.status === "pending" ? (
-                    <>
-                      <button
-                        className="btn-primary"
-                        disabled={reviewBusy === u.id}
-                        onClick={() => handleApprove(u)}
-                      >
-                        ✓ 批准
-                      </button>
-                      <button
-                        className="danger"
-                        disabled={reviewBusy === u.id}
-                        onClick={() => {
-                          setRejecting(u);
-                          setRejectReason("");
-                        }}
-                      >
-                        ✕ 驳回
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <button
-                        onClick={() => navigate(`/admin/users/${u.id}/tasks`)}
-                        title="查看 / 编辑该用户的任务"
-                      >
-                        📋 任务
-                      </button>
-                      <button onClick={() => setEditing(u)}>✏ 编辑</button>
-                      {u.status === "rejected" && (
-                        <button
-                          disabled={reviewBusy === u.id}
-                          onClick={() => handleApprove(u)}
-                          title="已驳回的账号可重新批准"
-                        >
-                          ✓ 批准
-                        </button>
-                      )}
-                      {isSuper && u.id !== me?.id && (
-                        <button className="danger" onClick={() => setConfirmDelete(u)}>
-                          🗑 删除
-                        </button>
-                      )}
-                    </>
-                  )}
-                </td>
-              </tr>
-            ))}
-            {items.length === 0 && (
-              <tr>
-                <td colSpan={8} style={{ textAlign: "center", padding: 32, color: "var(--text-muted)" }}>
-                  没有匹配的用户
-                </td>
-              </tr>
+          <button
+            onClick={() => { setStatusFilter("pending"); setRole(""); reload(); }}
+            style={{
+              padding: "6px 16px", borderRadius: "999px", fontSize: "14px", fontWeight: 700,
+              background: statusFilter === "pending" ? "#1e293b" : "#fff",
+              color: statusFilter === "pending" ? "#fff" : "#475569",
+              border: statusFilter === "pending" ? "none" : "1px solid #e2e8f0",
+              cursor: "pointer", display: "flex", alignItems: "center", gap: "4px"
+            }}
+          >
+            待审批
+            {pendingCount > 0 && (
+               <span style={{ background: "#ef4444", color: "#fff", fontSize: "10px", padding: "0 6px", borderRadius: "99px" }}>
+                 {pendingCount}
+               </span>
             )}
-          </tbody>
-        </table>
-      )}
+          </button>
+          <button
+            onClick={() => { setRole("super_admin"); setStatusFilter(""); reload(); }}
+            style={{
+              padding: "6px 16px", borderRadius: "999px", fontSize: "14px", fontWeight: 700,
+              background: role === "super_admin" ? "#1e293b" : "#fff",
+              color: role === "super_admin" ? "#fff" : "#475569",
+              border: role === "super_admin" ? "none" : "1px solid #e2e8f0",
+              cursor: "pointer"
+            }}
+          >
+            Super Admins
+          </button>
+        </div>
+
+        <div className="v6-card" style={{ padding: 0, overflow: "hidden" }}>
+          {loading ? (
+            <div style={{ padding: 24 }}><Skeleton lines={6} /></div>
+          ) : (
+            <table style={{ width: "100%", textAlign: "left", fontSize: "14px", borderCollapse: "collapse" }}>
+              <thead style={{ background: "#f8fafc", borderBottom: "1px solid #e2e8f0", color: "#64748b", textTransform: "uppercase", fontSize: "12px", fontWeight: 700, letterSpacing: "0.05em" }}>
+                <tr>
+                  <th style={{ padding: "16px 24px" }}>用户信息</th>
+                  <th style={{ padding: "16px 24px" }}>角色权限</th>
+                  <th style={{ padding: "16px 24px" }}>状态</th>
+                  <th style={{ padding: "16px 24px" }}>飞书绑定</th>
+                  <th style={{ padding: "16px 24px", textAlign: "right" }}>操作</th>
+                </tr>
+              </thead>
+              <tbody style={{ color: "#334155" }}>
+                {items.map((u) => {
+                  const isPending = u.status === "pending";
+                  const isMe = u.id === me?.id;
+                  return (
+                    <tr 
+                      key={u.id} 
+                      style={{ 
+                        borderBottom: "1px solid #f1f5f9", 
+                        background: isPending ? "rgba(254, 242, 242, 0.5)" : "#fff",
+                        transition: "background 0.2s"
+                      }}
+                    >
+                      <td style={{ padding: "16px 24px" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                          <div style={{ width: "32px", height: "32px", borderRadius: "16px", background: isPending ? "#ef4444" : "#3b82f6", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: "14px" }}>
+                            {u.name?.[0]?.toUpperCase() || u.email[0].toUpperCase()}
+                          </div>
+                          <div>
+                            <div style={{ fontWeight: 700, color: "#0f172a", display: "flex", alignItems: "center", gap: "4px" }}>
+                              {u.email}
+                              {isMe && <span style={{ background: "#fef3c7", color: "#b45309", fontSize: "10px", padding: "2px 4px", borderRadius: "4px" }}>You</span>}
+                            </div>
+                            <div style={{ fontSize: "12px", color: "#64748b" }}>{u.name || "未设置姓名"} {u.team && `· ${u.team}`}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td style={{ padding: "16px 24px" }}>
+                        {u.auth_role === "super_admin" ? (
+                          <span style={{ background: "#fef3c7", color: "#b45309", padding: "4px 10px", borderRadius: "4px", fontSize: "12px", fontWeight: 700, border: "1px solid #fde68a" }}>Super Admin</span>
+                        ) : u.auth_role === "admin" ? (
+                          <span style={{ background: "#f3e8ff", color: "#7e22ce", padding: "4px 10px", borderRadius: "4px", fontSize: "12px", fontWeight: 700, border: "1px solid #e9d5ff" }}>Admin</span>
+                        ) : (
+                          <span style={{ background: "#f1f5f9", color: "#475569", padding: "4px 10px", borderRadius: "4px", fontSize: "12px", fontWeight: 700, border: "1px solid #e2e8f0" }}>User</span>
+                        )}
+                      </td>
+                      <td style={{ padding: "16px 24px" }}>
+                        {isPending ? (
+                          <span style={{ background: "#fee2e2", color: "#b91c1c", padding: "4px 10px", borderRadius: "4px", fontSize: "12px", fontWeight: 700, border: "1px solid #fecaca", display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                            <i className="ph-bold ph-clock"></i> 待审批 (Pending)
+                          </span>
+                        ) : u.status === "active" ? (
+                          <span style={{ background: "#ecfdf5", color: "#059669", padding: "4px 10px", borderRadius: "4px", fontSize: "12px", fontWeight: 700, border: "1px solid #d1fae5" }}>已激活 (Active)</span>
+                        ) : (
+                          <span style={{ background: "#f1f5f9", color: "#64748b", padding: "4px 10px", borderRadius: "4px", fontSize: "12px", fontWeight: 700 }} title={u.reject_reason || ""}>{u.status}</span>
+                        )}
+                      </td>
+                      <td style={{ padding: "16px 24px" }}>
+                        {u.feishu_bound ? (
+                          <span style={{ display: "inline-flex", alignItems: "center", gap: "4px", color: "#0d9488", fontSize: "12px", fontWeight: 700, background: "#f0fdfa", padding: "4px 8px", borderRadius: "4px", border: "1px solid #ccfbf1" }}>
+                            <i className="ph-fill ph-check-circle"></i> 已绑定
+                          </span>
+                        ) : (
+                          <span style={{ color: "#94a3b8", fontSize: "12px", fontWeight: 700 }}>未绑定</span>
+                        )}
+                      </td>
+                      <td style={{ padding: "16px 24px", textAlign: "right" }}>
+                        {isPending && isSuper ? (
+                          <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
+                            <button disabled={reviewBusy === u.id} onClick={() => { setRejecting(u); setRejectReason(""); }} style={{ background: "#fff", border: "1px solid #fecaca", color: "#dc2626", padding: "6px 12px", borderRadius: "4px", fontSize: "12px", fontWeight: 700, cursor: "pointer" }}>拒绝</button>
+                            <button disabled={reviewBusy === u.id} onClick={() => handleApprove(u)} style={{ background: "#10b981", border: "none", color: "#fff", padding: "6px 12px", borderRadius: "4px", fontSize: "12px", fontWeight: 700, cursor: "pointer", boxShadow: "0 1px 2px 0 rgba(0,0,0,0.05)" }}>通过 (Approve)</button>
+                          </div>
+                        ) : (
+                          <div style={{ display: "flex", gap: "4px", justifyContent: "flex-end" }}>
+                            {(isSuper || isMe) && (
+                              <button onClick={() => setEditing(u)} title="编辑" style={{ background: "transparent", border: "none", color: "#94a3b8", padding: "6px", borderRadius: "4px", cursor: "pointer", fontSize: "18px" }} onMouseOver={e => {e.currentTarget.style.color="#f97316"; e.currentTarget.style.background="#fff7ed"}} onMouseOut={e => {e.currentTarget.style.color="#94a3b8"; e.currentTarget.style.background="transparent"}}><i className="ph-bold ph-pencil-simple"></i></button>
+                            )}
+                            {isSuper && !isMe && (
+                              <button onClick={() => setConfirmDelete(u)} title="删除" style={{ background: "transparent", border: "none", color: "#94a3b8", padding: "6px", borderRadius: "4px", cursor: "pointer", fontSize: "18px" }} onMouseOver={e => {e.currentTarget.style.color="#ef4444"; e.currentTarget.style.background="#fef2f2"}} onMouseOut={e => {e.currentTarget.style.color="#94a3b8"; e.currentTarget.style.background="transparent"}}><i className="ph-bold ph-trash"></i></button>
+                            )}
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+                {items.length === 0 && (
+                  <tr>
+                    <td colSpan={5} style={{ textAlign: "center", padding: "40px", color: "#94a3b8" }}>
+                      无匹配数据
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </div>
 
       {(showCreate || editing) && (
         <UserModal
@@ -316,7 +346,7 @@ export function AdminUsers() {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
 

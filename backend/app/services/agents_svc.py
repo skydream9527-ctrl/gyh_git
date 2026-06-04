@@ -4,11 +4,9 @@ from __future__ import annotations
 import re
 import shutil
 from datetime import datetime, timezone
-from pathlib import Path
 
 from ..core.errors import APIError, ErrorCode
 from ..core.storage import get_paths, read_json, write_json
-
 
 # Agents seeded at boot — tasks/admin UI rely on these being present, so we
 # refuse to delete them (the seed loop would silently recreate them on next
@@ -196,6 +194,8 @@ def get_agent_system_prompt(agent_id: str) -> str:
 
 
 _FEATURE_KEYS = ("spawn_subagent", "run_background", "todo_write", "exit_plan_mode")
+_PERMISSION_MODES = {"default", "read_only", "confirm_write", "confirm_network"}
+_EFFORT_VALUES = {"low", "medium", "high"}
 
 
 def get_agent_feature(agent_id: str, feature_name: str, default: bool) -> bool:
@@ -237,6 +237,16 @@ def get_agent_tools(agent_id: str) -> list[str] | None:
     return None
 
 
+def get_agent_disallowed_tools(agent_id: str) -> list[str]:
+    cfg = get_agent(agent_id) or {}
+    tools = cfg.get("disallowed_tools")
+    if tools is None:
+        tools = cfg.get("disallowedTools")
+    if isinstance(tools, list):
+        return [t for t in tools if isinstance(t, str)]
+    return []
+
+
 def get_agent_model(agent_id: str) -> str | None:
     """Per-agent LLM model id (declared in agent.json `model`).
 
@@ -247,6 +257,52 @@ def get_agent_model(agent_id: str) -> str | None:
     model = cfg.get("model")
     if isinstance(model, str) and model.strip():
         return model.strip()
+    return None
+
+
+def get_agent_effort(agent_id: str) -> str | int | None:
+    cfg = get_agent(agent_id) or {}
+    effort = cfg.get("effort")
+    if isinstance(effort, int) and effort > 0:
+        return effort
+    if isinstance(effort, str) and effort.strip().lower() in _EFFORT_VALUES:
+        return effort.strip().lower()
+    return None
+
+
+def get_agent_max_turns(agent_id: str) -> int | None:
+    cfg = get_agent(agent_id) or {}
+    raw = cfg.get("max_turns")
+    if raw is None:
+        raw = cfg.get("maxTurns")
+    if isinstance(raw, int) and raw > 0:
+        return raw
+    return None
+
+
+def get_agent_permission_mode(agent_id: str) -> str:
+    cfg = get_agent(agent_id) or {}
+    raw = cfg.get("permission_mode")
+    if raw is None:
+        raw = cfg.get("permissionMode")
+    if isinstance(raw, str) and raw.strip() in _PERMISSION_MODES:
+        return raw.strip()
+    return "default"
+
+
+def get_agent_hooks(agent_id: str) -> dict:
+    cfg = get_agent(agent_id) or {}
+    hooks = cfg.get("hooks")
+    return hooks if isinstance(hooks, dict) else {}
+
+
+def get_agent_initial_prompt(agent_id: str) -> str | None:
+    cfg = get_agent(agent_id) or {}
+    raw = cfg.get("initial_prompt")
+    if raw is None:
+        raw = cfg.get("initialPrompt")
+    if isinstance(raw, str) and raw.strip():
+        return raw.strip()
     return None
 
 

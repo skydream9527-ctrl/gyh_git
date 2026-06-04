@@ -498,6 +498,90 @@ BUILTIN_TOOL_SCHEMAS: list[dict] = [
     {
         "type": "function",
         "function": {
+            "name": "memory_save",
+            "description": (
+                "Persist a reusable memory for the current user or for the "
+                "current user+agent. Use only for stable preferences, feedback, "
+                "project context, or external reference pointers that should "
+                "appear in future conversations. Do not save secrets, one-off "
+                "facts, or rules already fixed in the system prompt."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "scope": {"type": "string", "enum": ["user", "agent"]},
+                    "slug": {
+                        "type": "string",
+                        "description": "Stable lowercase id, e.g. 'report-style-preference'.",
+                    },
+                    "title": {"type": "string"},
+                    "hook": {"type": "string", "description": "One-line MEMORY.md retrieval hook."},
+                    "type": {
+                        "type": "string",
+                        "enum": ["user", "feedback", "project", "reference"],
+                    },
+                    "body": {"type": "string", "description": "Full markdown memory body."},
+                },
+                "required": ["scope", "slug", "title", "hook", "type", "body"],
+            },
+        },
+        "_meta": {
+            "display_name": "保存记忆",
+            "side_effect": "write",
+            "parallel_safe": False,
+            "plan_mode_allowed": False,
+            "subagent_exposable": True,
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "memory_delete",
+            "description": "Delete a stale or incorrect memory and remove it from MEMORY.md.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "scope": {"type": "string", "enum": ["user", "agent"]},
+                    "slug": {"type": "string"},
+                },
+                "required": ["scope", "slug"],
+            },
+        },
+        "_meta": {
+            "display_name": "删除记忆",
+            "side_effect": "write",
+            "parallel_safe": False,
+            "plan_mode_allowed": False,
+            "subagent_exposable": True,
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "task_state_save",
+            "description": (
+                "Overwrite the current task's STATE.md with a concise markdown "
+                "summary of semantic progress: phase, decomposition, pending "
+                "items, key decisions, current files, and next steps. Keep it "
+                "under about 100 lines."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {"content": {"type": "string"}},
+                "required": ["content"],
+            },
+        },
+        "_meta": {
+            "display_name": "保存任务状态",
+            "side_effect": "write",
+            "parallel_safe": False,
+            "plan_mode_allowed": False,
+            "subagent_exposable": True,
+        },
+    },
+    {
+        "type": "function",
+        "function": {
             "name": "todo_write",
             "description": (
                 "Maintain a live TODO list for the current task so the user can "
@@ -754,6 +838,7 @@ def get_anthropic_tools(
     in_subagent: bool = False,
     feature_flags: dict | None = None,
     tool_whitelist: list[str] | None = None,
+    disallowed_tools: list[str] | None = None,
     task_skill_ids: list[str] | None = None,
     spawn_targets: list[str] | None = None,
 ) -> list[dict]:
@@ -768,6 +853,7 @@ def get_anthropic_tools(
     `tool_whitelist` (when not None) restricts the output to names in the list;
     sourced from `agent.json.tools` so each agent can declare its own surface.
     None / missing field = no whitelist restriction (every tool stays).
+    `disallowed_tools` removes tools after the whitelist is applied.
     `task_skill_ids` (when not None) rewrites the read_skill tool description
     so the LLM only sees the agentic skills bound to the current task — the
     hardcoded example list (kyuubi, nl-mapping-table-sql, ...) is replaced by the actual
@@ -778,9 +864,12 @@ def get_anthropic_tools(
     """
     out = []
     whitelist_set = set(tool_whitelist) if tool_whitelist is not None else None
+    disallowed_set = set(disallowed_tools or [])
     for t in BUILTIN_TOOL_SCHEMAS:
         fn = t["function"]
         meta = {**_DEFAULT_META, **(t.get("_meta") or {})}
+        if fn["name"] in disallowed_set:
+            continue
         if plan_mode and not meta["plan_mode_allowed"]:
             continue
         if in_subagent and not meta["subagent_exposable"]:
@@ -999,9 +1088,10 @@ async def _tool_kyuubi(args: dict, ctx: dict | None = None) -> Any:
         and isinstance(out, dict) and "error_code" not in out
     ):
         try:
-            from . import file_svc as _file_svc
             import csv as _csv
             import io as _io
+
+            from . import file_svc as _file_svc
             ts_str = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
             short_uid = uuid.uuid4().hex[:6]
             sql_name = f"query_{ts_str}_{short_uid}.sql"
@@ -1103,9 +1193,9 @@ async def _tool_execute_python(args: dict, ctx: dict | None = None) -> Any:
         any new artifact under tasks/{tid}/files/output/. The frontend's
         left-side file panel picks up the registered files automatically.
     """
-    from .sandbox import run_python, SandboxStatus
-    from . import file_svc
     from ..core.storage.paths import get_paths
+    from . import file_svc
+    from .sandbox import SandboxStatus, run_python
 
     s = get_settings()
     if not s.ICE_PYTHON_SANDBOX_ENABLED:
@@ -1229,8 +1319,8 @@ async def _tool_volcano_abtest_analyze(args: dict, ctx: dict | None = None) -> A
     import shutil
     import sys
 
-    from . import file_svc
     from ..core.storage.paths import get_paths
+    from . import file_svc
 
     media_raw = (args.get("media") or "").strip()
     exp_id = (args.get("exp_id") or "").strip()
@@ -1579,7 +1669,6 @@ async def _tool_feishu_upload_image(args: dict, ctx: dict | None = None) -> Any:
     """
     import json as _json
     import shutil
-    from pathlib import Path
 
     from ..core.storage.paths import get_paths
 
@@ -1682,8 +1771,8 @@ async def _tool_list_files(args: dict, ctx: dict | None = None) -> Any:
 
 async def _tool_read_file(args: dict, ctx: dict | None = None) -> Any:
     """Read a workspace file by id or name."""
-    from . import file_svc
     from ..core.errors import APIError
+    from . import file_svc
 
     task_id = (ctx or {}).get("task_id")
     if not task_id:
@@ -1755,7 +1844,7 @@ async def _tool_read_agent_knowledge(args: dict, ctx: dict | None = None) -> Any
     if not raw:
         return {"error_code": "VALIDATION_ERROR", "message": "path is required"}
 
-    from pathlib import Path, PurePosixPath
+    from pathlib import PurePosixPath
 
     pp = PurePosixPath(raw)
     if pp.is_absolute() or any(part == ".." for part in pp.parts):
@@ -1837,6 +1926,7 @@ async def _tool_read_skill(args: dict, ctx: dict | None = None) -> Any:
     are rejected.
     """
     from pathlib import Path
+
     from ..core.storage import get_paths
 
     sid = (args.get("skill_id") or "").strip()
@@ -1930,6 +2020,73 @@ async def _tool_read_skill(args: dict, ctx: dict | None = None) -> Any:
 
 
 # ──────────────────────── v2 tool dispatches ─────────────────────────────
+
+
+async def _tool_memory_save(args: dict, ctx: dict | None = None) -> Any:
+    """Persist user-level or agent-level memory and update MEMORY.md."""
+    from .context_svc import ContextPaths, MemoryWriter
+
+    try:
+        result = MemoryWriter(
+            ContextPaths(
+                user_id=(ctx or {}).get("user_id"),
+                agent_id=(ctx or {}).get("agent_id"),
+                task_id=(ctx or {}).get("task_id"),
+            )
+        ).save_memory(
+            scope=(args.get("scope") or "").strip(),  # type: ignore[arg-type]
+            slug=args.get("slug") or "",
+            title=args.get("title") or "",
+            hook=args.get("hook") or "",
+            type_=args.get("type") or "",
+            body=args.get("body") or "",
+        )
+    except ValueError as exc:
+        return {"error_code": "VALIDATION_ERROR", "message": str(exc)}
+    except Exception as exc:
+        return {"error_code": "MEMORY_SAVE_FAILED", "message": str(exc)[:300]}
+    return result
+
+
+async def _tool_memory_delete(args: dict, ctx: dict | None = None) -> Any:
+    """Delete user-level or agent-level memory and update MEMORY.md."""
+    from .context_svc import ContextPaths, MemoryWriter
+
+    try:
+        result = MemoryWriter(
+            ContextPaths(
+                user_id=(ctx or {}).get("user_id"),
+                agent_id=(ctx or {}).get("agent_id"),
+                task_id=(ctx or {}).get("task_id"),
+            )
+        ).delete_memory(
+            scope=(args.get("scope") or "").strip(),  # type: ignore[arg-type]
+            slug=args.get("slug") or "",
+        )
+    except ValueError as exc:
+        return {"error_code": "VALIDATION_ERROR", "message": str(exc)}
+    except Exception as exc:
+        return {"error_code": "MEMORY_DELETE_FAILED", "message": str(exc)[:300]}
+    return result
+
+
+async def _tool_task_state_save(args: dict, ctx: dict | None = None) -> Any:
+    """Overwrite tasks/{task_id}/STATE.md."""
+    from .context_svc import ContextPaths, MemoryWriter
+
+    try:
+        result = MemoryWriter(
+            ContextPaths(
+                user_id=(ctx or {}).get("user_id"),
+                agent_id=(ctx or {}).get("agent_id"),
+                task_id=(ctx or {}).get("task_id"),
+            )
+        ).save_task_state(args.get("content") or "")
+    except ValueError as exc:
+        return {"error_code": "VALIDATION_ERROR", "message": str(exc)}
+    except Exception as exc:
+        return {"error_code": "TASK_STATE_SAVE_FAILED", "message": str(exc)[:300]}
+    return result
 
 
 async def _tool_todo_write(args: dict, ctx: dict | None = None) -> Any:
@@ -2107,8 +2264,8 @@ async def _tool_spawn_subagent(args: dict, ctx: dict | None = None) -> Any:
     """Run a bounded sub-agent and return only its final text."""
     import uuid
 
-    from . import agent_runtime, agents_svc, experience_card_svc
     from ..core.storage import append_jsonl, get_paths
+    from . import agent_runtime, agents_svc, experience_card_svc
 
     agent_id = (args.get("agent_id") or "").strip()
     prompt = (args.get("prompt") or "").strip()
@@ -2193,13 +2350,19 @@ async def _tool_spawn_subagent(args: dict, ctx: dict | None = None) -> Any:
     tools = get_anthropic_tools(
         in_subagent=True,
         tool_whitelist=effective_whitelist,
+        disallowed_tools=agents_svc.get_agent_disallowed_tools(agent_id),
         task_skill_ids=parent_skill_ids,
     )
     system_prompt = experience_card_svc.merged_system_prompt(
         agent_id,
         task_skill_ids=parent_skill_ids,
         callable_tool_names=[t["name"] for t in tools],
+        user_id=parent_ctx.get("user_id"),
+        task_id=task_id,
+        query=prompt,
     )
+    initial_prompt = agents_svc.get_agent_initial_prompt(agent_id)
+    child_user_prompt = f"{initial_prompt}\n\n{prompt}" if initial_prompt else prompt
 
     child_ctx = {
         "user_id": parent_ctx.get("user_id"),
@@ -2231,10 +2394,13 @@ async def _tool_spawn_subagent(args: dict, ctx: dict | None = None) -> Any:
         result = await asyncio.wait_for(
             agent_runtime.run_agent_turn(
                 system_prompt=system_prompt,
-                initial_messages=[{"role": "user", "content": prompt}],
+                initial_messages=[{"role": "user", "content": child_user_prompt}],
                 tools=tools,
                 ctx=child_ctx,
-                max_rounds=s.ICE_SUBAGENT_MAX_TOOL_ROUNDS,
+                max_rounds=min(
+                    s.ICE_SUBAGENT_MAX_TOOL_ROUNDS,
+                    agents_svc.get_agent_max_turns(agent_id) or s.ICE_SUBAGENT_MAX_TOOL_ROUNDS,
+                ),
                 model=child_model,
                 max_tokens=int(args.get("max_tokens") or 2048),
                 transcript_sink=transcript_path,
@@ -2333,6 +2499,9 @@ _DISPATCH = {
     "feishu_upload_image": _tool_feishu_upload_image,
     "read_skill": _tool_read_skill,
     "read_agent_knowledge": _tool_read_agent_knowledge,
+    "memory_save": _tool_memory_save,
+    "memory_delete": _tool_memory_delete,
+    "task_state_save": _tool_task_state_save,
     "todo_write": _tool_todo_write,
     "request_human_input": _tool_request_human_input,
     "exit_plan_mode": _tool_exit_plan_mode,
@@ -2350,6 +2519,30 @@ async def execute_tool(name: str, args: dict, ctx: dict | None = None) -> Any:
         return {"error_code": "TOOL_NOT_FOUND", "message": f"unknown tool: {name}"}
     meta = get_tool_meta(name)
     ctx_d = ctx or {}
+    agent_id = (ctx_d.get("agent_id") or "").strip()
+    if agent_id:
+        from . import agents_svc
+
+        if name in agents_svc.get_agent_disallowed_tools(agent_id):
+            return {
+                "error_code": "TOOL_DISALLOWED",
+                "message": f"'{name}' is disallowed by agent '{agent_id}'",
+            }
+        hook_result = _check_pre_tool_hooks(
+            hooks=agents_svc.get_agent_hooks(agent_id),
+            tool_name=name,
+            args=args,
+        )
+        if hook_result is not None:
+            return hook_result
+        permission_result = _check_agent_permission(
+            permission_mode=agents_svc.get_agent_permission_mode(agent_id),
+            tool_name=name,
+            meta=meta,
+            ctx=ctx_d,
+        )
+        if permission_result is not None:
+            return permission_result
     if ctx_d.get("plan_mode") and not meta["plan_mode_allowed"]:
         return {
             "error_code": "PLAN_MODE_BLOCKED",
@@ -2363,4 +2556,86 @@ async def execute_tool(name: str, args: dict, ctx: dict | None = None) -> Any:
             "error_code": "NOT_ALLOWED_IN_SUBAGENT",
             "message": f"'{name}' is not available inside a sub-agent",
         }
-    return await fn(args, ctx)
+    result = await fn(args, ctx)
+    if agent_id:
+        await _emit_post_tool_hook_event(ctx_d, agent_id, name, result)
+    return result
+
+
+def _check_agent_permission(
+    *,
+    permission_mode: str,
+    tool_name: str,
+    meta: dict,
+    ctx: dict,
+) -> dict | None:
+    side_effect = meta.get("side_effect") or "read"
+    if permission_mode == "default" or side_effect == "read":
+        return None
+    if permission_mode == "read_only":
+        return {
+            "error_code": "PERMISSION_DENIED",
+            "message": f"Agent permission_mode=read_only blocks '{tool_name}' ({side_effect}).",
+        }
+    approved = set(ctx.get("approved_side_effects") or [])
+    if permission_mode == "confirm_write" and side_effect == "write" and "write" not in approved:
+        return {
+            "error_code": "PERMISSION_REQUIRED",
+            "message": f"'{tool_name}' writes task state/files and requires user confirmation.",
+            "side_effect": side_effect,
+        }
+    if permission_mode == "confirm_network" and side_effect in ("write", "network") and side_effect not in approved:
+        return {
+            "error_code": "PERMISSION_REQUIRED",
+            "message": f"'{tool_name}' has side_effect={side_effect} and requires user confirmation.",
+            "side_effect": side_effect,
+        }
+    return None
+
+
+def _check_pre_tool_hooks(*, hooks: dict, tool_name: str, args: dict) -> dict | None:
+    pre_hooks = hooks.get("pre_tool") or hooks.get("PreToolUse") or []
+    if not isinstance(pre_hooks, list):
+        return None
+    for hook in pre_hooks:
+        if not isinstance(hook, dict):
+            continue
+        pattern = hook.get("tool") or hook.get("tool_name") or hook.get("matcher")
+        if pattern not in (None, "*", tool_name):
+            continue
+        if hook.get("block") is True:
+            return {
+                "error_code": "HOOK_BLOCKED",
+                "message": hook.get("message") or f"pre_tool hook blocked '{tool_name}'",
+                "hook": {k: v for k, v in hook.items() if k != "secret"},
+            }
+        required_args = hook.get("required_args")
+        if isinstance(required_args, list):
+            missing = [k for k in required_args if isinstance(k, str) and not args.get(k)]
+            if missing:
+                return {
+                    "error_code": "HOOK_BLOCKED",
+                    "message": hook.get("message") or f"missing required tool args: {missing}",
+                    "missing_args": missing,
+                }
+    return None
+
+
+async def _emit_post_tool_hook_event(ctx: dict, agent_id: str, tool_name: str, result: Any) -> None:
+    emit = ctx.get("emit_event")
+    if not callable(emit):
+        return
+    try:
+        maybe = emit(
+            {
+                "type": "agent_hook_event",
+                "hook": "post_tool",
+                "agent_id": agent_id,
+                "tool_name": tool_name,
+                "success": not (isinstance(result, dict) and result.get("error_code")),
+            }
+        )
+        if asyncio.iscoroutine(maybe):
+            await maybe
+    except Exception:
+        pass

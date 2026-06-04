@@ -734,6 +734,7 @@ async def _handle_user_message(
         plan_mode=plan_mode,
         feature_flags=feature_flags,
         tool_whitelist=agents_svc.get_agent_tools(agent_id),
+        disallowed_tools=agents_svc.get_agent_disallowed_tools(agent_id),
         task_skill_ids=list(task.get("skill_ids") or []),
         spawn_targets=agents_svc.list_spawnable_agent_ids(agent_id),
     )
@@ -742,6 +743,9 @@ async def _handle_user_message(
         plan_mode=plan_mode,
         task_skill_ids=list(task.get("skill_ids") or []),
         callable_tool_names=[t["name"] for t in tools],
+        user_id=user["id"],
+        task_id=task_id,
+        query=content,
     )
     runtime_hint = task_intent_svc.build_runtime_hint(
         content, task_name=task.get("name")
@@ -782,6 +786,9 @@ async def _handle_user_message(
             int(sys_params.get("tool_call_max_rounds") or 20),
         ),
     )
+    agent_max_turns = agents_svc.get_agent_max_turns(agent_id)
+    if agent_max_turns is not None:
+        max_rounds = min(max_rounds, agent_max_turns)
 
     final_text = ""
     files_created: list[dict] = []

@@ -9,7 +9,7 @@ from fastapi import APIRouter, Depends, Query
 
 from ...core.deps import require_admin
 from ...core.errors import ok
-from ...services import event_log
+from ...services import agent_inspection_svc, event_log
 
 router = APIRouter()
 
@@ -69,4 +69,34 @@ async def by_request(
 ):
     """跨任务按 request_id 反查——用户只贴了一个错误请求 ID 时用。"""
     items = event_log.merge_for_request(request_id, limit=limit)
+    return ok({"items": items, "total": len(items)})
+
+
+@router.get("/tasks/{task_id}/agent-context")
+async def agent_context(
+    task_id: str,
+    agent_id: str = Query(...),
+    user_id: str | None = Query(None),
+    query: str | None = Query(None),
+    _: dict = Depends(require_admin),
+):
+    """Inspect the runtime context that would be injected for an Agent."""
+    return ok(
+        agent_inspection_svc.inspect_context(
+            task_id=task_id,
+            agent_id=agent_id,
+            user_id=user_id,
+            query=query,
+        )
+    )
+
+
+@router.get("/tasks/{task_id}/subagent-runs")
+async def subagent_runs(
+    task_id: str,
+    limit: int = Query(50, ge=1, le=200),
+    _: dict = Depends(require_admin),
+):
+    """List sub-agent runs persisted under tasks/{tid}/subagent_runs."""
+    items = agent_inspection_svc.list_subagent_runs(task_id, limit=limit)
     return ok({"items": items, "total": len(items)})

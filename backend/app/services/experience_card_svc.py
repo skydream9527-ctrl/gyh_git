@@ -282,6 +282,9 @@ def merged_system_prompt(
     plan_mode: bool = False,
     task_skill_ids: list[str] | None = None,
     callable_tool_names: list[str] | None = None,
+    user_id: str | None = None,
+    task_id: str | None = None,
+    query: str | None = None,
 ) -> str:
     """Agent base prompt + approved cards + skill catalog.
 
@@ -301,7 +304,7 @@ def merged_system_prompt(
     from ..core.config import get_settings
     from .agent_prompt_builder import build_base_prompt
 
-    base = build_base_prompt(agent_id)
+    base = build_base_prompt(agent_id, user_id=user_id, task_id=task_id, query=query)
     cards_path = get_paths().agents / agent_id / "prompt" / "cards.md"
     parts: list[str] = [base]
     if cards_path.exists():
@@ -358,6 +361,9 @@ def _build_skill_catalog_section(
         "feishu_upload_image",
         "read_skill",
         "read_agent_knowledge",
+        "memory_save",
+        "memory_delete",
+        "task_state_save",
         "todo_write",
         "request_human_input",
         "exit_plan_mode",
@@ -379,6 +385,9 @@ def _build_skill_catalog_section(
         sid = s.get("id") or s.get("name") or ""
         name = s.get("name") or sid
         desc = (s.get("description") or "").strip().replace("\n", " ")
+        when = (s.get("when_to_use") or "").strip().replace("\n", " ")
+        if when:
+            desc = f"{desc} Trigger: {when}" if desc else f"Trigger: {when}"
         # `read_skill` 的官方描述硬编码了 kyuubi/nl-mapping-table-sql/docx/... 全集示例；
         # task 内必须用任务作用域的描述覆盖，否则 LLM 仍会从这条索引里读到全部
         # skill 名字并在回复里复述给用户。

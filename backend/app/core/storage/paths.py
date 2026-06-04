@@ -48,6 +48,18 @@ class StoragePaths:
     def user_tasks_index(self, user_id: str) -> Path:
         return self.user_dir(user_id) / "tasks" / "index.json"
 
+    def user_memory_dir(self, user_id: str) -> Path:
+        return self.user_dir(user_id) / "memory"
+
+    def user_memory_index(self, user_id: str) -> Path:
+        return self.user_memory_dir(user_id) / "MEMORY.md"
+
+    def user_agent_memory_dir(self, user_id: str, agent_id: str) -> Path:
+        return self.user_memory_dir(user_id) / "agents" / agent_id
+
+    def user_agent_memory_index(self, user_id: str, agent_id: str) -> Path:
+        return self.user_agent_memory_dir(user_id, agent_id) / "MEMORY.md"
+
     def user_notifications(self, user_id: str, ym: str) -> Path:
         return self.user_dir(user_id) / "notifications" / f"{ym}.jsonl"
 
@@ -139,6 +151,9 @@ class StoragePaths:
 
     def task_todos(self, task_id: str) -> Path:
         return self.task_dir(task_id) / "todos.json"
+
+    def task_state_md(self, task_id: str) -> Path:
+        return self.task_dir(task_id) / "STATE.md"
 
     def task_run_events(self, task_id: str, conv_id: str) -> Path:
         return self.task_dir(task_id) / "run_events" / f"{conv_id}.jsonl"

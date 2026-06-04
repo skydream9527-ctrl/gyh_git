@@ -71,6 +71,12 @@ def list_all() -> list[dict]:
                         "id": meta.get("name") or d.name,
                         "name": meta.get("name") or d.name,
                         "description": description,
+                        "when_to_use": meta.get("when_to_use") or meta.get("whenToUse"),
+                        "paths": _split_csvish(meta.get("paths")),
+                        "allowed_tools": _split_csvish(
+                            meta.get("allowed-tools") or meta.get("allowed_tools")
+                        ),
+                        "agent": meta.get("agent"),
                         "description_zh": zh_intro,  # 给前端做"是否已本地化"的判断
                         "category": "agentic",
                         "tool_entry": f"agentic:{d.name}",
@@ -80,6 +86,14 @@ def list_all() -> list[dict]:
                     }
                 )
     return out
+
+
+def _split_csvish(value) -> list[str]:
+    if isinstance(value, list):
+        return [str(v).strip() for v in value if str(v).strip()]
+    if not isinstance(value, str) or not value.strip():
+        return []
+    return [part.strip() for part in value.replace("\n", ",").split(",") if part.strip()]
 
 
 def _read_zh_intro(skill_dir: Path) -> str | None:
@@ -170,7 +184,7 @@ def upsert_skill(*, skill_id: str | None, body: dict) -> dict:
         try:
             schema = json.loads(schema)
         except json.JSONDecodeError as e:
-            raise APIError(400, ErrorCode.VALIDATION_ERROR, f"tool_schema JSON 解析失败：{e}")
+            raise APIError(400, ErrorCode.VALIDATION_ERROR, f"tool_schema JSON 解析失败：{e}") from e
     ok, reason = validate_tool_schema(schema)
     if not ok:
         raise APIError(400, ErrorCode.VALIDATION_ERROR, f"tool_schema 无效：{reason}")

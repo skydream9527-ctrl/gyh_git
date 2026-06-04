@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, Query
 from ...core.deps import get_current_user
 from ...core.errors import APIError, ErrorCode, ok
 from ...core.storage import get_paths
-from ...services import agents_svc
+from ...services import agent_workflow_svc, agents_svc
 
 router = APIRouter()
 
@@ -49,6 +49,13 @@ async def get_agent(agent_id: str, _: dict = Depends(get_current_user)):
     if not a:
         raise APIError(404, ErrorCode.RESOURCE_NOT_FOUND, "Agent 不存在")
     return ok(a)
+
+
+@router.get("/{agent_id}/workflows")
+async def list_agent_workflows(agent_id: str, _: dict = Depends(get_current_user)):
+    _agent_root(agent_id)
+    items = agent_workflow_svc.list_workflows(agent_id)
+    return ok({"items": items, "total": len(items), "agent_id": agent_id})
 
 
 @router.get("/{agent_id}/files")

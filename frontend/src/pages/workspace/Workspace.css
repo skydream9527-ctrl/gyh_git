@@ -495,16 +495,23 @@
 .ws-right-tabs {
   display: flex;
   border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.ws-right-tabs::-webkit-scrollbar {
+  display: none;
 }
 .ws-right-tabs button {
-  flex: 1;
+  flex: 0 0 auto;
+  min-width: 64px;
   background: transparent;
   border: none;
   color: var(--text-dim);
-  padding: 10px 14px;
+  padding: 10px 11px;
   font-size: 12px;
   cursor: pointer;
   border-bottom: 2px solid transparent;
+  white-space: nowrap;
 }
 .ws-right-tabs button.active {
   color: var(--primary);
@@ -760,7 +767,6 @@
 }
 
 @media (max-width: 720px) {
-  /* 移动端：隐藏 Desktop 的 💾/🔁 按钮，展示 ⋯ 菜单入口 */
   .ws-sec-action {
     display: none !important;
   }
@@ -769,778 +775,459 @@
   }
 }
 
-/* Workspace 顶栏：返回首页按钮 */
-.ws-crumb {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-.ws-crumb-sep {
-  color: var(--text-muted);
-  opacity: 0.6;
-}
-.ws-back-home {
-  appearance: none;
-  border: 1px solid var(--border);
-  background: transparent;
-  color: var(--text);
-  font-size: 12px;
-  font-weight: 500;
-  padding: 4px 10px;
-  border-radius: 999px;
-  cursor: pointer;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
-  line-height: 1.2;
-}
-.ws-back-home:hover {
-  background: var(--surface-alt, rgba(255,255,255,0.04));
-  border-color: var(--primary);
-  color: var(--primary);
+/* ========================================================
+   V6 Workspace Overrides (Three-Column Data Workspace)
+   ======================================================== */
+
+.ws.v6-workspace {
+  background: #fafafa;
+  color: #1e293b;
 }
 
-/* Agent 右栏：本任务 skills 列表 */
-.ws-skill-section {
-  margin-top: 18px;
-  padding-top: 14px;
-  border-top: 1px solid var(--border);
+/* Override TopNav to match V6 shadow-sm style */
+.ws.v6-workspace .top-nav {
+  height: 56px;
+  background: #fff;
+  border-bottom: 1px solid #e2e8f0;
+  box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
+  z-index: 10;
 }
-.ws-skill-head {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text);
-  margin-bottom: 10px;
-}
-.ws-skill-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.ws-skill-item {
-  padding: 8px 10px;
-  border-radius: 8px;
-  background: var(--surface-alt, rgba(255,255,255,0.03));
-  border: 1px solid var(--border);
-}
-.ws-skill-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.ws-skill-badge {
-  font-size: 10px;
-  padding: 1px 6px;
-  border-radius: 3px;
-  font-weight: 500;
-  flex-shrink: 0;
-  border: 1px solid var(--border);
-  color: var(--text-muted);
-}
-.ws-skill-badge-builtin {
-  background: var(--p-ab-dim);
-  color: var(--p-ab);
-  border-color: var(--p-ab-dim);
-}
-.ws-skill-badge-agentic {
-  background: var(--p-data-dim);
-  color: var(--p-data);
-  border-color: var(--p-data-dim);
-}
-.ws-skill-name {
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--text);
-}
-.ws-skill-desc {
-  margin-top: 4px;
-  font-size: 11px;
-  color: var(--text-muted);
-  line-height: 1.45;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-/* Agent 右栏 · 目录文件树 */
-.ws-agent-files-section {
-  margin-top: 18px;
-  padding-top: 14px;
-  border-top: 1px solid var(--border);
-}
-.ws-agent-files-section code {
-  font-size: 11px;
-  padding: 1px 4px;
-  background: var(--surface-2);
-  border-radius: 3px;
-  font-family: var(--font-mono, monospace);
-  color: var(--text-muted);
-}
-.ws-agent-files {
-  list-style: none;
-  padding: 0;
-  margin: 10px 0 0;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  max-height: 240px;
-  overflow-y: auto;
-}
-.ws-agent-file-btn {
-  appearance: none;
-  border: 0;
-  width: 100%;
-  background: transparent;
-  color: var(--text-dim);
-  padding: 5px 8px;
-  font-size: 11.5px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 6px;
+.ws.v6-workspace .ws-back-home {
+  width: 32px;
+  height: 32px;
   border-radius: 4px;
-  text-align: left;
-  font-family: var(--font-mono, ui-monospace, monospace);
-  line-height: 1.4;
-}
-.ws-agent-file-btn:hover {
-  background: var(--surface-alt, rgba(255,255,255,0.04));
-  color: var(--text);
-}
-.ws-agent-file-btn.is-active {
-  background: rgba(107,170,142,0.12);
-  color: var(--primary, #6baa8e);
-}
-.ws-agent-file-btn.is-binary {
-  opacity: 0.55;
-}
-.ws-af-icon {
-  flex-shrink: 0;
-  width: 14px;
-  text-align: center;
-}
-.ws-af-path {
-  flex: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.ws-af-size {
-  flex-shrink: 0;
-  font-size: 10px;
-  color: var(--text-muted);
-}
-.ws-agent-file-preview {
-  margin-top: 10px;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-}
-.ws-agent-file-preview-head {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 6px 10px;
-  border-bottom: 1px solid var(--border);
-  font-size: 11.5px;
-  font-weight: 500;
-  color: var(--text);
-  font-family: var(--font-mono, monospace);
-}
-.ws-af-close {
-  appearance: none;
-  background: transparent;
-  border: 0;
-  color: var(--text-muted);
-  font-size: 15px;
-  cursor: pointer;
-  line-height: 1;
-  padding: 2px 4px;
-}
-.ws-af-close:hover {
-  color: var(--error, #c97b7b);
-}
-.ws-af-pre {
-  margin: 0;
-  padding: 10px 12px;
-  max-height: 360px;
-  overflow: auto;
-  font-size: 11.5px;
-  line-height: 1.5;
-  white-space: pre-wrap;
-  word-break: break-word;
-  color: var(--text);
-  font-family: var(--font-mono, monospace);
-}
-
-/* Agent 右栏 · Skill 增删 UI */
-.ws-skill-head-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-}
-.ws-skill-head-row .ws-skill-head {
-  margin-bottom: 0;
-}
-.ws-skill-add-btn {
-  appearance: none;
-  border: 1px solid var(--border);
-  background: transparent;
-  color: var(--text-muted);
-  font-size: 11px;
-  padding: 3px 10px;
-  border-radius: 999px;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-.ws-skill-add-btn:hover {
-  border-color: var(--primary);
-  color: var(--primary);
-}
-.ws-skill-add-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-.ws-skill-row {
-  position: relative;
-}
-.ws-skill-remove {
-  appearance: none;
-  border: 0;
-  background: transparent;
-  color: var(--text-muted);
-  cursor: pointer;
-  font-size: 15px;
-  line-height: 1;
-  padding: 0 4px;
-  margin-left: auto;
-}
-.ws-skill-remove:hover {
-  color: var(--error, #c97b7b);
-}
-.ws-skill-remove:disabled {
-  opacity: 0.4;
-  cursor: wait;
-}
-.ws-skill-picker {
-  margin-top: 10px;
-  padding: 10px;
-  background: var(--surface-alt, rgba(255,255,255,0.02));
-  border: 1px dashed var(--border);
-  border-radius: var(--radius-sm);
-}
-.ws-skill-picker-head {
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--text-muted);
-  margin-bottom: 8px;
-}
-.ws-skill-picker-list {
-  max-height: 280px;
-  overflow-y: auto;
-}
-.ws-skill-add-inline {
-  appearance: none;
-  border: 0;
-  background: var(--p-data-dim);
-  color: var(--p-data);
-  font-size: 13px;
-  font-weight: 600;
-  width: 20px;
-  height: 20px;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-left: auto;
-  line-height: 1;
-}
-.ws-skill-add-inline:hover {
-  background: rgba(107,170,142,0.3);
-}
-.ws-skill-add-inline:disabled {
-  opacity: 0.4;
-  cursor: wait;
-}
-
-/* 左侧栏 · 文件预览区（点击列表项后展开在下方）*/
-.ws-sb-filepreview {
-  margin-top: auto;
-  padding-top: 12px;
-  border-top: 1px solid var(--border);
-}
-.ws-sb-filepreview .ws-sb-head {
-  justify-content: space-between;
-  gap: 8px;
-}
-.ws-sb-filepreview .ws-file-name {
-  flex: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 12px;
-  color: var(--text);
-  font-weight: 500;
-}
-.ws-sb-filepreview-close {
-  padding: 2px 6px !important;
-  font-size: 14px !important;
-  line-height: 1;
-}
-.ws-sb-filepreview .ws-file-pre {
-  margin: 8px 0 0;
-  padding: 8px 10px;
-  max-height: 320px;
-  overflow: auto;
-  font-size: 11.5px;
-  line-height: 1.5;
-  white-space: pre-wrap;
-  word-break: break-word;
-  color: var(--text);
-  font-family: var(--font-mono, monospace);
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-}
-
-/* ---- TopNav 右侧动作：桌面横排 / 手机收进 ⋯ 菜单 ---- */
-.ws-actions-desktop {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-.ws-actions-mobile {
-  display: none;
-  position: relative;
-}
-.ws-actions-more {
-  background: transparent;
-  border: 1px solid var(--border);
-  color: var(--text);
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  font-size: 18px;
-  line-height: 1;
-  cursor: pointer;
-  display: inline-flex;
   align-items: center;
   justify-content: center;
-}
-.ws-actions-more:hover {
-  background: var(--surface-2);
-}
-.ws-actions-mobile-menu {
-  /* override ws-sec-more-menu defaults — 给 TopNav 右上角更宽的菜单 */
-  min-width: 220px;
-  padding: 6px;
-}
-.ws-actions-mobile-menu button,
-.ws-actions-mobile-menu .btn-ghost {
-  width: 100%;
-  text-align: left;
-  padding: 10px 12px;
-  font-size: 14px;
-  border: none;
+  color: #64748b;
+  transition: all 0.2s;
   background: transparent;
-  border-radius: 6px;
-  white-space: nowrap;
-  display: block;
+  padding: 0;
+  overflow: hidden;
+  text-indent: -9999px;
+  position: relative;
 }
-.ws-actions-mobile-menu button:hover,
-.ws-actions-mobile-menu .btn-ghost:hover {
-  background: var(--surface-2);
+.ws.v6-workspace .ws-back-home::after {
+  content: "\2190";
+  text-indent: 0;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 16px;
+  font-weight: bold;
 }
-
-@media (max-width: 800px) {
-  .ws-actions-desktop {
-    display: none;
-  }
-  .ws-actions-mobile {
-    display: inline-flex;
-  }
-  /* chat 输入区简化：手机键盘没 Enter，"Enter 发送 · Shift+Enter 换行" 提示无意义 */
-  .chat-hint {
-    display: none;
-  }
-  /* model selector 长文字截断不溢出 */
-  .ws-chat-head .model {
-    max-width: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  /* 3-段切换：≤375px 时 emoji+文字仍要紧凑可读 */
-  .ws-mobile-segs button {
-    font-size: 13px;
-    padding: 9px 4px;
-    white-space: nowrap;
-  }
-  /* Plan Mode 在手机端已经移进 TopNav 的 ⋯ 菜单（参见 WorkspacePage.tsx）。
-     整块隐藏 plan-toggle-row，把空间还给 chat-input —— 否则 ws-main 的
-     overflow:hidden 在内容紧凑时会把这一行裁掉。 */
-  .plan-toggle-row {
-    display: none !important;
-  }
-  .chat-input {
-    /* 8px 视觉间距即可：底部的 .ws-mobile-segs 是 .ws 的 flex 子元素，
-       自己负担 safe-area，chat-input 上方不再被任何 fixed bar 遮挡。 */
-    padding-bottom: 8px !important;
-  }
+.ws.v6-workspace .ws-back-home:hover {
+  background: #f1f5f9;
+  color: #0f172a;
 }
 
-/* =========================================
-   V6 WORKSPACE REDESIGN STYLES
-   ========================================= */
-
-.v6-pane-header {
-  padding: 12px;
-  border-bottom: 1px solid var(--border);
+.ws.v6-workspace .ws-crumb {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  background: var(--surface);
+  gap: 12px;
+  font-weight: 700;
+  color: #1e293b;
+}
+.ws.v6-workspace .ws-crumb-sep {
+  display: none;
+}
+.ws.v6-workspace .current {
+  font-size: 16px;
 }
 
-.v6-pane-title {
+/* Sidebar (Left) */
+.ws.v6-workspace .ws-sidebar {
+  background: #f8fafc;
+  border-right: 1px solid #e2e8f0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+.ws.v6-workspace .ws-sb-section {
+  padding: 16px;
+  border-bottom: 1px solid #e2e8f0;
+}
+.ws.v6-workspace .ws-sb-head {
   font-size: 12px;
-  font-weight: 600;
-  color: var(--text-dim);
+  font-weight: 700;
+  color: #94a3b8;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  margin-bottom: 12px;
   display: flex;
   align-items: center;
-  gap: 6px;
+  justify-content: space-between;
 }
-
-.v6-data-source-item {
+.ws.v6-workspace .ws-sb-head span {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px;
-  border-radius: 6px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow-1);
+}
+/* File cards */
+.ws.v6-workspace .ws-file-item,
+.ws.v6-workspace .ws-file-list li {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
+  margin-bottom: 8px;
+  transition: all 0.2s;
   cursor: pointer;
-  transition: border-color 0.2s;
-  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
-.v6-data-source-item:hover {
-  border-color: var(--primary);
+.ws.v6-workspace .ws-file-list li:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+  background: #fff;
 }
-.v6-ds-icon {
+.ws.v6-workspace .ws-file-list .fl-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  background: #f0fdfa; /* teal-50 */
+  color: #0d9488;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  border: 1px solid #ccfbf1;
+}
+
+/* Main Chat (Middle) */
+.ws.v6-workspace .ws-main {
+  background: #fff;
+  position: relative;
+}
+
+/* --------------------------------------------------------
+   V6 Chat Bubble Overrides
+   -------------------------------------------------------- */
+
+.ws.v6-workspace .msg-list {
+  padding: 24px;
+}
+
+/* General bubble row alignment */
+.ws.v6-workspace .bubble-row {
+  max-width: 48rem; /* 3xl */
+  margin: 0 auto;
+  width: 100%;
+  padding-bottom: 24px;
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+/* User Bubble */
+.ws.v6-workspace .bubble-row.user {
+  flex-direction: row-reverse;
+}
+.ws.v6-workspace .bubble-row.user .user-bubble {
+  background: #f8fafc;
+  border: 1px solid #f1f5f9;
+  color: #1e293b;
+  border-radius: 16px;
+  border-top-right-radius: 4px;
+  box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
+  font-size: 14px;
+  line-height: 1.6;
+  padding: 12px 16px;
+  max-width: 80%;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+/* Assistant Bubble */
+.ws.v6-workspace .bubble-row.assistant {
+  flex-direction: row;
+}
+.ws.v6-workspace .agent-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #dbeafe;
+  color: #2563eb;
+  border: 1px solid #bfdbfe;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
+  margin-top: 4px;
+  flex-shrink: 0;
+}
+.ws.v6-workspace .bubble-row.assistant .assistant-bubble {
+  background: transparent;
+  color: #334155;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  max-width: 100%;
+}
+
+/* Markdown typography adjustments inside V6 */
+.ws.v6-workspace .assistant-bubble .markdown-body p {
+  margin-bottom: 12px;
+}
+.ws.v6-workspace .assistant-bubble .markdown-body code {
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  color: #0f172a;
+  border-radius: 4px;
+}
+
+/* Right Panel */
+.ws.v6-workspace .ws-right {
+  background: #f8fafc;
+  border-left: 1px solid #e2e8f0;
+}
+.ws.v6-workspace .ws-right-tabs {
+  background: #fff;
+  height: 48px;
+  align-items: center;
+}
+.ws.v6-workspace .ws-right-tabs button {
+  font-weight: 700;
+  font-size: 13px;
+  height: 100%;
+}
+
+/* Additional ToolCard V6 adjustments */
+.ws.v6-workspace .tool-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+.ws.v6-workspace .tool-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 13px;
+  color: #1e293b;
+}
+.ws.v6-workspace .tool-card.tool-amber {
+  border-color: #fde68a;
+  box-shadow: 0 4px 20px rgba(245,158,11,0.05);
+}
+.ws.v6-workspace .tool-card.tool-amber .tool-head {
+  background: #fffbeb;
+  border-bottom-color: #fde68a;
+  color: #92400e;
+}
+.ws.v6-workspace .tool-card.tool-blue {
+  border-color: #bfdbfe;
+}
+.ws.v6-workspace .tool-card.tool-blue .tool-head {
+  background: #eff6ff;
+  border-bottom-color: #bfdbfe;
+  color: #1e3a8a;
+}
+.ws.v6-workspace .tool-toggle, .ws.v6-workspace .tool-inline-btn {
+  background: #fff;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 11px;
+  color: #475569;
+  cursor: pointer;
+  font-weight: 700;
+  box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
+}
+.ws.v6-workspace .tool-result.success {
+  background: #ecfdf5;
+  color: #065f46;
+  padding: 12px 16px;
+  font-size: 13px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #a7f3d0;
+}
+.ws.v6-workspace .tool-args {
+  padding: 12px 16px;
+  margin: 0;
+  font-size: 12px;
+  background: #fff;
+  color: #334155;
+}
+
+
+/* --------------------------------------------------------
+   V6 Execution Plan Tree Overrides
+   -------------------------------------------------------- */
+.ws.v6-workspace .exec-cockpit {
+  padding: 16px;
+  background: #f8fafc;
+}
+.ws.v6-workspace .exec-hero {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
+  background: #fff;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+.ws.v6-workspace .exec-hero__top h3 {
+  font-size: 16px;
+  color: #1e293b;
+  margin: 4px 0 8px;
+}
+.ws.v6-workspace .exec-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
+  background: #fff;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+.ws.v6-workspace .exec-card__head {
+  background: #f8fafc;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e2e8f0;
+  font-weight: 700;
+  font-size: 14px;
+  color: #1e293b;
+  display: flex;
+  justify-content: space-between;
+}
+.ws.v6-workspace .exec-tree {
+  padding: 16px;
+  margin: 0;
+  list-style: none;
+}
+.ws.v6-workspace .exec-node {
+  position: relative;
+  display: flex;
+  gap: 12px;
+  padding-bottom: 24px;
+}
+.ws.v6-workspace .exec-node:last-child {
+  padding-bottom: 0;
+}
+.ws.v6-workspace .exec-node__rail {
+  position: absolute;
+  left: 11px;
+  top: 24px;
+  bottom: 0;
+  width: 2px;
+  background: #e2e8f0;
+}
+.ws.v6-workspace .exec-node--completed .exec-node__rail {
+  background: #a7f3d0;
+}
+.ws.v6-workspace .exec-node__mark {
   width: 24px;
   height: 24px;
-  border-radius: 4px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  font-size: 14px;
-}
-.v6-ds-info {
-  flex: 1;
-  overflow: hidden;
-}
-.v6-ds-name {
-  font-size: 13px;
-  font-weight: 500;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.v6-ds-meta {
-  font-size: 10px;
-  color: var(--text-muted);
-  font-family: var(--font-mono);
-  margin-top: 2px;
-}
-
-/* V6 Execution Tree */
-.v6-exec-tree {
-  position: relative;
-  padding-left: 12px;
-  margin-top: 16px;
-}
-.v6-exec-line {
-  position: absolute;
-  left: 15px;
-  top: 16px;
-  bottom: 40px;
-  width: 1px;
-  background: var(--border);
-}
-.v6-exec-node {
   position: relative;
   z-index: 10;
-  margin-bottom: 24px;
+  font-size: 12px;
+  background: #f1f5f9;
+  color: #94a3b8;
+  border: 1px solid #e2e8f0;
 }
-.v6-exec-dot {
-  position: absolute;
-  left: -14px;
-  top: 4px;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 2px solid var(--surface);
-  box-shadow: var(--shadow-1);
+.ws.v6-workspace .exec-node--completed .exec-node__mark {
+  background: #d1fae5;
+  color: #059669;
+  border-color: #a7f3d0;
 }
-.v6-exec-dot.completed { background: var(--success); color: white; }
-.v6-exec-dot.paused { background: var(--surface); border-color: var(--warning); }
-.v6-exec-dot.pending { background: var(--surface); border-color: var(--border); }
-.v6-exec-content {
-  padding-left: 20px;
+.ws.v6-workspace .exec-node--in_progress .exec-node__mark {
+  background: #dbeafe;
+  color: #2563eb;
+  border-color: #bfdbfe;
+  box-shadow: 0 0 0 4px rgba(59,130,246,0.2);
 }
-.v6-exec-title {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text);
-}
-.v6-exec-meta {
-  font-size: 11px;
-  margin-top: 2px;
-  font-family: var(--font-mono);
-}
-
-.v6-pulse {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--warning);
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: .5; }
-}
-
-/* HITL Approval Card */
-.v6-hitl-card {
-  margin-top: 16px;
-  background: var(--surface);
-  border: 1px solid rgba(176, 125, 42, 0.4); /* warning */
-  border-radius: 12px;
-  box-shadow: var(--shadow-2);
-  overflow: hidden;
-}
-.v6-hitl-head {
-  background: rgba(176, 125, 42, 0.05);
-  padding: 12px 16px;
-  border-bottom: 1px solid rgba(176, 125, 42, 0.2);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.v6-hitl-title {
-  font-weight: 500;
-  font-size: 13px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--text);
-}
-.v6-hitl-body {
-  padding: 16px;
-  font-size: 13px;
-  color: var(--text-dim);
-}
-
-.ws-task-menu {
-  position: relative;
-  display: inline-block;
-}
-.ws-task-menu > summary {
-  list-style: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  cursor: pointer;
-  border-radius: 7px;
-  padding: 4px 6px;
-}
-.ws-task-menu > summary::-webkit-details-marker {
-  display: none;
-}
-.ws-task-menu > summary:hover {
-  background: var(--surface-2);
-}
-.ws-task-menu-caret {
-  color: var(--text-muted);
-  font-size: 10px;
-}
-.ws-task-menu-pop {
-  position: absolute;
-  left: 0;
-  top: calc(100% + 6px);
-  z-index: 70;
-  width: 230px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  box-shadow: var(--shadow-3);
-  padding: 6px;
-}
-.ws-task-menu-title {
-  padding: 6px 8px 8px;
-  margin-bottom: 2px;
-  color: var(--text-muted);
-  font-size: 10.5px;
-  font-family: var(--font-mono);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  border-bottom: 1px solid var(--border);
-}
-.ws-task-menu-pop button {
-  width: 100%;
-  border: 0;
-  background: transparent;
-  color: var(--text);
-  border-radius: 7px;
-  padding: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  cursor: pointer;
-  text-align: left;
-  font-size: 13px;
-}
-.ws-task-menu-pop button:hover:not(:disabled) {
-  background: var(--surface-2);
-}
-.ws-task-menu-pop button:disabled {
-  color: var(--text-muted);
-  cursor: not-allowed;
-}
-.ws-task-menu-pop button.danger {
-  color: var(--error);
-}
-.ws-task-menu-pop small {
-  color: var(--text-muted);
-  font-family: var(--font-mono);
-  font-size: 10px;
-}
-.ws-v6-status-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  margin-left: 8px;
-  padding: 2px 8px;
-  border-radius: 999px;
-  background: var(--warning-dim);
-  color: var(--warning);
-  border: 1px solid var(--warning-dim);
-  font-size: 11px;
-  font-family: var(--font-mono);
-}
-
-.v6-exec-panel {
-  padding: 12px 14px 8px;
-  border-bottom: 1px solid var(--border);
-  background: color-mix(in srgb, var(--surface-2) 55%, var(--surface));
-}
-.v6-exec-summary {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 4px;
-}
-.v6-exec-summary small {
-  color: var(--text-muted);
-  font-family: var(--font-mono);
-  font-size: 10.5px;
-}
-.v6-exec-dot.running {
-  background: var(--surface);
-  border-color: var(--warning);
-}
-.v6-exec-dot.completed {
-  font-size: 11px;
+.ws.v6-workspace .exec-node__title {
+  font-size: 14px;
   font-weight: 700;
+  color: #1e293b;
 }
-.v6-exec-meta.completed {
-  color: var(--success);
-}
-.v6-exec-meta.running {
-  color: var(--warning);
+.ws.v6-workspace .exec-node__meta {
+  font-size: 10px;
+  color: #64748b;
+  margin-top: 4px;
+  background: #f1f5f9;
   display: inline-block;
-  background: var(--warning-dim);
-  padding: 1px 5px;
+  padding: 2px 6px;
   border-radius: 4px;
 }
-.v6-exec-meta.pending {
-  color: var(--text-muted);
+.ws.v6-workspace .exec-node--in_progress .exec-node__meta {
+  background: #dbeafe;
+  color: #1d4ed8;
 }
-.v6-hitl-inline {
-  margin: 12px 24px 0;
+
+
+/* HITL Plan Card */
+.ws.v6-workspace .exec-plan-card {
+  border-color: #fde68a;
+  box-shadow: 0 4px 20px rgba(245,158,11,0.1);
 }
-.v6-hitl-body p {
-  margin: 0 0 12px;
-  line-height: 1.55;
+.ws.v6-workspace .exec-plan-card .exec-card__head {
+  background: #fffbeb;
+  border-bottom-color: #fde68a;
+  color: #92400e;
 }
-.v6-hitl-table {
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  overflow: hidden;
-  margin: 12px 0;
-}
-.v6-hitl-tr {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
-  gap: 0;
-  align-items: center;
-  border-bottom: 1px solid var(--border);
-}
-.v6-hitl-tr:last-child {
-  border-bottom: 0;
-}
-.v6-hitl-tr.head {
-  background: var(--surface-2);
-  color: var(--text-muted);
-  font-family: var(--font-mono);
-  font-size: 10.5px;
+.ws.v6-workspace .exec-plan-card .exec-card__tag {
+  background: #fff;
+  border: 1px solid #fcd34d;
+  color: #d97706;
+  padding: 2px 8px;
+  border-radius: 99px;
+  font-size: 10px;
   text-transform: uppercase;
 }
-.v6-hitl-tr span,
-.v6-hitl-tr input {
-  min-width: 0;
-  padding: 9px 10px;
-  font-size: 12px;
+.ws.v6-workspace .exec-plan-text {
+  padding: 16px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #334155;
+  background: #fff;
 }
-.v6-hitl-tr .danger {
-  color: var(--error);
-}
-.v6-hitl-tr input {
-  margin: 6px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background: var(--surface);
-  color: var(--text);
-  outline: none;
-}
-.v6-hitl-tr input:focus {
-  border-color: var(--primary);
-  box-shadow: var(--ring);
-}
-.v6-hitl-actions {
+.ws.v6-workspace .exec-actions {
+  padding: 12px 16px;
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
   display: flex;
-  align-items: center;
-  gap: 10px;
-  padding-top: 12px;
-  border-top: 1px solid var(--border);
+  justify-content: flex-end;
+  gap: 12px;
 }
-.v6-hitl-link {
-  margin-left: auto;
-  border: 0;
-  background: transparent;
-  color: var(--primary);
-  cursor: pointer;
+.ws.v6-workspace .exec-btn {
+  padding: 6px 16px;
+  border-radius: 8px;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
 }
+.ws.v6-workspace .exec-btn--secondary {
+  background: #fff;
+  border: 1px solid #cbd5e1;
+  color: #475569;
+}
+.ws.v6-workspace .exec-btn--secondary:hover {
+  background: #f1f5f9;
+}
+.ws.v6-workspace .exec-btn--primary {
+  background: #f97316;
+  border: 1px solid #ea580c;
+  color: #fff;
+  box-shadow: 0 1px 2px 0 rgba(249,115,22,0.2);
+}
+.ws.v6-workspace .exec-btn--primary:hover {
+  background: #ea580c;
+}
+

@@ -165,5 +165,13 @@ async def maybe_compact(
         except Exception as exc:
             log.warning("compaction cache write failed: %s", exc)
 
-    synthetic = {"role": "user", "content": f"(历史摘要 · {len(old_head)} 条消息)\n{summary}"}
+    state_text = ""
+    try:
+        state_path = paths.task_state_md(task_id)
+        if state_path.exists():
+            state_text = state_path.read_text(encoding="utf-8").strip()[:2000]
+    except Exception:
+        state_text = ""
+    state_block = f"\n\n(当前 Task State)\n{state_text}" if state_text else ""
+    synthetic = {"role": "user", "content": f"(历史摘要 · {len(old_head)} 条消息)\n{summary}{state_block}"}
     return [synthetic, *keep_tail]

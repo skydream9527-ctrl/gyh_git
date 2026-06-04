@@ -5,7 +5,6 @@ import { authApi, sysApi } from "@/api/endpoints";
 import type { GlobalToggles } from "@/types/api";
 import { useUIStore } from "@/stores/uiStore";
 import { checkLoginLimit, clearLoginLimit, recordLoginFailure } from "@/utils/loginRateLimit";
-import { ThemeSelect } from "@/components/shell/ThemeSelect";
 import "./Login.css";
 
 /**
@@ -314,8 +313,6 @@ export function LoginPage() {
   return (
     <div className="login-page">
       <div className="login-bg-grid" />
-      <div className="login-orb login-orb-1" />
-      <div className="login-orb login-orb-2" />
 
       <div className="login-card">
         <aside className="login-left">
@@ -329,37 +326,61 @@ export function LoginPage() {
             </div>
             <div>
               <div className="brand-name">
-                <span className="brand-accent">ICE</span> Data Workbench
+                <span className="brand-accent">ICE</span> Workbench
               </div>
-              <div className="brand-tag">AI 数据工作流工作台</div>
+              <div className="brand-tag">v6 多智能体数据工作舱</div>
             </div>
           </div>
-          <div className="loop-anim">
-            <div className="loop-step">
-              <div className="dot user" />
-              <div className="loop-text">用户：上周新版本留存…</div>
+
+          <div className="login-hero-copy">
+            <p className="login-kicker">Mission Control</p>
+            <h2>把数据、Agent、审批和长任务放进同一个工作流。</h2>
+            <p>
+              v6 将任务工作区升级为三栏式控制台：左侧管理上下文，中间处理对话，
+              右侧追踪执行计划与人工确认。
+            </p>
+          </div>
+
+          <div className="login-cockpit" aria-hidden="true">
+            <div className="cockpit-top">
+              <span>Q2 Retention Analysis</span>
+              <b>RUNNING</b>
             </div>
-            <div className="loop-arrow">↓</div>
-            <div className="loop-step">
-              <div className="dot tool" />
-              <div className="loop-text">⚡ Tool: SQL → Skill → 图表</div>
+            <div className="cockpit-body">
+              <div className="cockpit-track">
+                <span className="track-dot is-done" />
+                <span className="track-line" />
+                <span className="track-dot is-active" />
+                <span className="track-line" />
+                <span className="track-dot" />
+              </div>
+              <div className="cockpit-steps">
+                <div>
+                  <strong>Context</strong>
+                  <span>Feishu Bitable + CSV</span>
+                </div>
+                <div>
+                  <strong>Agent Plan</strong>
+                  <span>SQL → Chart → Summary</span>
+                </div>
+                <div>
+                  <strong>HITL Gate</strong>
+                  <span>Waiting for approval</span>
+                </div>
+              </div>
             </div>
-            <div className="loop-arrow">↓</div>
-            <div className="loop-step">
-              <div className="dot agent" />
-              <div className="loop-text">📊 Agent：D7 留存 +5.6pp</div>
+            <div className="cockpit-metrics">
+              <div><span>Tasks</span><b>128</b></div>
+              <div><span>Agents</span><b>12</b></div>
+              <div><span>HITL</span><b>3</b></div>
             </div>
           </div>
         </aside>
 
         <main className="login-right">
-          <div className="login-right-head">
-            <div>
-              <h1>登录</h1>
-              <p className="login-sub">两种登录方式任选其一</p>
-            </div>
-            <ThemeSelect />
-          </div>
+          <p className="login-kicker">Secure Access</p>
+          <h1>欢迎回来</h1>
+          <p className="login-sub">选择认证方式，进入你的 ICE Workbench。</p>
 
           <div className="login-tabs">
             {aegisTabVisible && (
@@ -368,7 +389,8 @@ export function LoginPage() {
                 className={`login-tab ${tab === "aegis" ? "active" : ""}`}
                 onClick={() => setTab("aegis")}
               >
-                🛡 米盾
+                <i className="ph ph-shield-check" aria-hidden="true" />
+                米盾
               </button>
             )}
             {passwordTabVisible && (
@@ -377,7 +399,8 @@ export function LoginPage() {
                 className={`login-tab ${tab === "password" ? "active" : ""}`}
                 onClick={() => setTab("password")}
               >
-                🔑 账号密码
+                <i className="ph ph-key" aria-hidden="true" />
+                账号密码
               </button>
             )}
           </div>
@@ -386,7 +409,7 @@ export function LoginPage() {
             <div className="login-pane">
               {justLoggedOut ? (
                 <div className="login-hint info">
-                  <div className="lh-title">👋 已退出登录</div>
+                  <div className="lh-title">已退出登录</div>
                   <div className="lh-body">
                     你已安全登出。若需继续使用米盾账号，点击下方重新验证。
                   </div>
@@ -395,7 +418,7 @@ export function LoginPage() {
                     type="button"
                     onClick={retryAegis}
                   >
-                    🔁 重新登录
+                    重新登录
                   </button>
                 </div>
               ) : checking ? (
@@ -404,7 +427,7 @@ export function LoginPage() {
                 </div>
               ) : (
                 <div className="login-hint warn">
-                  <div className="lh-title">🔐 未检测到米盾登录态</div>
+                  <div className="lh-title">未检测到米盾登录态</div>
                   <div className="lh-body">
                     请通过米盾代理域名访问；本地开发可在 backend <code>.env</code> 设置{" "}
                     <code>AEGIS_DEV_BYPASS_EMAIL=admin</code> 后重启。
@@ -414,7 +437,7 @@ export function LoginPage() {
                     type="button"
                     onClick={retryAegis}
                   >
-                    🔁 重新尝试
+                    重新尝试
                   </button>
                 </div>
               )}
@@ -460,7 +483,7 @@ export function LoginPage() {
                     }}
                   >
                     <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 6 }}>
-                      🕓 账号申请已提交，等待管理员审批
+                      账号申请已提交，等待管理员审批
                     </div>
                     <div>
                       账号：<code>{submittedForApproval.email}</code>

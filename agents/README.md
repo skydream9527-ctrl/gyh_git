@@ -26,6 +26,7 @@ agents/{agent_id}/
 ├── agent.json          # 运行时声明：工具白名单 / spawn 目标 / feature flags / 展示信息
 ├── prompt/             # system.md 或 v3 的 identity.md + sop.md
 ├── knowledge/          # Agent 私有知识库，供 read_agent_knowledge 读取（可选）
+├── workflows/          # Agent 私有工作流模板，*.md 会作为 /workflow 索引注入（可选）
 ├── skills/             # Agent 私有说明型 skill（可选）
 └── README.md           # Agent 使用说明（可选）
 ```
@@ -37,12 +38,19 @@ agents/{agent_id}/
 - `spawn_targets`: 可派单的子 Agent 白名单。`["*"]` 表示所有已发布 Agent；空数组表示不可派单。
 - `skills`: 推荐的说明型 skill id，仅作为提示词 hint；真正可读取的 skill 仍由任务绑定的 skill 快照决定。
 - `prompt_layout: "v3"`: 使用 `identity.md` / `sop.md` + `_shared/_partials/` 组装运行时提示词。
+- `disallowed_tools`: 在 `tools` 白名单之后再次移除的工具，适合做负向权限。
+- `permission_mode`: 工具权限策略。支持 `default`、`read_only`、`confirm_write`、`confirm_network`。
+- `max_turns`: 单轮 Agent ReAct 最大工具轮数上限，会与系统上限取较小值。
+- `effort`: Agent 推理强度提示，支持 `low`、`medium`、`high` 或正整数。
+- `initial_prompt`: 子 Agent / 后台任务首轮用户 prompt 前置说明。
+- `hooks`: 轻量 Hook 声明。当前支持 `pre_tool` 阻断 / 必填参数校验，以及 `post_tool` 事件发出。
+- `mcp_servers` / `plugin_tools`: 声明型外部能力，当前注入 prompt 供运行约束和后续插件化接入使用。
 
 ## 共享运行时片段
 
-`agents/_shared/_partials/` 下的片段由 `agent_prompt_builder` 注入：
+共享片段由 `agent_prompt_builder` 注入：
 
 - `tool_contract.md`: 通用工具契约
-- `context_protocol.md`: 上下文协议
+- `../context-protocol.md`: 上下文协议
 - `spawn_routing.md`: 子 Agent 派单规则，仅对启用 `spawn_subagent` 的 v3 Agent 注入
 - `plan_mode.md`: Plan Mode 规则，仅对启用 `exit_plan_mode` 的 v3 Agent 注入

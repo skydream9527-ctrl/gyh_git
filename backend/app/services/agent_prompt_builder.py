@@ -71,7 +71,6 @@ def _render_spawn_targets(agent_id: str) -> str:
     # runs — keep the loader path one-directional.
     from . import agents_svc
 
-    parent = agents_svc.get_agent(agent_id) or {}
     whitelist = agents_svc.get_agent_spawn_targets(agent_id)
     candidates = []
     for a in agents_svc.list_agents():
@@ -119,38 +118,64 @@ def _render_recommended_skills(agent_id: str) -> str:
     )
 
 
-def build_base_prompt(agent_id: str) -> str:
+def _read_context_protocol() -> str:
+    root = get_paths().agents / "_shared"
+    direct = _read_text(root / "context-protocol.md")
+    if direct:
+        return direct
+    return _read_text(root / _PARTIALS_DIR_NAME / "context_protocol.md")
+
+
+def build_base_prompt(
+    agent_id: str,
+    *,
+    user_id: str | None = None,
+    task_id: str | None = None,
+    query: str | None = None,
+) -> str:
     """Assemble the runtime base prompt for an agent.
 
     New layout (identity.md present):
         identity.md
         ─── _partials/tool_contract.md
-        ─── _partials/context_protocol.md
+        ─── context-protocol.md
+        ─── runtime context (User Memory / Agent Memory / Task State)
         ─── sop.md (if present)
         ─── _partials/spawn_routing.md + dynamic spawn targets
         ─── _partials/plan_mode.md (if features.exit_plan_mode)
         ─── recommended skills (from agent.json.skills)
 
-    Legacy layout: returns prompt/system.md byte-for-byte. Bit-stable for
-    agents we haven't migrated.
+    Legacy layout: returns prompt/system.md byte-for-byte unless runtime
+    context is supplied, in which case the context section is appended.
 
     Returns a non-empty string in all cases (default fallback if everything
     is missing).
     """
     from . import agents_svc
+    from .context_svc import ContextLoader, ContextPaths
 
     adir = _agent_dir(agent_id)
+    context_section = ContextLoader(
+        ContextPaths(user_id=user_id, agent_id=agent_id, task_id=task_id),
+        query=query,
+    ).build_context_section()
     if not has_new_layout(agent_id):
         # Legacy bit-stable path — preserve trailing whitespace exactly so the
         # assembled prompt is identical to what the legacy reader produced.
         sys_path = adir / "prompt" / "system.md"
         if sys_path.exists():
             try:
-                return sys_path.read_text(encoding="utf-8")
+                base = sys_path.read_text(encoding="utf-8")
+                if context_section:
+                    return f"{base}\n\n---\n\n{context_section}"
+                return base
             except OSError:
                 pass
         cfg = agents_svc.get_agent(agent_id) or {}
-        return cfg.get("system_prompt") or _DEFAULT_FALLBACK_PROMPT
+        base = cfg.get("system_prompt") or _DEFAULT_FALLBACK_PROMPT
+        if context_section:
+            return f"{base}\n\n---\n\n{context_section}"
+        return base
     identity_path = adir / "prompt" / "identity.md"
 
     parts: list[str] = []
@@ -161,9 +186,12 @@ def build_base_prompt(agent_id: str) -> str:
     if tool_contract:
         parts.append(tool_contract)
 
-    ctx_protocol = _read_text(partials / "context_protocol.md")
+    ctx_protocol = _read_context_protocol()
     if ctx_protocol:
         parts.append(ctx_protocol)
+
+    if context_section:
+        parts.append(context_section)
 
     sop = _read_text(adir / "prompt" / "sop.md")
     if sop:
@@ -190,4 +218,45 @@ def build_base_prompt(agent_id: str) -> str:
     if recommended:
         parts.append(recommended)
 
+    declarative = _render_declarative_capabilities(agent_id)
+    if declarative:
+        parts.append(declarative)
+
+    from .agent_workflow_svc import render_workflow_index
+
+    workflows = render_workflow_index(agent_id)
+    if workflows:
+        parts.append(workflows)
+
     return "\n\n---\n\n".join(p for p in parts if p)
+
+
+def _render_declarative_capabilities(agent_id: str) -> str:
+    from . import agents_svc
+
+    cfg = agents_svc.get_agent(agent_id) or {}
+    lines: list[str] = []
+    permission_mode = agents_svc.get_agent_permission_mode(agent_id)
+    if permission_mode != "default":
+        lines.append(f"- permission_mode: `{permission_mode}`")
+    max_turns = agents_svc.get_agent_max_turns(agent_id)
+    if max_turns is not None:
+        lines.append(f"- max_turns: `{max_turns}`")
+    effort = agents_svc.get_agent_effort(agent_id)
+    if effort:
+        lines.append(f"- effort: `{effort}`")
+    initial = agents_svc.get_agent_initial_prompt(agent_id)
+    if initial:
+        lines.append(f"- initial_prompt: {initial}")
+    mcp_servers = cfg.get("mcp_servers") or cfg.get("mcpServers") or []
+    if isinstance(mcp_servers, list) and mcp_servers:
+        lines.append("- mcp_servers: " + ", ".join(str(x) for x in mcp_servers))
+    plugin_tools = cfg.get("plugin_tools") or []
+    if isinstance(plugin_tools, list) and plugin_tools:
+        lines.append("- plugin_tools: " + ", ".join(str(x) for x in plugin_tools))
+    hooks = agents_svc.get_agent_hooks(agent_id)
+    if hooks:
+        lines.append("- hooks: enabled")
+    if not lines:
+        return ""
+    return "## Agent 运行声明\n" + "\n".join(lines)

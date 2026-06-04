@@ -47,10 +47,8 @@ async def enqueue(
 ) -> dict:
     """Record a new background job and start its coroutine. Returns the job
     descriptor (with status='running')."""
-    try:
-        await agents_svc.get_agent(agent_id)
-    except Exception as exc:
-        raise ValueError(f"agent '{agent_id}' not found") from exc
+    if not agents_svc.get_agent(agent_id):
+        raise ValueError(f"agent '{agent_id}' not found")
 
     job_id = f"bg_{uuid.uuid4().hex[:12]}"
     paths = get_paths()
@@ -88,12 +86,16 @@ async def _run(
                 "exit_plan_mode": False,
             },
             tool_whitelist=agents_svc.get_agent_tools(agent_id),
+            disallowed_tools=agents_svc.get_agent_disallowed_tools(agent_id),
             task_skill_ids=skill_ids,
         )
         system_prompt = experience_card_svc.merged_system_prompt(
             agent_id,
             task_skill_ids=skill_ids,
             callable_tool_names=[t["name"] for t in tools],
+            user_id=user_id,
+            task_id=task_id,
+            query=prompt,
         )
         ctx = {
             "user_id": user_id,
@@ -114,9 +116,14 @@ async def _run(
                 int(sys_params.get("tool_call_max_rounds") or 20),
             ),
         )
+        agent_max_turns = agents_svc.get_agent_max_turns(agent_id)
+        if agent_max_turns is not None:
+            max_rounds = min(max_rounds, agent_max_turns)
+        initial_prompt = agents_svc.get_agent_initial_prompt(agent_id)
+        user_prompt = f"{initial_prompt}\n\n{prompt}" if initial_prompt else prompt
         result = await agent_runtime.run_agent_turn(
             system_prompt=system_prompt,
-            initial_messages=[{"role": "user", "content": prompt}],
+            initial_messages=[{"role": "user", "content": user_prompt}],
             tools=tools,
             ctx=ctx,
             max_rounds=max_rounds,

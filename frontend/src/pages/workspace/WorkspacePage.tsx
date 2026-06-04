@@ -13,6 +13,7 @@ import { ErrorState } from "@/components/feedback/ErrorState";
 import { Skeleton } from "@/components/feedback/Skeleton";
 import AgentUpdateBanner from "@/components/task/AgentUpdateBanner";
 import ConversationTab from "@/components/task/ConversationTab";
+import { ExecutionCockpit } from "@/components/task/ExecutionCockpit";
 import ImportLinkDialog from "@/components/task/ImportLinkDialog";
 import { InviteCollaboratorsDialog } from "@/components/task/InviteCollaboratorsDialog";
 import PlanApprovalModal from "@/components/chat/PlanApprovalModal";
@@ -84,8 +85,8 @@ export function WorkspacePage() {
   const [skillPickerOpen, setSkillPickerOpen] = useState(false);
   const [skillBusy, setSkillBusy] = useState(false);
   const [activeRightTab, setActiveRightTab] = useState<
-    "conv" | "skill" | "agent" | "scheduled"
-  >("conv");
+    "execution" | "conv" | "scheduled" | "skill" | "agent"
+  >("execution");
   const [kbs, setKbs] = useState<KBSummary[]>([]);
   const [expandedKbId, setExpandedKbId] = useState<string | null>(null);
   const [kbArticles, setKbArticles] = useState<Record<string, KBArticle[]>>({});
@@ -665,7 +666,7 @@ export function WorkspacePage() {
   };
 
   return (
-    <div className="ws">
+    <div className="ws v6-workspace">
       <TopNav
         mode="workspace"
         crumb={
@@ -1073,6 +1074,35 @@ export function WorkspacePage() {
               )}
             </div>
           )}
+
+          {/* V6: Running Agents Section */}
+          <div className="ws-sb-section v6-agents-section">
+            <h3 className="ws-sb-head" style={{ marginBottom: 12 }}>运行智能体组合</h3>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {agent ? (
+                <div style={{ display: "flex", alignItems: "center", gap: 12, padding: 8, borderRadius: 8, background: "#fff", border: "1px solid #e2e8f0", boxShadow: "0 1px 2px 0 rgba(0,0,0,0.05)" }}>
+                  <div style={{ width: 32, height: 32, borderRadius: 4, background: "#dbeafe", color: "#2563eb", display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid #bfdbfe", fontSize: 18 }}>{agent.icon || "🤖"}</div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: "#1e293b", display: "flex", alignItems: "center", gap: 4 }}>{agent.name} <span style={{ background: "#f1f5f9", fontSize: 9, padding: "2px 4px", borderRadius: 4, border: "1px solid #e2e8f0" }}>主控</span></div>
+                    <div style={{ fontSize: 10, color: "#64748b" }}>{agent.paradigm}</div>
+                  </div>
+                </div>
+              ) : (
+                <div className="ws-empty">尚未绑定 Agent</div>
+              )}
+              {/* Optional secondary agent placeholder just for v6 visuals if wanted */}
+              {agent && (
+                <div style={{ display: "flex", alignItems: "center", gap: 12, padding: 8, borderRadius: 8, background: "#fff", border: "1px solid #e2e8f0", boxShadow: "0 1px 2px 0 rgba(0,0,0,0.05)", opacity: 0.6 }}>
+                  <div style={{ width: 32, height: 32, borderRadius: 4, background: "#f3e8ff", color: "#9333ea", display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid #e9d5ff", fontSize: 18 }}>📊</div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: "#1e293b" }}>Data Analyst</div>
+                    <div style={{ fontSize: 10, color: "#64748b" }}>数据分析与处理</div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
         </aside>
 
         <div
@@ -1242,7 +1272,6 @@ export function WorkspacePage() {
             historyHasMore={historyHasMore}
             historyLoading={historyLoadingOlder}
             onLoadOlder={loadOlderHistory}
-            runEvents={socket.runEvents}
             toolOverrides={socket.toolOverrides}
             onRetryToolCall={socket.retryToolCall}
             onCrystallize={handleCrystallize}
@@ -1381,6 +1410,7 @@ export function WorkspacePage() {
           <div className="ws-right-tabs">
             {(
               [
+                { k: "execution", label: "◎ 执行" },
                 { k: "conv", label: "💬 对话" },
                 { k: "scheduled", label: "⏱ 定时任务" },
                 { k: "skill", label: "🧰 Skill" },
@@ -1397,6 +1427,29 @@ export function WorkspacePage() {
             ))}
           </div>
           <div className="ws-right-body">
+            {activeRightTab === "execution" && (
+              <ExecutionCockpit
+                task={task}
+                agent={agent}
+                phase={socket.phase}
+                status={socket.status}
+                runEvents={socket.runEvents}
+                todos={socket.todos}
+                todosUpdatedAt={socket.todosUpdatedAt}
+                planMode={socket.planMode}
+                pendingPlan={socket.pendingPlan}
+                inflightUser={socket.inflightUser}
+                currentUserId={currentUser?.id}
+                scheduledItems={scheduledItems}
+                canWrite={canWrite}
+                onTogglePlanMode={() => {
+                  if (conversationId) socket.setPlanMode(!socket.planMode);
+                }}
+                onApprovePlan={(pid) => socket.approvePlan(pid)}
+                onRejectPlan={(pid) => socket.rejectPlan(pid)}
+                onOpenScheduled={() => setActiveRightTab("scheduled")}
+              />
+            )}
             {activeRightTab === "agent" && (
               <div className="ws-agent-tab">
                 {agent ? (
@@ -1849,7 +1902,7 @@ export function WorkspacePage() {
           className={mobileTab === "right" ? "active" : ""}
           onClick={() => setMobileTab("right")}
         >
-          🤖 详情
+          ◎ 执行
         </button>
       </div>
     </div>
