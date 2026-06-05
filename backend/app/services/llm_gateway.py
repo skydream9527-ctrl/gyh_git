@@ -40,6 +40,7 @@ _TOOL_TIMEOUT_FLOORS = {
     "kyuubi_query": 330,
     "volcano_abtest_analyze": 340,
     "feishu_publish": 120,
+    "feishu_send_message": 60,
     "feishu_upload_image": 90,
 }
 

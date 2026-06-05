@@ -334,6 +334,21 @@ export interface ScheduledRun {
   output: string | null;
   error: { code: string; message: string } | null;
   tokens?: { input: number; output: number };
+  rounds?: number;
+  stop_reason?: string;
+  tool_calls?: Array<{
+    name?: string;
+    success?: boolean;
+    status?: string;
+    error?: unknown;
+    result?: unknown;
+  }>;
+}
+
+export interface ScheduledRunDetail {
+  run: ScheduledRun;
+  transcript: Array<Record<string, unknown>>;
+  transcript_path: string | null;
 }
 
 export const scheduledApi = {
@@ -359,6 +374,8 @@ export const scheduledApi = {
     api<ScheduledRun>(http.post(`/scheduled-tasks/by-task/${taskId}/${sid}/run-now`)),
   listRuns: (taskId: string, sid: string) =>
     api<{ items: ScheduledRun[] }>(http.get(`/scheduled-tasks/by-task/${taskId}/${sid}/runs`)),
+  getRunDetail: (taskId: string, sid: string, runId: string) =>
+    api<ScheduledRunDetail>(http.get(`/scheduled-tasks/by-task/${taskId}/${sid}/runs/${runId}`)),
   plan: (body: { prompt: string; model?: string | null }) =>
     api<{ cron: string; todo_list: string[]; model: string }>(
       http.post(`/scheduled-tasks/plan`, body),

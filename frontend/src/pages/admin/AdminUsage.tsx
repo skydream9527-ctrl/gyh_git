@@ -83,10 +83,10 @@ export function AdminUsage() {
   }
 
   return (
-    <div>
-      <div className="adm-page-head adm-page-head-with-toolbar">
+    <>
+      <header className="adm-page-head adm-page-head-with-toolbar">
         <div>
-          <h1>💰 用量与成本</h1>
+          <h1>用量与成本 (Usage)</h1>
           <p>按 LLM tokens × 单价计算；超预算自动告警</p>
         </div>
         <div className="adm-period-toolbar">
@@ -101,134 +101,147 @@ export function AdminUsage() {
             </button>
           ))}
           <a className="btn-secondary" href={usageApi.exportCsvUrl(days)} target="_blank" rel="noreferrer">
-            📥 CSV
+            <i className="ph ph-download-simple" aria-hidden="true" />
+            CSV
           </a>
         </div>
-      </div>
+      </header>
 
-      <BudgetCard summary={summary} />
+      <div className="v6-page-content adm-usage-page">
+        <BudgetCard summary={summary} />
 
-      <div className="adm-stat-grid">
-        <Stat label="本月调用" val={summary.calls.toLocaleString()} color="var(--primary)" />
-        <Stat label="本月输入" val={fmtTokens(summary.input_tokens)} color="var(--p-data)" />
-        <Stat label="本月输出" val={fmtTokens(summary.output_tokens)} color="var(--p-biz)" />
-        <Stat label="本月成本" val={`$${summary.cost_usd.toFixed(2)}`} color="var(--agent)" />
-      </div>
-
-      <div style={{ display: "flex", gap: 4, borderBottom: "1px solid var(--border)", marginBottom: 18 }}>
-        {TABS.map((t) => (
-          <button
-            key={t.k}
-            onClick={() => setTab(t.k)}
-            style={{
-              background: "transparent",
-              border: "none",
-              padding: "10px 18px",
-              fontSize: 13,
-              cursor: "pointer",
-              color: tab === t.k ? "var(--primary)" : "var(--text-dim)",
-              borderBottom: tab === t.k ? "2px solid var(--primary)" : "2px solid transparent",
-            }}
-          >
-            {t.label}
-          </button>
-        ))}
-      </div>
-
-      {tab === "daily" && (
-        <div className="adm-section">
-          <h3 style={{ fontFamily: "var(--font-head)", fontSize: 14, marginTop: 0 }}>
-            过去 {days} 天每日成本（USD）
-          </h3>
-          <Sparkline values={daily.map((d) => d.cost_usd)} height={140} />
-          <h3 style={{ fontFamily: "var(--font-head)", fontSize: 13, marginTop: 24 }}>调用次数</h3>
-          <Sparkline values={daily.map((d) => d.calls)} height={100} stroke="var(--p-data)" fill="var(--p-data-dim)" />
-          <table className="adm-table" style={{ marginTop: 16 }}>
-            <thead>
-              <tr>
-                <th>日期</th>
-                <th style={{ textAlign: "right" }}>调用</th>
-                <th style={{ textAlign: "right" }}>输入 tokens</th>
-                <th style={{ textAlign: "right" }}>输出 tokens</th>
-                <th style={{ textAlign: "right" }}>成本 (USD)</th>
-              </tr>
-            </thead>
-            <tbody>
-              {daily.slice().reverse().slice(0, 14).map((d) => (
-                <tr key={d.day}>
-                  <td>{d.day}</td>
-                  <td style={{ textAlign: "right" }}>{d.calls}</td>
-                  <td style={{ textAlign: "right", fontFamily: "var(--font-mono)" }}>{d.input_tokens.toLocaleString()}</td>
-                  <td style={{ textAlign: "right", fontFamily: "var(--font-mono)" }}>{d.output_tokens.toLocaleString()}</td>
-                  <td style={{ textAlign: "right", fontFamily: "var(--font-mono)" }}>${d.cost_usd.toFixed(4)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="adm-usage-stat-grid">
+          <Stat label="本月调用" val={summary.calls.toLocaleString()} icon="ph-phone-call" tone="orange" />
+          <Stat label="本月输入" val={fmtTokens(summary.input_tokens)} icon="ph-arrow-circle-down" tone="blue" />
+          <Stat label="本月输出" val={fmtTokens(summary.output_tokens)} icon="ph-arrow-circle-up" tone="green" />
+          <Stat label="本月成本" val={`$${summary.cost_usd.toFixed(2)}`} icon="ph-currency-dollar" tone="violet" />
         </div>
-      )}
 
-      {tab !== "daily" && (
-        <div className="adm-section">
-          {(() => {
-            const rows = byDim[tab];
-            const byKey: Record<string, DimUsage> = {};
-            rows.forEach((it) => (byKey[it.key] = it));
-            return (
-              <BarSeries
-                items={rows.map((it) => ({ key: it.key, value: it.cost_usd }))}
-                color={tab === "model" ? "var(--primary)" : tab === "user" ? "var(--p-data)" : tab === "agent" ? "var(--agent)" : "var(--p-biz)"}
-                formatLabel={(k) => (byKey[k] ? labelFor(tab, byKey[k]) : k)}
-                formatValue={(v) => `$${v.toFixed(4)}`}
-              />
-            );
-          })()}
-          <table className="adm-table" style={{ marginTop: 18 }}>
-            <thead>
-              <tr>
-                <th>{tab === "model" ? "模型" : tab === "user" ? "用户" : tab === "agent" ? "Agent" : "任务"}</th>
-                <th style={{ textAlign: "right" }}>调用</th>
-                <th style={{ textAlign: "right" }}>输入</th>
-                <th style={{ textAlign: "right" }}>输出</th>
-                <th style={{ textAlign: "right" }}>成本</th>
-              </tr>
-            </thead>
-            <tbody>
-              {byDim[tab].map((it) => (
-                <tr key={it.key}>
-                  <td>
-                    {labelFor(tab, it)}
-                    {it.label && it.label !== it.key && (
-                      <span
-                        style={{
-                          marginLeft: 8,
-                          fontSize: 11,
-                          color: "var(--text-muted)",
-                          fontFamily: "var(--font-mono)",
-                        }}
-                      >
-                        {it.key.slice(0, 8)}
-                      </span>
-                    )}
-                  </td>
-                  <td style={{ textAlign: "right" }}>{it.calls}</td>
-                  <td style={{ textAlign: "right", fontFamily: "var(--font-mono)" }}>{it.input_tokens.toLocaleString()}</td>
-                  <td style={{ textAlign: "right", fontFamily: "var(--font-mono)" }}>{it.output_tokens.toLocaleString()}</td>
-                  <td style={{ textAlign: "right", fontFamily: "var(--font-mono)" }}>${it.cost_usd.toFixed(4)}</td>
-                </tr>
-              ))}
-              {byDim[tab].length === 0 && (
-                <tr>
-                  <td colSpan={5} style={{ textAlign: "center", padding: 32, color: "var(--text-muted)" }}>
-                    暂无数据
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+        <div className="adm-usage-tabs" role="tablist" aria-label="用量维度">
+          {TABS.map((t) => (
+            <button
+              key={t.k}
+              type="button"
+              role="tab"
+              aria-selected={tab === t.k}
+              className={tab === t.k ? "active" : ""}
+              onClick={() => setTab(t.k)}
+            >
+              {t.label}
+            </button>
+          ))}
         </div>
-      )}
-    </div>
+
+        {tab === "daily" && (
+          <section className="v6-card adm-usage-card">
+            <div className="adm-usage-card-head">
+              <div>
+                <h2>过去 {days} 天每日成本</h2>
+                <p>单位：USD</p>
+              </div>
+            </div>
+            <div className="adm-usage-chart">
+              <Sparkline values={daily.map((d) => d.cost_usd)} height={140} />
+            </div>
+            <div className="adm-usage-card-head compact">
+              <div>
+                <h2>调用次数</h2>
+                <p>按自然日聚合</p>
+              </div>
+            </div>
+            <div className="adm-usage-chart small">
+              <Sparkline values={daily.map((d) => d.calls)} height={100} stroke="#2563eb" fill="#dbeafe" />
+            </div>
+            <div className="adm-table-scroll">
+              <table className="adm-usage-table">
+                <thead>
+                  <tr>
+                    <th>日期</th>
+                    <th className="num">调用</th>
+                    <th className="num">输入 tokens</th>
+                    <th className="num">输出 tokens</th>
+                    <th className="num">成本 (USD)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {daily.slice().reverse().slice(0, 14).map((d) => (
+                    <tr key={d.day}>
+                      <td>{d.day}</td>
+                      <td className="num">{d.calls}</td>
+                      <td className="num mono">{d.input_tokens.toLocaleString()}</td>
+                      <td className="num mono">{d.output_tokens.toLocaleString()}</td>
+                      <td className="num mono">${d.cost_usd.toFixed(4)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        )}
+
+        {tab !== "daily" && (
+          <section className="v6-card adm-usage-card">
+            <div className="adm-usage-card-head">
+              <div>
+                <h2>{TABS.find((t) => t.k === tab)?.label}</h2>
+                <p>按成本降序展示 Top 10</p>
+              </div>
+            </div>
+            <div className="adm-usage-bars">
+              {(() => {
+                const rows = byDim[tab];
+                const byKey: Record<string, DimUsage> = {};
+                rows.forEach((it) => (byKey[it.key] = it));
+                return (
+                  <BarSeries
+                    items={rows.map((it) => ({ key: it.key, value: it.cost_usd }))}
+                    color={tab === "model" ? "#f97316" : tab === "user" ? "#2563eb" : tab === "agent" ? "#7c3aed" : "#059669"}
+                    formatLabel={(k) => (byKey[k] ? labelFor(tab, byKey[k]) : k)}
+                    formatValue={(v) => `$${v.toFixed(4)}`}
+                  />
+                );
+              })()}
+            </div>
+            <div className="adm-table-scroll">
+              <table className="adm-usage-table">
+                <thead>
+                  <tr>
+                    <th>{tab === "model" ? "模型" : tab === "user" ? "用户" : tab === "agent" ? "Agent" : "任务"}</th>
+                    <th className="num">调用</th>
+                    <th className="num">输入</th>
+                    <th className="num">输出</th>
+                    <th className="num">成本</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {byDim[tab].map((it) => (
+                    <tr key={it.key}>
+                      <td>
+                        <div className="adm-usage-name">
+                          <span>{labelFor(tab, it)}</span>
+                          {it.label && it.label !== it.key && <code>{it.key.slice(0, 8)}</code>}
+                        </div>
+                      </td>
+                      <td className="num">{it.calls}</td>
+                      <td className="num mono">{it.input_tokens.toLocaleString()}</td>
+                      <td className="num mono">{it.output_tokens.toLocaleString()}</td>
+                      <td className="num mono">${it.cost_usd.toFixed(4)}</td>
+                    </tr>
+                  ))}
+                  {byDim[tab].length === 0 && (
+                    <tr>
+                      <td colSpan={5} className="adm-empty-cell">
+                        暂无数据
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        )}
+      </div>
+    </>
   );
 }
 
@@ -248,43 +261,46 @@ function BudgetCard({ summary }: { summary: UsageSummary }) {
         ? "接近预算上限"
         : "预算充足";
   return (
-    <div
-      className="adm-section"
-      style={{
-        marginBottom: 16,
-        borderColor: color,
-        background:
-          summary.budget_state === "ok"
-            ? "var(--surface)"
-            : summary.budget_state === "warning"
-              ? "var(--warning-dim)"
-              : "var(--error-dim)",
-      }}
-    >
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 10 }}>
+    <section className={`v6-card adm-usage-budget ${summary.budget_state}`} style={{ borderColor: color }}>
+      <div className="adm-usage-budget-row">
         <div>
-          <div style={{ fontFamily: "var(--font-head)", fontSize: 14, color }}>{label}</div>
-          <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 2 }}>
+          <div className="adm-usage-budget-title" style={{ color }}>
+            {label}
+          </div>
+          <div className="adm-usage-budget-sub">
             本月预算 ${summary.budget_usd.toFixed(2)} · 已用 ${summary.cost_usd.toFixed(2)} ({(ratio * 100).toFixed(1)}%)
           </div>
         </div>
-        <div style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--text-muted)" }}>{summary.month}</div>
+        <div className="adm-usage-month">{summary.month}</div>
       </div>
-      <div style={{ height: 8, background: "var(--surface-2)", borderRadius: 4, overflow: "hidden" }}>
-        <div style={{ width: `${pct}%`, height: "100%", background: color, transition: "width .3s" }} />
+      <div className="adm-usage-progress">
+        <div style={{ width: `${pct}%`, background: color }} />
       </div>
-    </div>
+    </section>
   );
 }
 
-function Stat({ label, val, color }: { label: string; val: string | number; color: string }) {
+function Stat({
+  label,
+  val,
+  icon,
+  tone,
+}: {
+  label: string;
+  val: string | number;
+  icon: string;
+  tone: "orange" | "blue" | "green" | "violet";
+}) {
   return (
-    <div className="adm-stat">
-      <div className="adm-stat-label">{label}</div>
-      <div className="adm-stat-val" style={{ color }}>
-        {val}
+    <section className="v6-card adm-usage-stat">
+      <div className={`adm-usage-stat-icon ${tone}`}>
+        <i className={`ph ${icon}`} aria-hidden="true" />
       </div>
-    </div>
+      <div>
+        <div className="adm-usage-stat-label">{label}</div>
+        <div className="adm-usage-stat-val">{val}</div>
+      </div>
+    </section>
   );
 }
 

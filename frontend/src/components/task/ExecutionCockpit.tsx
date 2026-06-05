@@ -49,6 +49,7 @@ export function ExecutionCockpit({
     phase,
     status,
     latest,
+    todos,
     pendingPlan,
     inflightUser,
   });
@@ -197,22 +198,33 @@ function getCockpitStatus({
   phase,
   status,
   latest,
+  todos,
   pendingPlan,
   inflightUser,
 }: {
   phase: StreamPhase;
   status: "idle" | "connecting" | "open" | "closed";
   latest: RunEvent | null;
+  todos: TodoItem[];
   pendingPlan: PlanProposal | null;
   inflightUser: InflightUser | null;
 }): CockpitStatus {
-  if (pendingPlan || latest?.status === "waiting") return "waiting";
+  const waitingTodo = findWaitingTodo(todos);
+  if (pendingPlan || latest?.status === "waiting" || waitingTodo) return "waiting";
   if (latest?.status === "error" || phase === "error") return "error";
   if (latest?.status === "warning") return "warning";
   if (latest?.status === "done") return "done";
   if (["typing", "streaming", "tool"].includes(phase) || inflightUser || latest?.status === "running") return "running";
   if (status === "closed" || status === "connecting") return "offline";
   return "idle";
+}
+
+function findWaitingTodo(todos: TodoItem[]): TodoItem | null {
+  return todos.find((todo) => {
+    if (todo.status !== "in_progress") return false;
+    const text = `${todo.activeForm || ""} ${todo.content || ""}`;
+    return /等待|确认|审批|人工|补充|输入|选择|配置/.test(text);
+  }) ?? null;
 }
 
 const statusMeta: Record<CockpitStatus, { label: string; title: string; description: string }> = {

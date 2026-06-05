@@ -57,6 +57,10 @@ class Settings(BaseSettings):
     # Default = 「内容生态数据产品知识库」(known agent's space).
     FEISHU_DEFAULT_WIKI_SPACE_ID: str = "7560912865739997187"
     FEISHU_DEFAULT_FOLDER_TOKEN: str = ""
+    # Default IM target for Feishu bot message delivery. receive_id_type can be
+    # chat_id/open_id/user_id/union_id/email. Agents may override per call.
+    FEISHU_DEFAULT_RECEIVE_ID: str = ""
+    FEISHU_DEFAULT_RECEIVE_ID_TYPE: str = "chat_id"
     # If non-empty, feishu_publish auto-grants this perm to:
     #   1. the task owner's xiaomi_email
     #   2. every active collaborator's xiaomi_email

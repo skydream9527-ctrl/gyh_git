@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import csv
 import io
+import re
 import uuid
 from datetime import datetime, timedelta, timezone
 
@@ -46,9 +47,18 @@ def _day(d: datetime) -> str:
     return d.strftime("%Y-%m-%d")
 
 
+def _strip_leading_comments(sql: str) -> str:
+    s = sql or ""
+    while True:
+        nxt = re.sub(r"^\s*(--[^\n]*(?:\n|$)|/\*.*?\*/)", "", s, count=1, flags=re.DOTALL)
+        if nxt == s:
+            return s.strip()
+        s = nxt
+
+
 def classify(sql: str) -> tuple[str, str | None]:
     """Return (decision, reason). decision in {allow, warn, block}."""
-    s = (sql or "").strip().upper()
+    s = _strip_leading_comments(sql).upper()
     if not s:
         return "block", "Empty SQL"
     first = s.split()[0] if s else ""
@@ -58,9 +68,9 @@ def classify(sql: str) -> tuple[str, str | None]:
         return "warn", f"{first} statement"
     if first in {"INSERT", "UPDATE", "CREATE", "ALTER", "GRANT", "REVOKE"}:
         return "block", f"DML/DDL not allowed: {first}"
-    if first == "SELECT":
+    if first in {"SELECT", "WITH"}:
         if "WHERE" not in s and "LIMIT" not in s:
-            return "warn", "SELECT without WHERE/LIMIT"
+            return "warn", f"{first} without WHERE/LIMIT"
         return "allow", None
     return "block", f"Unknown SQL type: {first[:32]}"
 

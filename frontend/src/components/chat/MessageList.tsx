@@ -177,6 +177,7 @@ export function MessageList({
 function RunTimeline({ events }: { events: RunEvent[] }) {
   const visible = events.slice(-8);
   const latest = visible[visible.length - 1];
+  const latestMeta = runEventVisualMeta(latest?.status || "running");
   const title =
     latest?.status === "done"
       ? "执行完成"
@@ -192,22 +193,36 @@ function RunTimeline({ events }: { events: RunEvent[] }) {
   return (
     <div className="run-timeline" aria-live="polite">
       <div className="run-timeline-head">
-        <span className={`run-status-dot ${latest?.status || "running"}`} />
+        <span
+          className={`run-status-dot ${latestMeta.className}`}
+          title={latestMeta.label}
+          aria-label={latestMeta.label}
+        />
         <span>{title}</span>
       </div>
       <ol className="run-timeline-list">
-        {visible.map((ev, idx) => (
-          <li key={`${ev.run_id}-${idx}-${ev.created_at}`} className={`run-event ${ev.status}`}>
-            <span className="run-event-mark" />
-            <span className="run-event-body">
-              <span className="run-event-label">{ev.label}</span>
-              {ev.detail && <span className="run-event-detail">{ev.detail}</span>}
-            </span>
-          </li>
-        ))}
+        {visible.map((ev, idx) => {
+          const meta = runEventVisualMeta(ev.status);
+          return (
+            <li key={`${ev.run_id}-${idx}-${ev.created_at}`} className={`run-event ${meta.className}`}>
+              <span className="run-event-mark" title={meta.label} aria-label={meta.label} />
+              <span className="run-event-body">
+                <span className="run-event-label">{ev.label}</span>
+                {ev.detail && <span className="run-event-detail">{ev.detail}</span>}
+              </span>
+            </li>
+          );
+        })}
       </ol>
     </div>
   );
+}
+
+function runEventVisualMeta(status: RunEvent["status"]): { className: string; label: string } {
+  if (status === "done") return { className: "is-complete", label: "已完成" };
+  if (status === "warning" || status === "waiting") return { className: "is-exception", label: "异常" };
+  if (status === "error" || status === "aborted") return { className: "is-alert", label: "告警" };
+  return { className: "is-running", label: "进行中" };
 }
 
 // ---- 轮次分组 ----------------------------------------------------------

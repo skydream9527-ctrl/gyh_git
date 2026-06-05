@@ -1,0 +1,37 @@
+{
+  "id": "djy-daily-report",
+  "name": "日报推送",
+  "paradigm": "data",
+  "icon": "🗞",
+  "color": "#e0b84f",
+  "description": "上传 SQL 自动查数 · AI 日报生成与飞书推送 · 都江堰内容池巡检/补跑/异常告警",
+  "publish_status": "published",
+  "prompt_layout": "v3",
+  "created_at": "2026-06-04T00:00:00+00:00",
+  "tools": [
+    "now",
+    "kyuubi_query",
+    "execute_python",
+    "write_file",
+    "read_file",
+    "list_files",
+    "feishu_send_message",
+    "feishu_upload_image",
+    "read_skill",
+    "todo_write",
+    "request_human_input",
+    "create_scheduled_task",
+    "exit_plan_mode",
+    "spawn_subagent",
+    "run_background"
+  ],
+  "model": null,
+  "spawn_targets": ["zijian-data-analysis", "data-analysis", "know"],
+  "skills": ["djy-pool-analysis", "kyuubi", "feishu", "nl-python", "text2html2png"],
+  "features": {
+    "todo_write": true,
+    "exit_plan_mode": true,
+    "spawn_subagent": true,
+    "run_background": true
+  }
+}

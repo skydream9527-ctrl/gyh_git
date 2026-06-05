@@ -36,6 +36,7 @@ read_skill(skill_id="<skill_id>", path="references/example.md")
 | 飞书结构化写作 | `feishu-pyramid-writer` | 用金字塔原理写汇报、复盘、方案、分析报告 |
 | 文本转图表 PNG | `text2html2png` | 画流程图、架构图、看板、漏斗、时间线等 |
 | 每日新闻收集分发 | `daily-news-collector` | 新闻摘要、科技日报、行业 newsletter、定时新闻 |
+| 都江堰内容池日报 | `djy-pool-analysis` | 上传 SQL 自动查数生成 AI 日报、内容池日报、CP 字段校验、消费分析、飞书推送 |
 | 定时日报发送 | `schedule-send` | 设置日报定时并写入飞书多维表格 |
 | datum 数据工场 CLI | `datum-cli` | 数据资产、DAG、Kestra、datum SQL / task 运维 |
 | Word 文档 | `docx` | 新建、修改、批注、提取 `.docx` |
@@ -50,6 +51,13 @@ read_skill(skill_id="<skill_id>", path="references/example.md")
 - **触发**：每日新闻、新闻摘要、科技日报、行业新闻收集、自动 newsletter、新闻定时任务。
 - **依赖**：通常需要 Tavily API / 可访问新闻源 / 定时任务能力。
 - **读取**：`read_skill(skill_id="daily-news-collector")`
+
+### `djy-pool-analysis`
+
+- **用途**：上传 SQL 自动查数生成 AI 日报、都江堰内容池日报、CP 字段校验、DAU 消费分析和创作者审核链路校验。
+- **触发**：上传 SQL 跑日报、自动查询生成日报、都江堰日报、内容池校验、CP 脏数据、日报推飞书、消费趋势、签约作者审核链路。
+- **依赖**：Kyuubi/DataWorks 查询环境、飞书凭证、HTML/PNG 生成环境；推送前必须确认目标和权限。
+- **读取**：`read_skill(skill_id="djy-pool-analysis")`
 
 ### `data.an`
 

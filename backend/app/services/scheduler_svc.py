@@ -19,7 +19,10 @@ log = logging.getLogger("scheduler")
 
 
 def _now() -> datetime:
-    return datetime.now(tz=timezone.utc)
+    # Cron expressions are authored from the product UI and prompts in the
+    # server's local timezone (Asia/Shanghai in this deployment), so compute
+    # next_fire_at against local time rather than UTC wall-clock hours.
+    return datetime.now().astimezone()
 
 
 def _now_iso() -> str:
@@ -86,6 +89,10 @@ def _sched_path(tid: str) -> Path:
 
 def _runs_path(tid: str, sid: str) -> Path:
     return get_paths().task_dir(tid) / "scheduled_runs" / f"{sid}.jsonl"
+
+
+def _transcript_path(tid: str, sid: str, run_id: str) -> Path:
+    return get_paths().task_dir(tid) / "scheduled_runs" / f"{sid}.{run_id}.transcript.jsonl"
 
 
 def list_for_task(tid: str) -> list[dict]:
@@ -185,7 +192,87 @@ def remove(task_id: str, sid: str, owner_id: str) -> None:
 
 def list_runs(task_id: str, sid: str, *, limit: int = 50) -> list[dict]:
     rows = read_jsonl(_runs_path(task_id, sid))
-    return rows[-limit:][::-1]
+    latest: dict[str, dict] = {}
+    order: list[str] = []
+    for row in rows:
+        rid = row.get("id")
+        if not rid:
+            continue
+        if rid not in latest:
+            order.append(rid)
+        latest[rid] = _normalize_run_status(task_id, sid, row)
+    compact = [latest[rid] for rid in order]
+    return compact[-limit:][::-1]
+
+
+def _normalize_run_status(task_id: str, sid: str, row: dict) -> dict:
+    """Decorate legacy successful Feishu runs that never actually sent."""
+    if row.get("status") != "success":
+        return row
+    prompt = row.get("prompt") or ""
+    if "feishu_send_message" not in prompt:
+        return row
+    if _tool_calls_include_feishu_sent(row.get("tool_calls") or []):
+        return row
+    run_id = row.get("id")
+    transcript = read_jsonl(_transcript_path(task_id, sid, run_id)) if run_id else []
+    if _transcript_include_feishu_sent(transcript):
+        return row
+    fixed = dict(row)
+    fixed["status"] = "failed"
+    fixed["error"] = fixed.get("error") or {
+        "code": "FEISHU_NOT_SENT",
+        "message": "历史执行记录显示成功，但未找到 feishu_send_message 的真实成功发送结果。",
+    }
+    return fixed
+
+
+def _tool_calls_include_feishu_sent(tool_calls: list) -> bool:
+    for call in tool_calls:
+        if not isinstance(call, dict) or call.get("name") != "feishu_send_message":
+            continue
+        result = call.get("result") or {}
+        if isinstance(result, dict) and result.get("sent"):
+            return True
+    return False
+
+
+def _transcript_include_feishu_sent(transcript: list[dict]) -> bool:
+    for event in transcript:
+        if event.get("event") != "tool_call" or event.get("name") != "feishu_send_message":
+            continue
+        result = event.get("result") or {}
+        if isinstance(result, dict) and result.get("sent"):
+            return True
+    return False
+
+
+def get_run_detail(task_id: str, sid: str, run_id: str) -> dict | None:
+    run = next((r for r in list_runs(task_id, sid, limit=500) if r.get("id") == run_id), None)
+    if not run:
+        return None
+    transcript_path = _transcript_path(task_id, sid, run_id)
+    transcript = read_jsonl(transcript_path) if transcript_path.exists() else []
+    return {
+        "run": _redact_sensitive(run),
+        "transcript": [_redact_sensitive(e) for e in transcript[-200:]],
+        "transcript_path": str(transcript_path) if transcript_path.exists() else None,
+    }
+
+
+def _redact_sensitive(value):
+    if isinstance(value, dict):
+        out = {}
+        for k, v in value.items():
+            lk = str(k).lower()
+            if lk in {"webhook_url", "sign_secret", "app_secret", "secret", "token", "authorization"}:
+                out[k] = "***"
+            else:
+                out[k] = _redact_sensitive(v)
+        return out
+    if isinstance(value, list):
+        return [_redact_sensitive(v) for v in value]
+    return value
 
 
 def summary_for_user(user_id: str) -> dict:
@@ -223,18 +310,62 @@ async def run_now(task_id: str, sid: str, owner_id: str) -> dict:
     rec = get_one(task_id, sid)
     if not rec:
         raise APIError(404, ErrorCode.RESOURCE_NOT_FOUND, "定时任务不存在")
-    return await _execute_run(task_id, rec, trigger="manual")
+    run_id = _new_id()
+    started = _now_iso()
+    run = {
+        "id": run_id,
+        "scheduled_id": sid,
+        "task_id": task_id,
+        "trigger": "manual",
+        "status": "running",
+        "started_at": started,
+        "ended_at": None,
+        "prompt": rec.get("prompt"),
+        "output": None,
+        "error": None,
+        "tokens": None,
+    }
+    append_jsonl(_runs_path(task_id, sid), run)
+    task = asyncio.create_task(
+        _execute_run(
+            task_id,
+            rec,
+            trigger="manual",
+            run_id=run_id,
+            started_at=started,
+            append_running=False,
+        )
+    )
+    _manual_run_tasks.add(task)
+    task.add_done_callback(_manual_run_tasks.discard)
+    return run
 
 
-async def _execute_run(task_id: str, rec: dict, *, trigger: str) -> dict:
+async def _execute_run(
+    task_id: str,
+    rec: dict,
+    *,
+    trigger: str,
+    run_id: str | None = None,
+    started_at: str | None = None,
+    append_running: bool = True,
+) -> dict:
     from ..core.config import get_settings
-    from . import llm_gateway, usage_svc
+    from . import (
+        agent_runtime,
+        agents_svc,
+        experience_card_svc,
+        llm_gateway,
+        sysconfig_svc,
+        tool_runner,
+        usage_svc,
+    )
     from ..core.storage import read_json, get_paths
 
     sid = rec["id"]
-    started = _now_iso()
+    started = started_at or _now_iso()
     run = {
-        "id": _new_id(),
+        "id": run_id or _new_id(),
         "scheduled_id": sid,
         "task_id": task_id,
         "trigger": trigger,
@@ -246,6 +377,8 @@ async def _execute_run(task_id: str, rec: dict, *, trigger: str) -> dict:
         "error": None,
         "tokens": None,
     }
+    if append_running:
+        append_jsonl(_runs_path(task_id, sid), run)
     try:
         if not get_settings().llm_enabled:
             run["status"] = "skipped"
@@ -256,30 +389,139 @@ async def _execute_run(task_id: str, rec: dict, *, trigger: str) -> dict:
         else:
             meta = read_json(get_paths().task_meta(task_id), default={}) or {}
             ws_cfg = read_json(get_paths().task_workspace(task_id), default={}) or {}
+            agent_id = meta.get("agent_id") or "biz-insight"
+            owner_id = rec.get("owner_id") or meta.get("owner_id")
             model_id = rec.get("model") or ws_cfg.get("model") or llm_gateway.resolve_model(None)
-            result = await llm_gateway.complete_once(
-                system_prompt="你是定时任务执行助手，按用户指令完成任务并简明输出结果。",
-                messages=[{"role": "user", "content": rec.get("prompt") or ""}],
-                model=model_id,
+            skill_ids = list(meta.get("skill_ids") or [])
+            tools = tool_runner.get_anthropic_tools(
+                feature_flags={
+                    "todo_write": agents_svc.get_agent_feature(agent_id, "todo_write", True),
+                    "exit_plan_mode": False,
+                    "spawn_subagent": False,
+                    "run_background": False,
+                },
+                tool_whitelist=agents_svc.get_agent_tools(agent_id),
+                disallowed_tools=agents_svc.get_agent_disallowed_tools(agent_id),
+                task_skill_ids=skill_ids,
             )
-            run["status"] = "success"
-            run["output"] = (result.get("text") or "")[:4000]
-            usage = result.get("usage") or {}
+            system_prompt = experience_card_svc.merged_system_prompt(
+                agent_id,
+                task_skill_ids=skill_ids,
+                callable_tool_names=[t["name"] for t in tools],
+                user_id=owner_id,
+                task_id=task_id,
+                query=rec.get("prompt") or "",
+            )
+            system_prompt = (
+                f"{system_prompt}\n\n---\n\n"
+                "你正在执行无人值守的定时任务。必须真实调用工具完成查询、文件生成、截图和外部发送；"
+                "不要把 `<tool_call>`、Python 代码块或计划当作执行结果输出。"
+                "如果 prompt 要求飞书推送，最终必须以 `feishu_send_message` 的真实工具结果为准。"
+            )
+            ctx = {
+                "user_id": owner_id,
+                "agent_id": agent_id,
+                "task_id": task_id,
+                "conversation_id": f"schedule::{sid}",
+                "run_id": run["id"],
+                "plan_mode": False,
+                "subagent_depth": 0,
+            }
+            sys_params = sysconfig_svc.get_system_params()
+            max_rounds = max(
+                1,
+                min(
+                    llm_gateway.MAX_TOOL_ROUNDS,
+                    int(sys_params.get("tool_call_max_rounds") or 20),
+                ),
+            )
+            agent_max_turns = agents_svc.get_agent_max_turns(agent_id)
+            if agent_max_turns is not None:
+                max_rounds = min(max_rounds, agent_max_turns)
+            initial_prompt = agents_svc.get_agent_initial_prompt(agent_id)
+            scheduled_prompt = rec.get("prompt") or ""
+            user_prompt = f"{initial_prompt}\n\n{scheduled_prompt}" if initial_prompt else scheduled_prompt
+            transcript = (
+                get_paths().task_dir(task_id)
+                / "scheduled_runs"
+                / f"{sid}.{run['id']}.transcript.jsonl"
+            )
+            result = await agent_runtime.run_agent_turn(
+                system_prompt=system_prompt,
+                initial_messages=[{"role": "user", "content": user_prompt}],
+                tools=tools,
+                ctx=ctx,
+                max_rounds=max_rounds,
+                model=model_id,
+                max_tokens=4096,
+                transcript_sink=transcript,
+            )
+            final_text = result.get("final_text") or ""
+            tool_uses = result.get("tool_uses_log") or []
+            required_feishu = "feishu_send_message" in scheduled_prompt
+            feishu_calls = [t for t in tool_uses if t.get("name") == "feishu_send_message"]
+            feishu_sent = any(
+                bool((t.get("result") or {}).get("sent"))
+                for t in feishu_calls
+                if isinstance(t.get("result"), dict)
+            )
+            if required_feishu and not feishu_sent:
+                run["status"] = "failed"
+                last_error = next(
+                    (
+                        t.get("error") or t.get("result")
+                        for t in reversed(feishu_calls)
+                        if t.get("error") or isinstance(t.get("result"), dict)
+                    ),
+                    None,
+                )
+                run["error"] = {
+                    "code": "FEISHU_NOT_SENT",
+                    "message": (
+                        "定时任务要求飞书推送，但没有真实成功发送。"
+                        f"工具结果：{str(last_error)[:300]}" if last_error else "定时任务要求飞书推送，但本次执行没有调用 feishu_send_message。"
+                    ),
+                }
+            elif required_feishu and not tool_uses:
+                run["status"] = "failed"
+                run["error"] = {
+                    "code": "NO_TOOLS_EXECUTED",
+                    "message": "定时任务只生成了文本，没有执行任何工具，因此没有完成日报发送。",
+                }
+            elif result.get("stop_reason") == "llm_error":
+                run["status"] = "failed"
+                run["error"] = {"code": "LLM_ERROR", "message": "定时任务 LLM 执行失败"}
+            else:
+                run["status"] = "success"
+            run["output"] = final_text[:4000]
+            run["tool_calls"] = [
+                {
+                    "name": t.get("name"),
+                    "success": t.get("success"),
+                    "status": t.get("status"),
+                    "error": t.get("error"),
+                    "result": t.get("result"),
+                }
+                for t in tool_uses[-20:]
+            ]
+            run["rounds"] = result.get("rounds")
+            run["stop_reason"] = result.get("stop_reason")
+            usage = result.get("usage_total") or {}
             run["tokens"] = {
                 "input": int(usage.get("input_tokens") or 0),
                 "output": int(usage.get("output_tokens") or 0),
             }
-            run["model"] = result.get("model")
+            run["model"] = model_id
             try:
                 await usage_svc.record_usage(
-                    user_id=meta.get("owner_id"),
-                    agent_id=meta.get("agent_id"),
+                    user_id=owner_id,
+                    agent_id=agent_id,
                     task_id=task_id,
                     conversation_id=None,
-                    model=result.get("model") or model_id,
+                    model=model_id,
                     input_tokens=int(usage.get("input_tokens") or 0),
                     output_tokens=int(usage.get("output_tokens") or 0),
-                    success=True,
+                    success=run["status"] == "success",
                 )
             except Exception as exc:
                 log.warning("scheduler record_usage failed: %s", exc)
@@ -304,6 +546,7 @@ async def _execute_run(task_id: str, rec: dict, *, trigger: str) -> dict:
 # ---- background loop ----
 
 _loop_task: asyncio.Task | None = None
+_manual_run_tasks: set[asyncio.Task] = set()
 # Leader-election state. With uvicorn --workers=N each worker calls start_loop()
 # at lifespan startup; without coordination the same scheduled task fires N
 # times. We use a non-blocking flock on .cache/scheduler.leader.lock — only the

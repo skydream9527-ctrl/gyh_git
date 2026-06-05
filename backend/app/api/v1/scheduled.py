@@ -114,3 +114,12 @@ async def run_now(task_id: str, sid: str, user: dict = Depends(get_current_user)
 async def list_runs(task_id: str, sid: str, user: dict = Depends(get_current_user)):
     await task_svc.get_task(task_id, user["id"])
     return ok({"items": scheduler_svc.list_runs(task_id, sid)})
+
+
+@router.get("/by-task/{task_id}/{sid}/runs/{run_id}")
+async def get_run_detail(task_id: str, sid: str, run_id: str, user: dict = Depends(get_current_user)):
+    await task_svc.get_task(task_id, user["id"])
+    detail = scheduler_svc.get_run_detail(task_id, sid, run_id)
+    if not detail:
+        raise APIError(404, ErrorCode.RESOURCE_NOT_FOUND, "执行记录不存在")
+    return ok(detail)

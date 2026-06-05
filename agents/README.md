@@ -14,6 +14,7 @@
 | `know/` | 知识库 Agent | published | 飞书知识空间使用、维护、归档 |
 | `volcano-abtest/` | 火山实验分析 | published | 火山 ABtest 查询与报告 |
 | `zijian-data-analysis/` | 自建数据分析 | published | 都江堰自建信息流分析 |
+| `djy-daily-report/` | 日报推送 | published | 都江堰内容池日报生成、补跑、飞书推送与异常告警 |
 | `biz-insight/` | 经营洞察 Agent | coming_soon | 经营报告与洞察 |
 | `wave-attribution/` | 波动归因 Agent | coming_soon | 指标异动归因 |
 

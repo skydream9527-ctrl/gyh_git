@@ -547,8 +547,18 @@ select {
   color: var(--warning);
   border: 1px solid rgba(176, 125, 42, 0.2);
 }
+.v6-badge-running {
+  background: rgba(37, 99, 235, 0.1);
+  color: #1d4ed8;
+  border: 1px solid rgba(37, 99, 235, 0.2);
+}
 .v6-badge-success {
   background: rgba(90, 122, 79, 0.1);
   color: var(--success);
   border: 1px solid rgba(90, 122, 79, 0.2);
+}
+.v6-badge-error {
+  background: rgba(185, 28, 28, 0.1);
+  color: #b91c1c;
+  border: 1px solid rgba(185, 28, 28, 0.2);
 }

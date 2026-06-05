@@ -39,6 +39,7 @@ const AGENT_ORDER = [
   "know",
   "gray-release",
   "volcano-abtest",
+  "djy-daily-report",
   // 待上线
   "biz-insight",
   "wave-attribution",

@@ -221,22 +221,25 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--primary);
-  box-shadow: 0 0 0 3px var(--primary-dim);
+  flex: 0 0 auto;
+  background: #fff;
+  border: 1px solid color-mix(in srgb, var(--border-strong, var(--border)) 80%, #fff);
+  box-shadow: 0 0 0 3px color-mix(in srgb, #fff 55%, transparent);
 }
-.run-status-dot.done {
+.run-status-dot.is-complete {
   background: var(--success);
+  border-color: color-mix(in srgb, var(--success) 72%, #fff);
   box-shadow: 0 0 0 3px var(--success-dim);
 }
-.run-status-dot.error,
-.run-status-dot.aborted {
-  background: var(--error);
-  box-shadow: 0 0 0 3px var(--error-dim);
-}
-.run-status-dot.warning,
-.run-status-dot.waiting {
+.run-status-dot.is-exception {
   background: var(--warning);
+  border-color: color-mix(in srgb, var(--warning) 72%, #fff);
   box-shadow: 0 0 0 3px var(--warning-dim);
+}
+.run-status-dot.is-alert {
+  background: var(--error);
+  border-color: color-mix(in srgb, var(--error) 72%, #fff);
+  box-shadow: 0 0 0 3px var(--error-dim);
 }
 .run-timeline-list {
   list-style: none;
@@ -257,18 +260,20 @@
   height: 6px;
   margin-top: 7px;
   border-radius: 50%;
-  background: var(--border-strong, var(--border));
+  background: #fff;
+  border: 1px solid color-mix(in srgb, var(--border-strong, var(--border)) 80%, #fff);
 }
-.run-event.done .run-event-mark {
+.run-event.is-complete .run-event-mark {
   background: var(--success);
+  border-color: color-mix(in srgb, var(--success) 72%, #fff);
 }
-.run-event.error .run-event-mark,
-.run-event.aborted .run-event-mark {
-  background: var(--error);
-}
-.run-event.warning .run-event-mark,
-.run-event.waiting .run-event-mark {
+.run-event.is-exception .run-event-mark {
   background: var(--warning);
+  border-color: color-mix(in srgb, var(--warning) 72%, #fff);
+}
+.run-event.is-alert .run-event-mark {
+  background: var(--error);
+  border-color: color-mix(in srgb, var(--error) 72%, #fff);
 }
 .run-event-body {
   min-width: 0;

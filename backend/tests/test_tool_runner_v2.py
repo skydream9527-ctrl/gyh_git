@@ -66,6 +66,26 @@ def test_get_anthropic_tools_feature_flags():
     assert "write_file" in names
 
 
+def test_feishu_send_message_schema_supports_webhook():
+    schema = next(
+        t["function"]["parameters"]
+        for t in tool_runner.BUILTIN_TOOL_SCHEMAS
+        if t["function"]["name"] == "feishu_send_message"
+    )
+    props = schema["properties"]
+    assert "webhook_url" in props
+    assert "sign_secret" in props
+
+
+@pytest.mark.asyncio
+async def test_daily_report_requires_feishu_webhook():
+    r = await tool_runner._tool_feishu_send_message(
+        {"title": "日报", "content": "hello"},
+        ctx={"agent_id": "djy-daily-report"},
+    )
+    assert r["error_code"] == "FEISHU_WEBHOOK_REQUIRED"
+
+
 @pytest.mark.asyncio
 async def test_execute_tool_plan_mode_blocks_writes(isolated_data_root):
     """ctx.plan_mode=True blocks any tool whose _meta.plan_mode_allowed=False."""

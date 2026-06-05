@@ -11,12 +11,17 @@ Tools available regardless of which Agent the conversation is bound to:
 from __future__ import annotations
 
 import asyncio
+import base64
 import copy
+import hashlib
+import hmac
 import json
 import os
+import time
 import uuid
 from datetime import datetime, timezone
 from typing import Any
+from urllib.parse import urlparse
 
 from ..core.config import get_settings
 from ..core.errors import ErrorCode
@@ -334,6 +339,89 @@ BUILTIN_TOOL_SCHEMAS: list[dict] = [
             "parallel_safe": True,
             "plan_mode_allowed": True,
             "subagent_exposable": True,
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "feishu_send_message",
+            "description": (
+                "Send a Feishu bot message, not a document. Prefer custom bot "
+                "webhook delivery for 日报推送 / 发群: pass webhook_url and "
+                "optional sign_secret. If webhook_url is omitted, this falls "
+                "back to app IM delivery with FEISHU_APP_ID + FEISHU_APP_SECRET "
+                "and receive_id. For the 日报推送 agent, webhook_url is required. "
+                "Return the Feishu API result; include success/failure in reply."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "description": "Card title, e.g. 内容生态数据日报 - 2026-06-03.",
+                    },
+                    "content": {
+                        "type": "string",
+                        "description": "Message body in Feishu lark_md markdown. Keep it concise when image_path is provided.",
+                    },
+                    "image_path": {
+                        "type": "string",
+                        "description": (
+                            "Optional PNG/JPG path relative to <task_workspace>/files/output/, "
+                            "e.g. 'daily_report_preview.png'. When provided, the image is "
+                            "uploaded as a Feishu message image and embedded in the bot card."
+                        ),
+                    },
+                    "html_url": {
+                        "type": "string",
+                        "description": (
+                            "Optional absolute URL to the HTML report. When provided, the card "
+                            "adds a visible link to open the full HTML report."
+                        ),
+                    },
+                    "webhook_url": {
+                        "type": "string",
+                        "description": (
+                            "Feishu custom bot webhook URL, e.g. "
+                            "https://open.feishu.cn/open-apis/bot/v2/hook/..."
+                        ),
+                    },
+                    "sign_secret": {
+                        "type": "string",
+                        "description": (
+                            "Optional Feishu custom bot signing secret. Do not echo it back."
+                        ),
+                    },
+                    "receive_id": {
+                        "type": "string",
+                        "description": (
+                            "App IM target id. Optional if FEISHU_DEFAULT_RECEIVE_ID is configured. "
+                            "Ignored when webhook_url is provided."
+                        ),
+                    },
+                    "receive_id_type": {
+                        "type": "string",
+                        "enum": ["chat_id", "open_id", "user_id", "union_id", "email"],
+                        "description": (
+                            "App IM target id type. Defaults to FEISHU_DEFAULT_RECEIVE_ID_TYPE or chat_id. "
+                            "Ignored when webhook_url is provided."
+                        ),
+                    },
+                    "template": {
+                        "type": "string",
+                        "enum": ["blue", "green", "red", "yellow", "grey", "purple"],
+                        "description": "Feishu card header color template. Defaults to blue.",
+                    },
+                },
+                "required": ["title", "content"],
+            },
+        },
+        "_meta": {
+            "display_name": "发送飞书消息",
+            "side_effect": "network",
+            "parallel_safe": False,
+            "plan_mode_allowed": False,
+            "subagent_exposable": False,
         },
     },
     {
@@ -776,6 +864,53 @@ BUILTIN_TOOL_SCHEMAS: list[dict] = [
             "parallel_safe": True,
             "plan_mode_allowed": False,
             "subagent_exposable": False,  # prevents recursion
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "create_scheduled_task",
+            "description": (
+                "Create a persistent cron schedule for the current task. "
+                "Use only after the user has confirmed the schedule, cadence, "
+                "and delivery target. The schedule will appear in the task's "
+                "Scheduled tab and in the global scheduled task dashboard."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string", "description": "Human-readable schedule name."},
+                    "cron": {
+                        "type": "string",
+                        "description": "Standard 5-field cron expression: minute hour day month weekday.",
+                    },
+                    "prompt": {
+                        "type": "string",
+                        "description": "Full instruction prompt to execute every time the cron fires.",
+                    },
+                    "model": {
+                        "type": "string",
+                        "description": "Optional model id for scheduled execution.",
+                    },
+                    "enabled": {
+                        "type": "boolean",
+                        "description": "Whether the schedule is enabled immediately. Defaults to true.",
+                    },
+                    "todo_list": {
+                        "type": "array",
+                        "description": "Optional short execution checklist for the scheduled run.",
+                        "items": {"type": "string"},
+                    },
+                },
+                "required": ["name", "cron", "prompt"],
+            },
+        },
+        "_meta": {
+            "display_name": "创建定时任务",
+            "side_effect": "write",
+            "parallel_safe": False,
+            "plan_mode_allowed": False,
+            "subagent_exposable": False,
         },
     },
     {
@@ -1515,6 +1650,7 @@ async def _tool_feishu_publish(args: dict, ctx: dict | None = None) -> Any:
     import tempfile
     from pathlib import Path
 
+    task_id = (ctx or {}).get("task_id")
     title = (args.get("title") or "").strip()
     markdown = args.get("markdown") or ""
     if not title:
@@ -1657,6 +1793,309 @@ async def _tool_feishu_publish(args: dict, ctx: dict | None = None) -> Any:
         "perm_grants": perm_results,
         "perm_warnings": perm_warnings or None,
         "warning": err_s.strip() if proc.returncode in (2, 3) else None,
+    }
+
+
+async def _tool_feishu_send_message(args: dict, ctx: dict | None = None) -> Any:
+    import httpx
+    from ..core.storage.paths import get_paths
+
+    task_id = (ctx or {}).get("task_id")
+    is_daily_report_agent = (ctx or {}).get("agent_id") == "djy-daily-report"
+    title = (args.get("title") or "").strip()
+    content = (args.get("content") or "").strip()
+    if not title or not content:
+        return {"error_code": "VALIDATION_ERROR", "message": "title and content are required"}
+
+    settings = get_settings()
+    receive_id = (args.get("receive_id") or settings.FEISHU_DEFAULT_RECEIVE_ID or "").strip()
+    receive_id_type = (
+        args.get("receive_id_type") or settings.FEISHU_DEFAULT_RECEIVE_ID_TYPE or "chat_id"
+    ).strip()
+    webhook_url = (args.get("webhook_url") or "").strip()
+    sign_secret = (args.get("sign_secret") or "").strip()
+    image_path = (args.get("image_path") or "").strip()
+    html_url = (args.get("html_url") or "").strip()
+    template = (args.get("template") or "blue").strip()
+    if template not in {"blue", "green", "red", "yellow", "grey", "purple"}:
+        template = "blue"
+
+    duplicate_cache_path = None
+    duplicate_sig = ""
+    if is_daily_report_agent and webhook_url:
+        if not image_path or not html_url:
+            return {
+                "error_code": "DAILY_REPORT_FORMAT_REQUIRED",
+                "message": (
+                    "日报推送到飞书群必须使用 HTML 截图 + HTML 链接："
+                    "请先生成 daily_report_preview.html 和 daily_report_preview.png，"
+                    "再传 image_path='daily_report_preview.png' 与 html_url；"
+                    "禁止直接推送整份 Markdown。"
+                ),
+            }
+        table_lines = sum(1 for line in content.splitlines() if line.strip().startswith("|"))
+        heading_lines = sum(1 for line in content.splitlines() if line.lstrip().startswith("#"))
+        if len(content) > 1200 or table_lines >= 3 or heading_lines >= 2:
+            return {
+                "error_code": "DAILY_REPORT_SUMMARY_TOO_LONG",
+                "message": (
+                    "日报飞书消息正文只能放 3-6 行摘要，完整内容请放在 HTML 截图和 HTML 链接中；"
+                    "不要把整份 Markdown 表格作为 content 发送。"
+                ),
+            }
+        if task_id:
+            dedupe_payload = {
+                "title": title,
+                "content": content,
+                "webhook_url": webhook_url,
+                "image_path": image_path,
+                "html_url": html_url,
+            }
+            duplicate_sig = hashlib.sha256(
+                json.dumps(dedupe_payload, ensure_ascii=False, sort_keys=True).encode("utf-8")
+            ).hexdigest()
+            duplicate_cache_path = get_paths().task_dir(task_id) / ".feishu_send_dedupe.json"
+            try:
+                duplicate_cache = json.loads(duplicate_cache_path.read_text(encoding="utf-8"))
+            except Exception:
+                duplicate_cache = {}
+            if (
+                duplicate_cache.get("signature") == duplicate_sig
+                and time.time() - float(duplicate_cache.get("sent_at", 0)) < 120
+            ):
+                return {
+                    "sent": False,
+                    "duplicate_suppressed": True,
+                    "message": "检测到 120 秒内完全相同的日报飞书消息，已阻止重复发送。",
+                    "html_url": html_url or None,
+                }
+
+    host = (settings.FEISHU_HOST or "https://open.feishu.cn").rstrip("/")
+    image_key = ""
+    if image_path:
+        if not task_id:
+            return {"error_code": "VALIDATION_ERROR", "message": "image_path needs a task context"}
+        paths = get_paths()
+        out_root = paths.task_files_output(task_id).resolve()
+        candidate = (out_root / image_path).resolve()
+        try:
+            candidate.relative_to(out_root)
+        except ValueError:
+            return {
+                "error_code": "PATH_OUTSIDE_TASK_WORKSPACE",
+                "message": f"image_path must be under {out_root}",
+            }
+        if not candidate.is_file():
+            return {"error_code": "FILE_NOT_FOUND", "message": f"image not found: {image_path}"}
+        if candidate.suffix.lower() not in {".png", ".jpg", ".jpeg"}:
+            return {"error_code": "VALIDATION_ERROR", "message": "image_path must be PNG/JPG"}
+        if candidate.stat().st_size > 10 * 1024 * 1024:
+            return {"error_code": "IMAGE_TOO_LARGE", "message": f"image > 10MB: {image_path}"}
+        if not settings.FEISHU_APP_ID or not settings.FEISHU_APP_SECRET:
+            return {
+                "error_code": "FEISHU_APP_CREDENTIAL_REQUIRED",
+                "message": "发送图片需要 FEISHU_APP_ID / FEISHU_APP_SECRET 用于上传消息图片",
+            }
+        async with httpx.AsyncClient(timeout=30) as cli:
+            token_resp = await cli.post(
+                f"{host}/open-apis/auth/v3/tenant_access_token/internal",
+                json={"app_id": settings.FEISHU_APP_ID, "app_secret": settings.FEISHU_APP_SECRET},
+            )
+            try:
+                token_data = token_resp.json()
+            except Exception:
+                token_data = {"raw": token_resp.text[:300]}
+            if token_resp.status_code >= 400 or token_data.get("code") not in (0, "0", None):
+                return {
+                    "error_code": "FEISHU_TOKEN_FAILED",
+                    "message": str(token_data)[:800],
+                }
+            token = token_data.get("tenant_access_token")
+            if not token:
+                return {"error_code": "FEISHU_TOKEN_FAILED", "message": "tenant_access_token is empty"}
+            mime = "image/png" if candidate.suffix.lower() == ".png" else "image/jpeg"
+            with candidate.open("rb") as fh:
+                img_resp = await cli.post(
+                    f"{host}/open-apis/im/v1/images",
+                    headers={"Authorization": f"Bearer {token}"},
+                    data={"image_type": "message"},
+                    files={"image": (candidate.name, fh, mime)},
+                )
+            try:
+                img_data = img_resp.json()
+            except Exception:
+                img_data = {"raw": img_resp.text[:300]}
+            if img_resp.status_code >= 400 or img_data.get("code") not in (0, "0", None):
+                return {
+                    "error_code": "FEISHU_IMAGE_UPLOAD_FAILED",
+                    "message": str(img_data)[:800],
+                }
+            image_key = ((img_data.get("data") or {}).get("image_key") or "").strip()
+            if not image_key:
+                return {"error_code": "FEISHU_IMAGE_UPLOAD_FAILED", "message": "image_key is empty"}
+
+    elements: list[dict[str, Any]] = []
+    if image_key:
+        elements.append({
+            "tag": "img",
+            "img_key": image_key,
+            "alt": {"tag": "plain_text", "content": title},
+        })
+    card_content = content
+    if html_url:
+        card_content = f"{card_content}\n\n[打开 HTML 报告]({html_url})"
+    elements.append({
+        "tag": "div",
+        "text": {"tag": "lark_md", "content": card_content},
+    })
+
+    card = {
+        "header": {
+            "title": {"tag": "plain_text", "content": title},
+            "template": template,
+        },
+        "elements": elements,
+    }
+
+    if webhook_url:
+        parsed = urlparse(webhook_url)
+        allowed_hosts = {"open.feishu.cn"}
+        configured_host = urlparse(settings.FEISHU_HOST or "").netloc
+        if configured_host:
+            allowed_hosts.add(configured_host)
+        if (
+            parsed.scheme != "https"
+            or parsed.netloc not in allowed_hosts
+            or not parsed.path.startswith("/open-apis/bot/v2/hook/")
+        ):
+            return {
+                "error_code": "FEISHU_WEBHOOK_INVALID",
+                "message": "飞书机器人 Webhook 必须是 https://open.feishu.cn/open-apis/bot/v2/hook/... 格式",
+            }
+        payload: dict[str, Any] = {
+            "msg_type": "interactive",
+            "card": card,
+        }
+        if sign_secret:
+            timestamp = str(int(time.time()))
+            string_to_sign = f"{timestamp}\n{sign_secret}"
+            sign = base64.b64encode(
+                hmac.new(string_to_sign.encode("utf-8"), b"", digestmod=hashlib.sha256).digest()
+            ).decode("utf-8")
+            payload["timestamp"] = timestamp
+            payload["sign"] = sign
+        async with httpx.AsyncClient(timeout=15) as cli:
+            resp = await cli.post(webhook_url, json=payload)
+        if resp.status_code >= 400:
+            return {
+                "error_code": "FEISHU_WEBHOOK_HTTP_ERROR",
+                "message": resp.text[:800],
+            }
+        try:
+            data = resp.json()
+        except Exception:
+            data = {"raw": resp.text[:800]}
+        code = data.get("code") or data.get("StatusCode")
+        if code not in ("0", 0, None):
+            return {
+                "error_code": "FEISHU_WEBHOOK_FAILED",
+                "message": str(data)[:800],
+            }
+        if duplicate_cache_path and duplicate_sig:
+            try:
+                duplicate_cache_path.write_text(
+                    json.dumps(
+                        {"signature": duplicate_sig, "sent_at": time.time()},
+                        ensure_ascii=False,
+                    ),
+                    encoding="utf-8",
+                )
+            except Exception:
+                pass
+        return {
+            "sent": True,
+            "delivery": "webhook",
+            "webhook": parsed.path.rsplit("/", 1)[-1][:8] + "***",
+            "image_embedded": bool(image_key),
+            "html_url": html_url or None,
+            "raw": data,
+        }
+
+    if (ctx or {}).get("agent_id") == "djy-daily-report":
+        return {
+            "error_code": "FEISHU_WEBHOOK_REQUIRED",
+            "message": (
+                "日报推送必须使用用户提供的飞书机器人 Webhook 地址；"
+                "请传 webhook_url，可选传 sign_secret。"
+            ),
+        }
+
+    if not settings.FEISHU_APP_ID or not settings.FEISHU_APP_SECRET:
+        return {
+            "error_code": "FEISHU_NOT_CONFIGURED",
+            "message": "缺少 FEISHU_APP_ID / FEISHU_APP_SECRET，无法发送飞书消息",
+        }
+
+    if not receive_id:
+        return {
+            "error_code": "FEISHU_RECEIVE_ID_MISSING",
+            "message": "缺少飞书消息接收目标：请传 receive_id 或配置 FEISHU_DEFAULT_RECEIVE_ID",
+        }
+    if receive_id_type not in {"chat_id", "open_id", "user_id", "union_id", "email"}:
+        return {"error_code": "VALIDATION_ERROR", "message": f"invalid receive_id_type: {receive_id_type}"}
+
+    async with httpx.AsyncClient(timeout=15) as cli:
+        token_resp = await cli.post(
+            f"{host}/open-apis/auth/v3/tenant_access_token/internal",
+            json={"app_id": settings.FEISHU_APP_ID, "app_secret": settings.FEISHU_APP_SECRET},
+        )
+        if token_resp.status_code >= 400:
+            return {
+                "error_code": "FEISHU_TOKEN_HTTP_ERROR",
+                "message": token_resp.text[:500],
+            }
+        token_data = token_resp.json()
+        if token_data.get("code") != 0:
+            return {
+                "error_code": "FEISHU_TOKEN_FAILED",
+                "message": str(token_data)[:500],
+            }
+        token = token_data.get("tenant_access_token")
+        if not token:
+            return {"error_code": "FEISHU_TOKEN_FAILED", "message": "tenant_access_token is empty"}
+
+        msg_resp = await cli.post(
+            f"{host}/open-apis/im/v1/messages",
+            params={"receive_id_type": receive_id_type},
+            headers={"Authorization": f"Bearer {token}"},
+            json={
+                "receive_id": receive_id,
+                "msg_type": "interactive",
+                "content": json.dumps(card, ensure_ascii=False),
+            },
+        )
+    if msg_resp.status_code >= 400:
+        return {
+            "error_code": "FEISHU_MESSAGE_HTTP_ERROR",
+            "message": msg_resp.text[:800],
+            "receive_id_type": receive_id_type,
+        }
+    data = msg_resp.json()
+    if data.get("code") != 0:
+        return {
+            "error_code": "FEISHU_MESSAGE_FAILED",
+            "message": str(data)[:800],
+            "receive_id_type": receive_id_type,
+        }
+    return {
+        "sent": True,
+        "delivery": "app_im",
+        "receive_id_type": receive_id_type,
+        "receive_id": receive_id,
+        "message_id": (data.get("data") or {}).get("message_id"),
+        "image_embedded": bool(image_key),
+        "html_url": html_url or None,
+        "raw": data,
     }
 
 
@@ -2260,6 +2699,45 @@ async def _tool_request_human_input(args: dict, ctx: dict | None = None) -> Any:
     return {"waiting_for_human": True, "request": req}
 
 
+async def _tool_create_scheduled_task(args: dict, ctx: dict | None = None) -> Any:
+    from . import scheduler_svc
+
+    task_id = (ctx or {}).get("task_id")
+    user_id = (ctx or {}).get("user_id")
+    if not task_id or not user_id:
+        return {"error_code": "VALIDATION_ERROR", "message": "create_scheduled_task needs task + user"}
+
+    name = (args.get("name") or "").strip()
+    cron = (args.get("cron") or "").strip()
+    prompt = (args.get("prompt") or "").strip()
+    if not name or not cron or not prompt:
+        return {"error_code": "VALIDATION_ERROR", "message": "name, cron and prompt are required"}
+
+    body = {
+        "name": name,
+        "cron": cron,
+        "prompt": prompt,
+        "enabled": args.get("enabled", True),
+        "model": args.get("model") or None,
+        "todo_list": args.get("todo_list") if isinstance(args.get("todo_list"), list) else [],
+        "channels": args.get("channels") if isinstance(args.get("channels"), list) else ["in_app"],
+    }
+    try:
+        rec = scheduler_svc.create(task_id=task_id, owner_id=user_id, body=body)
+    except Exception as exc:
+        return {"error_code": "SCHEDULE_CREATE_FAILED", "message": str(exc)[:300]}
+
+    emit = (ctx or {}).get("emit_event")
+    if callable(emit):
+        try:
+            maybe = emit({"type": "scheduled_task_created", "schedule": rec})
+            if asyncio.iscoroutine(maybe):
+                await maybe
+        except Exception:
+            pass
+    return {"scheduled_task": rec}
+
+
 async def _tool_spawn_subagent(args: dict, ctx: dict | None = None) -> Any:
     """Run a bounded sub-agent and return only its final text."""
     import uuid
@@ -2494,6 +2972,7 @@ _DISPATCH = {
     "execute_python": _tool_execute_python,
     "list_files": _tool_list_files,
     "read_file": _tool_read_file,
+    "feishu_send_message": _tool_feishu_send_message,
     "feishu_publish": _tool_feishu_publish,
     "volcano_abtest_analyze": _tool_volcano_abtest_analyze,
     "feishu_upload_image": _tool_feishu_upload_image,
@@ -2504,6 +2983,7 @@ _DISPATCH = {
     "task_state_save": _tool_task_state_save,
     "todo_write": _tool_todo_write,
     "request_human_input": _tool_request_human_input,
+    "create_scheduled_task": _tool_create_scheduled_task,
     "exit_plan_mode": _tool_exit_plan_mode,
     "spawn_subagent": _tool_spawn_subagent,
     "run_background": _tool_run_background,

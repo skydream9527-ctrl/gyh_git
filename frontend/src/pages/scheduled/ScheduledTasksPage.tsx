@@ -10,14 +10,17 @@ import { useBackdropClose } from "@/hooks/useBackdropClose";
 import { clickIgnoreSelection } from "@/utils/click";
 import { ModelSelector } from "@/components/chat/ModelSelector";
 import { scheduledApi, taskApi } from "@/api/endpoints";
-import type { ScheduledRun, ScheduledTask } from "@/api/endpoints";
+import type { ScheduledRun, ScheduledRunDetail, ScheduledTask } from "@/api/endpoints";
 import type { TaskSummary } from "@/types/api";
 import { useUIStore } from "@/stores/uiStore";
 import "./Scheduled.css";
 
 export function ScheduledTasksPage() {
   const [params] = useSearchParams();
-  const filterTaskId = params.get("taskId");
+  const filterTaskId = params.get("taskId") || params.get("task_id");
+  const openCreateOnLoad = params.get("create") === "1";
+  const detailScheduleId = params.get("scheduleId") || "";
+  const detailRunId = params.get("runId") || "";
   const navigate = useNavigate();
   const pushToast = useUIStore((s) => s.pushToast);
 
@@ -31,6 +34,10 @@ export function ScheduledTasksPage() {
   const [editing, setEditing] = useState<ScheduledTask | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<ScheduledTask | null>(null);
   const [expandedRuns, setExpandedRuns] = useState<Record<string, ScheduledRun[]>>({});
+  const [detailItem, setDetailItem] = useState<ScheduledTask | null>(null);
+  const [detailRuns, setDetailRuns] = useState<ScheduledRun[]>([]);
+  const [detail, setDetail] = useState<ScheduledRunDetail | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
   const [summary, setSummary] = useState<{
     enabled: number;
     paused: number;
@@ -52,8 +59,49 @@ export function ScheduledTasksPage() {
   useEffect(() => {
     void reload();
     taskApi.list().then((r) => setTasks(r.items)).catch(() => {});
+    if (filterTaskId && openCreateOnLoad) setShowCreate(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filterTaskId]);
+  }, [filterTaskId, openCreateOnLoad]);
+
+  useEffect(() => {
+    if (!detailScheduleId) {
+      setDetailItem(null);
+      setDetailRuns([]);
+      setDetail(null);
+      return;
+    }
+    let cancelled = false;
+    const load = async () => {
+      const source = items.find((s) => s.id === detailScheduleId);
+      if (!source) return;
+      setDetailItem(source);
+      setDetailLoading(true);
+      try {
+        const runsResp = await scheduledApi.listRuns(source.task_id, source.id);
+        if (cancelled) return;
+        setDetailRuns(runsResp.items);
+        const targetRun = detailRunId
+          ? runsResp.items.find((r) => r.id === detailRunId)
+          : runsResp.items[0];
+        if (targetRun) {
+          const d = await scheduledApi.getRunDetail(source.task_id, source.id, targetRun.id);
+          if (!cancelled) setDetail(d);
+        } else if (!cancelled) {
+          setDetail(null);
+        }
+      } catch (err) {
+        if (!cancelled) pushToast("error", (err as Error).message);
+      } finally {
+        if (!cancelled) setDetailLoading(false);
+      }
+    };
+    void load();
+    const t = window.setInterval(load, 5000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(t);
+    };
+  }, [detailScheduleId, detailRunId, items, pushToast]);
 
   const filtered = useMemo(
     () =>
@@ -83,9 +131,10 @@ export function ScheduledTasksPage() {
     try {
       pushToast("info", `正在执行 ${s.name}…`);
       const run = await scheduledApi.runNow(s.task_id, s.id);
+      navigate(`/scheduled-tasks?taskId=${encodeURIComponent(s.task_id)}&scheduleId=${encodeURIComponent(s.id)}&runId=${encodeURIComponent(run.id)}`);
       pushToast(
-        run.status === "success" ? "success" : "warning",
-        `执行${run.status === "success" ? "成功" : "结束"}：${run.status}`,
+        run.status === "running" ? "info" : run.status === "success" ? "success" : "warning",
+        run.status === "running" ? "已开始执行，正在进入详情页" : `执行结束：${run.status}`,
       );
       await reload();
     } catch (err) {
@@ -106,6 +155,10 @@ export function ScheduledTasksPage() {
     } catch (err) {
       pushToast("error", (err as Error).message);
     }
+  };
+
+  const openDetail = async (s: ScheduledTask, runId?: string) => {
+    navigate(`/scheduled-tasks?taskId=${encodeURIComponent(s.task_id)}&scheduleId=${encodeURIComponent(s.id)}${runId ? `&runId=${encodeURIComponent(runId)}` : ""}`);
   };
 
   const remove = async (s: ScheduledTask) => {
@@ -206,6 +259,7 @@ export function ScheduledTasksPage() {
                   <div className="sc-card-name">{s.name}</div>
                   <div className="sc-card-actions">
                     <button onClick={() => runNow(s)}>▶ 立即执行</button>
+                    <button onClick={() => openDetail(s)}>查看进度</button>
                     <button onClick={() => toggle(s)}>{s.enabled ? "⏸ 暂停" : "▶ 恢复"}</button>
                     <button onClick={() => setEditing(s)}>✏ 编辑</button>
                     <button onClick={() => setConfirmDelete(s)} className="danger">🗑 删除</button>
@@ -242,6 +296,7 @@ export function ScheduledTasksPage() {
                   <button onClick={() => expand(s)}>
                     {expandedRuns[s.id] ? "收起" : "查看"}执行历史
                   </button>
+                  <button onClick={() => openDetail(s)}>进入详情页</button>
                 </div>
                 {expandedRuns[s.id] && (
                   <div className="sc-runs">
@@ -256,6 +311,17 @@ export function ScheduledTasksPage() {
                           <span style={{ color: "var(--text-muted)", marginLeft: "auto" }}>
                             {r.trigger}
                           </span>
+                          <button
+                            type="button"
+                            className="sc-run-detail-btn"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              void openDetail(s, r.id);
+                            }}
+                          >
+                            详情
+                          </button>
                         </summary>
                         <div className="sc-run-body">
                           <div>
@@ -293,6 +359,19 @@ export function ScheduledTasksPage() {
             ))}
           </div>
         )}
+        {detailScheduleId && (
+          <ScheduleRunDetailPanel
+            item={detailItem}
+            runs={detailRuns}
+            detail={detail}
+            loading={detailLoading}
+            onClose={() => navigate(filterTaskId ? `/scheduled-tasks?taskId=${encodeURIComponent(filterTaskId)}` : "/scheduled-tasks")}
+            onSelectRun={(runId) => {
+              if (!detailItem) return;
+              navigate(`/scheduled-tasks?taskId=${encodeURIComponent(detailItem.task_id)}&scheduleId=${encodeURIComponent(detailItem.id)}&runId=${encodeURIComponent(runId)}`);
+            }}
+          />
+        )}
         </main>
       </div>
 
@@ -300,6 +379,7 @@ export function ScheduledTasksPage() {
         <ScheduleEditModal
           tasks={tasks}
           existing={editing}
+          initialTaskId={filterTaskId}
           onClose={() => {
             setShowCreate(false);
             setEditing(null);
@@ -321,6 +401,113 @@ export function ScheduledTasksPage() {
       />
       <MobileBottomBar />
     </div>
+  );
+}
+
+function ScheduleRunDetailPanel({
+  item,
+  runs,
+  detail,
+  loading,
+  onClose,
+  onSelectRun,
+}: {
+  item: ScheduledTask | null;
+  runs: ScheduledRun[];
+  detail: ScheduledRunDetail | null;
+  loading: boolean;
+  onClose: () => void;
+  onSelectRun: (runId: string) => void;
+}) {
+  const run = detail?.run;
+  const toolEvents = detail?.transcript.filter((e) => e.event === "tool_call") || [];
+  const assistantEvents = detail?.transcript.filter((e) => e.event === "assistant") || [];
+  return (
+    <aside className="sc-detail" aria-label="定时任务执行详情">
+      <div className="sc-detail-head">
+        <div>
+          <span className="sc-detail-kicker">Execution Detail</span>
+          <h2>{item?.name || "执行详情"}</h2>
+          <p>{item ? `${item.task_name || item.task_id.slice(0, 8)} · ${item.cron}` : "正在加载定时任务"}</p>
+        </div>
+        <button type="button" onClick={onClose}>关闭</button>
+      </div>
+
+      <div className="sc-detail-grid">
+        <section>
+          <h3>执行记录</h3>
+          <div className="sc-detail-runs">
+            {runs.length === 0 && <div className="sc-empty">暂无执行记录</div>}
+            {runs.map((r) => (
+              <button
+                key={r.id}
+                type="button"
+                className={`sc-detail-run ${run?.id === r.id ? "active" : ""}`}
+                onClick={() => onSelectRun(r.id)}
+              >
+                <span className={`sc-run-badge ${r.status}`}>{r.status}</span>
+                <span>{fmt(r.started_at)}</span>
+              </button>
+            ))}
+          </div>
+        </section>
+
+        <section className="sc-detail-main">
+          <h3>进度</h3>
+          {loading && <div className="sc-empty">正在刷新执行详情...</div>}
+          {!loading && !run && <div className="sc-empty">请选择一条执行记录</div>}
+          {run && (
+            <>
+              <div className="sc-detail-summary">
+                <span className={`sc-run-badge ${run.status}`}>{run.status}</span>
+                <span>开始：{fmt(run.started_at)}</span>
+                <span>结束：{fmt(run.ended_at)}</span>
+                {run.rounds != null && <span>轮次：{run.rounds}</span>}
+              </div>
+              {run.error && (
+                <div className="sc-detail-error">
+                  <strong>[{run.error.code}]</strong> {run.error.message}
+                </div>
+              )}
+              {toolEvents.length > 0 && (
+                <div className="sc-detail-tools">
+                  <h4>工具调用</h4>
+                  {toolEvents.map((e, i) => (
+                    <details key={i} className={`sc-detail-tool ${e.success ? "ok" : "bad"}`}>
+                      <summary>
+                        <span>{String(e.name || "tool")}</span>
+                        <b>{e.success ? "成功" : "失败"}</b>
+                      </summary>
+                      <pre>{JSON.stringify(e, null, 2)}</pre>
+                    </details>
+                  ))}
+                </div>
+              )}
+              {assistantEvents.length > 0 && (
+                <div className="sc-detail-tools">
+                  <h4>Agent 回合</h4>
+                  {assistantEvents.slice(-8).map((e, i) => (
+                    <details key={i} className="sc-detail-tool">
+                      <summary>
+                        <span>Round {String(e.round ?? i)}</span>
+                        <b>{String(e.stop_reason || "")}</b>
+                      </summary>
+                      <pre>{JSON.stringify(e, null, 2)}</pre>
+                    </details>
+                  ))}
+                </div>
+              )}
+              {run.output && (
+                <div className="sc-detail-output">
+                  <h4>最终输出</h4>
+                  <pre>{run.output}</pre>
+                </div>
+              )}
+            </>
+          )}
+        </section>
+      </div>
+    </aside>
   );
 }
 
@@ -352,14 +539,15 @@ function readableCron(expr: string): string {
 interface ModalProps {
   tasks: TaskSummary[];
   existing: ScheduledTask | null;
+  initialTaskId?: string | null;
   onClose: () => void;
   onSaved: () => void | Promise<void>;
 }
 
-function ScheduleEditModal({ tasks, existing, onClose, onSaved }: ModalProps) {
+function ScheduleEditModal({ tasks, existing, initialTaskId, onClose, onSaved }: ModalProps) {
   const pushToast = useUIStore((s) => s.pushToast);
   const [form, setForm] = useState({
-    task_id: existing?.task_id || tasks[0]?.id || "",
+    task_id: existing?.task_id || initialTaskId || tasks[0]?.id || "",
     name: existing?.name || "",
     cron: existing?.cron || "0 9 * * *",
     prompt: existing?.prompt || "",
@@ -369,6 +557,11 @@ function ScheduleEditModal({ tasks, existing, onClose, onSaved }: ModalProps) {
   });
   const [saving, setSaving] = useState(false);
   const [planning, setPlanning] = useState(false);
+
+  useEffect(() => {
+    if (existing || form.task_id || tasks.length === 0) return;
+    setForm((cur) => ({ ...cur, task_id: initialTaskId || tasks[0]?.id || "" }));
+  }, [existing, form.task_id, initialTaskId, tasks]);
 
   const plan = async () => {
     const p = form.prompt.trim();
@@ -418,6 +611,9 @@ function ScheduleEditModal({ tasks, existing, onClose, onSaved }: ModalProps) {
                 onChange={(e) => setForm({ ...form, task_id: e.target.value })}
                 disabled={!!existing}
               >
+                {initialTaskId && !tasks.some((t) => t.id === initialTaskId) && (
+                  <option value={initialTaskId}>当前任务（{initialTaskId.slice(0, 8)}）</option>
+                )}
                 {tasks.map((t) => (
                   <option key={t.id} value={t.id}>
                     {t.name}

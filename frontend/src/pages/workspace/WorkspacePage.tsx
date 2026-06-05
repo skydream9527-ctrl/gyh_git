@@ -8,6 +8,7 @@ import type { ChatInputRef } from "@/components/chat/ChatInput";
 import { CrystallizeModal } from "@/components/chat/CrystallizeModal";
 import { MessageList } from "@/components/chat/MessageList";
 import { ModelSelector } from "@/components/chat/ModelSelector";
+import { MarkdownRenderer } from "@/components/markdown/MarkdownRenderer";
 import { VoiceConversationOverlay } from "@/components/chat/VoiceConversationOverlay";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { Skeleton } from "@/components/feedback/Skeleton";
@@ -267,6 +268,10 @@ export function WorkspacePage() {
     reloadScheduled();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [taskId]);
+  useEffect(() => {
+    if (activeRightTab === "scheduled") void reloadScheduled();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeRightTab, taskId]);
 
   const reloadHitl = async () => {
     try {
@@ -691,7 +696,7 @@ export function WorkspacePage() {
                 <button type="button" onClick={renameTask} disabled={!canWrite} title={canWrite ? "修改任务名称" : "当前身份无权修改"}>
                   重命名任务
                 </button>
-                <button type="button" onClick={() => navigate(`/scheduled-tasks?taskId=${taskId}`)}>
+                <button type="button" onClick={() => navigate(`/scheduled-tasks?taskId=${encodeURIComponent(taskId)}&create=1`)}>
                   配置定时调度
                   <small>{scheduledItems.length > 0 ? `${scheduledItems.length} 个` : "Off"}</small>
                 </button>
@@ -1401,6 +1406,7 @@ export function WorkspacePage() {
           <div className="v6-pane-header"><h3 className="v6-pane-title">Execution & Tools</h3></div>
           <V6ExecutionPlan
             todos={socket.todos}
+            runEvents={socket.runEvents}
             phase={socket.phase}
             pendingPlan={Boolean(socket.pendingPlan)}
             inflightName={socket.inflightUser?.name || null}
@@ -1708,7 +1714,7 @@ export function WorkspacePage() {
                     className="btn-ghost"
                     style={{ fontSize: 11, padding: "2px 8px" }}
                     onClick={() =>
-                      navigate(`/scheduled-tasks?task_id=${encodeURIComponent(taskId)}`)
+                      navigate(`/scheduled-tasks?taskId=${encodeURIComponent(taskId)}&create=1`)
                     }
                     title="去定时任务全页管理"
                   >
@@ -1911,13 +1917,15 @@ export function WorkspacePage() {
 
 function V6ExecutionPlan({
   todos,
+  runEvents,
   phase,
   pendingPlan,
   inflightName,
   scheduledCount,
   agentName,
 }: {
-  todos: Array<{ id: string; content: string; status: "pending" | "in_progress" | "completed" }>;
+  todos: Array<{ id: string; content: string; activeForm?: string; status: "pending" | "in_progress" | "completed" }>;
+  runEvents: Array<{ status: "running" | "done" | "error" | "warning" | "waiting" | "aborted" }>;
   phase: string;
   pendingPlan: boolean;
   inflightName: string | null;
@@ -1925,7 +1933,43 @@ function V6ExecutionPlan({
   agentName: string;
 }) {
   const active = ["typing", "streaming", "tool"].includes(phase);
-  type NodeStatus = "completed" | "running" | "pending";
+  const latestEvent = runEvents[runEvents.length - 1] ?? null;
+  const waitingTodo = findWaitingTodo(todos);
+  const panelStatus =
+    pendingPlan || latestEvent?.status === "waiting" || waitingTodo
+      ? "waiting"
+      : latestEvent?.status === "error" || phase === "error" || latestEvent?.status === "aborted"
+        ? "error"
+        : latestEvent?.status === "warning"
+          ? "warning"
+          : active || latestEvent?.status === "running"
+            ? "running"
+            : latestEvent?.status === "done"
+              ? "done"
+              : "idle";
+  const summaryBadgeClass =
+    panelStatus === "waiting" || panelStatus === "warning"
+      ? "v6-badge v6-badge-warning"
+      : panelStatus === "error"
+        ? "v6-badge v6-badge-error"
+        : panelStatus === "done"
+          ? "v6-badge v6-badge-success"
+          : panelStatus === "running"
+            ? "v6-badge v6-badge-running"
+            : "v6-badge";
+  const summaryLabel =
+    panelStatus === "waiting"
+      ? "等待确认"
+      : panelStatus === "warning"
+        ? "有警告"
+        : panelStatus === "error"
+          ? "执行异常"
+          : panelStatus === "done"
+            ? "本轮完成"
+            : panelStatus === "running"
+              ? "执行中"
+              : "就绪";
+  type NodeStatus = "completed" | "running" | "waiting" | "error" | "pending";
   const fallbackNodes: Array<{ id: string; title: string; meta: string; status: NodeStatus }> = [
     { id: "intent", title: "理解意图与拆解计划", meta: agentName, status: active || pendingPlan ? "completed" : "pending" },
     { id: "execute", title: "数据提取与工具调用", meta: inflightName ? `${inflightName} 占用中` : active ? "执行中" : "等待指令", status: active ? "running" : "pending" },
@@ -1936,18 +1980,22 @@ function V6ExecutionPlan({
     todos.length > 0
       ? todos.map((t) => ({
           id: t.id,
-          title: t.content,
+          title: t.status === "in_progress" ? t.activeForm || t.content : t.content,
           meta:
             t.status === "completed"
               ? "已完成"
               : t.status === "in_progress"
-                ? `${agentName} · 执行中`
+                ? findWaitingTodo([t])
+                  ? "等待用户确认"
+                  : `${agentName} · 执行中`
                 : "等待中",
           status:
             t.status === "completed"
               ? "completed"
               : t.status === "in_progress"
-                ? "running"
+                ? findWaitingTodo([t])
+                  ? "waiting"
+                  : "running"
                 : "pending",
         }))
       : fallbackNodes;
@@ -1955,9 +2003,7 @@ function V6ExecutionPlan({
   return (
     <div className="v6-exec-panel">
       <div className="v6-exec-summary">
-        <span className={active || pendingPlan ? "v6-badge v6-badge-warning" : "v6-badge"}>
-          {pendingPlan ? "等待审批" : active ? "执行中" : "就绪"}
-        </span>
+        <span className={summaryBadgeClass}>{summaryLabel}</span>
         <small>{todos.length > 0 ? "来自 Agent Todo" : "工作流预览"}</small>
       </div>
       <div className="v6-exec-tree">
@@ -1965,7 +2011,7 @@ function V6ExecutionPlan({
         {nodes.map((n) => (
           <div key={n.id} className="v6-exec-node">
             <div className={`v6-exec-dot ${n.status}`}>
-              {n.status === "completed" ? "✓" : n.status === "running" ? <span className="v6-pulse" /> : null}
+              {n.status === "completed" ? "✓" : n.status === "running" || n.status === "waiting" ? <span className="v6-pulse" /> : n.status === "error" ? "!" : null}
             </div>
             <div className="v6-exec-content">
               <div className="v6-exec-title">{n.title}</div>
@@ -1976,6 +2022,16 @@ function V6ExecutionPlan({
       </div>
     </div>
   );
+}
+
+function findWaitingTodo(
+  todos: Array<{ content: string; activeForm?: string; status: "pending" | "in_progress" | "completed" }>,
+) {
+  return todos.find((todo) => {
+    if (todo.status !== "in_progress") return false;
+    const text = `${todo.activeForm || ""} ${todo.content || ""}`;
+    return /等待|确认|审批|人工|补充|输入|选择|配置/.test(text);
+  }) ?? null;
 }
 
 function V6HumanInterventionCard({
@@ -2019,9 +2075,11 @@ function V6HumanInterventionCard({
         <span className="v6-badge v6-badge-warning">HITL</span>
       </div>
       <div className="v6-hitl-body">
-        <p>
-          {request?.message || `工作流「${taskName}」已挂起。请补充处理口径，确认后 Agent 会继续执行。`}
-        </p>
+        <div className="v6-hitl-message">
+          <MarkdownRenderer
+            content={request?.message || `工作流「${taskName}」已挂起。请补充处理口径，确认后 Agent 会继续执行。`}
+          />
+        </div>
         {rows.length > 0 && columns.length > 0 && (
           <div className="v6-hitl-table">
             <div className="v6-hitl-tr head">
@@ -2034,16 +2092,19 @@ function V6HumanInterventionCard({
             ))}
           </div>
         )}
-        <div className="v6-hitl-table">
+        <div className="v6-hitl-fields">
           {fields.map((field) => (
-            <div className="v6-hitl-tr" key={field.id}>
-              <span>{field.label}</span>
+            <label className="v6-hitl-field" key={field.id}>
+              <span>
+                {field.label}
+                {field.required && <b>*</b>}
+              </span>
               <input
                 value={values[field.id] ?? field.value ?? ""}
                 onChange={(e) => setValues((cur) => ({ ...cur, [field.id]: e.target.value }))}
                 placeholder={field.placeholder || "请输入"}
               />
-            </div>
+            </label>
           ))}
         </div>
         <div className="v6-hitl-actions">
