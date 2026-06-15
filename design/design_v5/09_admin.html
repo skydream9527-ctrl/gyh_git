@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ICE Workbench v5 · Admin (管理后台 · 概览) (Moxt Style)</title>
+<script>(function(){var t=localStorage.getItem('ice-v5-theme')||'light';document.documentElement.dataset.theme=t;})();</script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root[data-theme="light"]{
+  --bg:#faf4ed;--surface:#ffffff;--surface-2:#f5efe4;--surface-3:#ece3d3;--paper-deep:#f0e9dc;
+  --border:#e5dcc8;--border-soft:#ede5d2;--border-strong:#d4c8ad;
+  --text:#1a1612;--text-dim:#5b5246;--text-muted:#8a7e69;--text-inv:#faf4ed;
+  --accent:#cc785c;--accent-hover:#b8624a;--accent-soft:#f5e8e2;--accent-text:#8a3a23;
+  --success:#5a7a4f;--success-soft:#e6ede0;
+  --warning:#b07d2a;--warning-soft:#f5ead0;
+  --error:#b54a3a;--error-soft:#f5dfd9;
+  --p-ab:#5e7d6a;--p-ab-soft:#e6ede6;
+  --p-biz:#b86b3a;--p-biz-soft:#f5e3d0;
+  --p-data:#4a7c8b;--p-data-soft:#d8e5ea;
+  --p-wave:#b04f5f;--p-wave-soft:#f0d8dc;
+  --p-gray:#7a6b8e;--p-gray-soft:#ebe5ee;
+  --accent-grad:var(--accent);
+  --accent-shadow:none;
+  --icon-emboss:none;
+  --icon-shadow:0 1px 2px rgba(26,22,18,.06);
+  --shadow-1:0 1px 0 rgba(26,22,18,.04);
+  --shadow-2:0 1px 2px rgba(26,22,18,.06),0 4px 16px rgba(26,22,18,.04);
+  --shadow-3:0 8px 32px rgba(26,22,18,.08);
+  --ring:0 0 0 3px rgba(204,120,92,.20);
+  --canvas:#f0e9dc;
+  --code-bg:#1a1612;--code-text:#f5f0e6;--code-comment:#8c8270;
+}
+:root[data-theme="dark"]{
+  --bg:#1f1d1a;--surface:#2a2723;--surface-2:#322e29;--surface-3:#3d3831;--paper-deep:#262320;
+  --border:#44403a;--border-soft:#322e29;--border-strong:#5a544c;
+  --text:#f5f0e6;--text-dim:#bdb19c;--text-muted:#8c8270;--text-inv:#1a1612;
+  --accent:#e89e83;--accent-hover:#f5b39a;--accent-soft:rgba(232,158,131,.16);--accent-text:#f0b59c;
+  --success:#8aa680;--success-soft:rgba(138,166,128,.14);
+  --warning:#d4a463;--warning-soft:rgba(212,164,99,.14);
+  --error:#d4756a;--error-soft:rgba(212,117,106,.14);
+  --p-ab:#8aa68f;--p-ab-soft:rgba(138,166,143,.14);
+  --p-biz:#d49070;--p-biz-soft:rgba(212,144,112,.14);
+  --p-data:#7aa5b3;--p-data-soft:rgba(122,165,179,.14);
+  --p-wave:#d4868f;--p-wave-soft:rgba(212,134,143,.14);
+  --p-gray:#a895b8;--p-gray-soft:rgba(168,149,184,.14);
+  --accent-grad:linear-gradient(135deg,#e89e83 0%,#f5b39a 100%);
+  --accent-shadow:0 1px 0 rgba(0,0,0,.45),0 4px 14px rgba(232,158,131,.22),inset 0 1px 0 rgba(255,255,255,.18);
+  --icon-emboss:inset 0 1px 0 rgba(255,255,255,.10),inset 0 -1px 0 rgba(0,0,0,.20);
+  --icon-shadow:0 1px 2px rgba(0,0,0,.30);
+  --shadow-1:0 1px 0 rgba(0,0,0,.3);
+  --shadow-2:0 4px 16px rgba(0,0,0,.4),0 1px 2px rgba(0,0,0,.4);
+  --shadow-3:0 16px 48px rgba(0,0,0,.5);
+  --ring:0 0 0 3px rgba(232,158,131,.30);
+  --canvas:#1a1815;
+  --code-bg:#16140f;--code-text:#f5f0e6;--code-comment:#8c8270;
+}
+*{box-sizing:border-box}html,body{margin:0;padding:0}
+body{background:var(--canvas);color:var(--text);
+  font-family:'Inter','PingFang SC',-apple-system,system-ui,sans-serif;
+  font-size:14px;line-height:1.6;letter-spacing:-.003em;
+  -webkit-font-smoothing:antialiased;,'cv11';padding:32px 0}
+.serif{font-family:'Inter',sans-serif;}
+.tnum{font-variant-numeric:tabular-nums}
+
+.outer-bar{max-width:1900px;margin:0 auto 24px;padding:0 32px;display:flex;align-items:center;gap:14px}
+.outer-tag{display:inline-flex;align-items:center;gap:8px;padding:5px 12px;
+  background:var(--accent-soft);color:var(--accent-text);border-radius:12px;font-size:11px;font-weight:500;
+  font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.06em}
+.outer-tag .dot{width:6px;height:6px;border-radius:50%;background:var(--accent)}
+.outer-bar .spacer{flex:1}
+.outer-bar a{color:var(--text-dim);font-size:13px;text-decoration:none;padding:6px 12px;border-radius:12px}
+.outer-bar a:hover{background:var(--surface-2);color:var(--text)}
+.outer-bar button{background:var(--surface);border:1px solid var(--border);color:var(--text);
+  height:36px;padding:0 14px;border-radius:12px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:500;
+  display:inline-flex;align-items:center;gap:6px}
+
+.canvas{max-width:1900px;margin:0 auto;padding:0 32px;
+  display:grid;grid-template-columns:1fr 420px;gap:32px;align-items:flex-start}
+@media (max-width:1500px){.canvas{grid-template-columns:1fr}}
+
+/* browser */
+.browser{background:var(--surface);border:1px solid var(--border);border-radius:10px;
+  overflow:hidden;box-shadow:var(--shadow-3)}
+.browser-bar{height:36px;background:var(--surface-2);border-bottom:1px solid var(--border-soft);
+  display:flex;align-items:center;padding:0 14px;gap:8px}
+.browser-dots{display:flex;gap:6px}
+.browser-dots span{width:11px;height:11px;border-radius:50%}
+.browser-dots span:nth-child(1){background:#cc6c5e}
+.browser-dots span:nth-child(2){background:#c4a55a}
+.browser-dots span:nth-child(3){background:#7a9a6e}
+.browser-url{flex:1;text-align:center;font-family:'JetBrains Mono',monospace;font-size:11.5px;
+  color:var(--text-muted);background:var(--surface);padding:5px 12px;border-radius:12px;
+  margin:0 80px;border:1px solid var(--border-soft)}
+.viewport{height:1500px;background:var(--bg);overflow:hidden;display:flex;flex-direction:column}
+
+/* TopNav admin mode */
+.appbar{height:54px;background:var(--bg);border-bottom:1px solid var(--border-soft);
+  display:flex;align-items:center;padding:0 24px;gap:14px;flex-shrink:0}
+.appbar .brand-mark{width:28px;height:28px;border-radius:12px;background:var(--accent-grad);
+  display:grid;place-items:center;color:#faf4ed;font-weight:600;font-size:13px;
+  font-family:'Inter',sans-serif;
+  box-shadow:var(--accent-shadow)}
+.admin-pill{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:12px;
+  background:var(--p-gray-soft);color:var(--p-gray);font-family:'JetBrains Mono',monospace;
+  font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+.crumb{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--text-dim);font-weight:500}
+.crumb a{color:var(--text-dim);text-decoration:none}
+.crumb .sep{color:var(--text-muted);font-family:'JetBrains Mono',monospace;font-size:12px}
+.crumb .current{color:var(--text)}
+.appbar .spacer{flex:1}
+.btn-ghost{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;background:transparent;
+  border:1px solid var(--border);color:var(--text);font-family:inherit;font-size:13px;font-weight:500;
+  border-radius:12px;cursor:pointer}
+.btn-ghost:hover{background:var(--surface-2);border-color:var(--border-strong)}
+.icon-btn{width:34px;height:34px;border-radius:12px;display:grid;place-items:center;cursor:pointer;
+  color:var(--text-dim);border:none;background:transparent;font-size:14px}
+.icon-btn:hover{background:var(--surface-2);color:var(--text)}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--accent-grad);
+  display:grid;place-items:center;color:#faf4ed;font-weight:500;font-size:12px;
+  font-family:'Inter',sans-serif;
+  box-shadow:var(--accent-shadow)}
+
+/* adm-body 双栏 */
+.adm-body{flex:1;display:grid;grid-template-columns:240px 1fr;min-height:0}
+
+/* 左侧栏 */
+.adm-sb{background:var(--surface-2);border-right:1px solid var(--border-soft);
+  padding:20px 14px;overflow-y:auto;display:flex;flex-direction:column;gap:18px;min-height:0}
+.adm-sb-group{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--text-muted);
+  font-weight:600;text-transform:uppercase;letter-spacing:.08em;padding:0 10px;margin-bottom:6px;
+  display:flex;align-items:center;gap:8px}
+.adm-sb-group::before{content:"";width:14px;height:1px;background:var(--accent)}
+.adm-sb-section{display:flex;flex-direction:column;gap:1px}
+.adm-sb-item{display:flex;align-items:center;gap:10px;padding:7px 10px;font-size:13px;
+  color:var(--text-dim);text-decoration:none;border-radius:12px;font-weight:500;letter-spacing:-.005em;
+  cursor:pointer;transition:all .12s}
+.adm-sb-item:hover{background:var(--surface);color:var(--text)}
+.adm-sb-item.active{background:var(--accent-soft);color:var(--accent-text);font-weight:600}
+.adm-sb-item .ico{font-size:14px;width:18px;text-align:center;flex-shrink:0}
+.adm-sb-item .badge{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:10px;
+  background:var(--error);color:#faf4ed;padding:1px 6px;border-radius:12px;font-weight:600}
+.adm-sb-item .lock{margin-left:auto;font-size:11px;color:var(--text-muted)}
+.adm-sb-foot{margin-top:auto;padding:14px 10px 4px;border-top:1px solid var(--border-soft);
+  font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-muted);
+  text-transform:uppercase;letter-spacing:.06em}
+.adm-sb-foot div{margin-bottom:3px}
+
+/* 主内容 */
+.adm-main{padding:32px 36px 60px;overflow-y:auto;min-width:0}
+.adm-page-head{margin-bottom:24px;padding-bottom:18px;border-bottom:1px solid var(--border-soft)}
+.adm-tag{display:inline-flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;
+  font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;
+  font-weight:500;margin-bottom:12px}
+.adm-tag::before{content:"";width:24px;height:1px;background:var(--accent)}
+.adm-h1{font-family:'Inter',sans-serif;font-size:36px;font-weight:500;letter-spacing:-.025em;line-height:1.1;
+  margin:0 0 6px;font-variation-settings:'opsz' 144,'wght' 500}
+.adm-lead{font-size:15px;color:var(--text-dim);margin:0}
+
+/* Alert · 待处理事项 */
+.adm-alert-card{background:var(--warning-soft);border:1px solid transparent;border-left:3px solid var(--warning);
+  border-radius:10px;padding:16px 20px;margin-bottom:24px;box-shadow:var(--shadow-1)}
+.adm-alert-h{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.adm-alert-h h3{font-family:'Inter',sans-serif;font-size:16px;font-weight:600;letter-spacing:-.01em;margin:0;
+  font-variation-settings:'opsz' 144}
+.adm-alert-h .count{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:600;
+  text-transform:uppercase;letter-spacing:.06em;color:var(--warning);background:var(--surface);
+  padding:2px 8px;border-radius:12px;border:1px solid var(--border-soft)}
+.adm-alert-list{display:flex;flex-direction:column;gap:6px}
+.adm-alert-item{display:flex;align-items:center;gap:10px;padding:9px 14px;border-radius:12px;
+  background:var(--surface);border:1px solid var(--border-soft);font-size:13px;color:var(--text);
+  border-left:3px solid var(--warning)}
+.adm-alert-item.err{border-left-color:var(--error);background:var(--error-soft)}
+.adm-alert-item .ic{font-size:14px;flex-shrink:0}
+.adm-alert-item b{font-weight:600;color:var(--text)}
+.adm-alert-item code{font-family:'JetBrains Mono',monospace;font-size:11.5px;background:var(--surface-2);
+  padding:1px 6px;border-radius:3px;color:var(--accent-text);border:1px solid var(--border-soft)}
+.adm-alert-item a{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:11.5px;
+  color:var(--accent);text-decoration:none;font-weight:500;text-transform:uppercase;letter-spacing:.06em}
+.adm-alert-item a:hover{text-decoration:underline}
+
+/* Stat grid · 居中风（含 icon） */
+.adm-stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0;
+  border:1px solid var(--border-soft);border-radius:10px;background:var(--surface);
+  box-shadow:var(--shadow-1);overflow:hidden;margin-bottom:24px}
+.adm-stat{padding:22px;border-right:1px solid var(--border-soft);
+  display:flex;flex-direction:column;align-items:center;text-align:center}
+.adm-stat:last-child{border-right:none}
+.adm-stat-icon{width:44px;height:44px;border-radius:11px;display:grid;place-items:center;font-size:20px;
+  margin:0 auto 12px;background:var(--accent-soft);color:var(--accent);
+  box-shadow:var(--icon-emboss),var(--icon-shadow)}
+.adm-stat.s2 .adm-stat-icon{background:var(--p-biz-soft);color:var(--p-biz)}
+.adm-stat.s3 .adm-stat-icon{background:var(--p-data-soft);color:var(--p-data)}
+.adm-stat.s4 .adm-stat-icon{background:var(--success-soft);color:var(--success)}
+.adm-stat.s4.warn .adm-stat-icon{background:var(--warning-soft);color:var(--warning)}
+.adm-stat.s4.err .adm-stat-icon{background:var(--error-soft);color:var(--error)}
+.adm-stat-l{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--text-muted);
+  font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+.adm-stat-v{font-family:'Inter',sans-serif;font-size:32px;font-weight:500;letter-spacing:-.025em;line-height:1;
+  font-variant-numeric:tabular-nums}
+.adm-stat-v small{font-size:14px;color:var(--text-muted);margin-left:3px;font-weight:500}
+.adm-stat-d{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--success);
+  font-weight:500;margin-top:6px;font-variant-numeric:tabular-nums}
+.adm-stat-d.warn{color:var(--warning)}
+.adm-stat-d.down{color:var(--error)}
+
+/* Two col */
+.adm-two-col{display:grid;grid-template-columns:1.1fr 1fr;gap:18px}
+.adm-section{background:var(--surface);border:1px solid var(--border-soft);border-radius:10px;
+  box-shadow:var(--shadow-1);overflow:hidden}
+.adm-section-h{padding:14px 20px;border-bottom:1px solid var(--border-soft);
+  display:flex;align-items:center;justify-content:space-between}
+.adm-section-h h3{font-family:'Inter',sans-serif;font-size:16px;font-weight:600;letter-spacing:-.01em;margin:0;
+  font-variation-settings:'opsz' 144}
+.adm-section-h .meta{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--text-muted);
+  text-transform:uppercase;letter-spacing:.06em}
+.adm-section-body{padding:8px}
+.adm-section-foot{padding:8px 20px 14px;border-top:1px solid var(--border-soft);
+  display:flex;justify-content:flex-end}
+.adm-section-foot a{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);
+  text-decoration:none;font-weight:500;text-transform:uppercase;letter-spacing:.06em}
+.adm-section-foot a:hover{text-decoration:underline}
+
+/* User list */
+.adm-list-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;cursor:pointer}
+.adm-list-item:hover{background:var(--surface-2)}
+.adm-list-avatar{width:32px;height:32px;border-radius:50%;background:var(--accent-grad);
+  display:grid;place-items:center;color:#faf4ed;font-weight:500;font-size:12px;flex-shrink:0;
+  font-family:'Inter',sans-serif;
+  box-shadow:var(--accent-shadow)}
+.adm-list-avatar.b2{background:linear-gradient(135deg,#7aa5b3,#4a7c8b)}
+.adm-list-avatar.b3{background:linear-gradient(135deg,#5e7d6a,#8aa68f)}
+.adm-list-avatar.b4{background:linear-gradient(135deg,#7a6b8e,#a895b8)}
+.adm-list-info{flex:1;min-width:0}
+.adm-list-info .name{font-size:13.5px;font-weight:500;letter-spacing:-.005em}
+.adm-list-info .meta{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--text-muted);
+  margin-top:2px;text-transform:uppercase;letter-spacing:.06em}
+.adm-list-time{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-dim);
+  font-variant-numeric:tabular-nums}
+.adm-role{display:inline-flex;align-items:center;padding:1px 6px;border-radius:3px;
+  font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:600;
+  text-transform:uppercase;letter-spacing:.06em;margin-left:4px}
+.adm-role.user{background:var(--surface-2);color:var(--text-dim)}
+.adm-role.admin{background:var(--p-gray-soft);color:var(--p-gray)}
+.adm-role.super{background:var(--accent-soft);color:var(--accent-text)}
+
+/* Rank list */
+.adm-rank-item{display:flex;align-items:flex-start;gap:12px;padding:10px 12px;border-radius:12px}
+.adm-rank-item:hover{background:var(--surface-2)}
+.adm-rank-num{width:28px;height:28px;border-radius:50%;background:var(--surface-2);
+  color:var(--text-dim);display:grid;place-items:center;
+  font-family:'JetBrains Mono',monospace;font-size:11.5px;font-weight:600;flex-shrink:0;letter-spacing:-.02em}
+.adm-rank-num.top{background:var(--accent-grad);color:#faf4ed;box-shadow:var(--accent-shadow)}
+.adm-rank-row{flex:1;min-width:0}
+.adm-rank-name{font-size:13.5px;font-weight:500;display:flex;align-items:center;gap:6px;letter-spacing:-.005em}
+.adm-rank-name .ag-icon{width:22px;height:22px;border-radius:12px;display:grid;place-items:center;
+  font-size:12px;background:var(--p-ab-soft);color:var(--p-ab);
+  box-shadow:var(--icon-emboss),var(--icon-shadow)}
+.adm-rank-name .nm{font-family:'Inter',sans-serif;font-weight:600;font-size:13.5px;letter-spacing:-.005em;
+  font-variation-settings:'opsz' 144}
+.adm-rank-meta{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--text-muted);
+  margin:4px 0 6px;text-transform:uppercase;letter-spacing:.06em}
+.adm-rank-meta b{color:var(--accent);font-weight:500}
+.adm-rank-bar{height:4px;background:var(--surface-2);border-radius:2px;overflow:hidden}
+.adm-rank-bar-fill{height:100%;background:var(--accent-grad);border-radius:2px;transition:width .3s}
+
+/* ===== Phone preview ===== */
+.phone-wrap{background:var(--surface);border:1px solid var(--border);border-radius:10px;
+  box-shadow:var(--shadow-3);padding:32px 28px 36px;text-align:center;position:sticky;top:24px}
+.phone-tag{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;
+  background:var(--accent-soft);color:var(--accent-text);border-radius:12px;font-size:10.5px;font-weight:500;
+  letter-spacing:.06em;margin-bottom:8px;font-family:'JetBrains Mono',monospace;text-transform:uppercase}
+.phone-name{font-family:'Inter',sans-serif;font-size:18px;font-weight:600;letter-spacing:-.015em;margin-bottom:4px;
+  font-variation-settings:'opsz' 144}
+.phone-meta{font-size:12px;color:var(--text-muted);margin-bottom:18px;font-family:'JetBrains Mono',monospace}
+.phone{width:360px;height:760px;background:#1a1612;border-radius:42px;padding:10px;
+  box-shadow:0 24px 64px rgba(26,22,18,.3);position:relative;margin:0 auto}
+.phone-screen{width:100%;height:100%;background:var(--bg);border-radius:32px;overflow:hidden;
+  position:relative;display:flex;flex-direction:column}
+.phone-notch{position:absolute;top:14px;left:50%;transform:translateX(-50%);
+  width:104px;height:28px;background:#000;border-radius:99px;z-index:10}
+
+.p-top{padding:50px 12px 12px;display:flex;align-items:center;gap:8px;flex-shrink:0;
+  background:var(--bg);border-bottom:1px solid var(--border-soft)}
+.p-top .menu-btn{width:32px;height:32px;border-radius:12px;border:1px solid var(--border);
+  background:var(--surface);color:var(--text);font-size:14px;display:grid;place-items:center;cursor:pointer}
+.p-top .crumb-m{flex:1;font-size:12.5px;color:var(--text-dim);font-weight:500;display:flex;align-items:center;gap:6px}
+.p-top .crumb-m .admin-pill{font-size:9px;padding:2px 6px}
+
+.p-content{flex:1;overflow-y:auto;padding:18px 14px 80px}
+.p-h1{font-family:'Inter',sans-serif;font-size:28px;font-weight:500;letter-spacing:-.025em;line-height:1.05;margin:0 0 6px;
+  font-variation-settings:'opsz' 144}
+.p-lead{font-size:13px;color:var(--text-dim);margin:0 0 18px}
+
+.p-alert{background:var(--warning-soft);border:1px solid transparent;border-left:3px solid var(--warning);
+  border-radius:12px;padding:12px 14px;margin-bottom:18px}
+.p-alert-h{display:flex;align-items:center;gap:6px;margin-bottom:8px;font-family:'Inter',sans-serif;
+  font-size:13.5px;font-weight:600;font-variation-settings:'opsz' 144}
+.p-alert-h .count{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:10px;
+  background:var(--surface);padding:1px 6px;border-radius:3px;color:var(--warning);font-weight:600}
+.p-alert-row{display:flex;align-items:center;gap:8px;font-size:11.5px;padding:5px 0}
+
+.p-stats{display:grid;grid-template-columns:repeat(2,1fr);border:1px solid var(--border-soft);
+  border-radius:12px;background:var(--surface);overflow:hidden;box-shadow:var(--shadow-1);margin-bottom:18px}
+.p-stat{padding:14px 12px;border-right:1px solid var(--border-soft);
+  display:flex;flex-direction:column;align-items:center;text-align:center}
+.p-stat:nth-child(2n){border-right:none}
+.p-stat:nth-child(n+3){border-top:1px solid var(--border-soft)}
+.p-stat-icon{width:30px;height:30px;border-radius:12px;display:grid;place-items:center;
+  font-size:14px;margin:0 auto 6px;background:var(--accent-soft);color:var(--accent);
+  box-shadow:var(--icon-emboss),var(--icon-shadow)}
+.p-stat.s2 .p-stat-icon{background:var(--p-biz-soft);color:var(--p-biz)}
+.p-stat.s3 .p-stat-icon{background:var(--p-data-soft);color:var(--p-data)}
+.p-stat.s4 .p-stat-icon{background:var(--warning-soft);color:var(--warning)}
+.p-stat .l{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text-muted);
+  text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.p-stat .v{font-family:'Inter',sans-serif;font-size:18px;font-weight:500;letter-spacing:-.02em;line-height:1;
+  font-variant-numeric:tabular-nums}
+
+.p-section{background:var(--surface);border:1px solid var(--border-soft);border-radius:12px;
+  margin-bottom:8px;overflow:hidden;box-shadow:var(--shadow-1)}
+.p-section-h{padding:10px 14px;border-bottom:1px solid var(--border-soft);
+  display:flex;align-items:center;font-family:'Inter',sans-serif;font-size:13.5px;font-weight:600;letter-spacing:-.005em;
+  font-variation-settings:'opsz' 144}
+.p-section-h .more{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-muted);
+  text-transform:uppercase;letter-spacing:.06em;font-weight:500}
+.p-section-b{padding:6px}
+
+/* spec footer */
+.spec{max-width:1900px;margin:32px auto 0;padding:0 32px}
+.spec-card{background:var(--surface);border:1px solid var(--border-soft);border-radius:10px;
+  padding:24px 28px;box-shadow:var(--shadow-1)}
+.spec-card h3{font-family:'Inter',sans-serif;font-size:18px;font-weight:600;margin:0 0 10px;letter-spacing:-.015em;
+  font-variation-settings:'opsz' 144}
+.spec-card ul{margin:0;padding-left:20px;font-size:13.5px;color:var(--text-dim);line-height:1.85}
+.spec-card code{background:var(--surface-2);padding:1px 6px;border-radius:12px;
+  font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--accent-text);
+  border:1px solid var(--border-soft)}
+.spec-card b{color:var(--text);font-weight:600}
+</style>
+</head>
+<body>
+
+<div class="outer-bar">
+  <span class="outer-tag"><span class="dot"></span>v5 · Admin · 概览（layout + overview）</span>
+  <span style="color:var(--text-muted);font-size:13px;font-family:'JetBrains Mono',monospace">基于 [AdminLayout.tsx](../frontend/src/pages/admin/AdminLayout.tsx) + [AdminOverview.tsx](../frontend/src/pages/admin/AdminOverview.tsx)</span>
+  <div class="spacer"></div>
+  <a href="08_scheduled.html">← Scheduled</a>
+  <a href="00_design_system.html">Design System</a>
+  <button onclick="toggleTheme()">
+    <span class="t-light">🌙 暗夜</span><span class="t-dark" style="display:none">☀️ 日间</span>
+  </button>
+</div>
+
+<script>
+function toggleTheme(){
+  var cur=document.documentElement.dataset.theme||'light';
+  var next=cur==='light'?'dark':'light';
+  document.documentElement.dataset.theme=next;
+  localStorage.setItem('ice-v5-theme',next);
+  document.querySelectorAll('.t-light').forEach(e=>e.style.display=next==='light'?'inline':'none');
+  document.querySelectorAll('.t-dark').forEach(e=>e.style.display=next==='dark'?'inline':'none');
+}
+(function(){if(document.documentElement.dataset.theme==='dark'){
+  document.querySelectorAll('.t-light').forEach(e=>e.style.display='none');
+  document.querySelectorAll('.t-dark').forEach(e=>e.style.display='inline');
+}})();
+</script>
+
+<div class="canvas">
+
+  <!-- ===== Desktop ===== -->
+  <div class="browser">
+    <div class="browser-bar">
+      <div class="browser-dots"><span></span><span></span><span></span></div>
+      <div class="browser-url">ice.workbench.local / admin</div>
+    </div>
+    <div class="viewport">
+
+      <!-- TopNav admin mode -->
+      <header class="appbar">
+        <div class="brand-mark">i</div>
+        <span class="admin-pill">🛡 ADMIN</span>
+        <div class="crumb">
+          <a href="01_dashboard.html">Dashboard</a>
+          <span class="sep">/</span>
+          <span class="current">管理后台</span>
+        </div>
+        <div class="spacer"></div>
+        <button class="btn-ghost">🏠 返回首页</button>
+        <button class="icon-btn" onclick="toggleTheme()">
+          <span class="t-light">🌙</span><span class="t-dark" style="display:none">☀️</span>
+        </button>
+        <button class="icon-btn">🔔</button>
+        <div class="avatar">GY</div>
+      </header>
+
+      <div class="adm-body">
+
+        <!-- 左侧栏 -->
+        <aside class="adm-sb">
+
+          <div>
+            <div class="adm-sb-group">监控</div>
+            <div class="adm-sb-section">
+              <a class="adm-sb-item active"><span class="ico">📊</span>概览</a>
+              <a class="adm-sb-item"><span class="ico">💰</span>用量与成本</a>
+              <a class="adm-sb-item"><span class="ico">🔍</span>SQL 审计</a>
+              <a class="adm-sb-item"><span class="ico">📜</span>操作审计</a>
+              <a class="adm-sb-item"><span class="ico">🩺</span>任务诊断</a>
+            </div>
+          </div>
+
+          <div>
+            <div class="adm-sb-group">内容审核</div>
+            <div class="adm-sb-section">
+              <a class="adm-sb-item"><span class="ico">📥</span>审核中心<span class="badge">14</span></a>
+              <a class="adm-sb-item"><span class="ico">💡</span>经验卡片<span class="badge">6</span></a>
+              <a class="adm-sb-item"><span class="ico">🌐</span>公共任务<span class="badge">3</span></a>
+            </div>
+          </div>
+
+          <div>
+            <div class="adm-sb-group">资源管理</div>
+            <div class="adm-sb-section">
+              <a class="adm-sb-item"><span class="ico">🤖</span>Agents</a>
+              <a class="adm-sb-item"><span class="ico">⚡</span>Skills</a>
+              <a class="adm-sb-item"><span class="ico">📚</span>知识库</a>
+              <a class="adm-sb-item"><span class="ico">📁</span>公共文件</a>
+              <a class="adm-sb-item"><span class="ico">📋</span>任务模板</a>
+            </div>
+          </div>
+
+          <div>
+            <div class="adm-sb-group">用户与配置</div>
+            <div class="adm-sb-section">
+              <a class="adm-sb-item"><span class="ico">👥</span>用户管理<span class="badge">7</span></a>
+              <a class="adm-sb-item"><span class="ico">⚙</span>系统设置<span class="lock">🔒</span></a>
+            </div>
+          </div>
+
+          <div class="adm-sb-foot">
+            <div>v3.4.2 · 2026-05-26</div>
+            <div>UPTIME 14d 6h</div>
+            <div style="color:var(--success)">● ALL SYSTEMS GREEN</div>
+          </div>
+        </aside>
+
+        <!-- 主内容 -->
+        <main class="adm-main">
+
+          <!-- Page head -->
+          <div class="adm-page-head">
+            <div class="adm-tag">ADMIN · OVERVIEW · 监控</div>
+            <h1 class="adm-h1 serif">📊 概览</h1>
+            <p class="adm-lead">查看平台运营全景 —— 用户、任务、消息、成本，以及待你处理的事项。</p>
+          </div>
+
+          <!-- 待处理事项 -->
+          <div class="adm-alert-card">
+            <div class="adm-alert-h">
+              <h3 class="serif">🚨 待处理事项</h3>
+              <span class="count">15 ITEMS</span>
+            </div>
+            <div class="adm-alert-list">
+              <div class="adm-alert-item err">
+                <span class="ic">💰</span>
+                <span>本月 LLM 支出已<b>超出预算</b>：<code>$1,284.32</code> / <code>$1,000.00</code>（仅提醒，未停服）</span>
+                <a href="#">→ 调整预算</a>
+              </div>
+              <div class="adm-alert-item">
+                <span class="ic">👥</span>
+                <span><b>7 个</b>账号注册申请待审批</span>
+                <a href="#">→ 立即审批</a>
+              </div>
+              <div class="adm-alert-item">
+                <span class="ic">💡</span>
+                <span><b>6 条</b>经验卡片待审批</span>
+                <a href="#">→ 立即审批</a>
+              </div>
+              <div class="adm-alert-item">
+                <span class="ic">🌐</span>
+                <span><b>3 个</b>公共任务待审核</span>
+                <a href="#">→ 立即审核</a>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4 Stats -->
+          <section class="adm-stat-grid">
+            <div class="adm-stat">
+              <div class="adm-stat-icon">👥</div>
+              <div class="adm-stat-l">用户数</div>
+              <div class="adm-stat-v tnum">142</div>
+              <div class="adm-stat-d">18 本周新增</div>
+            </div>
+            <div class="adm-stat s2">
+              <div class="adm-stat-icon">📋</div>
+              <div class="adm-stat-l">任务总数</div>
+              <div class="adm-stat-v tnum">1,284</div>
+              <div class="adm-stat-d">42 今日</div>
+            </div>
+            <div class="adm-stat s3">
+              <div class="adm-stat-icon">💬</div>
+              <div class="adm-stat-l">消息总数</div>
+              <div class="adm-stat-v tnum">28.4<small>k</small></div>
+              <div class="adm-stat-d">12.4% 月增</div>
+            </div>
+            <div class="adm-stat s4 err">
+              <div class="adm-stat-icon">💰</div>
+              <div class="adm-stat-l">本月成本 / $1,000 额度</div>
+              <div class="adm-stat-v tnum">$1,284<small>.32</small></div>
+              <div class="adm-stat-d down">⚠ 超出 28.4%</div>
+            </div>
+          </section>
+
+          <!-- 双栏 -->
+          <div class="adm-two-col">
+
+            <!-- 最近注册用户 -->
+            <section class="adm-section">
+              <div class="adm-section-h">
+                <h3 class="serif">最近注册用户</h3>
+                <span class="meta">7 NEW</span>
+              </div>
+              <div class="adm-section-body">
+                <div class="adm-list-item">
+                  <div class="adm-list-avatar">YH</div>
+                  <div class="adm-list-info">
+                    <div class="name">余浩 <span class="adm-role user">USER</span></div>
+                    <div class="meta">yuhao@xiaomi.com</div>
+                  </div>
+                  <div class="adm-list-time">2 小时前</div>
+                </div>
+                <div class="adm-list-item">
+                  <div class="adm-list-avatar b2">明</div>
+                  <div class="adm-list-info">
+                    <div class="name">明涵 <span class="adm-role user">USER</span></div>
+                    <div class="meta">minghan@xiaomi.com</div>
+                  </div>
+                  <div class="adm-list-time">5 小时前</div>
+                </div>
+                <div class="adm-list-item">
+                  <div class="adm-list-avatar b3">ZH</div>
+                  <div class="adm-list-info">
+                    <div class="name">张昊 <span class="adm-role admin">ADMIN</span></div>
+                    <div class="meta">zhanghao@mi.com</div>
+                  </div>
+                  <div class="adm-list-time">昨天</div>
+                </div>
+                <div class="adm-list-item">
+                  <div class="adm-list-avatar b4">永</div>
+                  <div class="adm-list-info">
+                    <div class="name">永琪 <span class="adm-role user">USER</span></div>
+                    <div class="meta">yongqi@xiaomi.com</div>
+                  </div>
+                  <div class="adm-list-time">2 天前</div>
+                </div>
+                <div class="adm-list-item">
+                  <div class="adm-list-avatar">林</div>
+                  <div class="adm-list-info">
+                    <div class="name">林夕 <span class="adm-role user">USER</span></div>
+                    <div class="meta">linxi@xiaomi.com</div>
+                  </div>
+                  <div class="adm-list-time">3 天前</div>
+                </div>
+              </div>
+              <div class="adm-section-foot">
+                <a href="#">查看全部用户 →</a>
+              </div>
+            </section>
+
+            <!-- Agent 排行 -->
+            <section class="adm-section">
+              <div class="adm-section-h">
+                <h3 class="serif">🤖 Agent 使用排行</h3>
+                <span class="meta">LAST 30 DAYS</span>
+              </div>
+              <div class="adm-section-body">
+                <div class="adm-rank-item">
+                  <span class="adm-rank-num top">#1</span>
+                  <div class="adm-rank-row">
+                    <div class="adm-rank-name">
+                      <span class="ag-icon" style="background:var(--p-data-soft);color:var(--p-data)">📊</span>
+                      <span class="nm serif">数据分析</span>
+                    </div>
+                    <div class="adm-rank-meta"><b>8,294</b> MESSAGES · 满意度 <b>96%</b></div>
+                    <div class="adm-rank-bar"><div class="adm-rank-bar-fill" style="width:100%"></div></div>
+                  </div>
+                </div>
+                <div class="adm-rank-item">
+                  <span class="adm-rank-num top">#2</span>
+                  <div class="adm-rank-row">
+                    <div class="adm-rank-name">
+                      <span class="ag-icon" style="background:var(--p-ab-soft);color:var(--p-ab)">🧪</span>
+                      <span class="nm serif">AB 实验</span>
+                    </div>
+                    <div class="adm-rank-meta"><b>5,142</b> MESSAGES · 满意度 <b>94%</b></div>
+                    <div class="adm-rank-bar"><div class="adm-rank-bar-fill" style="width:62%"></div></div>
+                  </div>
+                </div>
+                <div class="adm-rank-item">
+                  <span class="adm-rank-num top">#3</span>
+                  <div class="adm-rank-row">
+                    <div class="adm-rank-name">
+                      <span class="ag-icon">💬</span>
+                      <span class="nm serif">通用 Agent</span>
+                    </div>
+                    <div class="adm-rank-meta"><b>3,847</b> MESSAGES · 满意度 <b>89%</b></div>
+                    <div class="adm-rank-bar"><div class="adm-rank-bar-fill" style="width:46%"></div></div>
+                  </div>
+                </div>
+                <div class="adm-rank-item">
+                  <span class="adm-rank-num">#4</span>
+                  <div class="adm-rank-row">
+                    <div class="adm-rank-name">
+                      <span class="ag-icon" style="background:var(--p-gray-soft);color:var(--p-gray)">🚀</span>
+                      <span class="nm serif">灰度发布</span>
+                    </div>
+                    <div class="adm-rank-meta"><b>1,824</b> MESSAGES · 满意度 <b>92%</b></div>
+                    <div class="adm-rank-bar"><div class="adm-rank-bar-fill" style="width:22%"></div></div>
+                  </div>
+                </div>
+                <div class="adm-rank-item">
+                  <span class="adm-rank-num">#5</span>
+                  <div class="adm-rank-row">
+                    <div class="adm-rank-name">
+                      <span class="ag-icon" style="background:var(--p-wave-soft);color:var(--p-wave)">📚</span>
+                      <span class="nm serif">Know</span>
+                    </div>
+                    <div class="adm-rank-meta"><b>1,203</b> MESSAGES · 满意度 <b>87%</b></div>
+                    <div class="adm-rank-bar"><div class="adm-rank-bar-fill" style="width:14%"></div></div>
+                  </div>
+                </div>
+              </div>
+              <div class="adm-section-foot">
+                <a href="#">查看全部 Agent →</a>
+              </div>
+            </section>
+
+          </div>
+
+        </main>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===== Phone ===== -->
+  <div class="phone-wrap">
+    <div class="phone-tag"><span style="width:6px;height:6px;border-radius:50%;background:var(--accent)"></span>iPhone 14 Pro · 390 × 844</div>
+    <div class="phone-name">Admin · 移动版</div>
+    <div class="phone-meta">/ admin</div>
+
+    <div class="phone">
+      <div class="phone-notch"></div>
+      <div class="phone-screen">
+
+        <div class="p-top">
+          <button class="menu-btn">☰</button>
+          <div class="crumb-m">
+            <span class="admin-pill">🛡 ADMIN</span>
+            <span class="current">概览</span>
+          </div>
+          <div class="avatar" style="width:28px;height:28px;font-size:11px">GY</div>
+        </div>
+
+        <div class="p-content">
+          <h1 class="p-h1 serif">📊 概览</h1>
+          <p class="p-lead">平台运营全景 + 待处理事项</p>
+
+          <div class="p-alert">
+            <div class="p-alert-h">🚨 待处理事项 <span class="count">15</span></div>
+            <div class="p-alert-row">💰 <b>预算超出</b> $1,284 / $1,000 → 调整</div>
+            <div class="p-alert-row">👥 <b>7 个</b> 账号注册待审批</div>
+            <div class="p-alert-row">💡 <b>6 条</b> 经验卡片待审批</div>
+            <div class="p-alert-row">🌐 <b>3 个</b> 公共任务待审核</div>
+          </div>
+
+          <div class="p-stats">
+            <div class="p-stat"><div class="p-stat-icon">👥</div><div class="l">用户</div><div class="v tnum">142</div></div>
+            <div class="p-stat s2"><div class="p-stat-icon">📋</div><div class="l">任务</div><div class="v tnum">1,284</div></div>
+            <div class="p-stat s3"><div class="p-stat-icon">💬</div><div class="l">消息</div><div class="v tnum">28.4k</div></div>
+            <div class="p-stat s4"><div class="p-stat-icon">💰</div><div class="l">本月成本</div><div class="v tnum">$1,284</div></div>
+          </div>
+
+          <div class="p-section">
+            <div class="p-section-h">最近注册用户 <span class="more">7 NEW →</span></div>
+            <div class="p-section-b">
+              <div class="adm-list-item" style="padding:8px 10px">
+                <div class="adm-list-avatar" style="width:28px;height:28px;font-size:11px">YH</div>
+                <div class="adm-list-info">
+                  <div class="name" style="font-size:12.5px">余浩</div>
+                  <div class="meta" style="font-size:10px">yuhao@xiaomi.com</div>
+                </div>
+                <div class="adm-list-time" style="font-size:10px">2h</div>
+              </div>
+              <div class="adm-list-item" style="padding:8px 10px">
+                <div class="adm-list-avatar b2" style="width:28px;height:28px;font-size:11px">明</div>
+                <div class="adm-list-info">
+                  <div class="name" style="font-size:12.5px">明涵</div>
+                  <div class="meta" style="font-size:10px">minghan@xiaomi.com</div>
+                </div>
+                <div class="adm-list-time" style="font-size:10px">5h</div>
+              </div>
+              <div class="adm-list-item" style="padding:8px 10px">
+                <div class="adm-list-avatar b3" style="width:28px;height:28px;font-size:11px">ZH</div>
+                <div class="adm-list-info">
+                  <div class="name" style="font-size:12.5px">张昊 <span class="adm-role admin" style="font-size:8.5px">ADMIN</span></div>
+                  <div class="meta" style="font-size:10px">zhanghao@mi.com</div>
+                </div>
+                <div class="adm-list-time" style="font-size:10px">1d</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="p-section">
+            <div class="p-section-h">🤖 Agent 排行 <span class="more">30D →</span></div>
+            <div class="p-section-b">
+              <div class="adm-rank-item" style="padding:8px 10px;gap:8px">
+                <span class="adm-rank-num top" style="width:24px;height:24px;font-size:10px">#1</span>
+                <div class="adm-rank-row">
+                  <div class="adm-rank-name" style="font-size:12px"><span class="ag-icon" style="width:18px;height:18px;font-size:10px;background:var(--p-data-soft);color:var(--p-data)">📊</span><span class="nm serif" style="font-size:12px">数据分析</span></div>
+                  <div class="adm-rank-meta" style="font-size:9px"><b>8,294</b> · 96%</div>
+                  <div class="adm-rank-bar" style="height:3px"><div class="adm-rank-bar-fill" style="width:100%"></div></div>
+                </div>
+              </div>
+              <div class="adm-rank-item" style="padding:8px 10px;gap:8px">
+                <span class="adm-rank-num top" style="width:24px;height:24px;font-size:10px">#2</span>
+                <div class="adm-rank-row">
+                  <div class="adm-rank-name" style="font-size:12px"><span class="ag-icon" style="width:18px;height:18px;font-size:10px;background:var(--p-ab-soft);color:var(--p-ab)">🧪</span><span class="nm serif" style="font-size:12px">AB 实验</span></div>
+                  <div class="adm-rank-meta" style="font-size:9px"><b>5,142</b> · 94%</div>
+                  <div class="adm-rank-bar" style="height:3px"><div class="adm-rank-bar-fill" style="width:62%"></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="spec">
+  <div class="spec-card">
+    <h3 class="serif">📐 这张稿的布局重设计</h3>
+    <ul>
+      <li><b>原版</b>：TopNav admin mode + 双栏（左 240 sidebar / 右 main），sidebar 4 组导航（监控 / 内容审核 / 资源管理 / 用户与配置），main 是 AdminOverview（page-head + 待处理事项 + 4 stat + 双栏：最近用户 / Agent 排行）</li>
+      <li><b>v5</b>：沿用<b>双栏 layout</b>（左 240 / 右 1fr），但视觉全面升级。TopNav 加 <b>🛡 ADMIN pill</b>（紫 muted 范式色 mono 字）凸显当前在管理后台</li>
+      <li><b>左侧栏</b>：暖米色 surface-2 底，分组用 <b>Mono 大写小字 + 横线引导符</b>（CONTENTS 风），导航项 hover surface 白底，active 用铜橙 soft + 600 字重，待处理项右侧 <b>红色 Mono badge</b>（14 / 6 / 3 / 7）。底部 footer 显示版本号 + uptime + ALL SYSTEMS GREEN（绿色 dot）—— 学 Anthropic Console / Vercel Dashboard 风</li>
+      <li><b>主内容 page-head</b>：Mono tag「ADMIN · OVERVIEW · 监控」+ 36px Inter H1「📊 概览」+ 副本</li>
+      <li><b>🚨 待处理事项卡</b>：warning 软色底 + 3px 左边色条，标题 + 右上 Mono 计数（15 ITEMS），内部行用<b>范式色左边条</b> + Mono CTA 「→ 调整预算 / 立即审批」（铜橙）。预算超出用 error 色突出</li>
+      <li><b>4 stat 卡居中风</b>（与 08_scheduled 一致）：每张含 44px icon（👥/📋/💬/💰）+ Mono label + Inter 32px 数字 + 趋势。每张不同范式色 ico（accent / biz / data / warning）。预算超出态用 error 色 icon + ⚠ down 趋势</li>
+      <li><b>双栏</b> 1.1 : 1：左「最近注册用户」（小头像彩色渐变 + 名字 + role chip USER/ADMIN/SUPER + 邮箱 mono + 时间 mono）/ 右「Agent 排行」（#1-#5，#1-#3 用铜橙实色圆 + Inter 名字 + Mono 消息数 + 满意度 + 铜橙实色进度条）</li>
+      <li><b>section 头</b>：Inter H3 + 右 Mono 大写 meta（7 NEW / LAST 30 DAYS）</li>
+      <li><b>移动端</b>：左 ☰ 抽屉触发按钮 + 中 ADMIN pill + 右头像。主内容单栏（精简 alert + 2×2 stats + 紧凑用户列表 + Agent 排行 top 2）</li>
+    </ul>
+
+    <h3 class="serif" style="margin-top:24px">和 v4 / 当前实现的差异</h3>
+    <ul>
+      <li>TopNav：纯 breadcrumb → 加 <b>🛡 ADMIN pill 紫范式色</b> 凸显环境</li>
+      <li>侧栏：浅色 + 单色 active → <b>暖米色 + Mono 分组小字 + 铜橙 active 高亮 + 红 badge</b></li>
+      <li>侧栏底部：原版无 → <b>新增版本号 / uptime / 系统状态</b></li>
+      <li>page-head：emoji + 单行 → <b>Mono tag + Inter 大标题 + 副本</b></li>
+      <li>alert：彩色块 + 行 → <b>warning 软色底 + 范式色左边条 + Mono CTA</b></li>
+      <li>4 stat：左对齐数字 + 标签 → <b>居中风 + icon + Inter 数字 + Mono 趋势</b></li>
+      <li>用户列表：纯文字 → <b>彩色渐变小头像 + role chip + Mono 邮箱</b></li>
+      <li>Agent 排行：纯 #编号 + 进度条 → <b>top 3 铜橙实色圆 + Inter 名字 + Mono 数字 + 铜橙实色填充条</b></li>
+    </ul>
+
+    <h3 class="serif" style="margin-top:24px">📁 完整 design_v5 文件清单</h3>
+    <ul style="font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.9">
+      <li><code>00_design_system.html</code> — Tokens / 字体 / 按钮 / chip / 卡片</li>
+      <li><code>01_dashboard.html</code> — 用户首页（起点 + 范式 + 任务 + 公共区）</li>
+      <li><code>02_login.html</code> — 登录（split + 表单 + 3 状态）</li>
+      <li><code>03_introduce.html</code> — 产品介绍 / 落地页</li>
+      <li><code>04_guide.html</code> — 使用指南（文档三栏）</li>
+      <li><code>05_workspace_chat.html</code> — Workspace 三栏 chat</li>
+      <li><code>06_create_task.html</code> — 新建任务（3 步）</li>
+      <li><code>07_agent_detail.html</code> — Agent 详情（Hero + Prompt + 历史 + 沙盒）</li>
+      <li><code>08_scheduled.html</code> — 定时任务列表 + Modal</li>
+      <li><code>09_admin.html</code> — 管理后台（layout + overview）</li>
+    </ul>
+  </div>
+</div>
+
+</body>
+</html>

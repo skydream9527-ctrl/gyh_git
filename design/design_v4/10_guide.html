@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ICE Workbench v4 · 新人引导 · Desktop + Mobile</title>
+<script>(function(){var t=localStorage.getItem('ice-theme')||'light';document.documentElement.dataset.theme=t;})();</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+:root[data-theme="light"]{--bg:#faf9f6;--paper:#f4f1ec;--surface:#fff;--surface-2:#f7f5f0;--surface-3:#ece7df;
+  --border:#e6e2dc;--border-soft:#efece6;--text:#1f1f1f;--text-dim:#5f6368;--text-muted:#80868b;
+  --accent:#1a73e8;--accent-hover:#1557b0;--accent-soft:#e8f0fe;--accent-text:#174ea6;
+  --success:#137333;--success-soft:#e6f4ea;
+  --p-ab-soft:#e8f0fe;--p-biz-soft:#fef7e0;--p-gray-soft:#f3edff;--p-data-soft:#e6f4ea;--p-wave-soft:#fce8e6;
+  --p-ab:#1967d2;--p-biz:#b06000;--p-gray:#5f4b8b;--p-data:#137333;--p-wave:#b3261e;
+  --shadow-1:0 1px 2px rgba(60,64,67,.06);--shadow-2:0 1px 3px rgba(60,64,67,.10),0 4px 8px rgba(60,64,67,.04);
+  --shadow-3:0 8px 32px rgba(60,64,67,.10);}
+:root[data-theme="dark"]{--bg:#1f1f1f;--paper:#2a2a2a;--surface:#262626;--surface-2:#2e2e2e;--surface-3:#363636;
+  --border:#3c3c3c;--border-soft:#2e2e2e;--text:#e8eaed;--text-dim:#9aa0a6;--text-muted:#6c7075;
+  --accent:#8ab4f8;--accent-hover:#aecbfa;--accent-soft:rgba(138,180,248,.16);--accent-text:#aecbfa;
+  --success:#81c995;--success-soft:rgba(129,201,149,.14);
+  --p-ab:#8ab4f8;--p-biz:#fdd663;--p-gray:#c58af9;--p-data:#81c995;--p-wave:#f28b82;
+  --p-ab-soft:rgba(138,180,248,.16);--p-biz-soft:rgba(253,214,99,.14);--p-gray-soft:rgba(197,138,249,.14);
+  --p-data-soft:rgba(129,201,149,.14);--p-wave-soft:rgba(242,139,130,.14);
+  --shadow-1:0 1px 2px rgba(0,0,0,.4);--shadow-2:0 4px 16px rgba(0,0,0,.5);--shadow-3:0 12px 48px rgba(0,0,0,.5);}
+*{box-sizing:border-box}html,body{margin:0;padding:0}
+body{background:var(--paper);color:var(--text);font-family:'Inter','PingFang SC','Microsoft YaHei',sans-serif;font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased}
+.canvas{max-width:1820px;margin:0 auto;padding:32px 24px 80px;display:grid;grid-template-columns:1fr 430px;gap:32px;align-items:flex-start}
+@media (max-width:1500px){.canvas{grid-template-columns:1fr;gap:48px}}
+.label{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.6px;font-weight:500;margin:0 0 12px;display:flex;align-items:center;gap:8px}
+.label .dot{width:6px;height:6px;border-radius:50%;background:var(--accent)}
+.vp-cap{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:14px}
+.vp-cap .name{font-family:'Inter',sans-serif;font-weight:500;font-size:18px;letter-spacing:-.2px}
+.vp-cap .size{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted)}
+.browser{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow-2)}
+.browser-bar{background:var(--surface-2);padding:10px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border-soft)}
+.browser-bar .dots{display:flex;gap:6px}.browser-bar .dots span{width:11px;height:11px;border-radius:50%;background:var(--surface-3)}
+.browser-bar .url{flex:1;background:var(--surface);border:1px solid var(--border-soft);border-radius:99px;padding:5px 14px;font-size:12px;color:var(--text-dim);font-family:'JetBrains Mono',monospace}
+.browser-bar .url::before{content:"🔒 "}
+
+.guide-page{height:780px;background:var(--bg);position:relative;overflow:hidden;display:flex;flex-direction:column}
+.gd-top{padding:14px 24px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border-soft)}
+.brand-mark{width:30px;height:30px;display:grid;place-items:center}
+.brand-mark svg{width:30px;height:30px}
+.brand-text{font-family:'Inter',sans-serif;font-weight:500;font-size:16px;letter-spacing:-.2px}
+.brand-text b{font-weight:600}
+.gd-top .spacer{flex:1}
+.gd-top .skip{font-size:12.5px;color:var(--text-dim);background:none;border:none;cursor:pointer;font-family:inherit}
+.gd-top .skip:hover{color:var(--text)}
+.icon-btn{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;cursor:pointer;color:var(--text-dim);background:transparent;border:none;font-size:15px}
+.icon-btn:hover{background:var(--surface-2);color:var(--text)}
+.theme-btn .t-light{display:inline}.theme-btn .t-dark{display:none}
+:root[data-theme="dark"] .theme-btn .t-light{display:none}
+:root[data-theme="dark"] .theme-btn .t-dark{display:inline}
+
+/* progress */
+.progress{padding:18px 24px 0}
+.progress-row{display:flex;align-items:center;gap:8px;max-width:680px;margin:0 auto}
+.step-pill{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--text-muted);font-weight:500}
+.step-pill .dot{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--border);background:var(--surface);display:grid;place-items:center;font-size:11px;font-weight:600;color:var(--text-muted)}
+.step-pill.done .dot{background:var(--success);border-color:var(--success);color:#fff}
+.step-pill.active .dot{background:var(--accent);border-color:var(--accent);color:#fff}
+.step-pill.active{color:var(--text)}
+.step-line{flex:1;height:2px;background:var(--surface-3);border-radius:1px;position:relative;overflow:hidden}
+.step-line.done::before{content:"";position:absolute;inset:0;background:var(--success)}
+
+/* main step content */
+.gd-main{flex:1;display:grid;grid-template-columns:1fr 1fr;align-items:stretch;overflow:hidden}
+@media (max-width:980px){.gd-main{grid-template-columns:1fr}.gd-main .gd-art{display:none}}
+.gd-content{padding:36px 56px;display:flex;flex-direction:column;justify-content:center;overflow-y:auto}
+.gd-step-tag{font-size:11px;color:var(--accent-text);background:var(--accent-soft);padding:4px 11px;border-radius:99px;font-weight:500;letter-spacing:.3px;display:inline-flex;align-items:center;gap:5px;width:fit-content;margin-bottom:14px}
+.gd-content h1{font-family:'Inter',sans-serif;font-size:30px;font-weight:500;letter-spacing:-.5px;line-height:1.2;margin:0 0 10px;max-width:480px}
+.gd-content p.lead{font-size:14px;color:var(--text-dim);line-height:1.65;max-width:480px;margin:0 0 24px}
+
+/* paradigm pick */
+.para-pick{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;max-width:520px}
+.para-card{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:16px;cursor:pointer;display:flex;align-items:flex-start;gap:12px;transition:all .15s;text-align:left}
+.para-card:hover{border-color:var(--text-dim)}
+.para-card.selected{border-color:var(--accent);background:var(--accent-soft);box-shadow:0 0 0 3px var(--accent-soft)}
+.para-card .e{font-size:24px;flex-shrink:0;line-height:1}
+.para-card .info{flex:1;min-width:0}
+.para-card .info .n{font-size:13.5px;font-weight:500;display:flex;align-items:center;gap:6px;margin-bottom:3px}
+.para-card .info .d{font-size:11.5px;color:var(--text-dim);line-height:1.5}
+.para-card .check{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--text-muted);background:var(--surface);flex-shrink:0;display:grid;place-items:center;font-size:11px}
+.para-card.selected .check{background:var(--accent);border-color:var(--accent);color:#fff}
+.para-card.selected .check::before{content:"✓"}
+
+/* nav */
+.gd-nav{padding:16px 56px 22px;display:flex;align-items:center;border-top:1px solid var(--border-soft);background:var(--bg)}
+.gd-nav .step-meta{font-size:12px;color:var(--text-muted);font-family:'JetBrains Mono',monospace}
+.gd-nav .actions{margin-left:auto;display:flex;gap:8px}
+.btn{display:inline-flex;align-items:center;gap:6px;font-family:inherit;font-size:14px;font-weight:500;padding:10px 22px;border-radius:99px;border:1px solid transparent;cursor:pointer;line-height:1;transition:all .15s}
+.btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:var(--accent-hover)}
+.btn-ghost{background:transparent;color:var(--text);border-color:var(--border)}
+.btn-ghost:hover{background:var(--surface-2)}
+
+/* art preview */
+.gd-art{background:linear-gradient(135deg,var(--accent-soft) 0%,var(--p-biz-soft) 100%);position:relative;overflow:hidden;display:grid;place-items:center;padding:40px}
+.gd-art::before{content:"";position:absolute;top:-40%;left:-15%;width:70%;height:70%;background:radial-gradient(circle,var(--p-gray-soft),transparent 70%);opacity:.6}
+
+.preview-card{background:var(--surface);border:1px solid var(--border-soft);border-radius:18px;padding:20px;box-shadow:var(--shadow-3);max-width:380px;width:100%;position:relative;z-index:1}
+.preview-card .ph{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.preview-card .ph .e{width:40px;height:40px;border-radius:12px;background:var(--p-biz-soft);color:var(--p-biz);display:grid;place-items:center;font-size:20px}
+.preview-card .ph .info .n{font-size:14px;font-weight:500}
+.preview-card .ph .info .s{font-size:11px;color:var(--text-muted);margin-top:2px}
+.preview-card .ph .pill{font-size:10px;background:var(--p-biz-soft);color:var(--p-biz);padding:1px 7px;border-radius:99px;font-weight:500}
+.preview-card .body{font-size:12.5px;color:var(--text);line-height:1.6;margin-bottom:12px}
+.preview-card .body .cite{display:inline-flex;align-items:center;justify-content:center;font-size:9px;background:var(--accent-soft);color:var(--accent-text);padding:0 5px;height:16px;border-radius:8px;margin:0 2px;font-weight:600}
+.preview-card .skill-row{display:flex;gap:6px;flex-wrap:wrap}
+.preview-card .skill{font-size:10px;background:var(--surface-2);color:var(--text-dim);padding:3px 8px;border-radius:99px;border:1px solid var(--border-soft)}
+
+/* phone */
+.phone{position:sticky;top:32px;justify-self:center}
+.phone-frame{width:390px;height:844px;background:var(--bg);border:9px solid #1a1a1a;border-radius:48px;overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--shadow-3);position:relative}
+.phone-frame::before{content:"";position:absolute;top:9px;left:50%;transform:translateX(-50%);width:120px;height:28px;background:#1a1a1a;border-radius:16px;z-index:10}
+.phone-status{height:48px;flex-shrink:0;padding:16px 26px 4px;display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:600;color:var(--text)}
+.phone-body{flex:1;background:var(--bg);position:relative;display:flex;flex-direction:column}
+.phone-body::-webkit-scrollbar{display:none}
+
+.mob-top{padding:14px 16px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border-soft)}
+.mob-top .skip{font-size:12px;color:var(--text-dim);margin-left:auto;background:none;border:none;cursor:pointer;font-family:inherit}
+
+.mob-progress{padding:14px 16px 8px;display:flex;align-items:center;gap:6px}
+.mob-progress .seg{flex:1;height:3px;background:var(--surface-3);border-radius:99px;overflow:hidden}
+.mob-progress .seg.done{background:var(--success)}
+.mob-progress .seg.active{background:var(--accent)}
+.mob-step-meta{padding:0 16px 4px;font-size:10.5px;color:var(--text-muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.4px}
+
+.mob-content{flex:1;padding:14px 18px;overflow-y:auto}
+.mob-content .gd-step-tag{margin-bottom:10px;font-size:10px}
+.mob-content h1{font-size:22px;font-weight:500;letter-spacing:-.3px;line-height:1.2;margin:0 0 8px}
+.mob-content p.lead{font-size:13px;color:var(--text-dim);line-height:1.6;margin:0 0 18px}
+
+.mob-para{display:flex;flex-direction:column;gap:8px}
+.mob-para .para-card{padding:13px;align-items:center}
+.mob-para .para-card .e{font-size:22px}
+.mob-para .para-card .info .n{font-size:13px}
+.mob-para .para-card .info .d{font-size:11px}
+
+.mob-nav{padding:14px 16px 26px;border-top:1px solid var(--border-soft);background:var(--bg);display:flex;gap:8px}
+.mob-nav .btn{flex:1;justify-content:center;padding:12px}
+</style>
+</head>
+<body>
+
+<div class="canvas">
+  <!-- DESKTOP -->
+  <section>
+    <div class="vp-cap"><div><p class="label"><span class="dot"></span>DESKTOP · 1280 × 800</p><span class="name">新人引导</span></div><span class="size">4 步 · Step 2/4 演示</span></div>
+    <div class="browser">
+      <div class="browser-bar"><div class="dots"><span></span><span></span><span></span></div><div class="url">ice.workbench.local/onboarding</div></div>
+      <div class="guide-page">
+        <header class="gd-top">
+          <div class="brand-mark"><svg viewBox="0 0 32 32" fill="none"><rect x="2" y="2" width="28" height="28" rx="8" fill="#e8f0fe"/><path d="M9 11h10M9 16h14M9 21h7" stroke="#1a73e8" stroke-width="2" stroke-linecap="round"/><circle cx="22" cy="21" r="3" fill="#fef7e0" stroke="#b06000" stroke-width="1.5"/></svg></div>
+          <span class="brand-text"><b>ICE</b> Workbench · 新人引导</span>
+          <div class="spacer"></div>
+          <button class="icon-btn theme-btn" onclick="toggleTheme()" title="主题"><span class="t-light">🌙</span><span class="t-dark">☀️</span></button>
+          <button class="skip">跳过引导 →</button>
+        </header>
+
+        <div class="progress">
+          <div class="progress-row">
+            <div class="step-pill done"><span class="dot">✓</span><span>账号</span></div>
+            <div class="step-line done"></div>
+            <div class="step-pill active"><span class="dot">2</span><span>选范式</span></div>
+            <div class="step-line"></div>
+            <div class="step-pill"><span class="dot">3</span><span>接知识库</span></div>
+            <div class="step-line"></div>
+            <div class="step-pill"><span class="dot">4</span><span>邀请协作</span></div>
+          </div>
+        </div>
+
+        <div class="gd-main">
+          <main class="gd-content">
+            <span class="gd-step-tag">Step 2 / 4 · 选你常用的</span>
+            <h1>你最常做哪类分析？</h1>
+            <p class="lead">我们会按你选的范式预设 Agent 与 Skills，第一个笔记本就能用。可多选，不喜欢可以随时调。</p>
+
+            <div class="para-pick">
+              <div class="para-card selected">
+                <div class="e">📈</div>
+                <div class="info">
+                  <div class="n">经营分析</div>
+                  <div class="d">指标拆解 · 趋势 · 归因 · 报告</div>
+                </div>
+                <div class="check"></div>
+              </div>
+              <div class="para-card selected">
+                <div class="e">⚖️</div>
+                <div class="info">
+                  <div class="n">AB 实验</div>
+                  <div class="d">分流校验 · 显著性 · 置信区间</div>
+                </div>
+                <div class="check"></div>
+              </div>
+              <div class="para-card">
+                <div class="e">🔥</div>
+                <div class="info">
+                  <div class="n">波动分析</div>
+                  <div class="d">异动检测 · 多维下钻 · 归因定位</div>
+                </div>
+                <div class="check"></div>
+              </div>
+              <div class="para-card">
+                <div class="e">🔌</div>
+                <div class="info">
+                  <div class="n">版本灰度</div>
+                  <div class="d">放量监控 · 版本对比 · 质量评估</div>
+                </div>
+                <div class="check"></div>
+              </div>
+              <div class="para-card">
+                <div class="e">📊</div>
+                <div class="info">
+                  <div class="n">数据分析</div>
+                  <div class="d">SQL 查询 · 探索 · 可视化</div>
+                </div>
+                <div class="check"></div>
+              </div>
+              <div class="para-card" style="border-style:dashed">
+                <div class="e" style="color:var(--text-muted)">＋</div>
+                <div class="info">
+                  <div class="n" style="color:var(--text-dim)">空白笔记本</div>
+                  <div class="d">不预设范式</div>
+                </div>
+                <div class="check" style="visibility:hidden"></div>
+              </div>
+            </div>
+          </main>
+
+          <aside class="gd-art">
+            <div class="preview-card">
+              <div class="ph">
+                <div class="e">📈</div>
+                <div class="info">
+                  <div class="n">经营洞察 Agent</div>
+                  <div class="s">Claude Opus 4.7</div>
+                </div>
+                <span class="pill">经营</span>
+              </div>
+              <div class="body">
+                💬 你现在可以问：<br/>
+                <strong>"上周新版本留存怎么样？"</strong><br/>
+                <span style="color:var(--text-dim)">Agent 会调用指标拆解、趋势分析等 Skill，并引用接入的数据源 <span class="cite">1</span><span class="cite">2</span> 给出结论。</span>
+              </div>
+              <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;font-weight:500;margin-bottom:6px">已预设 Skills</div>
+              <div class="skill-row">
+                <span class="skill">📐 指标拆解</span>
+                <span class="skill">📈 趋势分析</span>
+                <span class="skill">🎯 归因</span>
+                <span class="skill">📝 报告生成</span>
+                <span class="skill">+3</span>
+              </div>
+            </div>
+          </aside>
+        </div>
+
+        <footer class="gd-nav">
+          <span class="step-meta">2 / 4 · 已选 2 个范式</span>
+          <div class="actions">
+            <button class="btn btn-ghost">← 上一步</button>
+            <button class="btn btn-primary">下一步 → 接知识库</button>
+          </div>
+        </footer>
+      </div>
+    </div>
+  </section>
+
+  <!-- MOBILE -->
+  <section class="phone">
+    <div class="vp-cap"><div><p class="label"><span class="dot"></span>MOBILE · iPhone 14 Pro</p><span class="name">新人引导</span></div><span class="size">390 × 844</span></div>
+    <div class="phone-frame">
+      <div class="phone-status"><span>9:41</span><span style="display:flex;gap:5px"><span>📶</span><span>📡</span><span>🔋</span></span></div>
+      <div class="phone-body">
+        <div class="mob-top">
+          <div class="brand-mark"><svg viewBox="0 0 32 32" fill="none"><rect x="2" y="2" width="28" height="28" rx="8" fill="#e8f0fe"/><path d="M9 11h10M9 16h14M9 21h7" stroke="#1a73e8" stroke-width="2" stroke-linecap="round"/><circle cx="22" cy="21" r="3" fill="#fef7e0" stroke="#b06000" stroke-width="1.5"/></svg></div>
+          <span class="brand-text" style="font-size:14px"><b>ICE</b> · 引导</span>
+          <button class="skip">跳过</button>
+          <button class="icon-btn theme-btn" onclick="toggleTheme()"><span class="t-light">🌙</span><span class="t-dark">☀️</span></button>
+        </div>
+
+        <div class="mob-progress">
+          <div class="seg done"></div>
+          <div class="seg active"></div>
+          <div class="seg"></div>
+          <div class="seg"></div>
+        </div>
+        <div class="mob-step-meta">Step 2 / 4 · 选范式</div>
+
+        <div class="mob-content">
+          <span class="gd-step-tag">📒 选你常用的</span>
+          <h1>你最常做哪类分析？</h1>
+          <p class="lead">我们会按你选的范式预设 Agent 和 Skills。可多选，可调。</p>
+
+          <div class="mob-para">
+            <div class="para-card selected">
+              <div class="e">📈</div>
+              <div class="info"><div class="n">经营分析</div><div class="d">指标拆解 · 归因</div></div>
+              <div class="check"></div>
+            </div>
+            <div class="para-card selected">
+              <div class="e">⚖️</div>
+              <div class="info"><div class="n">AB 实验</div><div class="d">显著性 · 置信区间</div></div>
+              <div class="check"></div>
+            </div>
+            <div class="para-card">
+              <div class="e">🔥</div>
+              <div class="info"><div class="n">波动分析</div><div class="d">异动 · 归因定位</div></div>
+              <div class="check"></div>
+            </div>
+            <div class="para-card">
+              <div class="e">🔌</div>
+              <div class="info"><div class="n">版本灰度</div><div class="d">放量 · 监控</div></div>
+              <div class="check"></div>
+            </div>
+            <div class="para-card">
+              <div class="e">📊</div>
+              <div class="info"><div class="n">数据分析</div><div class="d">SQL · 探索</div></div>
+              <div class="check"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mob-nav">
+          <button class="btn btn-ghost">←</button>
+          <button class="btn btn-primary" style="flex:3">下一步 →</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>function toggleTheme(){var c=document.documentElement.dataset.theme||'light';var n=c==='light'?'dark':'light';document.documentElement.dataset.theme=n;localStorage.setItem('ice-theme',n);}</script>
+</body>
+</html>

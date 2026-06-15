@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ICE Workbench v4 · 产品介绍 · Desktop + Mobile</title>
+<script>(function(){var t=localStorage.getItem('ice-theme')||'light';document.documentElement.dataset.theme=t;})();</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+:root[data-theme="light"]{--bg:#faf9f6;--paper:#f4f1ec;--surface:#fff;--surface-2:#f7f5f0;--surface-3:#ece7df;
+  --border:#e6e2dc;--border-soft:#efece6;--text:#1f1f1f;--text-dim:#5f6368;--text-muted:#80868b;
+  --accent:#1a73e8;--accent-hover:#1557b0;--accent-soft:#e8f0fe;--accent-text:#174ea6;
+  --p-ab-soft:#e8f0fe;--p-biz-soft:#fef7e0;--p-gray-soft:#f3edff;--p-data-soft:#e6f4ea;--p-wave-soft:#fce8e6;
+  --p-ab:#1967d2;--p-biz:#b06000;--p-gray:#5f4b8b;--p-data:#137333;--p-wave:#b3261e;
+  --shadow-1:0 1px 2px rgba(60,64,67,.06);--shadow-2:0 1px 3px rgba(60,64,67,.10),0 4px 8px rgba(60,64,67,.04);
+  --shadow-3:0 8px 32px rgba(60,64,67,.10);}
+:root[data-theme="dark"]{--bg:#1f1f1f;--paper:#2a2a2a;--surface:#262626;--surface-2:#2e2e2e;--surface-3:#363636;
+  --border:#3c3c3c;--border-soft:#2e2e2e;--text:#e8eaed;--text-dim:#9aa0a6;--text-muted:#6c7075;
+  --accent:#8ab4f8;--accent-hover:#aecbfa;--accent-soft:rgba(138,180,248,.16);--accent-text:#aecbfa;
+  --p-ab:#8ab4f8;--p-biz:#fdd663;--p-gray:#c58af9;--p-data:#81c995;--p-wave:#f28b82;
+  --p-ab-soft:rgba(138,180,248,.16);--p-biz-soft:rgba(253,214,99,.14);--p-gray-soft:rgba(197,138,249,.14);
+  --p-data-soft:rgba(129,201,149,.14);--p-wave-soft:rgba(242,139,130,.14);
+  --shadow-1:0 1px 2px rgba(0,0,0,.4);--shadow-2:0 4px 16px rgba(0,0,0,.5);--shadow-3:0 12px 48px rgba(0,0,0,.5);}
+*{box-sizing:border-box}html,body{margin:0;padding:0}
+body{background:var(--paper);color:var(--text);font-family:'Inter','PingFang SC','Microsoft YaHei',sans-serif;font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased}
+.canvas{max-width:1820px;margin:0 auto;padding:32px 24px 80px;display:grid;grid-template-columns:1fr 430px;gap:32px;align-items:flex-start}
+@media (max-width:1500px){.canvas{grid-template-columns:1fr;gap:48px}}
+.label{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.6px;font-weight:500;margin:0 0 12px;display:flex;align-items:center;gap:8px}
+.label .dot{width:6px;height:6px;border-radius:50%;background:var(--accent)}
+.vp-cap{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:14px}
+.vp-cap .name{font-family:'Inter',sans-serif;font-weight:500;font-size:18px;letter-spacing:-.2px}
+.vp-cap .size{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted)}
+
+.browser{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow-2)}
+.browser-bar{background:var(--surface-2);padding:10px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border-soft)}
+.browser-bar .dots{display:flex;gap:6px}.browser-bar .dots span{width:11px;height:11px;border-radius:50%;background:var(--surface-3)}
+.browser-bar .url{flex:1;background:var(--surface);border:1px solid var(--border-soft);border-radius:99px;padding:5px 14px;font-size:12px;color:var(--text-dim);font-family:'JetBrains Mono',monospace}
+.browser-bar .url::before{content:"🔒 "}
+
+.lp{background:var(--bg);height:1240px;overflow-y:auto}
+.lp-nav{position:sticky;top:0;z-index:10;background:rgba(250,249,246,.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--border-soft);height:64px;display:flex;align-items:center;padding:0 32px;gap:14px}
+:root[data-theme="dark"] .lp-nav{background:rgba(31,31,31,.85)}
+.lp-brand{display:flex;align-items:center;gap:10px;cursor:pointer}
+.lp-brand-mark{width:32px;height:32px;display:grid;place-items:center}
+.lp-brand-mark svg{width:32px;height:32px}
+.lp-brand-text{font-family:'Inter',sans-serif;font-weight:500;font-size:18px;letter-spacing:-.2px}
+.lp-brand-text b{font-weight:600}
+.lp-nav .links{display:flex;gap:8px;margin-left:24px}
+.lp-nav .links a{font-size:13px;color:var(--text-dim);text-decoration:none;padding:6px 12px;border-radius:99px;font-weight:500;transition:all .12s}
+.lp-nav .links a:hover{color:var(--text);background:var(--surface-2)}
+.lp-nav .spacer{flex:1}
+.icon-btn{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;cursor:pointer;color:var(--text-dim);background:transparent;border:none;font-size:16px}
+.icon-btn:hover{background:var(--surface-2);color:var(--text)}
+.theme-btn .t-light{display:inline}.theme-btn .t-dark{display:none}
+:root[data-theme="dark"] .theme-btn .t-light{display:none}
+:root[data-theme="dark"] .theme-btn .t-dark{display:inline}
+.btn{display:inline-flex;align-items:center;gap:6px;font-family:inherit;font-size:13px;font-weight:500;padding:8px 16px;border-radius:99px;border:1px solid transparent;cursor:pointer;line-height:1;transition:all .15s;text-decoration:none}
+.btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:var(--accent-hover)}
+.btn-tonal{background:var(--accent-soft);color:var(--accent-text)}
+.btn-ghost{background:transparent;color:var(--text);border-color:var(--border)}
+.btn-lg{padding:13px 26px;font-size:15px}
+
+/* HERO */
+.hero{padding:80px 32px 60px;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:"";position:absolute;top:-200px;left:50%;transform:translateX(-50%);width:1000px;height:600px;background:radial-gradient(ellipse at center,var(--accent-soft) 0%,transparent 60%);opacity:.6;pointer-events:none}
+.hero-tag{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--accent-text);background:var(--accent-soft);padding:5px 14px;border-radius:99px;font-weight:500;letter-spacing:.3px;margin-bottom:24px;position:relative}
+.hero h1{font-family:'Inter',sans-serif;font-size:54px;font-weight:500;letter-spacing:-1.2px;line-height:1.1;margin:0 0 20px;max-width:900px;margin-inline:auto;position:relative}
+.hero h1 .accent{color:var(--accent-text);font-style:italic}
+.hero p.lead{font-size:17px;color:var(--text-dim);line-height:1.6;max-width:640px;margin:0 auto 32px;position:relative}
+.hero .cta{display:flex;gap:10px;justify-content:center;position:relative}
+
+.demo-frame{margin:48px auto 0;max-width:880px;background:var(--surface);border:1px solid var(--border-soft);border-radius:18px;padding:18px;box-shadow:var(--shadow-3);position:relative}
+.demo-strip{display:flex;align-items:center;gap:6px;margin-bottom:12px}
+.demo-strip span{width:9px;height:9px;border-radius:50%;background:var(--surface-3)}
+.demo-content{display:grid;grid-template-columns:200px 1fr 240px;gap:12px;height:340px}
+.demo-pane{background:var(--surface-2);border-radius:10px;padding:12px;font-size:11px;color:var(--text-dim);overflow:hidden}
+.demo-pane .ph{font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;font-weight:500;margin-bottom:8px}
+.demo-pane .row{padding:6px 8px;background:var(--surface);border-radius:6px;margin-bottom:5px;display:flex;align-items:center;gap:6px;font-size:11px}
+.demo-pane .row .e{font-size:14px}
+.demo-msg{background:var(--surface);border-radius:8px;padding:8px 10px;margin-bottom:6px;font-size:11.5px}
+.demo-msg.ag{border-left:2px solid var(--accent)}
+.demo-cite{font-size:9px;background:var(--accent-soft);color:var(--accent-text);padding:0 4px;border-radius:6px;font-weight:600;margin:0 2px}
+
+/* SECTIONS */
+.section{padding:60px 32px;max-width:1080px;margin:0 auto}
+.section-h{text-align:center;margin-bottom:44px}
+.section-h .tag{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.6px;font-weight:500;margin-bottom:10px;display:block}
+.section-h h2{font-family:'Inter',sans-serif;font-size:34px;font-weight:500;letter-spacing:-.5px;margin:0 0 12px;line-height:1.2}
+.section-h p{color:var(--text-dim);font-size:15px;max-width:600px;margin:0 auto;line-height:1.6}
+
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+@media (max-width:780px){.feat-grid{grid-template-columns:1fr}}
+.feat-card{background:var(--surface);border:1px solid var(--border-soft);border-radius:18px;padding:24px;transition:all .15s}
+.feat-card:hover{border-color:var(--border);transform:translateY(-2px);box-shadow:var(--shadow-2)}
+.feat-card .ico{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-size:22px;margin-bottom:14px;background:var(--accent-soft);color:var(--accent-text)}
+.feat-card.biz .ico{background:var(--p-biz-soft);color:var(--p-biz)}
+.feat-card.gray .ico{background:var(--p-gray-soft);color:var(--p-gray)}
+.feat-card.data .ico{background:var(--p-data-soft);color:var(--p-data)}
+.feat-card.wave .ico{background:var(--p-wave-soft);color:var(--p-wave)}
+.feat-card h3{font-family:'Inter',sans-serif;font-size:16px;font-weight:500;margin:0 0 6px;letter-spacing:-.1px}
+.feat-card p{font-size:13.5px;color:var(--text-dim);line-height:1.6;margin:0}
+
+/* paradigm row */
+.para-row{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:12px}
+.para-tile{background:var(--surface);border:1px solid var(--border-soft);border-radius:14px;padding:18px 12px;text-align:center;cursor:pointer;transition:all .15s}
+.para-tile:hover{border-color:var(--border)}
+.para-tile .e{font-size:30px;line-height:1;margin-bottom:6px}
+.para-tile .n{font-size:13px;font-weight:500}
+.para-tile .d{font-size:11px;color:var(--text-muted);margin-top:3px;line-height:1.4}
+
+/* CTA */
+.cta-section{padding:80px 32px;text-align:center;background:linear-gradient(180deg,var(--bg) 0%,var(--surface-2) 100%);position:relative;overflow:hidden}
+.cta-section::before{content:"";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:600px;height:300px;border-radius:50%;background:radial-gradient(ellipse,var(--accent-soft),transparent 70%);opacity:.7}
+.cta-section h2{font-family:'Inter',sans-serif;font-size:36px;font-weight:500;letter-spacing:-.5px;margin:0 0 12px;position:relative}
+.cta-section p{color:var(--text-dim);font-size:15px;margin:0 0 26px;position:relative}
+.cta-section .ctaBtns{display:flex;gap:10px;justify-content:center;position:relative}
+
+.lp-foot{padding:40px 32px;border-top:1px solid var(--border-soft);font-size:12px;color:var(--text-muted);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px}
+.lp-foot .links a{color:var(--text-dim);text-decoration:none;margin-right:14px}
+
+/* phone */
+.phone{position:sticky;top:32px;justify-self:center}
+.phone-frame{width:390px;height:844px;background:var(--bg);border:9px solid #1a1a1a;border-radius:48px;overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--shadow-3);position:relative}
+.phone-frame::before{content:"";position:absolute;top:9px;left:50%;transform:translateX(-50%);width:120px;height:28px;background:#1a1a1a;border-radius:16px;z-index:10}
+.phone-status{height:48px;flex-shrink:0;padding:16px 26px 4px;display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:600;color:var(--text)}
+.phone-body{flex:1;overflow-y:auto;background:var(--bg)}
+.phone-body::-webkit-scrollbar{display:none}
+
+.mob-nav{padding:14px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border-soft);background:rgba(250,249,246,.9);position:sticky;top:0;z-index:5}
+:root[data-theme="dark"] .mob-nav{background:rgba(31,31,31,.9)}
+.mob-hero{padding:32px 22px 40px;text-align:center}
+.mob-hero .tag{display:inline-block;font-size:10px;color:var(--accent-text);background:var(--accent-soft);padding:4px 10px;border-radius:99px;font-weight:500;margin-bottom:16px;letter-spacing:.3px}
+.mob-hero h1{font-size:32px;font-weight:500;letter-spacing:-.7px;line-height:1.15;margin:0 0 12px}
+.mob-hero h1 .accent{color:var(--accent-text);font-style:italic}
+.mob-hero p{font-size:13.5px;color:var(--text-dim);margin:0 0 20px;line-height:1.6}
+.mob-hero .ctaBtns{display:flex;flex-direction:column;gap:8px;max-width:280px;margin:0 auto}
+.mob-hero .btn{justify-content:center;padding:11px;font-size:13.5px}
+
+.mob-section{padding:32px 22px}
+.mob-section h2{font-size:24px;font-weight:500;letter-spacing:-.4px;margin:0 0 6px;text-align:center}
+.mob-section p.s{color:var(--text-dim);font-size:12.5px;text-align:center;margin:0 0 22px;line-height:1.5}
+.mob-feat-list{display:flex;flex-direction:column;gap:10px}
+.mob-feat{background:var(--surface);border:1px solid var(--border-soft);border-radius:14px;padding:16px;display:flex;gap:12px;align-items:flex-start}
+.mob-feat .ico{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;font-size:17px;flex-shrink:0;background:var(--accent-soft);color:var(--accent-text)}
+.mob-feat.biz .ico{background:var(--p-biz-soft);color:var(--p-biz)}
+.mob-feat.gray .ico{background:var(--p-gray-soft);color:var(--p-gray)}
+.mob-feat .info .n{font-size:13.5px;font-weight:500;margin-bottom:3px}
+.mob-feat .info .d{font-size:12px;color:var(--text-dim);line-height:1.5}
+
+.mob-para{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.mob-para .para-tile{padding:14px 6px}
+.mob-para .para-tile .e{font-size:24px}
+.mob-para .para-tile .n{font-size:11.5px}
+.mob-para .para-tile .d{display:none}
+
+.mob-cta{padding:36px 22px 32px;text-align:center;background:linear-gradient(180deg,var(--bg),var(--accent-soft))}
+.mob-cta h2{font-size:22px;font-weight:500;letter-spacing:-.3px;margin:0 0 8px}
+.mob-cta p{font-size:12.5px;color:var(--text-dim);margin:0 0 16px}
+.mob-cta .btn{justify-content:center;padding:12px 24px}
+</style>
+</head>
+<body>
+
+<div class="canvas">
+  <!-- DESKTOP -->
+  <section>
+    <div class="vp-cap"><div><p class="label"><span class="dot"></span>DESKTOP · 1280 × 1240</p><span class="name">产品介绍 / 落地页</span></div><span class="size">Hero · Features · CTA</span></div>
+    <div class="browser">
+      <div class="browser-bar"><div class="dots"><span></span><span></span><span></span></div><div class="url">ice.workbench.local/</div></div>
+      <div class="lp">
+        <nav class="lp-nav">
+          <div class="lp-brand">
+            <div class="lp-brand-mark"><svg viewBox="0 0 32 32" fill="none"><rect x="2" y="2" width="28" height="28" rx="8" fill="#e8f0fe"/><path d="M9 11h10M9 16h14M9 21h7" stroke="#1a73e8" stroke-width="2" stroke-linecap="round"/><circle cx="22" cy="21" r="3" fill="#fef7e0" stroke="#b06000" stroke-width="1.5"/></svg></div>
+            <span class="lp-brand-text"><b>ICE</b> Workbench</span>
+          </div>
+          <div class="links">
+            <a href="#">功能</a>
+            <a href="#">范式</a>
+            <a href="#">价格</a>
+            <a href="#">文档</a>
+          </div>
+          <div class="spacer"></div>
+          <button class="icon-btn theme-btn" onclick="toggleTheme()" title="主题"><span class="t-light">🌙</span><span class="t-dark">☀️</span></button>
+          <a class="btn btn-ghost" href="#">登录</a>
+          <a class="btn btn-primary" href="#">开始使用 →</a>
+        </nav>
+
+        <!-- HERO -->
+        <section class="hero">
+          <span class="hero-tag">📒 v4.2 · 全新 NotebookLM 风格</span>
+          <h1>把数据问题，<br/>变成可执行的<span class="accent"> 笔记本</span>。</h1>
+          <p class="lead">对接团队数据源，召唤专属 Agent 协作分析，沉淀经验卡片到知识库。让分析像写笔记一样自然，结论可追溯、可复用、可定时。</p>
+          <div class="cta">
+            <a class="btn btn-primary btn-lg" href="#">＋ 创建第一个笔记本</a>
+            <a class="btn btn-ghost btn-lg" href="#">▷ 看 2 分钟演示</a>
+          </div>
+
+          <!-- demo screenshot -->
+          <div class="demo-frame">
+            <div class="demo-strip"><span></span><span></span><span></span></div>
+            <div class="demo-content">
+              <div class="demo-pane">
+                <div class="ph">SOURCES · 4</div>
+                <div class="row"><span class="e">📊</span>retention.csv</div>
+                <div class="row"><span class="e">📝</span>评审纪要</div>
+                <div class="row"><span class="e">🧠</span>留存口径</div>
+              </div>
+              <div class="demo-pane">
+                <div class="ph">CHAT</div>
+                <div class="demo-msg">上周新版本留存怎么样？</div>
+                <div class="demo-msg ag">D7 留存 +8.5pp <span class="demo-cite">1</span><span class="demo-cite">2</span><br/>首页改版贡献 61% <span class="demo-cite">3</span></div>
+                <div style="background:var(--surface);border:1px solid var(--border-soft);border-radius:99px;padding:6px 10px;font-size:11px;color:var(--text-dim);margin-top:8px">基于 4 个数据源提问…</div>
+              </div>
+              <div class="demo-pane">
+                <div class="ph">STUDIO</div>
+                <div class="row"><span class="e">🎧</span>音频简报</div>
+                <div class="row"><span class="e">📋</span>经验卡片</div>
+                <div class="row"><span class="e">🧠</span>归因脑图</div>
+                <div class="row"><span class="e">📄</span>完整报告</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- FEATURES -->
+        <section class="section">
+          <div class="section-h">
+            <span class="tag">CORE FEATURES</span>
+            <h2>分析的全流程，被重新组织</h2>
+            <p>不再在 BI / Excel / IM / 文档之间反复切换。一切围绕「笔记本」展开。</p>
+          </div>
+          <div class="feat-grid">
+            <div class="feat-card">
+              <div class="ico">📒</div>
+              <h3>笔记本式分析</h3>
+              <p>每个分析任务一个笔记本，对话、数据源、生成产物同屏。引用 [n] 可点击溯源。</p>
+            </div>
+            <div class="feat-card biz">
+              <div class="ico">🤖</div>
+              <h3>专属 Agent</h3>
+              <p>面向 5 个范式调优的 Agent，调用各自 Skill 集（指标拆解、归因、SQL、图表）。</p>
+            </div>
+            <div class="feat-card gray">
+              <div class="ico">🎨</div>
+              <h3>Studio 沉淀</h3>
+              <p>音频简报 / 经验卡片 / 归因脑图 / 完整 PDF 报告，一键生成可分享。</p>
+            </div>
+            <div class="feat-card data">
+              <div class="ico">📚</div>
+              <h3>知识库联动</h3>
+              <p>飞书 / Mify / 内部 Wiki 实时同步，RAG 检索，规范口径自动加载到上下文。</p>
+            </div>
+            <div class="feat-card wave">
+              <div class="ico">⏱</div>
+              <h3>定时与告警</h3>
+              <p>把笔记本变成跑批：日报、周报、监控告警自动推 IM，结论自动写卡片。</p>
+            </div>
+            <div class="feat-card">
+              <div class="ico">👥</div>
+              <h3>协同与审批</h3>
+              <p>多人共编、@ 提及、@@评论、经验卡片审批流程，知识沉淀有归属。</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- PARADIGMS -->
+        <section class="section">
+          <div class="section-h">
+            <span class="tag">5 PARADIGMS</span>
+            <h2>开箱即用的 5 个分析范式</h2>
+            <p>不需要从零写 prompt，每个范式都内置 Skills 和方法论模板。</p>
+          </div>
+          <div class="para-row">
+            <div class="para-tile"><div class="e">⚖️</div><div class="n">AB 实验</div><div class="d">显著性 · 置信区间</div></div>
+            <div class="para-tile"><div class="e">📈</div><div class="n">经营分析</div><div class="d">指标拆解 · 归因</div></div>
+            <div class="para-tile"><div class="e">🔌</div><div class="n">版本灰度</div><div class="d">放量 · 监控</div></div>
+            <div class="para-tile"><div class="e">📊</div><div class="n">数据分析</div><div class="d">SQL · 探索</div></div>
+            <div class="para-tile"><div class="e">🔥</div><div class="n">波动分析</div><div class="d">异动 · 归因</div></div>
+          </div>
+        </section>
+
+        <!-- CTA -->
+        <section class="cta-section">
+          <h2>开始你的第一个笔记本</h2>
+          <p>2 分钟接入数据源，5 分钟得到第一份结论。</p>
+          <div class="ctaBtns">
+            <a class="btn btn-primary btn-lg" href="#">＋ 立即开始</a>
+            <a class="btn btn-ghost btn-lg" href="#">查看文档</a>
+          </div>
+        </section>
+
+        <footer class="lp-foot">
+          <div>© 2026 ICE Workbench · v4.2.1</div>
+          <div class="links">
+            <a href="#">使用条款</a><a href="#">隐私</a><a href="#">安全</a><a href="#">联系</a>
+          </div>
+        </footer>
+      </div>
+    </div>
+  </section>
+
+  <!-- MOBILE -->
+  <section class="phone">
+    <div class="vp-cap"><div><p class="label"><span class="dot"></span>MOBILE · iPhone 14 Pro</p><span class="name">产品介绍</span></div><span class="size">390 × 844</span></div>
+    <div class="phone-frame">
+      <div class="phone-status"><span>9:41</span><span style="display:flex;gap:5px"><span>📶</span><span>📡</span><span>🔋</span></span></div>
+      <div class="phone-body">
+        <nav class="mob-nav">
+          <div class="lp-brand-mark"><svg viewBox="0 0 32 32" fill="none"><rect x="2" y="2" width="28" height="28" rx="8" fill="#e8f0fe"/><path d="M9 11h10M9 16h14M9 21h7" stroke="#1a73e8" stroke-width="2" stroke-linecap="round"/><circle cx="22" cy="21" r="3" fill="#fef7e0" stroke="#b06000" stroke-width="1.5"/></svg></div>
+          <span class="lp-brand-text" style="font-size:15px"><b>ICE</b> Workbench</span>
+          <div style="margin-left:auto;display:flex;gap:4px">
+            <button class="icon-btn theme-btn" onclick="toggleTheme()"><span class="t-light">🌙</span><span class="t-dark">☀️</span></button>
+            <button class="icon-btn">≡</button>
+          </div>
+        </nav>
+
+        <section class="mob-hero">
+          <span class="tag">📒 v4.2 · NotebookLM 风</span>
+          <h1>把数据问题，<br/>变成可执行的<br/><span class="accent">笔记本</span>。</h1>
+          <p>对接数据源 · 召唤 Agent · 沉淀经验卡。让分析像写笔记一样自然。</p>
+          <div class="ctaBtns">
+            <a class="btn btn-primary" href="#">＋ 创建笔记本</a>
+            <a class="btn btn-ghost" href="#">▷ 看演示</a>
+          </div>
+        </section>
+
+        <section class="mob-section">
+          <h2>核心能力</h2>
+          <p class="s">分析的全流程被重新组织</p>
+          <div class="mob-feat-list">
+            <div class="mob-feat"><div class="ico">📒</div><div class="info"><div class="n">笔记本式分析</div><div class="d">对话 · 数据源 · 生成产物同屏</div></div></div>
+            <div class="mob-feat biz"><div class="ico">🤖</div><div class="info"><div class="n">专属 Agent</div><div class="d">5 范式调优 · 25+ Skills</div></div></div>
+            <div class="mob-feat gray"><div class="ico">🎨</div><div class="info"><div class="n">Studio 沉淀</div><div class="d">音频简报 / 经验卡 / 脑图 / PDF</div></div></div>
+          </div>
+        </section>
+
+        <section class="mob-section" style="background:var(--surface-2)">
+          <h2>5 范式</h2>
+          <p class="s">开箱即用的分析模板</p>
+          <div class="mob-para">
+            <div class="para-tile"><div class="e">⚖️</div><div class="n">AB</div></div>
+            <div class="para-tile"><div class="e">📈</div><div class="n">经营</div></div>
+            <div class="para-tile"><div class="e">🔌</div><div class="n">灰度</div></div>
+            <div class="para-tile"><div class="e">📊</div><div class="n">数据</div></div>
+            <div class="para-tile"><div class="e">🔥</div><div class="n">波动</div></div>
+          </div>
+        </section>
+
+        <section class="mob-cta">
+          <h2>开始你的第一个笔记本</h2>
+          <p>2 分钟接入数据源</p>
+          <a class="btn btn-primary" href="#">＋ 立即开始</a>
+        </section>
+
+        <div style="padding:20px;font-size:11px;color:var(--text-muted);text-align:center">© 2026 ICE Workbench</div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>function toggleTheme(){var c=document.documentElement.dataset.theme||'light';var n=c==='light'?'dark':'light';document.documentElement.dataset.theme=n;localStorage.setItem('ice-theme',n);}</script>
+</body>
+</html>

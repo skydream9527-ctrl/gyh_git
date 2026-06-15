@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ICE Workbench v4 · 通知中心 · Desktop + Mobile</title>
+<script>(function(){var t=localStorage.getItem('ice-theme')||'light';document.documentElement.dataset.theme=t;})();</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+:root[data-theme="light"]{--bg:#faf9f6;--paper:#f4f1ec;--surface:#fff;--surface-2:#f7f5f0;--surface-3:#ece7df;
+  --border:#e6e2dc;--border-soft:#efece6;--text:#1f1f1f;--text-dim:#5f6368;--text-muted:#80868b;
+  --accent:#1a73e8;--accent-soft:#e8f0fe;--accent-text:#174ea6;
+  --success:#137333;--success-soft:#e6f4ea;--warning:#b06000;--warning-soft:#fef7e0;--error:#b3261e;--error-soft:#fce8e6;
+  --p-ab:#1967d2;--p-ab-soft:#e8f0fe;--p-biz:#b06000;--p-biz-soft:#fef7e0;
+  --p-gray:#5f4b8b;--p-gray-soft:#f3edff;--p-data:#137333;--p-data-soft:#e6f4ea;--p-wave:#b3261e;--p-wave-soft:#fce8e6;
+  --shadow-1:0 1px 2px rgba(60,64,67,.06);--shadow-2:0 1px 3px rgba(60,64,67,.10),0 4px 8px rgba(60,64,67,.04);
+  --shadow-3:0 4px 24px rgba(60,64,67,.10);}
+:root[data-theme="dark"]{--bg:#1f1f1f;--paper:#2a2a2a;--surface:#262626;--surface-2:#2e2e2e;--surface-3:#363636;
+  --border:#3c3c3c;--border-soft:#2e2e2e;--text:#e8eaed;--text-dim:#9aa0a6;--text-muted:#6c7075;
+  --accent:#8ab4f8;--accent-soft:rgba(138,180,248,.16);--accent-text:#aecbfa;
+  --success:#81c995;--success-soft:rgba(129,201,149,.14);--warning:#fdd663;--warning-soft:rgba(253,214,99,.14);
+  --error:#f28b82;--error-soft:rgba(242,139,130,.14);
+  --p-ab:#8ab4f8;--p-ab-soft:rgba(138,180,248,.16);--p-biz:#fdd663;--p-biz-soft:rgba(253,214,99,.14);
+  --p-gray:#c58af9;--p-gray-soft:rgba(197,138,249,.14);--p-data:#81c995;--p-data-soft:rgba(129,201,149,.14);
+  --p-wave:#f28b82;--p-wave-soft:rgba(242,139,130,.14);
+  --shadow-1:0 1px 2px rgba(0,0,0,.4);--shadow-2:0 4px 16px rgba(0,0,0,.5);--shadow-3:0 6px 28px rgba(0,0,0,.5);}
+*{box-sizing:border-box}html,body{margin:0;padding:0}
+body{background:var(--paper);color:var(--text);font-family:'Inter','PingFang SC','Microsoft YaHei',sans-serif;font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased}
+.canvas{max-width:1820px;margin:0 auto;padding:32px 24px 80px;display:grid;grid-template-columns:1fr 430px;gap:32px;align-items:flex-start}
+@media (max-width:1500px){.canvas{grid-template-columns:1fr;gap:48px}}
+.label{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.6px;font-weight:500;margin:0 0 12px;display:flex;align-items:center;gap:8px}
+.label .dot{width:6px;height:6px;border-radius:50%;background:var(--accent)}
+.vp-cap{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:14px}
+.vp-cap .name{font-family:'Inter',sans-serif;font-weight:500;font-size:18px;letter-spacing:-.2px}
+.vp-cap .size{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted)}
+.browser{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow-2)}
+.browser-bar{background:var(--surface-2);padding:10px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border-soft)}
+.browser-bar .dots{display:flex;gap:6px}.browser-bar .dots span{width:11px;height:11px;border-radius:50%;background:var(--surface-3)}
+.browser-bar .url{flex:1;background:var(--surface);border:1px solid var(--border-soft);border-radius:99px;padding:5px 14px;font-size:12px;color:var(--text-dim);font-family:'JetBrains Mono',monospace}
+.browser-bar .url::before{content:"🔒 "}
+
+.appbar{height:60px;background:var(--bg);border-bottom:1px solid var(--border-soft);display:flex;align-items:center;padding:0 24px;gap:12px}
+.brand-mark{width:32px;height:32px;display:grid;place-items:center}
+.brand-mark svg{width:32px;height:32px}
+.crumb{font-size:13px;color:var(--text-dim);display:flex;align-items:center;gap:8px}
+.crumb b{color:var(--text);font-weight:500;font-size:14px}.crumb .sep{color:var(--text-muted)}
+.appbar .spacer{flex:1}
+.icon-btn{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;cursor:pointer;color:var(--text-dim);background:transparent;border:none;font-size:16px}
+.icon-btn:hover{background:var(--surface-2);color:var(--text)}
+.theme-btn .t-light{display:inline}.theme-btn .t-dark{display:none}
+:root[data-theme="dark"] .theme-btn .t-light{display:none}
+:root[data-theme="dark"] .theme-btn .t-dark{display:inline}
+
+.btn{display:inline-flex;align-items:center;gap:6px;font-family:inherit;font-size:13px;font-weight:500;padding:8px 16px;border-radius:99px;border:1px solid transparent;cursor:pointer;line-height:1}
+.btn-primary{background:var(--accent);color:#fff}.btn-tonal{background:var(--accent-soft);color:var(--accent-text)}
+.btn-ghost{background:transparent;color:var(--text);border-color:var(--border)}.btn-text{background:transparent;color:var(--accent-text);padding:6px 10px}
+.btn-sm{padding:6px 12px;font-size:12px}
+
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:500;padding:3px 10px;border-radius:99px}
+.chip.biz{background:var(--p-biz-soft);color:var(--p-biz)}.chip.ab{background:var(--p-ab-soft);color:var(--p-ab)}
+.chip.gray{background:var(--p-gray-soft);color:var(--p-gray)}.chip.data{background:var(--p-data-soft);color:var(--p-data)}
+.chip.wave{background:var(--p-wave-soft);color:var(--p-wave)}
+.chip.ok{background:var(--success-soft);color:var(--success)}.chip.warn{background:var(--warning-soft);color:var(--warning)}
+.chip.err{background:var(--error-soft);color:var(--error)}
+
+.page{padding:28px 32px;max-width:880px;margin:0 auto;background:var(--bg)}
+.page-h{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:20px}
+.page-h h1{font-family:'Inter',sans-serif;font-size:26px;font-weight:500;margin:0;letter-spacing:-.4px}
+.page-h .sub{color:var(--text-dim);font-size:13px;margin:4px 0 0}
+.page-h .actions{display:flex;gap:6px}
+
+.tabs{display:flex;align-items:center;gap:6px;margin-bottom:18px;border-bottom:1px solid var(--border-soft);padding-bottom:0}
+.tab{padding:10px 14px 10px;font-size:13px;font-weight:500;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;display:flex;align-items:center;gap:6px;letter-spacing:.1px;background:none;border-top:none;border-left:none;border-right:none;font-family:inherit}
+.tab .c{font-size:10px;color:var(--text-muted);background:var(--surface-2);padding:1px 7px;border-radius:99px}
+.tab.active{color:var(--text);border-bottom-color:var(--accent)}
+.tab.active .c{background:var(--accent-soft);color:var(--accent-text)}
+.tabs .spacer{flex:1}
+.tabs .all-read{font-size:12px;color:var(--accent-text);background:none;border:none;cursor:pointer;font-family:inherit;font-weight:500}
+
+/* day group */
+.day-h{font-size:12px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;font-weight:500;margin:18px 0 10px;display:flex;align-items:center;gap:10px}
+.day-h::after{content:"";flex:1;height:1px;background:var(--border-soft)}
+
+.notif-list{display:flex;flex-direction:column;gap:6px}
+.notif{background:var(--surface);border:1px solid var(--border-soft);border-radius:14px;padding:14px;display:flex;gap:12px;cursor:pointer;transition:all .15s;position:relative}
+.notif:hover{border-color:var(--border);box-shadow:var(--shadow-1)}
+.notif.unread{background:var(--accent-soft);border-color:var(--accent-soft)}
+.notif.unread::before{content:"";position:absolute;left:-6px;top:50%;transform:translateY(-50%);width:6px;height:6px;border-radius:50%;background:var(--accent)}
+.notif .ico{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-size:18px;flex-shrink:0;background:var(--accent-soft);color:var(--accent-text)}
+.notif.warn .ico{background:var(--warning-soft);color:var(--warning)}
+.notif.err .ico{background:var(--error-soft);color:var(--error)}
+.notif.ok .ico{background:var(--success-soft);color:var(--success)}
+.notif.collab .ico{background:var(--p-gray-soft);color:var(--p-gray)}
+.notif.review .ico{background:var(--p-biz-soft);color:var(--p-biz)}
+.notif .body{flex:1;min-width:0}
+.notif .head{display:flex;align-items:center;gap:8px;font-size:13.5px;line-height:1.3;margin-bottom:5px}
+.notif .head .who{font-weight:500}
+.notif .head .what{color:var(--text-dim)}
+.notif .head .where{color:var(--text);font-weight:500}
+.notif .head .time{margin-left:auto;font-size:11px;color:var(--text-muted);font-family:'JetBrains Mono',monospace}
+.notif .preview{font-size:12.5px;color:var(--text-dim);line-height:1.55;margin-bottom:8px;
+  display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.notif .meta{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-muted)}
+.notif .actions{display:flex;gap:6px;margin-top:8px}
+
+/* phone */
+.phone{position:sticky;top:32px;justify-self:center}
+.phone-frame{width:390px;height:844px;background:var(--bg);border:9px solid #1a1a1a;border-radius:48px;overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--shadow-3);position:relative}
+.phone-frame::before{content:"";position:absolute;top:9px;left:50%;transform:translateX(-50%);width:120px;height:28px;background:#1a1a1a;border-radius:16px;z-index:10}
+.phone-status{height:48px;flex-shrink:0;padding:16px 26px 4px;display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:600;color:var(--text)}
+.phone-body{flex:1;overflow-y:auto;background:var(--bg);position:relative;display:flex;flex-direction:column;padding-bottom:80px}
+.phone-body::-webkit-scrollbar{display:none}
+
+.mob-head{padding:14px 16px 6px;display:flex;align-items:center;gap:8px;background:var(--bg);border-bottom:1px solid var(--border-soft)}
+.mob-head h1{font-size:22px;font-weight:500;margin:0;flex:1;letter-spacing:-.3px}
+
+.mob-tabs{display:flex;padding:0 12px;gap:4px;background:var(--bg);border-bottom:1px solid var(--border-soft);overflow-x:auto;scrollbar-width:none}
+.mob-tabs::-webkit-scrollbar{display:none}
+.mob-tab{padding:10px 14px;font-size:12.5px;font-weight:500;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;display:flex;gap:5px;align-items:center}
+.mob-tab .c{font-size:10px;background:var(--surface-2);padding:1px 6px;border-radius:99px}
+.mob-tab.active{color:var(--text);border-bottom-color:var(--accent)}
+.mob-tab.active .c{background:var(--accent-soft);color:var(--accent-text)}
+
+.mob-list{padding:10px 14px;display:flex;flex-direction:column;gap:6px}
+.mob-notif{background:var(--surface);border:1px solid var(--border-soft);border-radius:12px;padding:12px;display:flex;gap:10px}
+.mob-notif.unread{background:var(--accent-soft);border-color:var(--accent-soft)}
+.mob-notif .ico{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:15px;flex-shrink:0;background:var(--accent-soft);color:var(--accent-text)}
+.mob-notif.warn .ico{background:var(--warning-soft);color:var(--warning)}
+.mob-notif.err .ico{background:var(--error-soft);color:var(--error)}
+.mob-notif.ok .ico{background:var(--success-soft);color:var(--success)}
+.mob-notif.collab .ico{background:var(--p-gray-soft);color:var(--p-gray)}
+.mob-notif.review .ico{background:var(--p-biz-soft);color:var(--p-biz)}
+.mob-notif .body{flex:1;min-width:0}
+.mob-notif .body .h{font-size:12.5px;line-height:1.4;margin-bottom:4px}
+.mob-notif .body .h .who{font-weight:500}
+.mob-notif .body .h .what{color:var(--text-dim)}
+.mob-notif .body .where{color:var(--text);font-weight:500}
+.mob-notif .body .preview{font-size:11.5px;color:var(--text-dim);line-height:1.5;margin-bottom:5px;display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.mob-notif .body .t{font-size:10px;color:var(--text-muted);font-family:'JetBrains Mono',monospace;display:flex;justify-content:space-between;align-items:center}
+</style>
+</head>
+<body>
+
+<div class="canvas">
+  <!-- DESKTOP -->
+  <section>
+    <div class="vp-cap"><div><p class="label"><span class="dot"></span>DESKTOP · 1280 × 900</p><span class="name">通知中心</span></div><span class="size">分组 · 未读 · @ 我</span></div>
+    <div class="browser">
+      <div class="browser-bar"><div class="dots"><span></span><span></span><span></span></div><div class="url">ice.workbench.local/notifications</div></div>
+      <header class="appbar">
+        <div class="brand-mark"><svg viewBox="0 0 32 32" fill="none"><rect x="2" y="2" width="28" height="28" rx="8" fill="#e8f0fe"/><path d="M9 11h10M9 16h14M9 21h7" stroke="#1a73e8" stroke-width="2" stroke-linecap="round"/><circle cx="22" cy="21" r="3" fill="#fef7e0" stroke="#b06000" stroke-width="1.5"/></svg></div>
+        <div class="crumb"><a href="#" style="color:var(--text-dim);text-decoration:none">工作台</a><span class="sep">›</span><b>🔔 通知</b></div>
+        <div class="spacer"></div>
+        <button class="icon-btn theme-btn" onclick="toggleTheme()" title="主题"><span class="t-light">🌙</span><span class="t-dark">☀️</span></button>
+      </header>
+
+      <main class="page">
+        <div class="page-h">
+          <div>
+            <h1>🔔 通知中心</h1>
+            <p class="sub">12 条未读 · 3 个 @ 我 · 5 条待审批</p>
+          </div>
+          <div class="actions">
+            <button class="btn btn-tonal btn-sm">⚙ 通知偏好</button>
+            <button class="btn btn-ghost btn-sm">全部已读</button>
+          </div>
+        </div>
+
+        <div class="tabs">
+          <button class="tab active">全部 <span class="c">28</span></button>
+          <button class="tab">未读 <span class="c">12</span></button>
+          <button class="tab">@ 我 <span class="c">3</span></button>
+          <button class="tab">待审批 <span class="c">5</span></button>
+          <button class="tab">系统告警 <span class="c">2</span></button>
+          <span class="spacer"></span>
+          <button class="all-read">标记本页已读</button>
+        </div>
+
+        <div class="day-h">今天</div>
+        <div class="notif-list">
+
+          <div class="notif unread review">
+            <div class="ico">📋</div>
+            <div class="body">
+              <div class="head">
+                <span class="who">张明远</span>
+                <span class="what">提交了经验卡片</span>
+                <span class="where">v2.4 留存归因</span>
+                <span class="time">刚刚</span>
+              </div>
+              <div class="preview">D7 留存 +8.5pp → 50.8%；首页改版贡献 61%；建议全量放开</div>
+              <div class="meta"><span class="chip biz">经营</span><span>📒 Q2 经营复盘分析</span></div>
+              <div class="actions">
+                <button class="btn btn-primary btn-sm">✓ 审批通过</button>
+                <button class="btn btn-ghost btn-sm">⤺ 退回</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="notif unread err">
+            <div class="ico">⚠</div>
+            <div class="body">
+              <div class="head">
+                <span class="who">⏱ 定时任务</span>
+                <span class="what">触发告警</span>
+                <span class="time">10 分钟前</span>
+              </div>
+              <div class="preview">「DAU 异常监控」连续失败 3 次：execute_sql 超时（30s），可能是 dwd_user 表锁定。</div>
+              <div class="meta"><span class="chip wave">波动</span><span class="chip err">连续失败 3</span></div>
+              <div class="actions">
+                <button class="btn btn-tonal btn-sm">查看任务详情</button>
+                <button class="btn btn-ghost btn-sm">手动重跑</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="notif unread collab">
+            <div class="ico">@</div>
+            <div class="body">
+              <div class="head">
+                <span class="who">王子轩</span>
+                <span class="what">在评论中提到了你</span>
+                <span class="time">35 分钟前</span>
+              </div>
+              <div class="preview">@张明远 你看下留存提升的归因，是不是把首页改版的占比拉得有点高？我感觉推荐升级被低估了</div>
+              <div class="meta"><span>📒 Q2 经营复盘分析</span></div>
+            </div>
+          </div>
+
+          <div class="notif">
+            <div class="ico">💬</div>
+            <div class="body">
+              <div class="head">
+                <span class="who">李思涵</span>
+                <span class="what">回复了你在</span>
+                <span class="where">DAU 异动归因</span>
+                <span class="what">的留言</span>
+                <span class="time">1 小时前</span>
+              </div>
+              <div class="preview">同意，先回滚 v3.1.2，研发已在排期 hotfix。</div>
+              <div class="meta"><span class="chip wave">波动</span></div>
+            </div>
+          </div>
+
+          <div class="notif ok">
+            <div class="ico">✓</div>
+            <div class="body">
+              <div class="head">
+                <span class="who">📚 飞书 · 产品知识库</span>
+                <span class="what">已同步</span>
+                <span class="time">今天 09:00</span>
+              </div>
+              <div class="preview">12 篇文档更新（其中 3 篇新增）。已重建向量索引，所有相关 Agent 可立即使用。</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="day-h">昨天</div>
+        <div class="notif-list">
+          <div class="notif review">
+            <div class="ico">📋</div>
+            <div class="body">
+              <div class="head">
+                <span class="who">李思涵</span>
+                <span class="what">提交了经验卡片</span>
+                <span class="where">v2.4 实验显著性</span>
+                <span class="time">昨天 16:42</span>
+              </div>
+              <div class="preview">v2.4 留存 +8.5%，p &lt; 0.01，已通过显著性检验，建议全量放开</div>
+              <div class="meta"><span class="chip ab">AB</span><span class="chip ok">✓ 已通过</span></div>
+            </div>
+          </div>
+
+          <div class="notif collab">
+            <div class="ico">👥</div>
+            <div class="body">
+              <div class="head">
+                <span class="who">王子轩</span>
+                <span class="what">邀请你加入笔记本</span>
+                <span class="where">核心指标异动 SOP</span>
+                <span class="time">昨天 14:18</span>
+              </div>
+              <div class="preview">这是团队公开模板，欢迎一起完善异动归因方法论</div>
+              <div class="actions">
+                <button class="btn btn-primary btn-sm">✓ 接受</button>
+                <button class="btn btn-ghost btn-sm">忽略</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="notif">
+            <div class="ico">⚡</div>
+            <div class="body">
+              <div class="head">
+                <span class="who">系统</span>
+                <span class="what">新版本上线</span>
+                <span class="time">昨天 10:00</span>
+              </div>
+              <div class="preview">ICE Workbench v4.2 已发布：新增 Studio 音频简报、归因脑图，引用 chip 改版。</div>
+              <div class="actions">
+                <button class="btn btn-text btn-sm">查看更新日志 →</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="day-h">本周</div>
+        <div class="notif-list">
+          <div class="notif">
+            <div class="ico" style="background:var(--p-data-soft);color:var(--p-data)">📊</div>
+            <div class="body">
+              <div class="head">
+                <span class="who">📒 月度收入归因分析</span>
+                <span class="what">已完成自动跑数</span>
+                <span class="time">3 天前</span>
+              </div>
+              <div class="preview">月度收入归因报告已生成，广告收入贡献度 +15%。结果已保存到 Studio。</div>
+              <div class="meta"><span class="chip biz">经营</span></div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </section>
+
+  <!-- MOBILE -->
+  <section class="phone">
+    <div class="vp-cap"><div><p class="label"><span class="dot"></span>MOBILE · iPhone 14 Pro</p><span class="name">通知中心</span></div><span class="size">390 × 844</span></div>
+    <div class="phone-frame">
+      <div class="phone-status"><span>9:41</span><span style="display:flex;gap:5px"><span>📶</span><span>📡</span><span>🔋</span></span></div>
+      <div class="phone-body">
+        <div class="mob-head">
+          <h1>🔔 通知</h1>
+          <button class="icon-btn">⚙</button>
+          <button class="icon-btn theme-btn" onclick="toggleTheme()"><span class="t-light">🌙</span><span class="t-dark">☀️</span></button>
+        </div>
+        <div class="mob-tabs">
+          <span class="mob-tab active">全部 <span class="c">28</span></span>
+          <span class="mob-tab">未读 <span class="c">12</span></span>
+          <span class="mob-tab">@ 我 <span class="c">3</span></span>
+          <span class="mob-tab">审批 <span class="c">5</span></span>
+        </div>
+
+        <div style="padding:14px 14px 6px;font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;font-weight:500">今天</div>
+        <div class="mob-list">
+          <div class="mob-notif unread review">
+            <div class="ico">📋</div>
+            <div class="body">
+              <div class="h"><span class="who">张明远</span><span class="what"> 提交经验卡 </span><span class="where">v2.4 留存归因</span></div>
+              <div class="preview">D7 留存 +8.5pp，建议全量放开</div>
+              <div class="t"><span class="chip biz" style="font-size:9px;padding:1px 6px">经营</span><span>刚刚</span></div>
+            </div>
+          </div>
+
+          <div class="mob-notif unread err">
+            <div class="ico">⚠</div>
+            <div class="body">
+              <div class="h"><span class="who">⏱ 定时任务</span><span class="what"> 告警</span></div>
+              <div class="preview">DAU 异常监控连续失败 3 次</div>
+              <div class="t"><span class="chip err" style="font-size:9px;padding:1px 6px">连续失败</span><span>10 分钟前</span></div>
+            </div>
+          </div>
+
+          <div class="mob-notif unread collab">
+            <div class="ico">@</div>
+            <div class="body">
+              <div class="h"><span class="who">王子轩</span><span class="what"> 提到你</span></div>
+              <div class="preview">@张明远 留存归因看下，首页改版占比是不是高了</div>
+              <div class="t"><span>📒 Q2 经营复盘</span><span>35 分钟前</span></div>
+            </div>
+          </div>
+
+          <div class="mob-notif">
+            <div class="ico">💬</div>
+            <div class="body">
+              <div class="h"><span class="who">李思涵</span><span class="what"> 回复了留言</span></div>
+              <div class="preview">同意，先回滚 v3.1.2</div>
+              <div class="t"><span class="chip wave" style="font-size:9px;padding:1px 6px">波动</span><span>1 小时前</span></div>
+            </div>
+          </div>
+
+          <div class="mob-notif ok">
+            <div class="ico">✓</div>
+            <div class="body">
+              <div class="h"><span class="who">飞书知识库</span><span class="what"> 已同步</span></div>
+              <div class="preview">12 篇文档更新</div>
+              <div class="t"><span></span><span>09:00</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div style="padding:18px 14px 6px;font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;font-weight:500">昨天</div>
+        <div class="mob-list">
+          <div class="mob-notif review">
+            <div class="ico">📋</div>
+            <div class="body">
+              <div class="h"><span class="who">李思涵</span><span class="what"> 提交经验卡</span></div>
+              <div class="preview">v2.4 +8.5%, p&lt;0.01, 全量放开</div>
+              <div class="t"><span class="chip ok" style="font-size:9px;padding:1px 6px">已通过</span><span>16:42</span></div>
+            </div>
+          </div>
+          <div class="mob-notif collab">
+            <div class="ico">👥</div>
+            <div class="body">
+              <div class="h"><span class="who">王子轩</span><span class="what"> 邀请加入</span></div>
+              <div class="preview">📒 核心指标异动 SOP</div>
+              <div class="t"><span></span><span>14:18</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>function toggleTheme(){var c=document.documentElement.dataset.theme||'light';var n=c==='light'?'dark':'light';document.documentElement.dataset.theme=n;localStorage.setItem('ice-theme',n);}</script>
+</body>
+</html>

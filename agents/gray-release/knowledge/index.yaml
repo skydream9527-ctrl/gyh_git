@@ -1,0 +1,32 @@
+version: "1.2"
+description: 灰度版本数据分析知识库全局索引（APP 版本灰度发布 V1.2）
+
+directories:
+  - name: rules
+    description: 分析规则与决策逻辑
+    load_strategy: required
+    files:
+      - aa_rules.yaml           # AA 实验规则（免AA为主）、波动阈值
+      - decision_matrix.yaml    # 决策矩阵（含此消彼长强制人工）
+      - rollout_phases.yaml     # 放量阶段配置（5/10/30/全量）
+
+  - name: metrics
+    description: 核心指标定义与 SQL 查询模板
+    load_strategy: required
+    files:
+      - core_metrics.yaml       # 规模 / 消费 / 收入三类核心指标
+      - sql_templates.yaml      # Kyuubi SQL 模板，按 app_version 分组
+
+  - name: analysis
+    description: 下钻推理知识与历史案例
+    load_strategy: required
+    files:
+      - drill_knowledge.yaml    # 场景模式 → 假设 → 下钻维度
+      - cases_and_lessons.yaml  # good_cases / bad_cases，反馈闭环回写
+
+  - name: product_model
+    description: 产品结构模型与报告规范
+    load_strategy: required
+    files:
+      - page_structure.yaml     # 页面元素、卡片、流转关系
+      - report_template.yaml    # 报告结构 / 角色自适应规则

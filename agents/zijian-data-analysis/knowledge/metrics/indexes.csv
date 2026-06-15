@@ -1,0 +1,118 @@
+﻿name	label	aggregator	fieldType	displayType	alias
+dura	总时长	sum	2	number	页面总时长
+consum_dura	消费时长	sum	2	number	消费总时长
+expose_pv	曝光PV	sum	2	number	曝光PV
+consum_pv	消费VV	sum	2	number	浏览PV
+comment_area_pv	评论区浏览PV	sum	2	number	评论区浏览PV
+comment_area_dura	评论区浏览时长	sum	2	number	评论区浏览时长
+click_pv	点击PV	sum	2	number	点击PV_只有列表页有点击
+all_consum_pv	完播完读PV	sum	2	number	完播完读PV
+valid_consum_pv	有效播读PV	sum	2	number	有效播读PV
+like_pv	点赞PV	sum	2	number	点赞PV
+comment_pv	评论PV	sum	2	number	评论PV
+share_pv	分享PV	sum	2	number	分享PV
+negative_pv	负反馈PV	sum	2	number	负反馈PV
+report_pv	举报PV	sum	2	number	举报PV
+case when expose_pv>0 or consum_pv>0 then did end	信息流DAU	distinct-count	2	number	曝光UV
+case when consum_pv>0 then did end	消费UV	distinct-count	2	number	浏览UV
+case when comment_area_pv>0 then did end	评论区浏览UV	distinct-count	2	number	评论区浏览UV
+case when click_pv>0 then did end	点击UV	distinct-count	2	number	点击UV
+case when all_consum_pv>0 then did end	完播完读UV	distinct-count	2	number	完播完读UV
+case when valid_consum_pv>0 then did end	有效播读UV	distinct-count	2	number	有效播读UV
+case when like_pv>0 then did end	点赞UV	distinct-count	2	number	点赞UV
+case when comment_pv>0 then did end	评论UV	distinct-count	2	number	评论UV
+case when share_pv>0 then did end	转发UV	distinct-count	2	number	转发UV
+case when negative_pv>0 then did end	负反馈UV	distinct-count	2	number	负反馈UV
+case when report_pv>0 then did end	举报UV	distinct-count	2	number	举报UV
+双频道列表页点击PV / 双频道列表页曝光PV	双频道列表页CTR		4	number	pvCTR
+双频道列表页点击UV/双频道列表页曝光UV	双频道列表页UTR		4	number	uvCTR
+页面总时长/曝光UV	人均时长		4	number	人均页面时长
+完播完读PV/浏览PV	完播完读率		4	number	完播完读率
+case when consum_pv>0 then item_id end	消费内容量	distinct-count	2	number	消费内容量
+case when expose_pv>0 then item_id end	分发内容量	distinct-count	2	number	分发内容量
+comment_cnt	item_comment_cnt	max	2	number	comment_cnt
+like_cnt	item_like_cnt	max	2	number	like_cnt
+share_cnt	item_share_cnt	max	2	number	share_cnt
+case when expose_pv>0 then item_author_id end	分发作者量	distinct-count	2	number	分发作者量
+TotalRatio(内容发布时间距离T_1的天数分段_取自内容池_,曝光PV)	时效分段曝光占比		4	number	时效分段曝光占比
+djy_expose_pv	huoshan_expose_pv	sum	2	number	huoshan_expose_pv
+huoshan_expose_pv	djy_expose_pv	sum	2	number	djy_expose_pv
+avg_video_play_percent	avg_video_play_percent	avg	2	number	avg_video_play_percent
+total_djy_expose_pv	total_djy_expose_pv	avg	2	number	total_djy_expose_pv
+total_huoshan_expose_pv	total_huoshan_expose_pv	avg	2	number	total_huoshan_expose_pv
+djy_expose_pv / total_djy_expose_pv	自建组曝光PV占比		4	number	自建组曝光PV占比
+huoshan_expose_pv/ total_huoshan_expose_pv	火山组曝光PV占比		4	number	火山组曝光PV占比
+firts_video_dura	沉浸流首条消费时长	sum	2	number	沉浸流首条消费时长
+drop_firts_video_dura	沉浸流非首条消费时长	sum	2	number	沉浸流非首条消费时长
+drop_first_video_vv	沉浸流非首条消费VV	sum	2	number	drop_first_video_vv
+first_video_vv	沉浸流首条消费VV	sum	2	number	first_video_vv
+shortstory_read_cnt	短故事消费VV_大盘口径	sum	2	number	短故事消费VV
+shortstory_read_dura	短故事消费时长_大盘口径	sum	2	number	短故事消费时长_min_
+消费总时长/浏览UV	人均消费时长		4	number	人均消费时长new
+浏览PV/浏览UV	人均消费VV		4	number	人均vv_new
+case when first_video_vv >0 then did end	沉浸流首条消费UV	distinct-count	2	number	沉浸流首条消费UV
+case when drop_first_video_vv >0 then did end	沉浸流非首条消费UV	distinct-count	2	number	沉浸流非首条消费uv
+消费总时长/曝光PV*60	次均曝光时长(秒)		4	number	平均曝光消费时长
+case when is_feed_active_new_no_push=1 then did else null end	有效用户DAU_不含push	distinct-count	2	number	有效用户DAU_不含push
+case when is_feed_active_new=1 then did else null end	有效用户DAU	distinct-count	2	number	有效用户DAU
+novel_read_cnt	小说阅读VV_大盘口径	sum	2	number	novel_read_cnt
+novel_read_dura	小说阅读时长_大盘口径	sum	2	number	novel_read_dura
+有效用户DAU/曝光UV	有效用户渗透率		4	number	有效用户渗透率
+有效用户DAU_不含push/信息流DAU_不含push	有效用户渗透率_不含push		4	number	有效用户渗透率_不含push_
+shortstory_read_cnt_v2	短故事消费VV_自建信息流口径	sum	2	number	shortstory_read_cnt_v2
+shortstory_read_dura_v2	短故事消费时长_自建信息流口径	sum	2	number	shortstory_read_dura_v2
+novel_read_cnt_v2	小说阅读VV_自建信息流口径	sum	2	number	novel_read_cnt_v2
+novel_read_dura_v2	小说阅读时长_自建信息流口径	sum	2	number	novel_read_dura_v2
+if(is_feed_active_new=1 and page='列表页' and feed_channel in('热点','推荐'), dura, 0) + if( is_feed_active_new=1,consum_dura ,0 )	总有效时长	sum	2	number	总有效时长
+if(is_feed_active_new_no_push=1 and page='列表页' and feed_channel in ('热点','推荐'), dura, 0) + if( is_feed_active_new_no_push=1 and feed_channel not in ('push'), consum_dura ,0 )	总有效时长_不含push	sum	2	number	总有效时长_不含push
+if(feed_channel not in ('push') and consum_pv>0, did, null)	消费UV_不含push	distinct-count	2	number	消费UV_不含push
+点赞PV+评论PV+分享PV+评论区浏览PV	总互动量		4	number	总互动量
+if(feed_channel in ('热点','推荐') and page in ('列表页'),expose_pv,0)	双频道列表页曝光PV	sum	2	number	双频道列表页曝光PV
+if(feed_channel in ('热点','推荐') and page in ('列表页'),click_pv,0)	双频道列表页点击PV	sum	2	number	双频道列表页点击PV
+if(feed_channel in ('热点','推荐') and page in ('列表页') and expose_pv>0,did,null)	双频道列表页曝光UV	distinct-count	2	number	双频道列表页曝光UV
+if(feed_channel in ('热点','推荐') and page in ('列表页') and click_pv>0,did,null)	双频道列表页点击UV	distinct-count	2	number	双频道列表页点击UV
+总有效时长/有效用户DAU	人均有效时长		4	number	人均有效时长
+总有效时长_不含push/有效用户DAU_不含push	人均有效时长_不含push		4	number	人均有效时长_不含push
+if(page='列表页' and feed_channel in('热点','推荐'),dura,0)	列表页时长	sum	2	number	列表页时长
+xiahua_pv	点击列表页视频后的内流下滑PV	sum	2	number	xiahua_pv
+xiahua_pv/点击PV_只有列表页有点击	点击列表页视频后的内流下滑率		4	number	下滑率
+CycleDiff(日期_天,1,有效用户渗透率)	有效用户渗透率_日环比		4	number	有效用户渗透率_日环比
+if(feed_channel not in ('push'), consum_pv, 0)	消费时长_不含push	sum	2	number	消费时长_不含push
+case when feed_channel != 'push' and (expose_pv>0 or consum_pv>0) then did end	信息流DAU_不含push	distinct-count	2	number	信息流DAU_不含push
+if(is_feed_active_new=1 and page='列表页' and feed_channel in('热点','推荐'),dura,0)	列表页有效时长	sum	2	number	有效用户列表页时长
+if(page in ('短小融合沉浸页','小视频沉浸页'), dura, 0)	视频沉浸态时长	sum	2	number	视频沉浸态时长
+if(page in ('短小融合沉浸页','小视频沉浸页') and root_gid != '未知', concat(did,root_gid), null)	点击进入内流的次数	distinct-count	2	number	进入内流的次数
+if(feed_channel in ('热点','推荐') and page in ('短小融合沉浸页') and is_click_content_enter='true', consum_dura, 0)	双频道短小流消费时长	sum	2	number	双频道短小融合流消费时长
+if(feed_channel in ('热点','推荐') and page in ('短小融合沉浸页') and root_gid != '未知' and is_click_content_enter='true', consum_dura, 0)	去首条双频道短小流消费时长	sum	2	number	去首条短小融合流消费时长
+去首条短小融合流消费时长/短视频点击后下滑PV	去首条次均短小流消费时长		4	number	去首条次均内流消费时长
+双频道短小融合流消费时长/列表页短视频点击PV	次均短小流消费时长		4	number	次均短小融合流消费时长
+if(feed_channel in ('热点','推荐') and page in ('列表页') and item_type='短视频',click_pv,0)	短视频点击PV	sum	2	number	列表页短视频点击PV
+if(feed_channel in ('热点','推荐') and page in ('列表页') and item_type='小视频',click_pv,0)	小视频点击PV	sum	2	number	小视频点击PV
+if(feed_channel in ('热点','推荐') and page in ('小视频沉浸页') and is_click_content_enter='true', consum_dura, 0)	双频道小沉流消费时长	sum	2	number	双频道小视频流消费时长
+if(feed_channel in ('热点','推荐') and page in ('小视频沉浸页') and root_gid != '未知' and is_click_content_enter='true', consum_dura, 0)	去首条双频道小沉流消费时长	sum	2	number	去首条双频道小视频流消费时长
+双频道小视频流消费时长/小视频点击PV	次均小沉流消费时长		4	number	次均小视频流消费时长
+去首条双频道小视频流消费时长/小视频点击后下滑PV	去首条次均小沉流消费时长		4	number	去首条次均小视频流消费时长
+if(feed_channel in ('热点','推荐') and page in ('列表页') and item_type='短视频',xiahua_pv,0)	短视频点击后下滑PV	sum	2	number	短视频点击后下滑PV
+if(feed_channel in ('热点','推荐') and page in ('列表页') and item_type='小视频',xiahua_pv,0)	小视频点击后下滑PV	sum	2	number	小视频点击后下滑PV
+if(feed_channel in ('热点','推荐') and page in ('短小融合沉浸页') and is_click_content_enter='true', consum_pv, 0)	双频道短小流消费VV	sum	2	number	双频道短小融合流消费VV
+if(feed_channel in ('热点','推荐') and page in ('短小融合沉浸页') and root_gid != '未知' and is_click_content_enter='true', consum_pv, 0)	去首条双频道短小流消费VV	sum	2	number	去首条双频道短小融合流消费VV
+if(feed_channel in ('热点','推荐') and page in ('小视频沉浸页') and is_click_content_enter='true', consum_pv, 0)	双频道小沉流消费VV	sum	2	number	双频道小视频流消费VV
+if(feed_channel in ('热点','推荐') and page in ('小视频沉浸页') and root_gid != '未知' and is_click_content_enter='true', consum_pv, 0)	去首条双频道小沉流消费VV	sum	2	number	去首条双频道小视频流消费VV
+双频道短小融合流消费VV/列表页短视频点击PV	次均短小流消费VV		4	number	次均短小融合流消费VV
+去首条双频道短小融合流消费VV/短视频点击后下滑PV	去首条次均短小流消费VV		4	number	去首条次均短小融合流消费VV
+次均短小融合流消费VV/小视频点击PV	次均小沉流消费VV		4	number	次均小视频流消费VV
+去首条双频道小视频流消费VV/小视频点击后下滑PV	去首条次均小沉流消费VV		4	number	去首条次均小视频流消费VV
+case when feed_channel in ('热点','推荐') then consum_dura end	双频道消费时长	sum	2	number	双频道消费时长
+双频道消费时长/双频道列表页点击PV*60	次均点击时长(秒)		4	number	次均点击时长_S_
+浏览UV/曝光UV	消费用户渗透率		4	number	消费用户渗透率
+case when expose_pv>0 then did end	曝光UV	distinct-count	2	number	曝光UV_原
+曝光PV/曝光UV_原	人均曝光PV		4	number	人均曝光PV
+点击PV_只有列表页有点击/点击UV	人均点击PV		4	number	人均点击PV
+case when is_vliad_user_new='是' then did else null end	新版有效用户DAU	distinct-count	2	number	新版有效用户DAU
+if(is_vliad_user_new='是' and page='列表页' and feed_channel in('热点','推荐'), dura, 0) + if(is_vliad_user_new='是',consum_dura ,0 )	新版总有效时长	sum	2	number	新版总有效时长
+新版总有效时长/新版有效用户DAU	新版人均有效时长		4	number	新版人均有效时长
+case when is_valid_user_new_no_push='是' then did else null end	新版有效用户DAU_不含push	distinct-count	2	number	新版有效用户DAU_不含push
+if(is_valid_user_new_no_push='是' and page='列表页' and feed_channel in ('热点','推荐'), dura, 0) + if(is_valid_user_new_no_push='是' and feed_channel not in ('push'), consum_dura ,0 )	新版总有效时长_不含push	sum	2	number	新版总有效时长_不含push
+新版总有效时长_不含push/新版有效用户DAU_不含push	新版人均有效时长_不含push		4	number	新版人均有效时长_不含push
+新版有效用户DAU/曝光UV	新版有效用户渗透率		4	number	新版有效用户渗透率
+新版有效用户DAU_不含push/信息流DAU_不含push	新版有效用户渗透率_不含push		4	number	新版有效用户渗透率_不含push

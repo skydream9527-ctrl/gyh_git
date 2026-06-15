@@ -103,6 +103,22 @@ pipx install xiaomi-kyuubi-cli     # Kyuubi SQL 网关
 # 两者缺失时相关工具返回 *_NOT_CONFIGURED，不阻塞启动
 ```
 
+## 自托管（Docker Compose）
+
+跨机迁移、外部用户/客户自托管、升级流程标准化的推荐路径。详见 [`docs/SELF_HOSTING.md`](docs/SELF_HOSTING.md)。
+
+```bash
+cp .env.example .env             # 必改 ICE_SECRET_KEY + LLM key
+docker compose up -d --build     # 首次 5–10 分钟（npm install + prophet 编译）
+docker exec ice-workbench cat /app/.cache/initial_admin_password.txt  # 取初始 admin 密码
+# 浏览器：http://localhost:8000
+
+# 升级：先备份再 pull + rebuild
+make docker-upgrade
+```
+
+数据全部 bind mount 到宿主当前目录（`users/ tasks/ files/ agents/ skills/ .cache/ .env`），`docker compose down` 不丢数据，符合 G3 文件优先。
+
 ## 仓库导航
 
 ### 📋 设计与决策

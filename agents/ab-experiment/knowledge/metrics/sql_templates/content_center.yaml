@@ -1,0 +1,645 @@
+dimension: 内容中心
+source_table: iceberg_zjyprc_hadoop.newhome.dwm_newhome_event_aggregation_label_di
+ad_table: iceberg_zjyprc_hadoop.newhome.dwm_newhome_ad_event_aggregation_di
+dau_flag: is_dau_2024=1
+
+规模指标:
+  - name: 内容中心DAU/日活
+    sql: |
+      SELECT  count(distinct did)
+      FROM    iceberg_zjyprc_hadoop.newhome.dwm_newhome_event_aggregation_label_di
+      WHERE   date=${date-1}
+              and is_dau_2024=1
+
+  - name: 内容中心分新老用户DAU/日活
+    sql: |
+      SELECT  date,
+              CASE WHEN is_new_2024=1 THEN 'new'
+                   WHEN is_new_2024=0 THEN 'old'
+              END as is_new_user,
+              count(distinct did)
+      FROM    iceberg_zjyprc_hadoop.newhome.dwm_newhome_event_aggregation_label_di
+      WHERE   date=${date-1}
+      GROUP BY date,
+               CASE WHEN is_new_2024=1 THEN 'new'
+                    WHEN is_new_2024=0 THEN 'old'
+               END
+    drill_dimension: is_new_user
+
+  - name: 内容中心深度DAU/日活
+    sql: |
+      SELECT  date, count(distinct did)
+      FROM
+          (
+              SELECT  date, did,
+                      sum(app_dura)/60000 as app_dura
+              FROM    iceberg_zjyprc_hadoop.newhome.dwm_newhome_event_aggregation_label_di
+              WHERE   date = ${date-1}
+                      and is_app_dau_2024=1
+              GROUP BY date, did
+          ) a
+      WHERE   app_dura>=20
+      GROUP BY date
+
+  - name: 内容中心有效DAU/日活
+    sql: |
+      SELECT  count(distinct distinct_id)
+      FROM    iceberg_zjyprc_hadoop.dw.dwd_ot_event_di_31000000297
+      WHERE
+          date=${date-1}
+          and event_name in ('content_item_click', 'search_click', 'mivideo_content_item_click', 'content_item_view', 'content_item_video_play')
+
+  - name: 内容中心MAU
+    sql: |
+      SELECT  count(distinct did)
+      FROM    iceberg_zjyprc_hadoop.newhome.dwm_newhome_event_aggregation_label_di
+      WHERE   date BETWEEN ${date-30} AND ${date-1}
+              and is_dau_2024=1
+
+  - name: 内容中心消费DAU
+    sql: |
+      SELECT  count(distinct did)
+      FROM    iceberg_zjyprc_hadoop.newhome.dwm_newhome_event_aggregation_label_di
+      WHERE   date=${date-1}
+              and is_dau_2024=1
+              and consum_cnt>0
+
+消费指标:
+  - name: 内容中心时长
+    sql: |
+      SELECT  sum(app_dura)/60000
+      FROM    iceberg_zjyprc_hadoop.newhome.dwm_newhome_event_aggregation_label_di
+      WHERE   date=${date-1}
+              and is_dau_2024=1
+              and app_dura>0
+
+  - name: 内容中心人均时长
+    sql: |
+      SELECT  sum(app_dura)/60000/count(distinct did)
+      FROM    iceberg_zjyprc_hadoop.newhome.dwm_newhome_event_aggregation_label_di
+      WHERE   date=${date-1}
+              and is_dau_2024=1
+              and app_dura>0
+
+  - name: 内容中心消费UV
+    sql: |
+      SELECT  count(distinct did)
+      FROM    iceberg_zjyprc_hadoop.newhome.dwm_newhome_event_aggregation_label_di
+      WHERE   date=${date-1}
+              and is_dau_2024=1
+              and consum_cnt>0
+
+  - name: 内容中心VV
+    sql: |
+      SELECT  sum(consum_cnt)
+      FROM    iceberg_zjyprc_hadoop.newhome.dwm_newhome_event_aggregation_label_di
+      WHERE   date=${date-1}
+              and is_dau_2024=1
+              and consum_cnt>0
+
+  - name: 内容中心人均VV
+    sql: |
+      SELECT  sum(consum_cnt)/count(distinct did)
+      FROM    iceberg_zjyprc_hadoop.newhome.dwm_newhome_event_aggregation_label_di
+      WHERE   date=${date-1}
+              and is_dau_2024=1
+              and consum_cnt>0
+
+  - name: 内容中心消费时长
+    sql: |
+      SELECT  sum(consum_dura)/60000
+      FROM    iceberg_zjyprc_hadoop.newhome.dwm_newhome_event_aggregation_label_di
+      WHERE   date=${date-1}
+              and is_dau_2024=1
+              and consum_dura>0
+
+  - name: 内容中心人均消费时长
+    sql: |
+      SELECT  sum(consum_dura)/60000/count(distinct did)
+      FROM    iceberg_zjyprc_hadoop.newhome.dwm_newhome_event_aggregation_label_di
+      WHERE   date=${date-1}
+              and is_dau_2024=1
+              and consum_dura>0
+              and consum_cnt>0
+
+  - name: 内容中心分体裁消费UV
+    sql: |
+      SELECT  item_type,
+              count(distinct did)
+      FROM    iceberg_zjyprc_hadoop.newhome.dwm_newhome_event_aggregation_label_di
+      WHERE   date=${date-1}
+              and is_dau_2024=1
+              and consum_cnt>0
+      GROUP BY item_type
+    drill_dimension: item_type
+
+  - name: 内容中心分体裁VV
+    sql: |
+      SELECT  item_type,
+              sum(consum_cnt)
+      FROM    iceberg_zjyprc_hadoop.newhome.dwm_newhome_event_aggregation_label_di
+      WHERE   date=${date-1}
+              and is_dau_2024=1
+              and consum_cnt>0
+      GROUP BY item_type
+    drill_dimension: item_type
+
+  - name: 内容中心分体裁消费时长
+    sql: |
+      SELECT  item_type,
+              sum(consum_dura)/60000
+      FROM    iceberg_zjyprc_hadoop.newhome.dwm_newhome_event_aggregation_label_di
+      WHERE   date=${date-1}
+              and is_dau_2024=1
+              and consum_dura>0
+      GROUP BY item_type
+    drill_dimension: item_type
+
+  - name: 内容中心分频道消费UV
+    sql: |
+      SELECT  feed_channel,
+              count(distinct did)
+      FROM    iceberg_zjyprc_hadoop.newhome.dwm_newhome_event_aggregation_label_di
+      WHERE   date=${date-1}
+              and is_dau_2024=1
+              and consum_cnt>0
+      GROUP BY feed_channel
+    drill_dimension: feed_channel
+
+  - name: 内容中心分频道VV
+    sql: |
+      SELECT  feed_channel,
+              sum(consum_cnt)
+      FROM    iceberg_zjyprc_hadoop.newhome.dwm_newhome_event_aggregation_label_di
+      WHERE   date=${date-1}
+              and is_dau_2024=1
+              and consum_cnt>0
+      GROUP BY feed_channel
+    drill_dimension: feed_channel
+
+  - name: 内容中心分频道消费时长
+    sql: |
+      SELECT  feed_channel,
+              sum(consum_dura)/60000
+      FROM    iceberg_zjyprc_hadoop.newhome.dwm_newhome_event_aggregation_label_di
+      WHERE   date=${date-1}
+              and is_dau_2024=1
+              and consum_dura>0
+      GROUP BY feed_channel
+    drill_dimension: feed_channel
+
+  - name: 内容中心分页面消费UV
+    sql: |
+      SELECT  page,
+              count(distinct did)
+      FROM    iceberg_zjyprc_hadoop.newhome.dwm_newhome_event_aggregation_label_di
+      WHERE   date=${date-1}
+              and is_dau_2024=1
+              and consum_cnt>0
+      GROUP BY page
+    drill_dimension: page
+
+  - name: 内容中心分页面VV
+    sql: |
+      SELECT  page,
+              sum(consum_cnt)
+      FROM    iceberg_zjyprc_hadoop.newhome.dwm_newhome_event_aggregation_label_di
+      WHERE   date=${date-1}
+              and is_dau_2024=1
+              and consum_cnt>0
+      GROUP BY page
+    drill_dimension: page
+
+  - name: 内容中心分页面消费时长
+    sql: |
+      SELECT  page,
+              sum(consum_dura)/60000
+      FROM    iceberg_zjyprc_hadoop.newhome.dwm_newhome_event_aggregation_label_di
+      WHERE   date=${date-1}
+              and is_dau_2024=1
+              and consum_dura>0
+      GROUP BY page
+    drill_dimension: page
+
+收入指标:
+  - name: AB实验收入数据
+    source_table: iceberg_zjyprc_hadoop.browser.dwm_micd_effect_ad_1d
+    scene_mapping_ref: tag_id_scene_mapping.yaml#new_home
+    description: AB实验场景下的收入对比模板，exp_user侧必须GROUP BY去重避免JOIN放大
+    sql: |
+      WITH exp_user AS (
+          SELECT date, did,
+              CASE WHEN eid LIKE '%${treatment_id}%' THEN 'treatment'
+                   WHEN eid LIKE '%${control_id}%' THEN 'control'
+              END as exp_group
+          FROM iceberg_zjyprc_hadoop.newhome.dwm_newhome_event_aggregation_label_di
+          WHERE date = ${date}
+              AND is_dau_2024=1
+              AND (eid LIKE '%${treatment_id}%' OR eid LIKE '%${control_id}%')
+          GROUP BY date, did,
+              CASE WHEN eid LIKE '%${treatment_id}%' THEN 'treatment'
+                   WHEN eid LIKE '%${control_id}%' THEN 'control'
+              END
+      ),
+      ad_data AS (
+          SELECT date, did,
+              SUM(real_fee) as real_fee,
+              SUM(valid_view_num) as valid_view_num
+          FROM iceberg_zjyprc_hadoop.browser.dwm_micd_effect_ad_1d
+          WHERE date = ${date}
+              AND tag_media_type_flag='NEW_HOME'
+          GROUP BY date, did
+      )
+      SELECT e.exp_group,
+          COUNT(DISTINCT e.did) as dau,
+          SUM(COALESCE(a.real_fee,0))/100000 as revenue_yuan,
+          SUM(COALESCE(a.real_fee,0))/100000/COUNT(DISTINCT e.did) as arpu
+      FROM exp_user e
+      LEFT JOIN ad_data a ON e.date=a.date AND e.did=a.did
+      GROUP BY e.exp_group
+      ORDER BY e.exp_group
+    notes:
+      - exp_user CTE必须GROUP BY did去重，因为聚合表每did每天有约48行（按page/module等展开）
+      - 收入单位real_fee为"丝"，1元=100000丝，除以100000转元
+      - 使用LEFT JOIN确保所有实验用户都被统计（无广告收入的用户贡献0）
+      - COALESCE处理NULL值，避免无广告数据的用户被排除
+
+  - name: 内容中心ARPU
+    source_table: iceberg_zjyprc_hadoop.browser.dwm_micd_effect_ad_1d
+    scene_mapping_ref: tag_id_scene_mapping.yaml#new_home
+    sql: |
+      SELECT  a.date,
+              SUM(b.real_fee)/100000 AS total_revenue_yuan,
+              COUNT(DISTINCT a.did) AS nh_dau,
+              SUM(b.real_fee)/100000/COUNT(DISTINCT a.did) AS nh_arpu
+      FROM
+      (
+          SELECT  date, did
+          FROM    iceberg_zjyprc_hadoop.newhome.dwm_newhome_event_aggregation_label_di
+          WHERE   date=${date-1}
+                  AND is_dau_2024=1
+          GROUP BY date, did
+      ) a
+      JOIN
+      (
+          SELECT  date, did,
+                  SUM(real_fee) AS real_fee
+          FROM    iceberg_zjyprc_hadoop.browser.dwm_micd_effect_ad_1d
+          WHERE   date=${date-1}
+                  AND tag_media_type_flag='NEW_HOME'
+          GROUP BY date, did
+      ) b
+      ON a.date=b.date AND a.did=b.did
+      GROUP BY a.date
+
+  - name: 内容中心分广告位收入
+    source_table: iceberg_zjyprc_hadoop.browser.dwm_micd_effect_ad_1d
+    scene_mapping_ref: tag_id_scene_mapping.yaml#new_home
+    sql: |
+      SELECT  CASE
+                WHEN tag_id IN ('1.132.1.1','1.132.1.2') THEN '首页-推荐'
+                WHEN tag_id IN ('1.132.1.3','1.132.1.4') THEN '发现频道Tab'
+                WHEN tag_id IN ('1.132.1.6') THEN '游戏频道Tab'
+                WHEN tag_id IN ('1.132.1.7','1.132.1.8') THEN '娱乐频道Tab'
+                WHEN tag_id IN ('1.132.1.9','1.132.1.10') THEN '其他频道Tab'
+                WHEN tag_id IN ('1.132.3.1','1.132.3.2') THEN '视频频道Tab'
+                WHEN tag_id IN ('1.132.3.4','1.132.3.5','1.132.3.6','1.132.3.7') THEN '沉浸式详情页'
+                WHEN tag_id IN ('1.132.2.1','1.132.2.2','1.132.2.5','1.132.1.14') THEN '图文详情页'
+                WHEN tag_id IN ('1.132.3.9','1.132.3.10','1.132.3.11','1.132.3.13') THEN '短剧详情页'
+                WHEN tag_id LIKE '1.132.10.%' THEN '任务详情页'
+                ELSE '其他'
+              END AS scene,
+              tag_id,
+              SUM(real_fee)/100000 AS revenue_yuan
+      FROM    iceberg_zjyprc_hadoop.browser.dwm_micd_effect_ad_1d
+      WHERE   date=${date-1}
+              AND tag_media_type_flag='NEW_HOME'
+      GROUP BY CASE
+                WHEN tag_id IN ('1.132.1.1','1.132.1.2') THEN '首页-推荐'
+                WHEN tag_id IN ('1.132.1.3','1.132.1.4') THEN '发现频道Tab'
+                WHEN tag_id IN ('1.132.1.6') THEN '游戏频道Tab'
+                WHEN tag_id IN ('1.132.1.7','1.132.1.8') THEN '娱乐频道Tab'
+                WHEN tag_id IN ('1.132.1.9','1.132.1.10') THEN '其他频道Tab'
+                WHEN tag_id IN ('1.132.3.1','1.132.3.2') THEN '视频频道Tab'
+                WHEN tag_id IN ('1.132.3.4','1.132.3.5','1.132.3.6','1.132.3.7') THEN '沉浸式详情页'
+                WHEN tag_id IN ('1.132.2.1','1.132.2.2','1.132.2.5','1.132.1.14') THEN '图文详情页'
+                WHEN tag_id IN ('1.132.3.9','1.132.3.10','1.132.3.11','1.132.3.13') THEN '短剧详情页'
+                WHEN tag_id LIKE '1.132.10.%' THEN '任务详情页'
+                ELSE '其他'
+              END, tag_id
+      ORDER BY revenue_yuan DESC
+    drill_dimension: scene, tag_id
+
+  - name: 内容中心IPU
+    source_table: iceberg_zjyprc_hadoop.browser.dwm_micd_effect_ad_1d
+    scene_mapping_ref: tag_id_scene_mapping.yaml#new_home
+    sql: |
+      SELECT  a.date,
+              SUM(b.valid_view_num) AS total_imp,
+              COUNT(DISTINCT a.did) AS nh_dau,
+              CAST(SUM(b.valid_view_num) AS DOUBLE)/COUNT(DISTINCT a.did) AS nh_ipu
+      FROM
+      (
+          SELECT  date, did
+          FROM    iceberg_zjyprc_hadoop.newhome.dwm_newhome_event_aggregation_label_di
+          WHERE   date=${date-1}
+                  AND is_dau_2024=1
+          GROUP BY date, did
+      ) a
+      JOIN
+      (
+          SELECT  date, did,
+                  SUM(valid_view_num) AS valid_view_num
+          FROM    iceberg_zjyprc_hadoop.browser.dwm_micd_effect_ad_1d
+          WHERE   date=${date-1}
+                  AND tag_media_type_flag='NEW_HOME'
+          GROUP BY date, did
+      ) b
+      ON a.date=b.date AND a.did=b.did
+      GROUP BY a.date
+
+  - name: 内容中心eCPM
+    source_table: iceberg_zjyprc_hadoop.browser.dwm_micd_effect_ad_1d
+    scene_mapping_ref: tag_id_scene_mapping.yaml#new_home
+    sql: |
+      SELECT  date,
+              SUM(real_fee)/100000 AS revenue_yuan,
+              SUM(valid_view_num) AS total_imp,
+              CAST(SUM(real_fee) AS DOUBLE)/100000/CAST(SUM(valid_view_num) AS DOUBLE)*1000 AS ecpm
+      FROM    iceberg_zjyprc_hadoop.browser.dwm_micd_effect_ad_1d
+      WHERE   date=${date-1}
+              AND tag_media_type_flag='NEW_HOME'
+      GROUP BY date
+
+留存与LT指标:
+  - name: 内容中心次日留存率
+    sql: |
+      with
+          a as (
+              SELECT  date, did
+              FROM    iceberg_zjyprc_hadoop.newhome.dwm_newhome_event_aggregation_label_di
+              WHERE   date between ${date-30} and ${date-1}
+                      and is_dau_2024=1
+              GROUP BY date, did
+          )
+      SELECT  a.date,
+              count(distinct a.did) as uv,
+              count(distinct b.did) as uv_retent,
+              count(distinct b.did)/count(distinct a.did) as uv_retent_rate
+      FROM
+          (
+              SELECT  date, did
+              FROM    a
+          ) a
+          left join (
+              SELECT  date, did
+              FROM    a
+          ) b
+          on a.did=b.did
+          and datediff(FROM_unixtime(unix_timestamp(cast(b.date as string), 'yyyyMMdd'), 'yyyy-MM-dd'), FROM_unixtime(unix_timestamp(cast(a.date as string), 'yyyyMMdd'), 'yyyy-MM-dd'))=1
+      GROUP BY a.date;
+
+  - name: 内容中心7日留存率
+    sql: |
+      with
+          a as (
+              SELECT  date, did
+              FROM    iceberg_zjyprc_hadoop.newhome.dwm_newhome_event_aggregation_label_di
+              WHERE   date between ${date-30} and ${date-1}
+                      and is_dau_2024=1
+              GROUP BY date, did
+          )
+      SELECT  a.date,
+              count(distinct a.did) as uv,
+              count(distinct b.did) as uv_retent,
+              count(distinct b.did)/count(distinct a.did) as uv_retent_rate
+      FROM
+          (
+              SELECT  date, did
+              FROM    a
+          ) a
+          left join (
+              SELECT  date, did
+              FROM    a
+          ) b
+          on a.did=b.did
+          and datediff(FROM_unixtime(unix_timestamp(cast(b.date as string), 'yyyyMMdd'), 'yyyy-MM-dd'), FROM_unixtime(unix_timestamp(cast(a.date as string), 'yyyyMMdd'), 'yyyy-MM-dd'))=7
+      GROUP BY a.date;
+
+  - name: 内容中心30日留存率
+    sql: |
+      with
+          a as (
+              SELECT  date, did
+              FROM    iceberg_zjyprc_hadoop.newhome.dwm_newhome_event_aggregation_label_di
+              WHERE   date between ${date-60} and ${date-1}
+                      and is_dau_2024=1
+              GROUP BY date, did
+          )
+      SELECT  a.date,
+              count(distinct a.did) as uv,
+              count(distinct b.did) as uv_retent,
+              count(distinct b.did)/count(distinct a.did) as uv_retent_rate
+      FROM
+          (
+              SELECT  date, did
+              FROM    a
+          ) a
+          left join (
+              SELECT  date, did
+              FROM    a
+          ) b
+          on a.did=b.did
+          and datediff(FROM_unixtime(unix_timestamp(cast(b.date as string), 'yyyyMMdd'), 'yyyy-MM-dd'), FROM_unixtime(unix_timestamp(cast(a.date as string), 'yyyyMMdd'), 'yyyy-MM-dd'))=30
+      GROUP BY a.date;
+
+  - name: 内容中心LT3
+    sql: |
+      with t1 as (
+          SELECT  date, did
+          FROM    iceberg_zjyprc_hadoop.newhome.dwm_newhome_event_aggregation_label_di
+          WHERE   date between ${date-7} and ${date-1}
+                  and is_dau_2024=1
+          GROUP BY date, did
+      ),
+      t2 as (
+          SELECT  date, did
+          FROM    iceberg_zjyprc_hadoop.newhome.dwm_newhome_event_aggregation_label_di
+          WHERE   date between ${date-7} and ${date-1}
+                  and is_dau_2024=1
+          GROUP BY date, did
+      )
+      SELECT  a.date,
+              count(b.date)/count(distinct a.did) LT
+      FROM
+          (
+              SELECT  date, did
+              FROM    t1
+          ) a
+          LEFT JOIN (
+              SELECT  date, did
+              FROM    t2
+          ) b
+          on a.did=b.did
+      WHERE
+          b.date>=a.date
+          and datediff(from_unixtime(unix_timestamp(cast(b.date as string), 'yyyyMMdd'), 'yyyy-MM-dd'), from_unixtime(unix_timestamp(cast(a.date as string), 'yyyyMMdd'),'yyyy-MM-dd'))<=2
+      GROUP BY a.date
+
+  - name: 内容中心LT7
+    sql: |
+      with t1 as (
+          SELECT  date, did
+          FROM    iceberg_zjyprc_hadoop.newhome.dwm_newhome_event_aggregation_label_di
+          WHERE   date between ${date-30} and ${date-1}
+                  and is_dau_2024=1
+          GROUP BY date, did
+      ),
+      t2 as (
+          SELECT  date, did
+          FROM    iceberg_zjyprc_hadoop.newhome.dwm_newhome_event_aggregation_label_di
+          WHERE   date between ${date-30} and ${date-1}
+                  and is_dau_2024=1
+          GROUP BY date, did
+      )
+      SELECT  a.date,
+              count(b.date)/count(distinct a.did) LT
+      FROM
+          (
+              SELECT  date, did
+              FROM    t1
+          ) a
+          LEFT JOIN (
+              SELECT  date, did
+              FROM    t2
+          ) b
+          on a.did=b.did
+      WHERE
+          b.date>=a.date
+          and datediff(from_unixtime(unix_timestamp(cast(b.date as string), 'yyyyMMdd'), 'yyyy-MM-dd'), from_unixtime(unix_timestamp(cast(a.date as string), 'yyyyMMdd'),'yyyy-MM-dd'))<=6
+      GROUP BY a.date
+
+  - name: 内容中心LT30
+    sql: |
+      with t1 as (
+          SELECT  date, did
+          FROM    iceberg_zjyprc_hadoop.newhome.dwm_newhome_event_aggregation_label_di
+          WHERE   date between ${date-60} and ${date-1}
+                  and is_dau_2024=1
+          GROUP BY date, did
+      ),
+      t2 as (
+          SELECT  date, did
+          FROM    iceberg_zjyprc_hadoop.newhome.dwm_newhome_event_aggregation_label_di
+          WHERE   date between ${date-60} and ${date-1}
+                  and is_dau_2024=1
+          GROUP BY date, did
+      )
+      SELECT  a.date,
+              count(b.date)/count(distinct a.did) LT
+      FROM
+          (
+              SELECT  date, did
+              FROM    t1
+          ) a
+          LEFT JOIN (
+              SELECT  date, did
+              FROM    t2
+          ) b
+          on a.did=b.did
+      WHERE
+          b.date>=a.date
+          and datediff(from_unixtime(unix_timestamp(cast(b.date as string), 'yyyyMMdd'), 'yyyy-MM-dd'), from_unixtime(unix_timestamp(cast(a.date as string), 'yyyyMMdd'),'yyyy-MM-dd'))<=29
+      GROUP BY a.date
+
+下钻模板:
+  - name: 底部Tab点击UV分布（实验对比）
+    description: 对比实验组/对照组各底部Tab的点击UV分布，用于验证Tab挤压假设
+    drill_scenario: 底部导航Tab变更
+    sql: |
+      WITH daily AS (
+          SELECT date,
+              CASE WHEN eid LIKE '%${treatment_id}%' THEN 'treatment'
+                   WHEN eid LIKE '%${control_id}%' THEN 'control'
+              END as exp_group,
+              did
+          FROM iceberg_zjyprc_hadoop.dw.dwd_ot_event_di_31000000297
+          WHERE date BETWEEN '${start_date}' AND '${end_date}'
+              AND event_name = 'tab_bottom_click'
+              AND (properties['new_eid'] LIKE '%${treatment_id}%' OR properties['new_eid'] LIKE '%${control_id}%')
+      )
+      SELECT exp_group,
+          properties['tab_name'] as tab_name,
+          COUNT(DISTINCT distinct_id) as click_uv
+      FROM iceberg_zjyprc_hadoop.dw.dwd_ot_event_di_31000000297 t
+      JOIN (SELECT DISTINCT date, did as exp_did, exp_group FROM daily) d
+          ON t.date = d.date AND t.distinct_id = d.exp_did
+      WHERE t.date BETWEEN '${start_date}' AND '${end_date}'
+          AND t.event_name = 'tab_bottom_click'
+      GROUP BY exp_group, properties['tab_name']
+      ORDER BY exp_group, click_uv DESC
+    notes:
+      - 明细表用distinct_id做用户ID，非did
+      - 实验ID在properties['new_eid']中
+      - 需根据实际埋点确认tab_name字段的property key
+
+  - name: 用户分群消费画像
+    description: 按是否使用某功能分群，对比各群体的消费指标（VV、时长、消费率）
+    drill_scenario: 高活用户分流
+    sql: |
+      WITH exp_user AS (
+          SELECT date, did,
+              CASE WHEN eid LIKE '%${treatment_id}%' THEN 'treatment'
+                   WHEN eid LIKE '%${control_id}%' THEN 'control'
+              END as exp_group,
+              SUM(consum_cnt) as vv,
+              SUM(consum_dura)/60000 as consum_dura_min,
+              CASE WHEN SUM(consum_cnt) > 0 THEN 1 ELSE 0 END as is_consumer
+          FROM iceberg_zjyprc_hadoop.newhome.dwm_newhome_event_aggregation_label_di
+          WHERE date BETWEEN '${start_date}' AND '${end_date}'
+              AND is_dau_2024 = 1
+              AND (eid LIKE '%${treatment_id}%' OR eid LIKE '%${control_id}%')
+          GROUP BY date, did,
+              CASE WHEN eid LIKE '%${treatment_id}%' THEN 'treatment'
+                   WHEN eid LIKE '%${control_id}%' THEN 'control'
+              END
+      )
+      SELECT exp_group,
+          COUNT(DISTINCT did) as dau,
+          SUM(is_consumer) as consum_uv,
+          CAST(SUM(is_consumer) AS DOUBLE) / COUNT(DISTINCT did) as consum_rate,
+          SUM(vv) as total_vv,
+          CAST(SUM(vv) AS DOUBLE) / COUNT(DISTINCT did) as vv_per_user,
+          SUM(consum_dura_min) / COUNT(DISTINCT did) as consum_dura_per_user
+      FROM exp_user
+      GROUP BY exp_group
+    notes:
+      - 聚合表用did做用户ID
+      - 聚合表实验字段用eid（非new_eid）
+      - 需先GROUP BY did去重（聚合表每did每天多行）
+
+  - name: 功能用户与原有功能用户重叠分析
+    description: 分析使用新功能的用户与使用原有功能的用户重叠度
+    drill_scenario: 高活用户分流
+    sql: |
+      WITH new_feature_user AS (
+          SELECT DISTINCT distinct_id
+          FROM iceberg_zjyprc_hadoop.dw.dwd_ot_event_di_31000000297
+          WHERE date BETWEEN '${start_date}' AND '${end_date}'
+              AND event_name = '${new_feature_event}'
+              AND properties['new_eid'] LIKE '%${treatment_id}%'
+      ),
+      original_feature_user AS (
+          SELECT DISTINCT distinct_id
+          FROM iceberg_zjyprc_hadoop.dw.dwd_ot_event_di_31000000297
+          WHERE date BETWEEN '${start_date}' AND '${end_date}'
+              AND event_name = '${original_feature_event}'
+              AND properties['new_eid'] LIKE '%${treatment_id}%'
+      )
+      SELECT
+          (SELECT COUNT(*) FROM new_feature_user) as new_feature_uv,
+          (SELECT COUNT(*) FROM original_feature_user) as original_feature_uv,
+          (SELECT COUNT(*) FROM new_feature_user a JOIN original_feature_user b ON a.distinct_id = b.distinct_id) as overlap_uv
+    notes:
+      - ${new_feature_event} 和 ${original_feature_event} 需替换为实际事件名
+      - 重叠率 = overlap_uv / new_feature_uv，用于判断新功能是否吸引了原有高活用户

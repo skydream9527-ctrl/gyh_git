@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ICE Workbench v4 · Dashboard · Desktop + Mobile</title>
+<script>(function(){var t=localStorage.getItem('ice-theme')||'light';document.documentElement.dataset.theme=t;})();</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+:root[data-theme="light"]{
+  --bg:#faf9f6;--paper:#f4f1ec;--surface:#ffffff;--surface-2:#f7f5f0;--surface-3:#ece7df;
+  --border:#e6e2dc;--border-soft:#efece6;--divider:#ece8e1;
+  --text:#1f1f1f;--text-dim:#5f6368;--text-muted:#80868b;
+  --accent:#1a73e8;--accent-hover:#1557b0;--accent-soft:#e8f0fe;--accent-text:#174ea6;
+  --success:#137333;--success-soft:#e6f4ea;
+  --warning:#b06000;--warning-soft:#fef7e0;
+  --error:#b3261e;--error-soft:#fce8e6;
+  --p-ab:#1967d2;--p-ab-soft:#e8f0fe;
+  --p-biz:#b06000;--p-biz-soft:#fef7e0;
+  --p-gray:#5f4b8b;--p-gray-soft:#f3edff;
+  --p-data:#137333;--p-data-soft:#e6f4ea;
+  --p-wave:#b3261e;--p-wave-soft:#fce8e6;
+  --shadow-1:0 1px 2px rgba(60,64,67,.06);
+  --shadow-2:0 1px 3px rgba(60,64,67,.10),0 4px 8px rgba(60,64,67,.04);
+  --shadow-3:0 4px 24px rgba(60,64,67,.10);
+}
+:root[data-theme="dark"]{
+  --bg:#1f1f1f;--paper:#2a2a2a;--surface:#262626;--surface-2:#2e2e2e;--surface-3:#363636;
+  --border:#3c3c3c;--border-soft:#2e2e2e;
+  --text:#e8eaed;--text-dim:#9aa0a6;--text-muted:#6c7075;
+  --accent:#8ab4f8;--accent-hover:#aecbfa;--accent-soft:rgba(138,180,248,.16);--accent-text:#aecbfa;
+  --p-ab:#8ab4f8;--p-ab-soft:rgba(138,180,248,.16);
+  --p-biz:#fdd663;--p-biz-soft:rgba(253,214,99,.14);
+  --p-gray:#c58af9;--p-gray-soft:rgba(197,138,249,.14);
+  --p-data:#81c995;--p-data-soft:rgba(129,201,149,.14);
+  --p-wave:#f28b82;--p-wave-soft:rgba(242,139,130,.14);
+  --success:#81c995;--success-soft:rgba(129,201,149,.14);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--paper);color:var(--text);
+  font-family:'Inter','PingFang SC','Microsoft YaHei',-apple-system,sans-serif;font-size:14px;line-height:1.55;
+  -webkit-font-smoothing:antialiased}
+
+/* ========== Compare canvas ========== */
+.canvas{max-width:1640px;margin:0 auto;padding:32px 24px 80px;
+  display:grid;grid-template-columns:1fr 430px;gap:32px;align-items:flex-start}
+@media (max-width:1380px){.canvas{grid-template-columns:1fr;gap:48px}}
+
+.label{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);
+  text-transform:uppercase;letter-spacing:.6px;font-weight:500;margin:0 0 12px;display:flex;align-items:center;gap:8px}
+.label .dot{width:6px;height:6px;border-radius:50%;background:var(--accent)}
+
+/* ========== Desktop browser frame ========== */
+.browser{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;
+  box-shadow:var(--shadow-2)}
+.browser-bar{background:var(--surface-2);padding:10px 14px;display:flex;align-items:center;gap:10px;
+  border-bottom:1px solid var(--border-soft)}
+.browser-bar .dots{display:flex;gap:6px}
+.browser-bar .dots span{width:11px;height:11px;border-radius:50%;background:var(--surface-3)}
+.browser-bar .url{flex:1;background:var(--surface);border:1px solid var(--border-soft);
+  border-radius:99px;padding:5px 14px;font-size:12px;color:var(--text-dim);
+  font-family:'JetBrains Mono',monospace;display:flex;align-items:center;gap:6px}
+.browser-bar .url::before{content:"🔒";font-size:11px}
+.browser-content{background:var(--bg);min-height:920px}
+
+/* ========== Desktop layout ========== */
+.appbar{height:60px;background:var(--bg);border-bottom:1px solid var(--border-soft);
+  display:flex;align-items:center;padding:0 24px;gap:12px}
+.brand{display:flex;align-items:center;gap:10px;cursor:pointer}
+.brand-mark{width:32px;height:32px;display:grid;place-items:center}
+.brand-mark svg{width:32px;height:32px}
+.brand-text{font-family:'Inter',sans-serif;font-weight:500;font-size:18px;color:var(--text);letter-spacing:-.2px}
+.brand-text b{font-weight:600}
+
+.search-pill{margin:0 24px;flex:1;max-width:520px;background:var(--surface);border:1px solid var(--border-soft);
+  border-radius:99px;padding:9px 18px;font-size:13px;color:var(--text-dim);display:flex;align-items:center;gap:10px;
+  cursor:text;transition:all .15s}
+.search-pill:hover{border-color:var(--border);background:var(--surface)}
+.search-pill .kbd{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-muted);
+  background:var(--surface-2);padding:2px 7px;border-radius:5px;border:1px solid var(--border-soft)}
+
+.appbar .spacer{flex:1}
+.icon-btn{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;cursor:pointer;
+  color:var(--text-dim);background:transparent;border:none;font-size:18px;transition:background .15s;position:relative}
+.icon-btn:hover{background:var(--surface-2)}
+.icon-btn .dot{position:absolute;top:8px;right:8px;width:8px;height:8px;border-radius:50%;background:var(--error);
+  border:2px solid var(--bg)}
+.admin-link{font-size:13px;color:var(--text-dim);padding:8px 14px;text-decoration:none;border-radius:99px}
+.admin-link:hover{background:var(--surface-2);color:var(--text)}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--surface-3);
+  display:grid;place-items:center;font-weight:500;font-size:13px;color:var(--text);cursor:pointer}
+
+/* ========== Greeting ========== */
+.page{padding:32px 32px 48px;display:grid;grid-template-columns:1fr 320px;gap:32px;align-items:flex-start}
+@media (max-width:1100px){.page{grid-template-columns:1fr}}
+
+.hero{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:24px;gap:16px;flex-wrap:wrap}
+.hero h1{font-family:'Inter',sans-serif;font-size:28px;font-weight:500;margin:0;letter-spacing:-.5px;line-height:1.25}
+.hero .sub{color:var(--text-dim);font-size:13px;margin:6px 0 0}
+.hero-cta{display:flex;gap:8px;flex-shrink:0}
+
+.btn{display:inline-flex;align-items:center;gap:8px;font-family:inherit;font-size:14px;font-weight:500;
+  padding:10px 20px;border-radius:99px;border:1px solid transparent;cursor:pointer;transition:all .15s;line-height:1}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent-hover);box-shadow:var(--shadow-1)}
+.btn-tonal{background:var(--accent-soft);color:var(--accent-text)}
+.btn-tonal:hover{background:#dae8fd}
+.btn-ghost{background:transparent;color:var(--text);border-color:var(--border)}
+.btn-ghost:hover{background:var(--surface-2)}
+.btn-text{background:transparent;color:var(--accent-text);padding:8px 12px}
+.btn-text:hover{background:var(--accent-soft)}
+.btn-sm{padding:6px 14px;font-size:12px}
+.btn .ico{font-size:15px;line-height:1}
+
+/* ========== Alert (top inline) ========== */
+.alert{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--warning-soft);
+  border:1px solid var(--warning-soft);border-radius:12px;margin-bottom:18px;font-size:13px}
+.alert .ico{font-size:16px;color:var(--warning)}
+.alert a{margin-left:auto;color:var(--warning);font-weight:600;text-decoration:none}
+
+/* ========== Filter chips ========== */
+.filters{display:flex;align-items:center;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:500;
+  padding:7px 14px;border-radius:99px;background:var(--surface);color:var(--text);
+  border:1px solid var(--border);cursor:pointer;transition:all .12s}
+.chip:hover{background:var(--surface-2)}
+.chip.active{background:var(--accent-soft);color:var(--accent-text);border-color:var(--accent-soft)}
+.chip.ab{background:var(--p-ab-soft);color:var(--p-ab);border-color:var(--p-ab-soft)}
+.chip.biz{background:var(--p-biz-soft);color:var(--p-biz);border-color:var(--p-biz-soft)}
+.chip.gray{background:var(--p-gray-soft);color:var(--p-gray);border-color:var(--p-gray-soft)}
+.chip.data{background:var(--p-data-soft);color:var(--p-data);border-color:var(--p-data-soft)}
+.chip.wave{background:var(--p-wave-soft);color:var(--p-wave);border-color:var(--p-wave-soft)}
+.chip.ok{background:var(--success-soft);color:var(--success);border-color:var(--success-soft)}
+.filters .spacer{flex:1}
+.filters .sort{font-size:12px;color:var(--text-dim);background:transparent;border:1px solid var(--border-soft);
+  padding:6px 12px;border-radius:99px;cursor:pointer;font-family:inherit}
+
+/* ========== Notebook grid ========== */
+.notebooks{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+.nb-card{background:var(--surface);border:1px solid var(--border-soft);border-radius:14px;
+  padding:18px;cursor:pointer;transition:all .15s;position:relative;
+  display:flex;flex-direction:column;gap:12px;min-height:180px}
+.nb-card:hover{border-color:var(--border);box-shadow:var(--shadow-2);transform:translateY(-1px)}
+.nb-card .emoji{font-size:32px;line-height:1}
+.nb-card .name{font-family:'Inter',sans-serif;font-size:15px;font-weight:500;line-height:1.35;
+  display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.nb-card .meta{margin-top:auto;display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-muted)}
+.nb-card .meta .dot{width:3px;height:3px;border-radius:50%;background:var(--text-muted)}
+.nb-card .badge-row{display:flex;gap:4px;flex-wrap:wrap}
+.nb-card .badge-row .chip{padding:2px 9px;font-size:11px}
+.nb-card.new{border-style:dashed;border-color:var(--border);align-items:flex-start;justify-content:center;
+  background:transparent;text-align:left}
+.nb-card.new:hover{background:var(--surface);border-style:dashed;border-color:var(--accent)}
+.nb-card.new .add-ico{width:40px;height:40px;border-radius:50%;background:var(--accent-soft);color:var(--accent-text);
+  display:grid;place-items:center;font-size:24px;font-weight:300;margin-bottom:6px}
+.nb-card.new .name{color:var(--text-dim)}
+.nb-card.new .desc{font-size:12px;color:var(--text-muted)}
+.nb-card .more{position:absolute;top:10px;right:10px;width:28px;height:28px;border-radius:50%;
+  display:grid;place-items:center;color:var(--text-muted);font-size:14px;opacity:0;transition:all .12s;cursor:pointer}
+.nb-card:hover .more{opacity:1}
+.nb-card .more:hover{background:var(--surface-2);color:var(--text)}
+
+/* favorite star */
+.nb-card .star{position:absolute;top:14px;right:14px;font-size:14px;color:var(--p-biz);opacity:.0}
+.nb-card.starred .star{opacity:1}
+
+/* section title */
+.sect{font-size:13px;font-weight:500;color:var(--text-dim);margin:30px 0 14px;
+  text-transform:uppercase;letter-spacing:.6px;display:flex;align-items:center;gap:8px}
+.sect .a{margin-left:auto;color:var(--accent-text);font-weight:500;cursor:pointer;text-decoration:none;font-size:12px;text-transform:none;letter-spacing:0}
+
+/* ========== Right rail ========== */
+.rail{display:flex;flex-direction:column;gap:24px}
+.rail-card{background:var(--surface);border:1px solid var(--border-soft);border-radius:14px;padding:16px}
+.rail-h{font-size:12px;font-weight:500;color:var(--text-dim);text-transform:uppercase;letter-spacing:.6px;
+  margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
+.rail-h .a{color:var(--accent-text);font-size:11px;cursor:pointer;text-decoration:none;text-transform:none;letter-spacing:0;font-weight:500}
+
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{padding:10px;text-align:center;background:var(--surface-2);border-radius:10px}
+.stat .v{font-size:22px;font-weight:500;letter-spacing:-.5px;line-height:1.1}
+.stat .v.ab{color:var(--p-ab)}
+.stat .v.warn{color:var(--warning)}
+.stat .l{font-size:10px;color:var(--text-muted);margin-top:3px;text-transform:uppercase;letter-spacing:.4px}
+
+.activity{display:flex;flex-direction:column;gap:0}
+.act-row{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border-soft);font-size:13px}
+.act-row:last-child{border-bottom:none}
+.act-row .ico{width:28px;height:28px;border-radius:50%;background:var(--accent-soft);color:var(--accent-text);
+  display:grid;place-items:center;font-size:13px;flex-shrink:0}
+.act-row.ok .ico{background:var(--success-soft);color:var(--success)}
+.act-row.warn .ico{background:var(--warning-soft);color:var(--warning)}
+.act-row .who{font-weight:500}
+.act-row .what{color:var(--text-dim);line-height:1.5}
+.act-row .when{font-size:11px;color:var(--text-muted);margin-top:2px}
+
+.kb-row{display:flex;align-items:center;gap:10px;padding:10px 0;font-size:13px;border-bottom:1px solid var(--border-soft);cursor:pointer}
+.kb-row:last-child{border-bottom:none}
+.kb-row .ico{width:32px;height:32px;border-radius:8px;display:grid;place-items:center;font-size:14px;background:var(--p-gray-soft);color:var(--p-gray)}
+.kb-row .info{flex:1;min-width:0}
+.kb-row .info .n{font-weight:500;font-size:13px}
+.kb-row .info .s{font-size:11px;color:var(--text-muted);margin-top:2px}
+.kb-row .ok-pill{font-size:10px;padding:2px 8px;border-radius:99px;background:var(--success-soft);color:var(--success);font-weight:500}
+
+.scheduled{display:flex;align-items:center;gap:10px;padding:14px;background:var(--surface);border:1px solid var(--border-soft);
+  border-radius:14px;margin-top:18px;font-size:13px}
+.scheduled .ico{width:32px;height:32px;border-radius:8px;background:var(--accent-soft);color:var(--accent-text);
+  display:grid;place-items:center;font-size:15px}
+.scheduled .info{flex:1;line-height:1.4}
+.scheduled .info b{font-weight:500}
+.scheduled .info .s{font-size:11px;color:var(--text-muted);margin-top:2px}
+.scheduled a{color:var(--accent-text);text-decoration:none;font-size:12px;font-weight:500}
+
+/* ========== Mobile preview ========== */
+.phone{position:sticky;top:32px;justify-self:center}
+.phone-frame{width:390px;height:844px;background:var(--bg);border:9px solid #1a1a1a;border-radius:48px;
+  overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--shadow-3);position:relative}
+.phone-frame::before{content:"";position:absolute;top:9px;left:50%;transform:translateX(-50%);width:120px;height:28px;
+  background:#1a1a1a;border-radius:16px;z-index:10}
+.phone-status{height:48px;flex-shrink:0;padding:16px 26px 4px;display:flex;align-items:center;justify-content:space-between;
+  font-size:13px;font-weight:600;color:var(--text)}
+.phone-status .right{display:flex;gap:5px;align-items:center}
+.phone-body{flex:1;overflow-y:auto;background:var(--bg);padding:0 16px 76px;position:relative}
+.phone-body::-webkit-scrollbar{width:0}
+.phone-bottom{position:absolute;bottom:0;left:0;right:0;height:76px;background:var(--surface);
+  border-top:1px solid var(--border-soft);display:flex;justify-content:space-around;align-items:center;
+  padding-bottom:16px;padding-top:6px}
+.mob-tab{display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--text-muted);font-size:10px;cursor:pointer;flex:1}
+.mob-tab.active{color:var(--accent-text)}
+.mob-tab .pill{display:grid;place-items:center;width:56px;height:28px;border-radius:14px;font-size:18px;transition:background .15s}
+.mob-tab.active .pill{background:var(--accent-soft)}
+
+.fab{position:absolute;right:20px;bottom:96px;width:56px;height:56px;border-radius:18px;background:var(--accent);color:#fff;
+  display:grid;place-items:center;font-size:24px;cursor:pointer;box-shadow:var(--shadow-3);font-weight:300}
+.fab.extended{width:auto;padding:0 22px;gap:8px;display:flex;align-items:center;font-size:14px;font-weight:500;border-radius:18px}
+
+.phone-hero{padding:14px 0 12px;display:flex;align-items:center;justify-content:space-between}
+.phone-hero h1{font-size:24px;font-weight:500;margin:0;letter-spacing:-.4px}
+.phone-hero .actions{display:flex;gap:6px}
+.phone-greet{padding:10px 0 14px}
+.phone-greet h1{font-size:22px;font-weight:500;margin:0 0 4px;letter-spacing:-.3px}
+.phone-greet .s{color:var(--text-dim);font-size:12px}
+
+/* mobile filter row */
+.mob-filters{display:flex;gap:6px;overflow-x:auto;padding:0 0 12px;margin:0 -16px;padding-left:16px;padding-right:16px;scrollbar-width:none}
+.mob-filters::-webkit-scrollbar{display:none}
+.mob-filters .chip{white-space:nowrap;font-size:12px;padding:6px 12px}
+
+/* mobile alert */
+.mob-alert{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--warning-soft);
+  border:1px solid var(--warning-soft);border-radius:12px;margin-bottom:14px;font-size:12px}
+.mob-alert .ico{font-size:14px}
+.mob-alert .arr{margin-left:auto;color:var(--warning);font-weight:600}
+
+/* mobile quickstart pills */
+.mob-quickstart{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:18px}
+.qs{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 4px;border-radius:12px;background:var(--surface);border:1px solid var(--border-soft);cursor:pointer}
+.qs .e{font-size:22px}
+.qs .l{font-size:9px;color:var(--text-dim);font-weight:500;letter-spacing:.2px}
+
+/* mobile notebook list */
+.mob-nb{display:flex;flex-direction:column;gap:10px}
+.mob-nb-card{background:var(--surface);border:1px solid var(--border-soft);border-radius:14px;padding:14px;
+  display:flex;align-items:center;gap:12px;cursor:pointer;transition:all .15s}
+.mob-nb-card:hover{box-shadow:var(--shadow-1)}
+.mob-nb-card .e{font-size:30px;line-height:1;flex-shrink:0}
+.mob-nb-card .info{flex:1;min-width:0}
+.mob-nb-card .info .n{font-size:14px;font-weight:500;line-height:1.3;margin-bottom:5px;
+  display:-webkit-box;-webkit-line-clamp:1;line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+.mob-nb-card .info .row{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.mob-nb-card .info .row .chip{font-size:10px;padding:2px 7px}
+.mob-nb-card .info .row .t{font-size:11px;color:var(--text-muted)}
+.mob-nb-card .arr{color:var(--text-muted);font-size:14px}
+
+/* mobile section header */
+.mob-sect{font-size:12px;font-weight:500;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px;
+  margin:14px 0 10px;display:flex;align-items:center}
+.mob-sect .a{margin-left:auto;color:var(--accent-text);text-transform:none;letter-spacing:0;font-size:11px;text-decoration:none}
+
+/* theme button — 顶栏图标，依主题切换 */
+.theme-btn .t-light{display:inline}.theme-btn .t-dark{display:none}
+:root[data-theme="dark"] .theme-btn .t-light{display:none}
+:root[data-theme="dark"] .theme-btn .t-dark{display:inline}
+
+/* viewport caption */
+.vp-cap{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.vp-cap .name{font-family:'Inter',sans-serif;font-weight:500;font-size:18px;letter-spacing:-.2px}
+.vp-cap .size{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted)}
+</style>
+</head>
+<body>
+
+<div class="canvas">
+
+  <!-- ============ DESKTOP ============ -->
+  <section>
+    <div class="vp-cap">
+      <div>
+        <p class="label"><span class="dot"></span>DESKTOP · 1280 × 920+</p>
+        <span class="name">Dashboard · 笔记本首页</span>
+      </div>
+      <span class="size">≥ 1280px</span>
+    </div>
+
+    <div class="browser">
+      <div class="browser-bar">
+        <div class="dots"><span></span><span></span><span></span></div>
+        <div class="url">ice.workbench.local/</div>
+      </div>
+      <div class="browser-content">
+
+        <header class="appbar">
+          <div class="brand">
+            <div class="brand-mark">
+              <svg viewBox="0 0 32 32" fill="none">
+                <rect x="2" y="2" width="28" height="28" rx="8" fill="#e8f0fe"/>
+                <path d="M9 11h10M9 16h14M9 21h7" stroke="#1a73e8" stroke-width="2" stroke-linecap="round"/>
+                <circle cx="22" cy="21" r="3" fill="#fef7e0" stroke="#b06000" stroke-width="1.5"/>
+              </svg>
+            </div>
+            <span class="brand-text"><b>ICE</b> Workbench</span>
+          </div>
+          <div class="search-pill">
+            <span style="font-size:14px">🔍</span>
+            <span>搜索笔记本、Agent、文件</span>
+            <span class="kbd">⌘K</span>
+          </div>
+          <div class="spacer"></div>
+          <a class="admin-link" href="#">🛡 管理后台</a>
+          <button class="icon-btn theme-btn" title="切换主题" onclick="toggleTheme()" aria-label="切换主题"><span class="t-light">🌙</span><span class="t-dark">☀️</span></button>
+          <button class="icon-btn" title="通知">🔔<span class="dot"></span></button>
+          <button class="icon-btn" title="帮助">?</button>
+          <div class="avatar">张</div>
+        </header>
+
+        <main class="page">
+          <div>
+            <div class="hero">
+              <div>
+                <h1>欢迎回来，张明远 👋</h1>
+                <p class="sub">12 个笔记本 · 5 个本周更新 · 12K Token 余额</p>
+              </div>
+              <div class="hero-cta">
+                <button class="btn btn-tonal"><span class="ico">📚</span>从模板</button>
+                <button class="btn btn-primary"><span class="ico">＋</span>新建笔记本</button>
+              </div>
+            </div>
+
+            <!-- alert -->
+            <div class="alert">
+              <span class="ico">⚠</span>
+              <span><b>5 条经验卡片待审批</b> · 同事们正等你确认</span>
+              <a href="#">立即处理 →</a>
+            </div>
+
+            <!-- 快速开始 · 范式 (横排小卡，更克制) -->
+            <div class="sect">⚡ 快速开始 · 5 范式</div>
+            <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:8px">
+              <div class="nb-card" style="min-height:100px;padding:14px;align-items:flex-start;gap:6px">
+                <div style="font-size:24px">⚖️</div>
+                <div style="font-size:13px;font-weight:500">AB 实验</div>
+                <div style="font-size:11px;color:var(--text-muted);line-height:1.4">显著性检验 · 置信区间</div>
+              </div>
+              <div class="nb-card" style="min-height:100px;padding:14px;align-items:flex-start;gap:6px">
+                <div style="font-size:24px">📈</div>
+                <div style="font-size:13px;font-weight:500">经营分析</div>
+                <div style="font-size:11px;color:var(--text-muted);line-height:1.4">指标拆解 · 归因</div>
+              </div>
+              <div class="nb-card" style="min-height:100px;padding:14px;align-items:flex-start;gap:6px">
+                <div style="font-size:24px">🔌</div>
+                <div style="font-size:13px;font-weight:500">版本灰度</div>
+                <div style="font-size:11px;color:var(--text-muted);line-height:1.4">放量 · 监控</div>
+              </div>
+              <div class="nb-card" style="min-height:100px;padding:14px;align-items:flex-start;gap:6px">
+                <div style="font-size:24px">📊</div>
+                <div style="font-size:13px;font-weight:500">数据分析</div>
+                <div style="font-size:11px;color:var(--text-muted);line-height:1.4">SQL · 探索</div>
+              </div>
+              <div class="nb-card" style="min-height:100px;padding:14px;align-items:flex-start;gap:6px">
+                <div style="font-size:24px">🔥</div>
+                <div style="font-size:13px;font-weight:500">波动分析</div>
+                <div style="font-size:11px;color:var(--text-muted);line-height:1.4">异动 · 归因</div>
+              </div>
+            </div>
+
+            <!-- 最近 -->
+            <div class="sect">最近的笔记本 <span style="font-weight:400;color:var(--text-muted);text-transform:none;letter-spacing:0;font-size:12px">· 8 个</span><a class="a" href="#">查看全部</a></div>
+
+            <div class="filters">
+              <span class="chip active">全部 · 8</span>
+              <span class="chip">我的</span>
+              <span class="chip">协作中</span>
+              <span class="chip">已收藏</span>
+              <span class="chip">已归档</span>
+              <span class="spacer"></span>
+              <span class="sort">最近修改 ▾</span>
+            </div>
+
+            <div class="notebooks">
+              <div class="nb-card new">
+                <div class="add-ico">＋</div>
+                <div class="name">空白笔记本</div>
+                <div class="desc">从零开始 · 自由对话</div>
+              </div>
+
+              <div class="nb-card starred">
+                <div class="star">★</div>
+                <div class="emoji">📈</div>
+                <div class="name">Q2 经营复盘分析</div>
+                <div class="badge-row">
+                  <span class="chip biz">经营</span>
+                </div>
+                <div class="meta"><span>3 数据源</span><span class="dot"></span><span>24 轮</span><span class="dot"></span><span>2 小时前</span></div>
+                <div class="more">⋯</div>
+              </div>
+
+              <div class="nb-card">
+                <div class="emoji">⚖️</div>
+                <div class="name">搜索推荐 v2.4 AB 实验</div>
+                <div class="badge-row">
+                  <span class="chip ab">AB</span>
+                  <span class="chip ok">✓ 显著</span>
+                </div>
+                <div class="meta"><span>5 数据源</span><span class="dot"></span><span>昨天</span></div>
+                <div class="more">⋯</div>
+              </div>
+
+              <div class="nb-card">
+                <div class="emoji">🔥</div>
+                <div class="name">Android DAU 异常归因</div>
+                <div class="badge-row">
+                  <span class="chip wave">波动</span>
+                  <span class="chip" style="color:var(--error);background:var(--error-soft);border-color:var(--error-soft)">HIGH</span>
+                </div>
+                <div class="meta"><span>2 数据源</span><span class="dot"></span><span>3 天前</span></div>
+                <div class="more">⋯</div>
+              </div>
+
+              <div class="nb-card">
+                <div class="emoji">📊</div>
+                <div class="name">用户分层 RFM 模型</div>
+                <div class="badge-row">
+                  <span class="chip data">数据</span>
+                </div>
+                <div class="meta"><span>4 数据源</span><span class="dot"></span><span>5 天前</span></div>
+                <div class="more">⋯</div>
+              </div>
+
+              <div class="nb-card">
+                <div class="emoji">🔌</div>
+                <div class="name">v3.1 灰度放量监控</div>
+                <div class="badge-row">
+                  <span class="chip gray">灰度</span>
+                  <span class="chip ok">运行中</span>
+                </div>
+                <div class="meta"><span>3 数据源</span><span class="dot"></span><span>1 周前</span></div>
+                <div class="more">⋯</div>
+              </div>
+
+              <div class="nb-card">
+                <div class="emoji">📈</div>
+                <div class="name">月度收入归因分析</div>
+                <div class="badge-row">
+                  <span class="chip biz">经营</span>
+                </div>
+                <div class="meta"><span>6 数据源</span><span class="dot"></span><span>2 周前</span></div>
+                <div class="more">⋯</div>
+              </div>
+
+              <div class="nb-card">
+                <div class="emoji">🎯</div>
+                <div class="name">广告投放效率诊断</div>
+                <div class="badge-row">
+                  <span class="chip data">数据</span>
+                </div>
+                <div class="meta"><span>4 数据源</span><span class="dot"></span><span>3 周前</span></div>
+                <div class="more">⋯</div>
+              </div>
+            </div>
+
+            <!-- 公共任务 -->
+            <div class="sect">为你推荐 · 公共笔记本 <a class="a" href="#">公共区</a></div>
+            <div class="notebooks">
+              <div class="nb-card">
+                <div class="emoji">🔥</div>
+                <div class="name">核心指标异动归因 SOP</div>
+                <div class="badge-row"><span class="chip wave">波动</span></div>
+                <div class="meta"><span>👤 王子轩</span><span class="dot"></span><span>⭐ 15</span></div>
+              </div>
+              <div class="nb-card">
+                <div class="emoji">📈</div>
+                <div class="name">月度经营复盘模板</div>
+                <div class="badge-row"><span class="chip biz">经营</span></div>
+                <div class="meta"><span>👤 张明远</span><span class="dot"></span><span>⭐ 8</span></div>
+              </div>
+              <div class="nb-card">
+                <div class="emoji">⚖️</div>
+                <div class="name">搜索推荐 AB 实验流程</div>
+                <div class="badge-row"><span class="chip ab">AB</span></div>
+                <div class="meta"><span>👤 李思涵</span><span class="dot"></span><span>⭐ 12</span></div>
+              </div>
+            </div>
+
+            <!-- 定时任务 -->
+            <div class="scheduled">
+              <div class="ico">⏱</div>
+              <div class="info">
+                <b>定时任务</b> · 2 个运行中
+                <div class="s">上次执行 09:00 ✓ 成功 · 下次 14:00</div>
+              </div>
+              <a href="#">管理 →</a>
+            </div>
+          </div>
+
+          <!-- 右栏 -->
+          <aside class="rail">
+            <div class="rail-card">
+              <div class="rail-h"><span>我的工作概况</span><a class="a" href="#">详情</a></div>
+              <div class="stats-row">
+                <div class="stat"><div class="v">12</div><div class="l">总任务</div></div>
+                <div class="stat"><div class="v ab">5</div><div class="l">本周</div></div>
+                <div class="stat"><div class="v warn">12K</div><div class="l">Token</div></div>
+              </div>
+            </div>
+
+            <div class="rail-card">
+              <div class="rail-h"><span>团队动态</span><a class="a" href="#">全部</a></div>
+              <div class="activity">
+                <div class="act-row ok">
+                  <div class="ico">✓</div>
+                  <div><div class="who">王子轩 <span style="color:var(--text-dim);font-weight:400">完成了</span> DAU 异常归因</div><div class="when">10 分钟前</div></div>
+                </div>
+                <div class="act-row">
+                  <div class="ico">💬</div>
+                  <div><div class="who">李思涵 <span style="color:var(--text-dim);font-weight:400">在 Q2 复盘 留言</span></div><div class="what">"留存提升的归因看着没问题"</div><div class="when">35 分钟前</div></div>
+                </div>
+                <div class="act-row warn">
+                  <div class="ico">⚠</div>
+                  <div><div class="who">⏱ 定时任务 <span style="color:var(--text-dim);font-weight:400">触发告警</span></div><div class="what">DAU 同比下跌超 5%</div><div class="when">1 小时前</div></div>
+                </div>
+                <div class="act-row">
+                  <div class="ico">📚</div>
+                  <div><div class="who">飞书知识库 <span style="color:var(--text-dim);font-weight:400">已同步</span></div><div class="what">12 篇文档更新</div><div class="when">今天 09:00</div></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="rail-card">
+              <div class="rail-h"><span>知识库</span><a class="a" href="#">+ 添加</a></div>
+              <div class="kb-row">
+                <div class="ico">📖</div>
+                <div class="info"><div class="n">飞书 · 产品知识库</div><div class="s">12 篇 · 今天同步</div></div>
+                <span class="ok-pill">已同步</span>
+              </div>
+              <div class="kb-row">
+                <div class="ico">🧠</div>
+                <div class="info"><div class="n">Mify · 数据规范</div><div class="s">8 篇 · RAG</div></div>
+                <span class="ok-pill">已同步</span>
+              </div>
+            </div>
+          </aside>
+        </main>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ MOBILE ============ -->
+  <section class="phone">
+    <div class="vp-cap">
+      <div>
+        <p class="label"><span class="dot"></span>MOBILE · iPhone 14 Pro</p>
+        <span class="name">Dashboard</span>
+      </div>
+      <span class="size">390 × 844</span>
+    </div>
+
+    <div class="phone-frame">
+      <div class="phone-status">
+        <span>9:41</span>
+        <span class="right"><span>📶</span><span>📡</span><span>🔋</span></span>
+      </div>
+      <div class="phone-body">
+
+        <div class="phone-greet">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
+            <div>
+              <h1>👋 你好，张明远</h1>
+              <div class="s">12 个笔记本 · 5 个本周</div>
+            </div>
+            <div style="display:flex;gap:4px">
+              <button class="icon-btn" style="width:36px;height:36px;font-size:16px">🔍</button>
+              <button class="icon-btn" style="width:36px;height:36px;font-size:16px">🔔</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- alert -->
+        <div class="mob-alert">
+          <span class="ico">⚠</span>
+          <span>5 条经验卡片待审批</span>
+          <span class="arr">→</span>
+        </div>
+
+        <!-- quickstart -->
+        <div class="mob-sect">⚡ 快速开始</div>
+        <div class="mob-quickstart">
+          <div class="qs"><div class="e">⚖️</div><div class="l">AB</div></div>
+          <div class="qs"><div class="e">📈</div><div class="l">经营</div></div>
+          <div class="qs"><div class="e">🔌</div><div class="l">灰度</div></div>
+          <div class="qs"><div class="e">📊</div><div class="l">数据</div></div>
+          <div class="qs"><div class="e">🔥</div><div class="l">波动</div></div>
+        </div>
+
+        <!-- filters -->
+        <div class="mob-sect">最近的笔记本 <a class="a" href="#">全部</a></div>
+        <div class="mob-filters">
+          <span class="chip active">全部</span>
+          <span class="chip">我的</span>
+          <span class="chip">协作</span>
+          <span class="chip">收藏</span>
+        </div>
+
+        <div class="mob-nb">
+          <div class="mob-nb-card">
+            <div class="e">📈</div>
+            <div class="info">
+              <div class="n">Q2 经营复盘分析</div>
+              <div class="row">
+                <span class="chip biz">经营</span>
+                <span class="t">2 小时前</span>
+              </div>
+            </div>
+            <div class="arr">›</div>
+          </div>
+          <div class="mob-nb-card">
+            <div class="e">⚖️</div>
+            <div class="info">
+              <div class="n">搜索推荐 v2.4 AB</div>
+              <div class="row">
+                <span class="chip ab">AB</span>
+                <span class="chip ok">✓ 显著</span>
+                <span class="t">昨天</span>
+              </div>
+            </div>
+            <div class="arr">›</div>
+          </div>
+          <div class="mob-nb-card">
+            <div class="e">🔥</div>
+            <div class="info">
+              <div class="n">Android DAU 异常归因</div>
+              <div class="row">
+                <span class="chip wave">波动</span>
+                <span class="t">3 天前</span>
+              </div>
+            </div>
+            <div class="arr">›</div>
+          </div>
+          <div class="mob-nb-card">
+            <div class="e">📊</div>
+            <div class="info">
+              <div class="n">用户分层 RFM 模型</div>
+              <div class="row">
+                <span class="chip data">数据</span>
+                <span class="t">5 天前</span>
+              </div>
+            </div>
+            <div class="arr">›</div>
+          </div>
+          <div class="mob-nb-card">
+            <div class="e">🔌</div>
+            <div class="info">
+              <div class="n">v3.1 灰度放量监控</div>
+              <div class="row">
+                <span class="chip gray">灰度</span>
+                <span class="chip ok">运行中</span>
+              </div>
+            </div>
+            <div class="arr">›</div>
+          </div>
+        </div>
+
+        <div style="height:20px"></div>
+      </div>
+
+      <button class="fab" title="新建笔记本">＋</button>
+
+      <div class="phone-bottom">
+        <div class="mob-tab active"><div class="pill">🏠</div><span>首页</span></div>
+        <div class="mob-tab"><div class="pill">📚</div><span>笔记本</span></div>
+        <div class="mob-tab"><div class="pill">🔔</div><span>通知</span></div>
+        <div class="mob-tab"><div class="pill">👤</div><span>我</span></div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+function toggleTheme(){
+  var cur=document.documentElement.dataset.theme||'light';
+  var next=cur==='light'?'dark':'light';
+  document.documentElement.dataset.theme=next;
+  localStorage.setItem('ice-theme',next);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,281 @@
+[
+  {
+    "a_cp": "cn-beike-djy",
+    "a_item_id": "beike-djy_null",
+    "category": "historical_test_data",
+    "reason": "历史测试数据，已下线（delete_reason=1004）",
+    "status": "offline",
+    "registered_date": "2026-04-24",
+    "registered_by": "user"
+  },
+  {
+    "a_cp": "cn-beike-djy",
+    "a_item_id": "beike-djy_20260114160523000001",
+    "category": "cp_data_loss",
+    "reason": "CP 方数据丢失，已下线（delete_reason=1002），作者\"米米米\"",
+    "status": "offline",
+    "registered_date": "2026-04-24",
+    "registered_by": "user"
+  },
+  {
+    "a_cp": "cn-guoying-djy",
+    "a_item_id": "guoying-djy_1775534222598",
+    "category": "rule20_offline",
+    "reason": "rule20 映射错挂（3D打印拼装玩具→@李哥说历史），2026-04-21 CP 下线",
+    "status": "offline",
+    "registered_date": "2026-04-27",
+    "registered_by": "user"
+  },
+  {
+    "a_cp": "cn-guoying-djy",
+    "a_item_id": "guoying-djy_1773698392986",
+    "category": "rule20_offline",
+    "reason": "rule20 映射错挂（科普科长→科学漫游），2026-04-21 CP 下线",
+    "status": "offline",
+    "registered_date": "2026-04-27",
+    "registered_by": "user"
+  },
+  {
+    "a_cp": "cn-guoying-djy",
+    "a_item_id": "guoying-djy_1773503749575",
+    "category": "rule20_offline",
+    "reason": "rule20 映射错挂（南风→捧书大笑），2026-04-21 CP 下线",
+    "status": "offline",
+    "registered_date": "2026-04-27",
+    "registered_by": "user"
+  },
+  {
+    "a_cp": "cn-guoying-djy",
+    "a_item_id": "guoying-djy_1774055645581",
+    "category": "rule20_offline",
+    "reason": "rule20 映射错挂（老白剧场→小金轻食美食），2026-04-21 CP 下线",
+    "status": "offline",
+    "registered_date": "2026-04-27",
+    "registered_by": "user"
+  },
+  {
+    "a_cp": "cn-guoying-djy",
+    "a_item_id": "guoying-djy_1776081573387",
+    "category": "rule20_offline",
+    "reason": "rule20 映射错挂（匠人集→红姐爱折纸），2026-04-21 CP 下线",
+    "status": "offline",
+    "registered_date": "2026-04-27",
+    "registered_by": "user"
+  },
+  {
+    "a_cp": "cn-dihui-djy",
+    "a_item_id": "dihui-djy_25e9e3377b1c19cb45837ab98cbf2b00",
+    "category": "multi_field_null",
+    "reason": "作者\"新逻辑\"，online/create_time/delete_reason 多字段全空",
+    "status": "exempt",
+    "registered_date": "2026-04-27",
+    "registered_by": "user"
+  },
+  {
+    "a_cp": "cn-dihui-djy",
+    "a_item_id": "dihui-djy_08eb035782890b8b722341347b0506e9cdc74d2e26d2bc9b4430b8b857326c34",
+    "category": "rule20_offline",
+    "reason": "作者\"萤火剧星\" rule20 错挂至\"小半带你追现场\"，已下线（delete_reason=1002）",
+    "status": "offline",
+    "registered_date": "2026-04-27",
+    "registered_by": "user"
+  },
+  {
+    "a_cp": "cn-dihui-djy",
+    "a_item_id": "dihui-djy_0c42101eb74ca678591458a86b536929b6bb3a0efe2b512e2a1f98072db604c2",
+    "category": "rule20_offline",
+    "reason": "作者\"萤火剧星\" rule20 错挂至\"小半带你追现场\"，已下线（delete_reason=1002）",
+    "status": "offline",
+    "registered_date": "2026-04-27",
+    "registered_by": "user"
+  },
+  {
+    "a_cp": "cn-dihui-djy",
+    "a_item_id": "dihui-djy_121d5695ed61f6e8a9302218f01dcb163d0c853920a95407385ed398a10235ee",
+    "category": "rule20_offline",
+    "reason": "作者\"萤火剧星\" rule20 错挂，已下线（delete_reason=1003）",
+    "status": "offline",
+    "registered_date": "2026-04-27",
+    "registered_by": "user"
+  },
+  {
+    "a_cp": "cn-dihui-djy",
+    "a_item_id": "dihui-djy_2c2a6569001c03b16c286c61ee191e0603843b8e449c9d07fa14e9d18b0e9539",
+    "category": "rule20_offline",
+    "reason": "作者\"萤火剧星\" rule20 错挂至\"小半带你追现场\"，已下线（delete_reason=1002）",
+    "status": "offline",
+    "registered_date": "2026-04-27",
+    "registered_by": "user"
+  },
+  {
+    "a_cp": "cn-dihui-djy",
+    "a_item_id": "dihui-djy_69d47c94c71304f6312b42a653d5c19a6f0ad37ea1e4e65527743d53f491b002",
+    "category": "rule20_offline",
+    "reason": "作者\"萤火剧星\" rule20 错挂，已下线（delete_reason=1002）",
+    "status": "offline",
+    "registered_date": "2026-04-27",
+    "registered_by": "user"
+  },
+  {
+    "a_cp": "cn-dihui-djy",
+    "a_item_id": "dihui-djy_80ffd43c043a4f1e861b3800117e51086bb7fb347ce8426b0b7c5177063a9a9f",
+    "category": "rule20_offline",
+    "reason": "作者\"萤火剧星\" rule20 错挂至\"小半带你追现场\"，已下线（delete_reason=1002）",
+    "status": "offline",
+    "registered_date": "2026-04-27",
+    "registered_by": "user"
+  },
+  {
+    "a_cp": "cn-dihui-djy",
+    "a_item_id": "dihui-djy_b5c3a9fb1296bbddd0a8eb45a5834599ec37901d46f7ba9e1995bf7660e7e934",
+    "category": "rule20_offline",
+    "reason": "作者\"萤火剧星\" rule20 错挂，已下线（delete_reason=1003）",
+    "status": "offline",
+    "registered_date": "2026-04-27",
+    "registered_by": "user"
+  },
+  {
+    "a_cp": "cn-dihui-djy",
+    "a_item_id": "dihui-djy_d1c61c9a56cfec97d59facab20f295de5c3a2b30d502ee8028e3b5d83e039122",
+    "category": "rule20_offline",
+    "reason": "作者\"萤火剧星\" rule20 错挂至\"小半带你追现场\"，已下线（delete_reason=1002）",
+    "status": "offline",
+    "registered_date": "2026-04-27",
+    "registered_by": "user"
+  },
+  {
+    "a_cp": "cn-dihui-djy",
+    "a_item_id": "dihui-djy_f74da83d338d5f9a86a432f4ab5135017a404ef65f177322a2d26b37849301a3",
+    "category": "rule20_offline",
+    "reason": "作者\"萤火剧星\" rule20 错挂，已下线（delete_reason=1002）",
+    "status": "offline",
+    "registered_date": "2026-04-27",
+    "registered_by": "user"
+  },
+  {
+    "a_cp": "cn-dihui-djy",
+    "a_item_id": "dihui-djy_f9304d92324e289fabddcd3f21ed9d472436a5bf76bd7ceafd77b9e684ba1156",
+    "category": "rule20_offline",
+    "reason": "作者\"萤火剧星\" rule20 错挂，已下线（delete_reason=1002）",
+    "status": "offline",
+    "registered_date": "2026-04-27",
+    "registered_by": "user"
+  },
+  {
+    "a_cp": "cn-beike-djy",
+    "a_item_id": "beike-djy_aigic1aa6d09ce7e447f583fb5a25d6853b11",
+    "category": "aigc_incomplete",
+    "reason": "AIGC 作者\"锐析洞察局\" NEWS，image 空，已下线",
+    "status": "offline",
+    "registered_date": "2026-04-27",
+    "registered_by": "user"
+  },
+  {
+    "a_cp": "cn-beike-djy",
+    "a_item_id": "beike-djy_aigic9a0c635b23b34c1990664645c01b4625",
+    "category": "aigc_incomplete",
+    "reason": "AIGC 作者\"锐析洞察局\" NEWS，image 空，已下线",
+    "status": "offline",
+    "registered_date": "2026-04-27",
+    "registered_by": "user"
+  },
+  {
+    "a_cp": "cn-beike-djy",
+    "a_item_id": "beike-djy_aigicaf51738b27274cf19574fa8df5daeddc",
+    "category": "aigc_incomplete",
+    "reason": "AIGC 作者\"锐析洞察局\" NEWS，image 空，已下线",
+    "status": "offline",
+    "registered_date": "2026-04-27",
+    "registered_by": "user"
+  },
+  {
+    "a_cp": "cn-beike-djy",
+    "a_item_id": "beike-djy_aigicc9841acb977e428b918be5f8f558b56c",
+    "category": "aigc_incomplete",
+    "reason": "AIGC 作者\"锐析洞察局\" NEWS，image 空，已下线",
+    "status": "offline",
+    "registered_date": "2026-04-27",
+    "registered_by": "user"
+  },
+  {
+    "a_cp": "cn-beike-djy",
+    "a_item_id": "beike-djy_aigicede8177e0bb64750b229990f02b4e488",
+    "category": "aigc_incomplete",
+    "reason": "AIGC 作者\"锐析洞察局\" NEWS，image 空，已下线",
+    "status": "offline",
+    "registered_date": "2026-04-27",
+    "registered_by": "user"
+  },
+  {
+    "a_cp": "cn-beike-djy",
+    "a_item_id": "beike-djy_aigic50fcf752ca8b49aab82828a22a05f44f",
+    "category": "aigc_incomplete",
+    "reason": "AIGC 作者\"锐析洞察局\" NEWS，body/e_xm_body_word_cnt/e_xm_image_cnt 同时空，已下线",
+    "status": "offline",
+    "registered_date": "2026-04-27",
+    "registered_by": "user"
+  },
+  {
+    "a_cp": "cn-beike-djy",
+    "a_item_id": "beike-djy_aigic7d358dbea3344f26b4ecbb2576c754ca",
+    "category": "aigc_incomplete",
+    "reason": "AIGC 作者\"锐析洞察局\" NEWS，body/e_xm_body_word_cnt/e_xm_image_cnt 同时空，已下线",
+    "status": "offline",
+    "registered_date": "2026-04-27",
+    "registered_by": "user"
+  },
+  {
+    "a_cp": "cn-beike-djy",
+    "a_item_id": "beike-djy_aigicdd3f68f120c34d35b6024c27024e5c01",
+    "category": "aigc_incomplete",
+    "reason": "AIGC 作者\"锐析洞察局\" NEWS，body/e_xm_body_word_cnt/e_xm_image_cnt 同时空，已下线",
+    "status": "offline",
+    "registered_date": "2026-04-27",
+    "registered_by": "user"
+  },
+  {
+    "a_cp": "cn-beike-djy",
+    "a_item_id": "beike-djy_aigice22bf8969e964c92af6f469ec6f97961",
+    "category": "aigc_incomplete",
+    "reason": "AIGC 作者\"锐析洞察局\" NEWS，body/e_xm_body_word_cnt/e_xm_image_cnt 同时空，已下线",
+    "status": "offline",
+    "registered_date": "2026-04-27",
+    "registered_by": "user"
+  },
+  {
+    "a_cp": "cn-beike-djy",
+    "a_item_id": "beike-djy_aigicfaf7e41196794b7db374186e337b04e1",
+    "category": "aigc_incomplete",
+    "reason": "AIGC 作者\"锐析洞察局\" NEWS，body/e_xm_body_word_cnt/e_xm_image_cnt 同时空，已下线",
+    "status": "offline",
+    "registered_date": "2026-04-27",
+    "registered_by": "user"
+  },
+  {
+    "a_cp": "cn-dihui-djy",
+    "a_item_id": "dihui-djy_18bdb4bc11c77a3ca0560f0e070ad411",
+    "category": "rule20_offline",
+    "reason": "作者\"麻花娱乐\"(dihuimahuayule888) rule20 错挂至 lead\"狐友星闻社\"(95167815713)，已下线（delete_reason=1002 人工删除）",
+    "status": "offline",
+    "registered_date": "2026-05-11",
+    "registered_by": "user"
+  },
+  {
+    "a_cp": "cn-guoying-djy",
+    "a_item_id": "guoying-djy_1768474852349",
+    "category": "rule20_offline",
+    "reason": "作者\"珞珞说\"(2335013933428316) rule20 错挂至 lead\"胡乱乱漫剪\"(792113151749196)，已下线（delete_reason=12 CP_OFFLINE）",
+    "status": "offline",
+    "registered_date": "2026-05-11",
+    "registered_by": "user"
+  },
+  {
+    "a_cp": "cn-dihui-djy",
+    "a_item_id": "dihui-djy_d6797b3a378b09494da8f01682b873f5",
+    "category": "lead_misattribution",
+    "reason": "作者\"麻花娱乐\"(dihuimahuayule888) 错挂至 lead\"狐友星闻社\"(95167815713)，导致 lead 三元 1:1:1 异常；当前在线（与已下线豁免条目 dihui-djy_18bdb4bc... 是 CP 同一内容重复推送的另一份）",
+    "status": "exempt",
+    "registered_date": "2026-05-22",
+    "registered_by": "user"
+  }
+]

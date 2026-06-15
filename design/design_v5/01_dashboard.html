@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ICE Workbench v5 · Moxt Style</title>
+<script>(function(){var t=localStorage.getItem('ice-v5-theme')||'light';document.documentElement.dataset.theme=t;})();</script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    darkMode: ['class', '[data-theme="dark"]'],
+    theme: {
+      extend: {
+        colors: {
+          bg: 'var(--bg)',
+          surface: 'var(--bg)', /* Moxt doesn't distinguish much between bg and surface */
+          'surface-2': 'var(--surface-2)',
+          'surface-3': 'var(--surface-3)',
+          canvas: 'var(--bg)',
+          border: 'var(--border)',
+          'border-soft': 'var(--border-soft)',
+          'border-strong': 'var(--border)',
+          txt: 'var(--text)',
+          'txt-dim': 'var(--text-dim)',
+          'txt-muted': 'var(--text-muted)',
+          'txt-inv': '#ffffff',
+          accent: 'var(--brand)',
+          'accent-hover': 'var(--brand-deep)',
+          'accent-soft': 'var(--brand-soft)',
+          'accent-text': 'var(--brand-deep)',
+          success: '#10b981',
+          warning: '#d97706',
+          error: '#ef4444',
+          /* Map the paradigm colors to moxt muted grays or just keep them subtle */
+          'p-ab': '#64748b',
+          'p-biz': '#64748b',
+          'p-gray': '#64748b',
+          'p-data': '#64748b',
+          'p-wave': '#64748b',
+        },
+        fontFamily: {
+          sans: ['Inter', '-apple-system', 'system-ui', 'PingFang SC', 'sans-serif'],
+          serif: ['Inter', 'sans-serif'], /* Override serif to sans for moxt style */
+          mono: ['ui-monospace', 'monospace'],
+        },
+        boxShadow: {
+          'icon-emboss': 'none',
+          'icon-shadow': 'none',
+          'accent-shadow': 'none',
+          '1': '0 1px 2px rgba(0,0,0,.04)',
+          '2': '0 4px 6px -1px rgba(0,0,0,.05)',
+          '3': '0 10px 15px -3px rgba(0,0,0,.05)',
+        },
+        backgroundImage: {
+          'accent-grad': 'none',
+        },
+        borderRadius: {
+          'xl': '10px',
+          '2xl': '12px',
+        }
+      }
+    }
+  }
+</script>
+<style type="text/tailwindcss">
+  @layer base {
+    :root[data-theme="light"]{
+      --bg:#faf4ed;
+      --surface-2:#f5efe4;
+      --surface-3:#ece3d3;
+      --border:#e5dcc8;
+      --border-soft:#ede5d2;
+      --text:#1a1612;
+      --text-dim:#5b5246;
+      --text-muted:#8a7e69;
+      --brand:#cc785c;
+      --brand-deep:#b8624a;
+      --brand-soft:#f5e8e2;
+    }
+    :root[data-theme="dark"]{
+      --bg:#1c1917;
+      --surface-2:#34302d;
+      --surface-3:#44403c;
+      --border:#44403c;
+      --border-soft:#34302d;
+      --text:#f5efe4;
+      --text-dim:#a8a29e;
+      --text-muted:#78716c;
+      --brand:#cc785c;
+      --brand-deep:#e89e83;
+      --brand-soft:rgba(52, 211, 153, 0.1);
+    }
+    body {
+      @apply bg-bg text-txt font-sans antialiased text-[14px] leading-relaxed tracking-tight py-8;
+    }
+    h1, h2, h3, h4, h5, h6, .serif {
+      @apply font-sans font-semibold tracking-tight;
+    }
+  }
+
+  @layer components {
+    .nav-btn {
+      @apply inline-flex items-center gap-1.5 font-medium text-[13px] px-3.5 h-[34px] rounded-lg border border-transparent cursor-pointer transition-all leading-none whitespace-nowrap;
+    }
+    .btn-primary {
+      @apply bg-accent text-white hover:bg-accent-hover rounded-full;
+    }
+    .btn-ghost {
+      @apply bg-transparent text-txt-dim hover:bg-surface-2 hover:text-txt rounded-lg;
+    }
+    .icon-btn {
+      @apply w-[34px] h-[34px] rounded-lg grid place-items-center cursor-pointer text-txt-dim border-none bg-transparent text-sm hover:bg-surface-2 hover:text-txt transition-colors;
+    }
+
+    /* Cards - Moxt Style: rounded-xl (10-12px), thin borders, no shadow, hover gets surface-2 */
+    .start-card {
+      @apply flex items-center gap-3 bg-bg border border-border rounded-xl p-4 cursor-pointer text-left transition-colors relative text-txt hover:bg-surface-2;
+    }
+    .sc-icon {
+      @apply text-xl w-10 h-10 rounded-lg grid place-items-center bg-surface-3 flex-none text-txt-dim;
+    }
+    
+    .paradigm-card {
+      @apply bg-bg border border-border rounded-xl p-4 cursor-pointer flex flex-col items-center text-center transition-colors text-txt relative hover:bg-surface-2;
+    }
+    .pc-icon {
+      @apply w-10 h-10 rounded-lg grid place-items-center text-[20px] mx-auto mb-3 bg-surface-3 text-txt-dim;
+    }
+    
+    .task-card {
+      @apply bg-bg border border-border rounded-xl p-4 cursor-pointer flex flex-col gap-1.5 min-h-[120px] transition-colors text-left text-txt relative hover:bg-surface-2;
+    }
+    .tc-paradigm {
+      @apply text-[10px] px-2 py-0.5 rounded-full bg-surface-3 text-txt-dim font-medium;
+    }
+    
+    .public-tab {
+      @apply bg-transparent border-none rounded-lg px-3 py-1.5 text-[13px] cursor-pointer text-txt-dim inline-flex items-center gap-1.5 transition-colors hover:bg-surface-2 hover:text-txt;
+    }
+    .public-tab.active {
+      @apply bg-surface-3 text-txt font-medium;
+    }
+    .public-tab-count {
+      @apply bg-transparent text-txt-muted text-[11px] ml-0.5;
+    }
+  }
+</style>
+
+</head>
+<body>
+
+<div class="max-w-[1900px] mx-auto mb-6 px-8 flex items-center gap-3.5">
+  <span class="inline-flex items-center gap-2 px-3 py-1.5 bg-accent-soft text-accent-text rounded-md text-[11px] font-medium font-mono uppercase tracking-widest">
+    
+    v5 · Dashboard · Tailwind Refactor
+  </span>
+  <span class="text-txt-muted text-[13px] font-mono">基于真实组件</span>
+  <div class="flex-1"></div>
+  <a href="00_design_system.html" class="text-txt-dim text-[13px] no-underline px-3 py-1.5 rounded-md hover:bg-surface-2 hover:text-txt transition-colors">← Design System</a>
+  <button onclick="toggleTheme()" class="bg-surface border border-border text-txt h-[36px] px-3.5 rounded-lg cursor-pointer inline-flex items-center gap-1.5 text-[13px] font-medium transition-colors hover:bg-surface-2">
+    <span class="t-light">🌙 暗夜</span><span class="t-dark hidden">☀️ 日间</span>
+  </button>
+</div>
+
+<script>
+function toggleTheme(){
+  var cur=document.documentElement.dataset.theme||'light';
+  var next=cur==='light'?'dark':'light';
+  document.documentElement.dataset.theme=next;
+  localStorage.setItem('ice-v5-theme',next);
+  document.querySelectorAll('.t-light').forEach(e=>e.classList.toggle('hidden', next==='dark'));
+  document.querySelectorAll('.t-dark').forEach(e=>e.classList.toggle('hidden', next==='light'));
+}
+(function(){if(document.documentElement.dataset.theme==='dark'){
+  document.querySelectorAll('.t-light').forEach(e=>e.classList.add('hidden'));
+  document.querySelectorAll('.t-dark').forEach(e=>e.classList.remove('hidden'));
+}})();
+</script>
+
+<div class="max-w-[1900px] mx-auto px-8 grid grid-cols-1 xl:grid-cols-[1fr_420px] gap-8 items-start">
+
+  <!-- Desktop Browser -->
+  <div class="bg-surface border border-border rounded-xl overflow-hidden shadow-3">
+    <div class="h-[36px] bg-surface-2 border-b border-border-soft flex items-center px-3.5 gap-2">
+      <div class="flex gap-1.5">
+        <span class="w-[11px] h-[11px] rounded-full bg-[#cc6c5e]"></span>
+        <span class="w-[11px] h-[11px] rounded-full bg-[#c4a55a]"></span>
+        <span class="w-[11px] h-[11px] rounded-full bg-[#7a9a6e]"></span>
+      </div>
+      <div class="flex-1 text-center font-mono text-[11.5px] text-txt-muted bg-surface px-3 py-1.5 rounded-[5px] mx-[80px] border border-border-soft">
+        ice.workbench.local / dashboard
+      </div>
+    </div>
+    
+    <div class="h-[1080px] bg-bg overflow-hidden flex flex-col">
+      <!-- TopNav -->
+      <header class="h-[60px] bg-bg border-b border-border-soft flex items-center px-6 gap-3.5 shrink-0">
+        <div class="flex items-center gap-2.5">
+          <div class="w-[30px] h-[30px] rounded-[7px] bg-accent-grad grid place-items-center text-[#faf4ed] font-semibold text-sm font-sans shadow-accent-shadow">i</div>
+          <span class="font-sans font-semibold text-lg tracking-tight">ICE Workbench</span>
+        </div>
+        <nav class="flex items-center gap-0.5 ml-4">
+          <a href="#" class="px-3 py-1.5 rounded-md text-txt text-[13.5px] font-medium bg-surface-2 transition-colors">Dashboard</a>
+          <a href="#" class="px-3 py-1.5 rounded-md text-txt-dim text-[13.5px] font-medium hover:bg-surface-2 hover:text-txt transition-colors">任务</a>
+          <a href="#" class="px-3 py-1.5 rounded-md text-txt-dim text-[13.5px] font-medium hover:bg-surface-2 hover:text-txt transition-colors">Agent 池</a>
+          <a href="#" class="px-3 py-1.5 rounded-md text-txt-dim text-[13.5px] font-medium hover:bg-surface-2 hover:text-txt transition-colors">知识库</a>
+        </nav>
+        <div class="flex-1"></div>
+        <button class="nav-btn btn-primary">＋ 新任务</button>
+        <button class="nav-btn btn-ghost">⏱ 定时</button>
+        <button class="nav-btn btn-ghost">📖 指南</button>
+        <button class="nav-btn btn-ghost">🛡 管理</button>
+        <div class="w-[1px] h-5 bg-border mx-1"></div>
+        <button class="icon-btn" onclick="toggleTheme()" title="切换主题">
+          <span class="t-light">🌙</span><span class="t-dark hidden">☀️</span>
+        </button>
+        <div class="w-8 h-8 rounded-full bg-accent-grad grid place-items-center text-[#faf4ed] font-medium text-xs font-sans shadow-accent-shadow">GY</div>
+      </header>
+
+      <!-- Main Content -->
+      <main class="flex-1 overflow-y-auto p-0 bg-bg">
+        <div class="max-w-[1200px] mx-auto w-full pt-8 px-6 pb-20">
+          
+          <!-- dash-welcome -->
+          <div class="mb-8">
+            <h1 class="font-sans text-4xl font-medium tracking-tight leading-tight mb-2">👋 你好，Yunhe</h1>
+            <p class="text-txt-dim text-[15px] m-0">选一个范式开始今天的工作</p>
+          </div>
+
+          <!-- Section 01: Start -->
+          <section class="mb-9">
+            <div class="grid grid-cols-4 gap-3.5">
+              <button class="start-card  group">
+                <div class="sc-icon group-hover:text-accent transition-colors">📝</div>
+                <div><div class="font-sans font-semibold text-[15.5px] mb-1 tracking-tight">新建任务</div><div class="text-txt-dim text-[12.5px] leading-relaxed">选择范式 / Agent，开启一个新任务</div></div>
+              </button>
+              <button class="start-card  group">
+                <div class="sc-icon group-hover:text-p-data transition-colors">⏱</div>
+                <div><div class="font-sans font-semibold text-[15.5px] mb-1 tracking-tight">定时任务</div><div class="text-txt-dim text-[12.5px] leading-relaxed">按周期自动执行的任务列表</div></div>
+              </button>
+              <button class="start-card  group">
+                <div class="sc-icon group-hover:text-p-biz transition-colors">📖</div>
+                <div><div class="font-sans font-semibold text-[15.5px] mb-1 tracking-tight">使用指南</div><div class="text-txt-dim text-[12.5px] leading-relaxed">上手教程与功能说明</div></div>
+              </button>
+              <button class="start-card  group">
+                <div class="sc-icon group-hover:text-p-ab transition-colors">🌐</div>
+                <div><div class="font-sans font-semibold text-[15.5px] mb-1 tracking-tight">公共任务</div><div class="text-txt-dim text-[12.5px] leading-relaxed">参考团队已有任务</div></div>
+              </button>
+            </div>
+          </section>
+
+          <!-- Section 02: Paradigms -->
+          <section class="mb-9">
+            <h2 class="font-sans text-[22px] font-medium tracking-tight leading-tight mb-4 flex items-center">
+              <span class="font-mono text-[11px] text-accent font-medium tracking-widest mr-2.5 uppercase">02</span>⚡ 快速开始
+            </h2>
+            <div class="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-3.5">
+              <button class="paradigm-card ">
+                <div class="pc-icon bg-surface-3 text-txt-dim">📊</div>
+                <div class="font-sans font-semibold text-[15px] mb-1 tracking-tight">数据分析</div>
+                <div class="text-txt-dim text-[12.5px] leading-relaxed line-clamp-2">SQL 取数、可视化、自动报表，从问题到结论的最短路径。</div>
+              </button>
+              <button class="paradigm-card ">
+                <div class="pc-icon bg-surface-3 text-txt-dim">🧪</div>
+                <div class="font-sans font-semibold text-[15px] mb-1 tracking-tight">AB 实验</div>
+                <div class="text-txt-dim text-[12.5px] leading-relaxed line-clamp-2">实验设计、显著性检验、ARPU 复盘。</div>
+              </button>
+              <button class="paradigm-card ">
+                <div class="pc-icon bg-surface-3 text-txt-dim">🚀</div>
+                <div class="font-sans font-semibold text-[15px] mb-1 tracking-tight">灰度发布</div>
+                <div class="text-txt-dim text-[12.5px] leading-relaxed line-clamp-2">分桶规则、监控指标、决策建议一站式。</div>
+              </button>
+              <button class="paradigm-card ">
+                <div class="pc-icon">💬</div>
+                <div class="font-sans font-semibold text-[15px] mb-1 tracking-tight">通用 Agent</div>
+                <div class="text-txt-dim text-[12.5px] leading-relaxed line-clamp-2">面对任意数据问题的通用工作助手。</div>
+              </button>
+              <button class="paradigm-card ">
+                <div class="pc-icon">📚</div>
+                <div class="font-sans font-semibold text-[15px] mb-1 tracking-tight">Know</div>
+                <div class="text-txt-dim text-[12.5px] leading-relaxed line-clamp-2">基于飞书 Wiki 的内部知识问答。</div>
+              </button>
+              <button class="paradigm-card ">
+                <div class="pc-icon bg-surface-3 text-txt-dim">🌋</div>
+                <div class="font-sans font-semibold text-[15px] mb-1 tracking-tight">火山 ABTest</div>
+                <div class="text-txt-dim text-[12.5px] leading-relaxed line-clamp-2">对接火山引擎 ABTest 平台。</div>
+              </button>
+              <button class="paradigm-card  opacity-55 cursor-not-allowed hover:translate-y-0 hover:shadow-none hover:border-border">
+                <span class="absolute top-2.5 right-2.5 text-[10px] px-2 py-0.5 rounded-full bg-surface-2 text-txt-muted border border-border font-medium font-mono tracking-wider">待上线</span>
+                <div class="pc-icon bg-surface-3 text-txt-dim">💼</div>
+                <div class="font-sans font-semibold text-[15px] mb-1 tracking-tight">业务洞察</div>
+                <div class="text-txt-dim text-[12.5px] leading-relaxed line-clamp-2">指标拆解、异动归因、业务诊断。</div>
+              </button>
+              <button class="paradigm-card  opacity-55 cursor-not-allowed hover:translate-y-0 hover:shadow-none hover:border-border">
+                <span class="absolute top-2.5 right-2.5 text-[10px] px-2 py-0.5 rounded-full bg-surface-2 text-txt-muted border border-border font-medium font-mono tracking-wider">待上线</span>
+                <div class="pc-icon bg-surface-3 text-txt-dim">🌊</div>
+                <div class="font-sans font-semibold text-[15px] mb-1 tracking-tight">浪潮归因</div>
+                <div class="text-txt-dim text-[12.5px] leading-relaxed line-clamp-2">渠道归因、增长拆解、投放复盘。</div>
+              </button>
+            </div>
+          </section>
+
+          <!-- Section 03: My Tasks -->
+          <section class="mb-9">
+            <h2 class="font-sans text-[22px] font-medium tracking-tight leading-tight mb-4 flex items-center">
+              <span class="font-mono text-[11px] text-accent font-medium tracking-widest mr-2.5 uppercase">03</span>📋 我的任务
+            </h2>
+            <div class="grid grid-cols-4 lg:grid-cols-5 gap-3.5">
+              <div class="task-card ">
+                <div class="font-sans font-medium text-[15px] tracking-tight leading-snug">双十一 AB 实验复盘</div>
+                <div class="flex gap-2 items-center"><span class="tc-paradigm">AB</span></div>
+                <div class="text-txt-dim text-xs  leading-relaxed line-clamp-2 mt-1">💬 "主推礼盒装在 18-24 岁人群转化率 +14.2% (p&lt;0.01)，但 ARPU 持平…"</div>
+                <div class="font-mono text-[10.5px] text-txt-muted mt-auto flex gap-2.5 pt-2">⏱ 2 小时前 · 📄 8</div>
+              </div>
+              <div class="task-card ">
+                <div class="font-sans font-medium text-[15px] tracking-tight leading-snug">上新增长归因</div>
+                <div class="flex gap-2 items-center"><span class="tc-paradigm">WAVE</span><span class="text-[10.5px] text-success">👥 协作</span></div>
+                <div class="text-txt-dim text-xs  leading-relaxed line-clamp-2 mt-1">💬 "小红书素材 #3 贡献 37% 新增，建议加投…"</div>
+                <div class="font-mono text-[10.5px] text-txt-muted mt-auto flex gap-2.5 pt-2">⏱ 昨天 · 📄 14</div>
+              </div>
+              <div class="task-card ">
+                <div class="font-sans font-medium text-[15px] tracking-tight leading-snug">付费转化漏斗 · Q2</div>
+                <div class="flex gap-2 items-center"><span class="tc-paradigm">DATA</span></div>
+                <div class="text-txt-dim text-xs  leading-relaxed line-clamp-2 mt-1">💬 "查看→加购→付款 最大流失发生在加购到付款 67%…"</div>
+                <div class="font-mono text-[10.5px] text-txt-muted mt-auto flex gap-2.5 pt-2">⏱ 09:15 · 📄 6</div>
+              </div>
+              <div class="task-card ">
+                <div class="font-sans font-medium text-[15px] tracking-tight leading-snug">DAU 异动归因 · 5/24</div>
+                <div class="flex gap-2 items-center"><span class="tc-paradigm">BIZ</span></div>
+                <div class="text-txt-dim text-xs  leading-relaxed line-clamp-2 mt-1">💬 "DAU 环比 -3.2% 主要来自上海地区 push 推送故障…"</div>
+                <div class="font-mono text-[10.5px] text-txt-muted mt-auto flex gap-2.5 pt-2">⏱ 2 天前 · 📄 3</div>
+              </div>
+              <div class="task-card ">
+                <div class="font-sans font-medium text-[15px] tracking-tight leading-snug">10% 灰度试运行</div>
+                <div class="flex gap-2 items-center"><span class="tc-paradigm">GRAY</span></div>
+                <div class="text-txt-dim text-xs  leading-relaxed line-clamp-2 mt-1">💬 "桶 A 转化提升 4.3%，建议扩大至 30% 后观察…"</div>
+                <div class="font-mono text-[10.5px] text-txt-muted mt-auto flex gap-2.5 pt-2">⏱ 3 天前 · 📄 4</div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Section 04: Public -->
+          <section class="mb-9">
+            <h2 class="font-sans text-[22px] font-medium tracking-tight leading-tight mb-4 flex items-center">
+              <span class="font-mono text-[11px] text-accent font-medium tracking-widest mr-2.5 uppercase">04</span>🌐 团队公共区
+            </h2>
+            <div class="flex gap-1.5 mb-3.5 flex-wrap">
+              <button class="public-tab active">📋 公共任务<span class="public-tab-count">12</span></button>
+              <button class="public-tab">🤖 Agents<span class="public-tab-count">8</span></button>
+              <button class="public-tab">🧰 Skills<span class="public-tab-count">14</span></button>
+              <button class="public-tab">📁 公共文件<span class="public-tab-count">23</span></button>
+              <button class="public-tab">📚 知识库<span class="public-tab-count">5</span></button>
+            </div>
+            <div class="grid grid-cols-4 lg:grid-cols-6 gap-3">
+              <!-- ptc card -->
+              <button class="bg-surface border border-border rounded-lg px-3.5 py-3 min-h-[96px] flex flex-col gap-1.5 cursor-pointer text-left text-txt transition-colors hover:border-accent">
+                <div class="font-sans text-[13.5px] font-semibold leading-snug tracking-tight">双十一全量复盘 · 工作台</div>
+                <div class="text-[11px] text-txt-muted leading-relaxed">ab · 💬 已展开</div>
+                <div class="text-[10.5px] text-txt-muted mt-auto pt-1.5 border-t border-border-soft font-mono">👤 admin</div>
+              </button>
+              <button class="bg-surface border border-border rounded-lg px-3.5 py-3 min-h-[96px] flex flex-col gap-1.5 cursor-pointer text-left text-txt transition-colors hover:border-accent">
+                <div class="font-sans text-[13.5px] font-semibold leading-snug tracking-tight">支付链路稳定性月报</div>
+                <div class="text-[11px] text-txt-muted leading-relaxed">data · 💬 已展开</div>
+                <div class="text-[10.5px] text-txt-muted mt-auto pt-1.5 border-t border-border-soft font-mono">👤 zhanghao</div>
+              </button>
+              <button class="bg-surface border border-border rounded-lg px-3.5 py-3 min-h-[96px] flex flex-col gap-1.5 cursor-pointer text-left text-txt transition-colors hover:border-accent">
+                <div class="font-sans text-[13.5px] font-semibold leading-snug tracking-tight">App push 个性化评估</div>
+                <div class="text-[11px] text-txt-muted leading-relaxed">wave · 💬 已展开</div>
+                <div class="text-[10.5px] text-txt-muted mt-auto pt-1.5 border-t border-border-soft font-mono">👤 minghan</div>
+              </button>
+              <button class="bg-surface border border-border rounded-lg px-3.5 py-3 min-h-[96px] flex flex-col gap-1.5 cursor-pointer text-left text-txt transition-colors hover:border-accent">
+                <div class="font-sans text-[13.5px] font-semibold leading-snug tracking-tight">运营活动归因模板</div>
+                <div class="text-[11px] text-txt-muted leading-relaxed">biz · 📭 空</div>
+                <div class="text-[10.5px] text-txt-muted mt-auto pt-1.5 border-t border-border-soft font-mono">👤 admin</div>
+              </button>
+            </div>
+          </section>
+
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Mobile View -->
+  <div class="bg-surface border border-border rounded-[10px] shadow-3 pt-8 pb-9 px-7 text-center">
+    <div class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-accent-soft text-accent-text rounded-md text-[10.5px] font-medium tracking-widest mb-2 font-mono uppercase">
+      <span class="w-[6px] h-[6px] rounded-full bg-accent"></span>iPhone 14 Pro · 390 × 844
+    </div>
+    <div class="font-sans text-lg font-semibold tracking-tight mb-1">Dashboard · 移动版</div>
+    <div class="text-xs text-txt-muted mb-4 font-mono">/ dashboard</div>
+
+    <div class="w-[360px] h-[760px] bg-[#1a1612] rounded-[42px] p-2.5 shadow-[0_24px_64px_rgba(26,22,18,0.3)] relative mx-auto">
+      <div class="absolute top-[14px] left-1/2 -translate-x-1/2 w-[104px] h-[28px] bg-black rounded-full z-10"></div>
+      <div class="w-full h-full bg-bg rounded-[32px] overflow-hidden relative flex flex-col">
+        
+        <!-- p-top -->
+        <div class="pt-[54px] pb-3 px-4 flex items-center gap-2 shrink-0 bg-bg border-b border-border-soft">
+          <div class="w-6 h-6 text-[11px] rounded-[5px] bg-accent-grad grid place-items-center text-[#faf4ed] font-semibold font-sans shadow-accent-shadow">i</div>
+          <span class="text-sm font-sans font-semibold tracking-tight">ICE</span>
+          <div class="ml-auto flex items-center gap-1">
+            <button class="w-[30px] h-[30px] text-[13px] rounded-md grid place-items-center text-txt-dim hover:bg-surface-2 transition-colors">🔍</button>
+            <button class="w-[30px] h-[30px] text-[13px] rounded-md grid place-items-center text-txt-dim hover:bg-surface-2 transition-colors">🔔</button>
+            <div class="w-[26px] h-[26px] text-[11px] rounded-full bg-accent-grad grid place-items-center text-[#faf4ed] font-medium font-sans shadow-accent-shadow">GY</div>
+          </div>
+        </div>
+
+        <div class="flex-1 overflow-y-auto px-[14px] pt-4 pb-20 text-left">
+          <div class="font-sans text-2xl font-medium tracking-tight mt-1.5 mb-1 text-txt">👋 你好，Yunhe</div>
+          <div class="text-txt-dim text-[13px] mb-4">选一个范式开始今天的工作</div>
+
+          <!-- p-start -->
+          <div class="grid grid-cols-2 gap-2 mb-4">
+            <button class="flex flex-col items-start p-3 gap-2 rounded-lg bg-surface border border-border text-left relative overflow-hidden group hover:border-accent transition-colors">
+              <div class="text-xl w-9 h-9 rounded-lg grid place-items-center bg-surface-2 shadow-icon-emboss shadow-icon-shadow group-hover:text-accent transition-colors">📝</div>
+              <div><div class="text-[13px] font-sans font-semibold tracking-tight mb-0.5 text-txt">新建任务</div><div class="text-[11px] text-txt-dim leading-snug line-clamp-2">选择范式 / Agent</div></div>
+            </button>
+            <button class="flex flex-col items-start p-3 gap-2 rounded-lg bg-surface border border-border text-left relative overflow-hidden group hover:border-p-data transition-colors">
+              <div class="text-xl w-9 h-9 rounded-lg grid place-items-center bg-surface-2 shadow-icon-emboss shadow-icon-shadow group-hover:text-p-data transition-colors">⏱</div>
+              <div><div class="text-[13px] font-sans font-semibold tracking-tight mb-0.5 text-txt">定时任务</div><div class="text-[11px] text-txt-dim leading-snug line-clamp-2">按周期自动执行</div></div>
+            </button>
+          </div>
+
+          <!-- p-paradigm -->
+          <div class="font-mono text-[10.5px] uppercase tracking-widest text-txt-muted font-medium my-[18px] flex justify-between items-center">⚡ 快速开始</div>
+          <div class="grid grid-cols-2 gap-2 mb-4">
+            <button class="bg-surface border border-border border-t-[3px] border-t-p-data rounded-lg p-3 min-h-[108px] flex flex-col items-center text-center hover:border-border-strong transition-colors">
+              <div class="w-[34px] h-[34px] rounded-lg grid place-items-center text-base mb-2 bg-p-data-soft text-p-data shadow-icon-emboss shadow-icon-shadow">📊</div>
+              <div class="text-[12.5px] font-sans font-semibold tracking-tight mb-1 text-txt">数据分析</div>
+              <div class="text-[11px] text-txt-dim">SQL · 可视化 · 报表</div>
+            </button>
+            <button class="bg-surface border border-border border-t-[3px] border-t-p-ab rounded-lg p-3 min-h-[108px] flex flex-col items-center text-center hover:border-border-strong transition-colors">
+              <div class="w-[34px] h-[34px] rounded-lg grid place-items-center text-base mb-2 bg-p-ab-soft text-p-ab shadow-icon-emboss shadow-icon-shadow">🧪</div>
+              <div class="text-[12.5px] font-sans font-semibold tracking-tight mb-1 text-txt">AB 实验</div>
+              <div class="text-[11px] text-txt-dim">显著性 · ARPU 复盘</div>
+            </button>
+          </div>
+
+          <!-- p-task -->
+          <div class="font-mono text-[10.5px] uppercase tracking-widest text-txt-muted font-medium my-[18px] flex justify-between items-center">📋 我的任务 <a href="#" class="text-[10.5px] text-txt-muted no-underline">全部 →</a></div>
+          <div class="grid grid-cols-2 gap-2 mb-2">
+            <div class="bg-surface border border-border border-l-[3px] border-l-p-ab rounded-lg px-3 py-2.5 flex flex-col gap-1.5 min-h-[88px]">
+              <div class="text-[12.5px] font-sans font-medium leading-snug line-clamp-2 text-txt">双十一 AB 复盘</div>
+              <div class="mt-auto flex"><span class="tc-paradigm">AB</span></div>
+              <div class="font-mono text-[9.5px] text-txt-muted">⏱ 2 小时前</div>
+            </div>
+            <div class="bg-surface border border-border border-l-[3px] border-l-p-wave rounded-lg px-3 py-2.5 flex flex-col gap-1.5 min-h-[88px]">
+              <div class="text-[12.5px] font-sans font-medium leading-snug line-clamp-2 text-txt">上新增长归因</div>
+              <div class="mt-auto flex"><span class="tc-paradigm">WAVE</span></div>
+              <div class="font-mono text-[9.5px] text-txt-muted">⏱ 昨天</div>
+            </div>
+          </div>
+        </div>
+
+        <button class="absolute bottom-20 right-4 w-[52px] h-[52px] rounded-full bg-accent-grad shadow-[0_1px_0_rgba(166,84,57,.4),0_8px_24px_rgba(204,120,92,.30),inset_0_1px_0_rgba(255,255,255,.24)] grid place-items-center text-[#faf4ed] text-2xl font-light border-none cursor-pointer z-10 transition-transform active:scale-95">＋</button>
+
+        <nav class="absolute bottom-0 left-0 right-0 h-[60px] bg-bg border-t border-border-soft grid grid-cols-4 px-2 pb-3 pt-1.5">
+          <button class="flex flex-col items-center justify-center gap-1 bg-transparent border-none text-accent font-medium text-[10px] cursor-pointer">
+            <span class="text-xl leading-none">🏠</span><span>首页</span>
+          </button>
+          <button class="flex flex-col items-center justify-center gap-1 bg-transparent border-none text-txt-muted font-medium text-[10px] cursor-pointer hover:text-txt-dim">
+            <span class="text-xl leading-none">📒</span><span>任务</span>
+          </button>
+          <button class="flex flex-col items-center justify-center gap-1 bg-transparent border-none text-txt-muted font-medium text-[10px] cursor-pointer hover:text-txt-dim">
+            <span class="text-xl leading-none">🤖</span><span>Agent</span>
+          </button>
+          <button class="flex flex-col items-center justify-center gap-1 bg-transparent border-none text-txt-muted font-medium text-[10px] cursor-pointer hover:text-txt-dim">
+            <span class="text-xl leading-none">👤</span><span>我的</span>
+          </button>
+        </nav>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

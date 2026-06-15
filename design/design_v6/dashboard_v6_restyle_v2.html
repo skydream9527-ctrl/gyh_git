@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ICE Workbench v6 · Dashboard (基于现状升级)</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          bg: '#faf4ed', surface: '#ffffff', 'surface-2': '#f5efe4', border: '#e5dcc8', 'border-soft': '#ede5d2',
+          text: '#1a1612', 'text-dim': '#5b5246', 'text-muted': '#8a7e69',
+          primary: '#cc785c', 'primary-hover': '#b8624a', 'primary-soft': '#f5e8e2',
+          success: '#5a7a4f', warning: '#b07d2a', error: '#b54a3a'
+        },
+        fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
+        boxShadow: { 'card': '0 2px 8px rgba(26, 22, 18, 0.04), 0 1px 2px rgba(26, 22, 18, 0.02)', 'btn': '0 1px 2px rgba(26, 22, 18, 0.05), inset 0 1px 0 rgba(255,255,255,0.5)' }
+      }
+    }
+  }
+</script>
+<style>
+  body { background-color: theme('colors.bg'); color: theme('colors.text'); }
+  .tab-btn { position: relative; color: theme('colors.text-dim'); font-weight: 500; transition: color 0.2s; padding-bottom: 12px; font-size: 14px; }
+  .tab-btn:hover { color: theme('colors.text'); }
+  .tab-btn.active { color: theme('colors.primary'); }
+  .tab-btn.active::after { content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 2px; background: theme('colors.primary'); border-radius: 2px 2px 0 0; }
+  
+  /* Mock tabs logic for CSS-only prototype */
+  .tab-content { display: none; }
+  #tab1:checked ~ .content-area #content1,
+  #tab2:checked ~ .content-area #content2,
+  #tab3:checked ~ .content-area #content3 { display: block; }
+  
+  #tab1:checked ~ header label[for="tab1"],
+  #tab2:checked ~ header label[for="tab2"],
+  #tab3:checked ~ header label[for="tab3"] { color: theme('colors.primary'); }
+  
+  #tab1:checked ~ header label[for="tab1"]::after,
+  #tab2:checked ~ header label[for="tab2"]::after,
+  #tab3:checked ~ header label[for="tab3"]::after { content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 2px; background: theme('colors.primary'); border-radius: 2px 2px 0 0; }
+</style>
+</head>
+<body class="min-h-screen flex flex-col font-sans">
+
+  <!-- Radios for pure CSS tabs -->
+  <input type="radio" name="dashTabs" id="tab1" class="hidden" checked />
+  <input type="radio" name="dashTabs" id="tab2" class="hidden" />
+  <input type="radio" name="dashTabs" id="tab3" class="hidden" />
+
+  <!-- 顶部导航 & 选项卡 -->
+  <header class="bg-surface border-b border-border sticky top-0 z-20">
+    <div class="h-14 flex items-center justify-between px-6">
+      <div class="flex items-center gap-2 text-text font-semibold text-lg">
+        <svg class="w-5 h-5 text-primary" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zm0 7.5l-10-5v10l10 5 10-5v-10l-10 5z"/></svg>
+        <span>ICE Workbench</span>
+      </div>
+      <div class="flex items-center gap-3">
+        <!-- 保留原本顶部栏散落的核心入口，收拢为两个主要操作 -->
+        <button class="bg-gradient-to-br from-primary to-primary-hover text-white px-3 py-1.5 rounded-lg text-xs font-medium shadow-btn hover:opacity-90 mr-2">+ 新任务 (New)</button>
+        
+        <button class="relative p-1.5 text-text-dim hover:text-text hover:bg-surface-2 rounded-md transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+          <span class="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full border border-surface"></span>
+        </button>
+        <div class="w-px h-4 bg-border mx-1"></div>
+        <div class="w-8 h-8 rounded-full bg-surface-2 border border-border flex items-center justify-center font-medium">A</div>
+      </div>
+    </div>
+    
+    <!-- 3 Tabs 结构 -->
+    <div class="flex items-center gap-8 px-6 pt-2">
+      <label for="tab1" class="tab-btn cursor-pointer flex items-center gap-1.5">
+        新建与发现
+      </label>
+      <label for="tab2" class="tab-btn cursor-pointer flex items-center gap-1.5">
+        工作与进度
+        <span class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-warning/10 text-warning border border-warning/20 leading-none">1 待办</span>
+      </label>
+      <label for="tab3" class="tab-btn cursor-pointer flex items-center gap-1.5">
+        公共大厅
+      </label>
+    </div>
+  </header>
+
+  <main class="flex-1 w-full content-area pb-20">
+    
+    <!-- =========================================
+         TAB 1: 新建与发现 (整合现有 Paradigm 卡片与引导)
+         ========================================= -->
+    <div id="content1" class="tab-content pt-8">
+      <div class="max-w-5xl mx-auto px-6 space-y-8">
+        
+        <div>
+          <h2 class="text-sm font-semibold text-text mb-4">创建新任务 (Create Task)</h2>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- 沿用现有项目的 Agent/Paradigm 卡片样式进行重构 -->
+            <button class="bg-surface border border-border shadow-card rounded-xl p-4 text-left hover:border-primary transition-colors group">
+              <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mb-3">📊</div>
+              <h3 class="font-medium text-[15px] mb-1 group-hover:text-primary transition-colors">Data Analysis</h3>
+              <p class="text-xs text-text-dim">支持执行 Python 代码、SQL 查询，处理复杂数据分析和图表生成。</p>
+            </button>
+            <button class="bg-surface border border-border shadow-card rounded-xl p-4 text-left hover:border-primary transition-colors group">
+              <div class="w-10 h-10 rounded-lg bg-[#ebe5ee] text-[#7a6b8e] flex items-center justify-center mb-3">🧠</div>
+              <h3 class="font-medium text-[15px] mb-1 group-hover:text-primary transition-colors">General AI</h3>
+              <p class="text-xs text-text-dim">通用问答智能体，可直接作为任务编排的核心节点。</p>
+            </button>
+            <button class="bg-surface border border-border shadow-card rounded-xl p-4 text-left opacity-60 cursor-not-allowed">
+              <div class="flex justify-between items-start mb-3">
+                <div class="w-10 h-10 rounded-lg bg-green-50 text-green-600 flex items-center justify-center">📚</div>
+                <span class="text-[10px] bg-surface-2 px-1.5 py-0.5 rounded font-mono text-text-muted">COMING SOON</span>
+              </div>
+              <h3 class="font-medium text-[15px] mb-1">Knowledge RAG</h3>
+              <p class="text-xs text-text-dim">专注于飞书文档与超大文本的阅读与抽取。</p>
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <h2 class="text-sm font-semibold text-text mb-4">使用指南与参考 (Guide)</h2>
+          <!-- 整合原来单独的 Guide 页面入口内容 -->
+          <div class="bg-surface border border-border shadow-card rounded-xl p-5 flex flex-col md:flex-row gap-6">
+            <div class="flex-1">
+              <h3 class="font-medium text-sm mb-2 text-text">系统内置能力速查</h3>
+              <ul class="text-xs text-text-dim space-y-2 list-disc list-inside ml-2">
+                <li><span class="font-mono text-text">/now</span> - 获取服务器当前时间</li>
+                <li><span class="font-mono text-text">/kyuubi_query</span> - 提交 SQL 并获取 DataFrame 结果</li>
+                <li><span class="font-mono text-text">/feishu_publish</span> - 一键推送报告至飞书</li>
+              </ul>
+            </div>
+            <div class="w-px bg-border hidden md:block"></div>
+            <div class="flex-1">
+              <h3 class="font-medium text-sm mb-2 text-text">开发与管理</h3>
+              <p class="text-xs text-text-dim mb-3">您可以随时向 Admin 申请管理权限以自定义 Agent 的 Prompt 与调度逻辑。</p>
+              <button class="text-xs text-primary font-medium hover:underline">查看完整开发者文档 →</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- =========================================
+         TAB 2: 工作与进度 (整合现有的 Task 列表 + Scheduled 定时列表 + 新增监控卡片)
+         ========================================= -->
+    <div id="content2" class="tab-content pt-8">
+      <div class="max-w-5xl mx-auto px-6 space-y-8">
+        
+        <!-- 新增: 聚合关键干预和运行中的状态卡片 (v6特色) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- 待审批 -->
+          <div class="bg-surface border border-warning/40 shadow-card rounded-xl p-4 hover:border-warning/80 transition-colors cursor-pointer group">
+            <div class="flex items-center gap-2 mb-2 text-[13px] text-text-dim">
+              <span class="w-1.5 h-1.5 rounded-full bg-warning animate-pulse"></span>
+              需人工干预 (Action Required)
+            </div>
+            <div class="flex items-start justify-between">
+              <h3 class="font-medium text-[15px] group-hover:text-primary transition-colors"># Q2 销售复盘与归因分析</h3>
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-warning/10 text-warning border border-warning/20">PAUSED</span>
+            </div>
+          </div>
+
+          <!-- 后台运行 -->
+          <div class="bg-surface border border-blue-200 shadow-card rounded-xl p-4 hover:border-blue-400 transition-colors cursor-pointer group">
+            <div class="flex items-center gap-2 mb-2 text-[13px] text-text-dim">
+              <svg class="w-3.5 h-3.5 text-blue-500 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+              后台执行中 (Running Async)
+            </div>
+            <div class="flex items-start justify-between">
+              <h3 class="font-medium text-[15px] group-hover:text-blue-600 transition-colors"># 2026 H1 全量商品词频挖掘</h3>
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-blue-50 text-blue-600 border border-blue-100">RUNNING</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 整合现有: 我的任务列表与定时任务 -->
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-sm font-semibold text-text">我的任务 (My Tasks & Scheduled)</h2>
+            <!-- 保留现有的过滤机制，以轻量级 Tag 形式展示 -->
+            <div class="flex bg-surface-2 p-1 rounded-lg border border-border">
+              <button class="px-3 py-1 text-xs font-medium bg-surface shadow-sm rounded text-text">全部</button>
+              <button class="px-3 py-1 text-xs font-medium text-text-dim hover:text-text transition-colors">单次任务</button>
+              <button class="px-3 py-1 text-xs font-medium text-text-dim hover:text-text transition-colors">定时调度 (Cron)</button>
+            </div>
+          </div>
+          
+          <div class="bg-surface border border-border shadow-card rounded-xl overflow-hidden">
+            <!-- 直接借用现有的表格布局逻辑，加入 Cron 列 -->
+            <table class="w-full text-left text-[13px]">
+              <thead class="bg-surface-2 text-text-muted font-mono text-[11px] border-b border-border">
+                <tr>
+                  <th class="p-3.5 font-medium">任务名称</th>
+                  <th class="p-3.5 font-medium">驱动模式 / Agent</th>
+                  <th class="p-3.5 font-medium">最近活动</th>
+                  <th class="p-3.5 font-medium">状态</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-border">
+                <tr class="hover:bg-surface-2 transition-colors cursor-pointer">
+                  <td class="p-3.5 font-medium text-text"># 竞品每日动向自动巡检</td>
+                  <td class="p-3.5">
+                    <div class="text-[12px] text-text-dim">Data Analysis</div>
+                    <div class="mt-1 flex items-center gap-1 text-[10px] text-primary bg-primary-soft px-1.5 py-0.5 rounded font-mono w-max">
+                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                      0 9 * * *
+                    </div>
+                  </td>
+                  <td class="p-3.5 text-text-dim font-mono text-[12px]">2 hrs ago</td>
+                  <td class="p-3.5"><span class="px-2 py-0.5 rounded text-[11px] font-mono bg-success/10 text-success border border-success/20">SUCCESS</span></td>
+                </tr>
+                <tr class="hover:bg-surface-2 transition-colors cursor-pointer">
+                  <td class="p-3.5 font-medium text-text"># 客诉数据底座清洗</td>
+                  <td class="p-3.5">
+                    <div class="text-[12px] text-text-dim">General AI</div>
+                    <div class="mt-1 text-[10px] text-text-muted">Manual</div>
+                  </td>
+                  <td class="p-3.5 text-text-dim font-mono text-[12px]">1 day ago</td>
+                  <td class="p-3.5"><span class="px-2 py-0.5 rounded text-[11px] font-mono bg-success/10 text-success border border-success/20">SUCCESS</span></td>
+                </tr>
+                <tr class="hover:bg-surface-2 transition-colors cursor-pointer opacity-60">
+                  <td class="p-3.5 font-medium text-text"># Q1 财报核心论点摘取</td>
+                  <td class="p-3.5">
+                    <div class="text-[12px] text-text-dim">General AI</div>
+                  </td>
+                  <td class="p-3.5 text-text-dim font-mono text-[12px]">7 days ago</td>
+                  <td class="p-3.5"><span class="px-2 py-0.5 rounded text-[11px] font-mono bg-surface-2 text-text-dim border border-border">CLOSED</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- =========================================
+         TAB 3: 大厅 (整合现有的公共任务流 + 公共文件)
+         ========================================= -->
+    <div id="content3" class="tab-content pt-8">
+      <div class="max-w-5xl mx-auto px-6 space-y-8">
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <!-- 整合现存的 Public Tasks -->
+          <div>
+            <h2 class="text-sm font-semibold text-text mb-4">公共任务流 (Public Tasks)</h2>
+            <div class="space-y-3">
+              <div class="bg-surface border border-border rounded-xl p-4 shadow-card hover:border-primary cursor-pointer transition-colors group">
+                <div class="flex items-center justify-between mb-1">
+                  <h3 class="font-medium text-[14px] text-text">🔗 标准财务模型清洗流</h3>
+                  <button class="text-[10px] uppercase font-bold text-white bg-primary px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity shadow-btn">Fork</button>
+                </div>
+                <p class="text-xs text-text-dim">输入任意网银流水 CSV，自动对齐科目规范并吐出透视表。</p>
+              </div>
+              <div class="bg-surface border border-border rounded-xl p-4 shadow-card hover:border-primary cursor-pointer transition-colors group">
+                <div class="flex items-center justify-between mb-1">
+                  <h3 class="font-medium text-[14px] text-text">🔗 竞品公众号文章监控</h3>
+                  <button class="text-[10px] uppercase font-bold text-white bg-primary px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity shadow-btn">Fork</button>
+                </div>
+                <p class="text-xs text-text-dim">自带 Cron 设置的每日舆情监控流。</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 整合现存的 Public Files -->
+          <div>
+            <h2 class="text-sm font-semibold text-text mb-4">公共文件库 (Public Files)</h2>
+            <div class="bg-surface border border-border shadow-card rounded-xl overflow-hidden">
+              <div class="p-3.5 hover:bg-surface-2 border-b border-border transition-colors cursor-pointer flex items-center justify-between">
+                <div class="flex items-center gap-2 text-[13px] text-text font-medium"><span class="text-lg">📚</span> 2026 公司经营指标字典.pdf</div>
+                <span class="text-[11px] text-text-muted font-mono bg-surface-2 px-1.5 py-0.5 rounded border border-border">1.2MB</span>
+              </div>
+              <div class="p-3.5 hover:bg-surface-2 border-b border-border transition-colors cursor-pointer flex items-center justify-between">
+                <div class="flex items-center gap-2 text-[13px] text-text font-medium"><span class="text-lg">🗃</span> 核心数仓表结构速查.md</div>
+                <span class="text-[11px] text-text-muted font-mono bg-surface-2 px-1.5 py-0.5 rounded border border-border">45KB</span>
+              </div>
+              <div class="p-3.5 hover:bg-surface-2 transition-colors cursor-pointer flex items-center justify-between opacity-60">
+                <div class="flex items-center gap-2 text-[13px] text-text font-medium"><span class="text-lg">🔒</span> admin_configs_sample.json</div>
+                <span class="text-[11px] text-text-muted font-mono bg-surface-2 px-1.5 py-0.5 rounded border border-border">Internal</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+</body>
+</html>
