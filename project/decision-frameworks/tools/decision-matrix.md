@@ -362,4 +362,4 @@
 
 ---
 
-**下一步**：了解[预-mortem分析](./premortem-analysis.md)如何帮助你识别决策风险
+**下一步**：了解[风险评估](../templates/risk-assessment.md)如何帮助你识别决策风险

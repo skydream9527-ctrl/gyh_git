@@ -7,16 +7,20 @@
 ```
 decision-frameworks/
 ├── README.md                          # 本文件
-├── cases/                             # 行业决策案例
-│   ├── e-commerce/                    # 电商行业
-│   ├── social/                        # 社交平台
-│   ├── fintech/                       # 金融科技
-│   ├── saas/                          # SaaS服务
-│   ├── gaming/                        # 游戏行业
-│   └── ai-llm/                        # AI/LLM应用
+├── frameworks/                        # 决策框架详解
+│   ├── ai-decision-making.md          # AI决策框架（核心）
+│   ├── ai-context-decision-infrastructure.md  # AI上下文决策基础设施
+│   ├── ooda-loop.md                   # OODA循环
+│   ├── first-principles.md            # 第一性原理
+│   └── antifragile-decisions.md       # 反脆弱决策
 ├── tools/                             # 决策工具使用指南
 │   ├── rice-scoring.md                # RICE优先级评分
 │   ├── decision-matrix.md             # 决策矩阵
+│   ├── swot-analysis.md               # SWOT分析
+│   ├── porter-five-forces.md          # 波特五力分析
+│   ├── pestel-analysis.md             # PESTEL分析
+│   ├── blue-ocean-strategy.md         # 蓝海战略
+│   ├── ansoff-matrix.md              # 安索夫矩阵
 │   ├── premortem-analysis.md          # 预-mortem分析
 │   ├── bayesian-updating.md           # 贝叶斯更新
 │   ├── systems-thinking.md            # 系统思维工具
@@ -25,10 +29,14 @@ decision-frameworks/
 │   ├── decision-record.md             # 决策记录模板(ADR)
 │   ├── trade-off-analysis.md          # 权衡分析模板
 │   └── risk-assessment.md             # 风险评估模板
-└── frameworks/                        # 决策框架详解
-    ├── ooda-loop.md                   # OODA循环
-    ├── first-principles.md            # 第一性原理
-    └── antifragile-decisions.md       # 反脆弱决策
+└── cases/                             # 行业决策案例
+    ├── ai-llm/                        # AI/LLM应用
+    ├── e-commerce/                    # 电商行业
+    ├── fintech/                       # 金融科技
+    ├── saas/                          # SaaS服务
+    ├── gaming/                        # 游戏行业
+    ├── social/                        # 社交平台
+    └── pm-workspace/                  # PM工作区
 ```
 
 ## 🎯 核心理念
@@ -43,18 +51,28 @@ decision-frameworks/
 
 | 层次 | 描述 | 工具 |
 |------|------|------|
-| **战略决策** | 方向性、长期影响 | 第一性原理、系统思维 |
-| **战术决策** | 执行路径、资源分配 | RICE、决策矩阵 |
-| **运营决策** | 日常优化、快速迭代 | A/B测试、数据仪表盘 |
+| **战略决策** | 方向性、长期影响 | 第一性原理、系统思维、AI决策框架 |
+| **战术决策** | 执行路径、资源分配 | RICE、决策矩阵、预-mortem |
+| **运营决策** | 日常优化、快速迭代 | A/B测试、贝叶斯更新、数据仪表盘 |
+
+### AI决策：新范式
+
+AI 不是决策的替代者，而是决策的增强器。核心问题不是"AI能不能决策"，而是：
+
+1. **何时用AI判断 vs 人类判断** → [AI决策框架](./frameworks/ai-decision-making.md)
+2. **如何构建AI决策的上下文** → [AI上下文基础设施](./frameworks/ai-context-decision-infrastructure.md)
+3. **如何评估AI决策质量** → [贝叶斯更新](./tools/bayesian-updating.md)
+4. **如何设计人机协作决策流程** → [AI决策框架 §协作模式](./frameworks/ai-decision-making.md)
 
 ## 🚀 快速开始
 
 1. **明确决策类型**：这是战略/战术/运营决策？
-2. **选择合适框架**：根据决策类型和时间约束选择
-3. **收集信息**：数据 + 专家意见 + 反对观点
-4. **结构化分析**：使用工具量化或可视化
-5. **做出决策**：明确记录依据和假设
-6. **跟踪复盘**：建立反馈循环
+2. **判断AI参与度**：参考 [AI决策框架的自动化光谱](./frameworks/ai-decision-making.md)
+3. **选择合适框架**：根据决策类型、时间约束和AI能力选择
+4. **收集信息**：数据 + 专家意见 + 反对观点 + AI分析
+5. **结构化分析**：使用工具量化或可视化
+6. **做出决策**：明确记录依据和假设（ADR模板）
+7. **跟踪复盘**：贝叶斯更新 + 建立反馈循环
 
 ## 📚 学习路径
 
@@ -62,18 +80,35 @@ decision-frameworks/
 - 理解常见认知偏误
 - 掌握RICE和决策矩阵
 - 学会写决策记录(ADR)
+- 理解AI决策的基本光谱
 
 ### 中级：量化决策
 - 贝叶斯思维应用
 - 预期价值计算
 - 风险评估与对冲
+- AI辅助决策的上下文构建
 
 ### 高级：系统决策
 - 系统思维与因果回路
 - 博弈论与机制设计
 - 反脆弱决策设计
+- 人机协作决策流程设计
+
+## 🔗 核心文件导航
+
+| 你想做什么 | 去哪看 |
+|-----------|--------|
+| 理解AI该怎么决策 | [AI决策框架](./frameworks/ai-decision-making.md) |
+| 让AI认识你的业务 | [AI上下文基础设施](./frameworks/ai-context-decision-infrastructure.md) |
+| 快速做优先级排序 | [RICE评分](./tools/rice-scoring.md) |
+| 多选项结构化比较 | [决策矩阵](./tools/decision-matrix.md) |
+| 做战略环境分析 | [SWOT](./tools/swot-analysis.md) → [波特五力](./tools/porter-five-forces.md) → [PESTEL](./tools/pestel-analysis.md) |
+| 找增长方向 | [安索夫矩阵](./tools/ansoff-matrix.md) → [蓝海战略](./tools/blue-ocean-strategy.md) |
+| 防止决策翻车 | [预-mortem分析](./tools/premortem-analysis.md) → [风险评估](./templates/risk-assessment.md) |
+| 记录决策过程 | [ADR模板](./templates/decision-record.md) |
+| 看行业案例 | [cases/](./cases/) 目录下7个行业 |
 
 ---
 
-**维护者：** PM Workspace Starter
-**最后更新：** 2026-06-15
+**维护者：** PM Workspace Starter  
+**最后更新：** 2026-06-22
