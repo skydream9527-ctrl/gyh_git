@@ -1,0 +1,26 @@
+{
+  "dashboard_metrics.sql": {
+    "status": "error",
+    "message": "SQL Execution Failed.\nError: 2026-04-07T20:58:34,658 INFO  [FrontendServiceHandler-Pool: Thread-932] org.apache.kyuubi.Logging:60 [] - Processing gongyunhe:11329:workspace_11329.admin's query[1a4cf8d1-62c7-40c9-a9da-714b02605067] with session[d6d2e6d6-c7eb-474c-a538-83dcc1f68209] use engine[****] with remote query[] : INITIALIZED_STATE -> PENDING_STATE,traceId: b8b578f34ad6ead0855302aeb5b0bdcb, statement: -- 大盘指标查询 SQL;-- 用于分析版本灰度期间的大盘用户数据;-- 实验组版本: 20.11.1010115;-- 对照组版本: 20.11.10115;-- 分析时间: 2"
+  },
+  "feed_dau_rate_metrics.sql": {
+    "status": "error",
+    "message": "SQL Execution Failed.\nError: 2026-04-07T20:58:35,763 INFO  [FrontendServiceHandler-Pool: Thread-362] org.apache.kyuubi.Logging:60 [] - Processing gongyunhe:11329:workspace_11329.admin's query[2402731d-f591-478c-857e-97f14a675f0f] with session[961b7382-e58f-491f-b6a2-d3fc83fa72bc] use engine[****] with remote query[] : INITIALIZED_STATE -> PENDING_STATE,traceId: a382bf42806aafc6d347591ad1b637c0, statement: -- 信息流日活率指标查询 SQL;-- 用于分析版本灰度期间的信息流日活率和广告相关指标;-- 实验组版本: 20.11.1010115;-- 对照组版本: 20.11.10115"
+  },
+  "tracking_monitoring_metrics.sql": {
+    "status": "error",
+    "message": "SQL Execution Failed.\nError: 2026-04-07T20:58:36,862 INFO  [FrontendServiceHandler-Pool: Thread-336] org.apache.kyuubi.Logging:60 [] - Processing gongyunhe:11329:workspace_11329.admin's query[591e4ade-1a10-4796-a750-6307f9413514] with session[ad5295ab-96c7-43d7-ba70-0e8c36c29081] use engine[****] with remote query[] : INITIALIZED_STATE -> PENDING_STATE,traceId: 54f89c7062efa8d3503363775ba6405d, statement: -- 埋点监控指标查询 SQL;-- 用于分析版本灰度期间的视频播放和消费时长等监控指标;-- 实验组版本: 20.11.1010115;-- 对照组版本: 20.11.10115;"
+  },
+  "scale_experience_metrics.sql": {
+    "status": "error",
+    "message": "SQL Execution Failed.\nError: 2026-04-07T20:58:38,170 INFO  [FrontendServiceHandler-Pool: Thread-137] org.apache.kyuubi.Logging:60 [] - Processing gongyunhe:11329:workspace_11329.admin's query[69de3964-a460-4ce5-82d2-19af2cf70ee8] with session[f0874fee-2e64-4511-b620-97ceaa5dd9e0] use engine[****] with remote query[] : INITIALIZED_STATE -> PENDING_STATE,traceId: 14d65479ca28e8ceaa94134164ab9846, statement: -- 规模体验指标查询 SQL;-- 用于分析版本灰度期间的用户规模和体验相关指标;-- 实验组版本: 20.11.1010115;-- 对照组版本: 20.11.10115;-- "
+  },
+  "ot_advertising_metrics.sql": {
+    "status": "error",
+    "message": "SQL Execution Failed.\nError: 2026-04-07T20:58:42,667 INFO  [FrontendServiceHandler-Pool: Thread-288] org.apache.kyuubi.Logging:60 [] - Processing gongyunhe:11329:workspace_11329.admin's query[a754ceeb-10e6-4c2b-9d34-832d15a45c55] with session[2d3b42c6-e9b3-4fe8-a7c9-906adf337d62] use engine[****] with remote query[] : INITIALIZED_STATE -> PENDING_STATE,traceId: 241d3d549e66e0c1807b20467d74813c, statement: -- OT 口径广告指标查询 SQL;-- 用于分析版本灰度期间的广告相关指标（OT口径）;-- 实验组版本: 20.11.1010115;-- 对照组版本: 20.11.10115"
+  },
+  "commercial_platform_metrics.sql": {
+    "status": "error",
+    "message": "SQL Execution Failed.\nError: 2026-04-07T20:58:48,512 INFO  [FrontendServiceHandler-Pool: Thread-213] org.apache.kyuubi.Logging:60 [] - Processing gongyunhe:11329:workspace_11329.admin's query[f435942d-57a3-47a5-9f88-ee720224eba5] with session[9785db0e-a6c6-4632-ab80-8084f87a2409] use engine[****] with remote query[] : INITIALIZED_STATE -> PENDING_STATE,traceId: d9693bb7f3f0a681ba0db1f652286c39, statement: -- 商业中台指标查询 SQL;-- 用于分析版本灰度期间的商业化广告效果指标;-- 实验组版本: 20.11.1010115;-- 对照组版本: 20.11.10115;-- 分析"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "id": "ab-experiment",
+  "name": "实验分析 Agent",
+  "paradigm": "ab",
+  "icon": "⚖",
+  "color": "#7bafd4",
+  "description": "AB 显著性 · 下钻 · 放量决策（V2.4）",
+  "publish_status": "published"
+}

@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ICE Workbench · 智能数据工作台</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <link rel="stylesheet" href="_shared/tokens.css" />
+  <link rel="stylesheet" href="_shared/components.css" />
+  <style>
+    .intro-nav { position: sticky; top: 0; z-index: 30; height: 60px; display: flex; align-items: center; gap: 12px; padding: 0 40px; background: rgba(250,244,237,.8); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border-soft); }
+    .intro-nav .brand { display: flex; align-items: center; gap: 10px; font-weight: 600; }
+    .intro-nav .mark { width: 30px; height: 30px; border-radius: 8px; background: var(--accent-grad); display: grid; place-items: center; color: #fff; box-shadow: var(--accent-shadow); }
+    .intro-nav .links { margin-left: auto; display: flex; align-items: center; gap: 24px; font-size: 13px; color: var(--text-dim); }
+    .intro-nav .links a { color: var(--text-dim); }
+    .intro-nav .links a:hover { color: var(--text); }
+
+    .hero { text-align: center; padding: 90px 24px 70px; max-width: 880px; margin: 0 auto; position: relative; }
+    .hero-badge { display: inline-flex; align-items: center; gap: 7px; padding: 5px 14px; border-radius: var(--r-pill); background: var(--accent-soft); color: var(--accent-text); font-size: 12px; font-weight: 500; margin-bottom: 24px; }
+    .hero h1 { font-family: var(--font-serif); font-size: 56px; line-height: 1.12; font-weight: 500; color: var(--text); letter-spacing: -.02em; }
+    .hero h1 .accent { color: var(--accent); font-style: italic; }
+    .hero p { font-size: 17px; color: var(--text-dim); line-height: 1.7; max-width: 600px; margin: 24px auto 0; }
+    .hero-cta { display: flex; gap: 12px; justify-content: center; margin-top: 36px; }
+
+    .marquee { display: flex; justify-content: center; gap: 28px; flex-wrap: wrap; padding: 0 24px 60px; }
+    .marquee .stat-mini { text-align: center; }
+    .marquee .stat-mini .v { font-family: var(--font-serif); font-size: 32px; color: var(--text); font-weight: 500; }
+    .marquee .stat-mini .l { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+    .section { max-width: 1080px; margin: 0 auto; padding: 60px 40px; }
+    .feat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--gap-5); }
+    .feat { padding: 26px; border-radius: var(--r-lg); background: var(--surface); border: 1px solid var(--border-soft); transition: box-shadow var(--transition), transform var(--transition); }
+    .feat:hover { box-shadow: var(--shadow-2); transform: translateY(-3px); }
+    .feat .ico { width: 46px; height: 46px; border-radius: 12px; display: grid; place-items: center; font-size: 22px; margin-bottom: 16px; }
+    .feat h3 { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+    .feat p { font-size: 13px; color: var(--text-dim); line-height: 1.65; }
+
+    .agents-band { background: var(--bg-tint); border-top: 1px solid var(--border-soft); border-bottom: 1px solid var(--border-soft); }
+    .agent-chips { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 32px; }
+    .agent-chip-lg { display: flex; align-items: center; gap: 10px; padding: 12px 18px; border-radius: var(--r-pill); background: var(--surface); border: 1px solid var(--border-soft); font-size: 14px; font-weight: 500; color: var(--text); box-shadow: var(--shadow-1); }
+    .agent-chip-lg .d { width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center; font-size: 16px; }
+
+    .cta-band { text-align: center; padding: 80px 24px; }
+    .cta-band h2 { font-family: var(--font-serif); font-size: 38px; font-weight: 500; color: var(--text); }
+    .cta-band p { color: var(--text-dim); margin-top: 14px; font-size: 15px; }
+    .intro-foot { text-align: center; padding: 32px; color: var(--text-muted); font-size: 12px; border-top: 1px solid var(--border-soft); font-family: var(--font-mono); }
+  </style>
+</head>
+<body>
+  <nav class="intro-nav">
+    <div class="brand"><span class="mark"><i class="ph-fill ph-hexagon"></i></span> ICE Workbench</div>
+    <div class="links">
+      <a href="#features">能力</a>
+      <a href="#agents">Agents</a>
+      <a href="guide.html">指南</a>
+      <a class="btn btn-primary btn-sm" href="login.html">登录 <i class="ph ph-arrow-right"></i></a>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <span class="hero-badge"><i class="ph-fill ph-sparkle"></i> 基于 Agent 范式的智能数据工作台</span>
+    <h1>把数据分析师，<br />变成你的 <span class="accent">对话伙伴</span></h1>
+    <p>从取数、A/B 实验到经营复盘，用自然语言驱动专业分析流程。多 Agent 协作、可视化执行、定时自动化，让数据洞察触手可及。</p>
+    <div class="hero-cta">
+      <a class="btn btn-primary btn-lg" href="login.html"><i class="ph ph-rocket-launch"></i> 立即开始</a>
+      <a class="btn btn-secondary btn-lg" href="dashboard.html"><i class="ph ph-play-circle"></i> 查看工作台</a>
+    </div>
+  </header>
+
+  <div class="marquee">
+    <div class="stat-mini"><div class="v">9</div><div class="l">专业 Agent</div></div>
+    <div class="stat-mini"><div class="v">5</div><div class="l">分析范式</div></div>
+    <div class="stat-mini"><div class="v">1.2k+</div><div class="l">累计任务</div></div>
+    <div class="stat-mini"><div class="v">38s</div><div class="l">平均出结论</div></div>
+  </div>
+
+  <section class="section" id="features">
+    <div style="text-align:center;margin-bottom:48px">
+      <span class="kicker">Capabilities</span>
+      <h2 class="serif" style="font-size:34px;margin-top:10px">为数据工作的每个环节而设计</h2>
+    </div>
+    <div class="feat-grid">
+      <div class="feat"><div class="ico" style="background:var(--p-data-soft);color:var(--p-data)"><i class="ph ph-chart-bar"></i></div><h3>自然语言取数</h3><p>用中文描述需求，自动生成并执行 SQL，结果即时清洗、统计与可视化。</p></div>
+      <div class="feat"><div class="ico" style="background:var(--p-ab-soft);color:var(--p-ab)"><i class="ph ph-flask"></i></div><h3>A/B 实验评估</h3><p>显著性检验、样本均衡诊断、最小样本量估算，一键产出实验结论报告。</p></div>
+      <div class="feat"><div class="ico" style="background:var(--p-biz-soft);color:var(--p-biz)"><i class="ph ph-presentation-chart"></i></div><h3>经营复盘</h3><p>GMV、ARPU、留存等核心指标自动拆解归因，同比环比一目了然。</p></div>
+      <div class="feat"><div class="ico" style="background:var(--accent-soft);color:var(--accent-text)"><i class="ph ph-strategy"></i></div><h3>Plan Mode</h3><p>复杂任务先出方案、你批准后再执行，过程透明、结果可控。</p></div>
+      <div class="feat"><div class="ico" style="background:var(--p-gray-soft);color:var(--p-gray)"><i class="ph ph-users-three"></i></div><h3>多人协作</h3><p>邀请同事进入同一任务，对话、文件、经验卡片实时共享。</p></div>
+      <div class="feat"><div class="ico" style="background:var(--success-soft);color:var(--success)"><i class="ph ph-timer"></i></div><h3>定时自动化</h3><p>按 Cron 周期自动执行任务，日报结果定点推送飞书群。</p></div>
+    </div>
+  </section>
+
+  <section class="agents-band">
+    <div class="section" id="agents" style="text-align:center">
+      <span class="kicker">Agent Roster</span>
+      <h2 class="serif" style="font-size:34px;margin-top:10px">一支随时待命的专业团队</h2>
+      <div class="agent-chips">
+        <div class="agent-chip-lg"><span class="d" style="background:var(--p-gray-soft);color:var(--p-gray)"><i class="ph ph-sparkle"></i></span> 通用助理</div>
+        <div class="agent-chip-lg"><span class="d" style="background:var(--p-data-soft);color:var(--p-data)"><i class="ph ph-chart-bar"></i></span> 数据分析师</div>
+        <div class="agent-chip-lg"><span class="d" style="background:var(--p-ab-soft);color:var(--p-ab)"><i class="ph ph-flask"></i></span> AB 实验官</div>
+        <div class="agent-chip-lg"><span class="d" style="background:var(--p-biz-soft);color:var(--p-biz)"><i class="ph ph-books"></i></span> 知识问答</div>
+        <div class="agent-chip-lg"><span class="d" style="background:var(--p-wave-soft);color:var(--p-wave)"><i class="ph ph-git-branch"></i></span> 灰度发布</div>
+        <div class="agent-chip-lg"><span class="d" style="background:var(--p-biz-soft);color:var(--p-biz)"><i class="ph ph-newspaper"></i></span> 点金石日报</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta-band">
+    <h2>准备好开始了吗？</h2>
+    <p>用飞书账号登录，几秒钟进入你的智能数据工作区。</p>
+    <div style="margin-top:28px"><a class="btn btn-primary btn-lg" href="login.html"><i class="ph ph-rocket-launch"></i> 立即开始</a></div>
+  </section>
+
+  <footer class="intro-foot">© 2026 ICE Workbench · 内部智能数据工作台</footer>
+</body>
+</html>

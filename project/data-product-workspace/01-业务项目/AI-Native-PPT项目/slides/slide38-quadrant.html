@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html><head><style>
+html { background: #0D1117; }
+body { width: 720pt; height: 405pt; margin: 0; padding: 0; font-family: Arial, sans-serif; display: flex; background-image: url('bg-dark.png'); background-size: cover; }
+.wrap { margin: 24pt 50pt; width: 620pt; }
+.matrix { display: flex; flex-direction: column; gap: 6pt; margin-top: 6pt; }
+.matrix-row { display: flex; gap: 6pt; }
+.quadrant { flex: 1; border-radius: 6pt; padding: 10pt 12pt; height: 128pt; }
+.q-tl { background: #1A1030; border: 2pt solid #A371F7; }
+.q-tr { background: #0D1B2A; border: 2pt solid #58A6FF; }
+.q-bl { background: #1F0B0B; border: 2pt solid #F85149; }
+.q-br { background: #1A1507; border: 2pt solid #F0883E; }
+</style></head><body>
+<div class="wrap">
+  <h1 style="color: #FFFFFF; font-size: 20pt; margin: 0 0 4pt 0; text-align: center;">何时用 Skill / Agent / 多 Agent</h1>
+  <p style="color: #8B949E; font-size: 9pt; margin: 0 0 4pt 60pt; text-align: center;">处理信息方式的确定性 →</p>
+  <div style="display: flex;">
+    <div style="width: 46pt; display: flex; align-items: center;">
+      <p style="color: #8B949E; font-size: 9pt; margin: 0; text-align: center;">← 信息的确定性</p>
+    </div>
+    <div style="flex: 1;">
+      <div class="matrix">
+        <div class="matrix-row">
+          <div class="quadrant q-tl">
+            <p style="color: #A371F7; font-size: 14pt; font-weight: bold; margin: 0 0 4pt 0;">使用 Agent</p>
+            <p style="color: #C9D1D9; font-size: 9pt; margin: 0 0 6pt 0;">固定流程去处理不确定信息</p>
+            <p style="color: #8B949E; font-size: 8pt; margin: 0 0 2pt 0;"><b style="color: #A371F7;">例子：</b></p>
+            <p style="color: #8B949E; font-size: 8pt; margin: 0;">浏览器近一个月 DAU 上涨趋势在一众竞品中的水平或者位置</p>
+          </div>
+          <div class="quadrant q-tr">
+            <p style="color: #58A6FF; font-size: 14pt; font-weight: bold; margin: 0 0 4pt 0;">使用 Skill</p>
+            <p style="color: #C9D1D9; font-size: 9pt; margin: 0 0 6pt 0;">标准规范的流程</p>
+            <p style="color: #8B949E; font-size: 8pt; margin: 0 0 2pt 0;"><b style="color: #58A6FF;">例子：</b></p>
+            <p style="color: #8B949E; font-size: 8pt; margin: 0;">看一下近 7 天浏览器 DAU</p>
+          </div>
+        </div>
+        <div class="matrix-row">
+          <div class="quadrant q-bl">
+            <p style="color: #F85149; font-size: 14pt; font-weight: bold; margin: 0 0 4pt 0;">使用多 Agent 讨论</p>
+            <p style="color: #C9D1D9; font-size: 9pt; margin: 0 0 6pt 0;">复杂场景需要协作</p>
+            <p style="color: #8B949E; font-size: 8pt; margin: 0 0 2pt 0;"><b style="color: #F85149;">例子：</b></p>
+            <p style="color: #8B949E; font-size: 8pt; margin: 0;">短剧产品投放上线之后的投放节奏跟留存曲线应该是什么样的</p>
+          </div>
+          <div class="quadrant q-br">
+            <p style="color: #F0883E; font-size: 14pt; font-weight: bold; margin: 0 0 4pt 0;">使用 Agent</p>
+            <p style="color: #C9D1D9; font-size: 9pt; margin: 0 0 6pt 0;">需要思考与分析</p>
+            <p style="color: #8B949E; font-size: 8pt; margin: 0 0 2pt 0;"><b style="color: #F0883E;">例子：</b></p>
+            <p style="color: #8B949E; font-size: 8pt; margin: 0;">为什么近一个月 DAU 下降</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body></html>

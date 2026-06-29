@@ -1,0 +1,475 @@
+{
+  "ab-experiment": {
+    "disallowed_tools": [],
+    "effort": null,
+    "features_default_false": {
+      "exit_plan_mode": true,
+      "run_background": false,
+      "spawn_subagent": true,
+      "todo_write": true
+    },
+    "features_default_true": {
+      "exit_plan_mode": true,
+      "run_background": true,
+      "spawn_subagent": true,
+      "todo_write": true
+    },
+    "hooks": {},
+    "initial_prompt": null,
+    "max_turns": null,
+    "model": null,
+    "permission_mode": "default",
+    "skills": [
+      "kyuubi",
+      "feishu",
+      "nl-python"
+    ],
+    "spawn_targets": [
+      "data-analysis",
+      "gray-release",
+      "know",
+      "volcano-abtest"
+    ],
+    "spawnable": [
+      "data-analysis",
+      "gray-release",
+      "know",
+      "volcano-abtest"
+    ],
+    "tools": [
+      "now",
+      "kyuubi_query",
+      "execute_python",
+      "write_file",
+      "read_file",
+      "list_files",
+      "feishu_publish",
+      "feishu_upload_image",
+      "read_skill",
+      "read_agent_knowledge",
+      "todo_write",
+      "request_human_input",
+      "exit_plan_mode",
+      "spawn_subagent"
+    ]
+  },
+  "biz-insight": {
+    "disallowed_tools": [],
+    "effort": null,
+    "features_default_false": {
+      "exit_plan_mode": false,
+      "run_background": false,
+      "spawn_subagent": false,
+      "todo_write": false
+    },
+    "features_default_true": {
+      "exit_plan_mode": true,
+      "run_background": true,
+      "spawn_subagent": true,
+      "todo_write": true
+    },
+    "hooks": {},
+    "initial_prompt": null,
+    "max_turns": null,
+    "model": null,
+    "permission_mode": "default",
+    "skills": [],
+    "spawn_targets": null,
+    "spawnable": [
+      "ab-experiment",
+      "data-analysis",
+      "djy-daily-report",
+      "general",
+      "gray-release",
+      "know",
+      "volcano-abtest",
+      "zijian-data-analysis"
+    ],
+    "tools": null
+  },
+  "data-analysis": {
+    "disallowed_tools": [],
+    "effort": null,
+    "features_default_false": {
+      "exit_plan_mode": true,
+      "run_background": false,
+      "spawn_subagent": true,
+      "todo_write": true
+    },
+    "features_default_true": {
+      "exit_plan_mode": true,
+      "run_background": true,
+      "spawn_subagent": true,
+      "todo_write": true
+    },
+    "hooks": {},
+    "initial_prompt": null,
+    "max_turns": null,
+    "model": null,
+    "permission_mode": "default",
+    "skills": [
+      "nl-mapping-table-sql",
+      "kyuubi",
+      "feishu",
+      "nl-python"
+    ],
+    "spawn_targets": [
+      "wave-attribution",
+      "zijian-data-analysis",
+      "know"
+    ],
+    "spawnable": [
+      "know",
+      "zijian-data-analysis"
+    ],
+    "tools": [
+      "now",
+      "kyuubi_query",
+      "execute_python",
+      "write_file",
+      "read_file",
+      "list_files",
+      "feishu_publish",
+      "feishu_upload_image",
+      "read_skill",
+      "memory_save",
+      "memory_delete",
+      "task_state_save",
+      "todo_write",
+      "exit_plan_mode",
+      "spawn_subagent"
+    ]
+  },
+  "djy-daily-report": {
+    "disallowed_tools": [],
+    "effort": null,
+    "features_default_false": {
+      "exit_plan_mode": true,
+      "run_background": true,
+      "spawn_subagent": true,
+      "todo_write": true
+    },
+    "features_default_true": {
+      "exit_plan_mode": true,
+      "run_background": true,
+      "spawn_subagent": true,
+      "todo_write": true
+    },
+    "hooks": {},
+    "initial_prompt": null,
+    "max_turns": null,
+    "model": null,
+    "permission_mode": "default",
+    "skills": [
+      "djy-pool-analysis",
+      "kyuubi",
+      "feishu",
+      "nl-python",
+      "text2html2png"
+    ],
+    "spawn_targets": [
+      "zijian-data-analysis",
+      "data-analysis",
+      "know"
+    ],
+    "spawnable": [
+      "data-analysis",
+      "know",
+      "zijian-data-analysis"
+    ],
+    "tools": [
+      "now",
+      "kyuubi_query",
+      "execute_python",
+      "write_file",
+      "read_file",
+      "list_files",
+      "feishu_send_message",
+      "feishu_upload_image",
+      "read_skill",
+      "todo_write",
+      "request_human_input",
+      "create_scheduled_task",
+      "exit_plan_mode",
+      "spawn_subagent",
+      "run_background"
+    ]
+  },
+  "general": {
+    "disallowed_tools": [],
+    "effort": null,
+    "features_default_false": {
+      "exit_plan_mode": true,
+      "run_background": false,
+      "spawn_subagent": true,
+      "todo_write": true
+    },
+    "features_default_true": {
+      "exit_plan_mode": true,
+      "run_background": true,
+      "spawn_subagent": true,
+      "todo_write": true
+    },
+    "hooks": {},
+    "initial_prompt": null,
+    "max_turns": null,
+    "model": null,
+    "permission_mode": "default",
+    "skills": [],
+    "spawn_targets": null,
+    "spawnable": [
+      "ab-experiment",
+      "data-analysis",
+      "djy-daily-report",
+      "gray-release",
+      "know",
+      "volcano-abtest",
+      "zijian-data-analysis"
+    ],
+    "tools": [
+      "now",
+      "echo",
+      "kyuubi_query",
+      "write_file",
+      "read_file",
+      "list_files",
+      "feishu_publish",
+      "feishu_upload_image",
+      "read_skill",
+      "memory_save",
+      "memory_delete",
+      "task_state_save",
+      "todo_write",
+      "exit_plan_mode",
+      "spawn_subagent",
+      "run_background"
+    ]
+  },
+  "gray-release": {
+    "disallowed_tools": [],
+    "effort": null,
+    "features_default_false": {
+      "exit_plan_mode": true,
+      "run_background": false,
+      "spawn_subagent": true,
+      "todo_write": true
+    },
+    "features_default_true": {
+      "exit_plan_mode": true,
+      "run_background": true,
+      "spawn_subagent": true,
+      "todo_write": true
+    },
+    "hooks": {},
+    "initial_prompt": null,
+    "max_turns": null,
+    "model": null,
+    "permission_mode": "default",
+    "skills": [
+      "kyuubi",
+      "feishu",
+      "nl-python"
+    ],
+    "spawn_targets": [
+      "data-analysis",
+      "ab-experiment",
+      "know"
+    ],
+    "spawnable": [
+      "ab-experiment",
+      "data-analysis",
+      "know"
+    ],
+    "tools": [
+      "now",
+      "kyuubi_query",
+      "execute_python",
+      "write_file",
+      "read_file",
+      "list_files",
+      "feishu_publish",
+      "feishu_upload_image",
+      "read_skill",
+      "read_agent_knowledge",
+      "todo_write",
+      "request_human_input",
+      "exit_plan_mode",
+      "spawn_subagent"
+    ]
+  },
+  "know": {
+    "disallowed_tools": [],
+    "effort": null,
+    "features_default_false": {
+      "exit_plan_mode": true,
+      "run_background": false,
+      "spawn_subagent": false,
+      "todo_write": true
+    },
+    "features_default_true": {
+      "exit_plan_mode": true,
+      "run_background": true,
+      "spawn_subagent": false,
+      "todo_write": true
+    },
+    "hooks": {},
+    "initial_prompt": null,
+    "max_turns": null,
+    "model": null,
+    "permission_mode": "default",
+    "skills": [
+      "feishu"
+    ],
+    "spawn_targets": [],
+    "spawnable": [],
+    "tools": [
+      "now",
+      "execute_python",
+      "write_file",
+      "read_file",
+      "list_files",
+      "feishu_publish",
+      "feishu_upload_image",
+      "read_skill",
+      "todo_write",
+      "request_human_input",
+      "exit_plan_mode"
+    ]
+  },
+  "volcano-abtest": {
+    "disallowed_tools": [],
+    "effort": null,
+    "features_default_false": {
+      "exit_plan_mode": true,
+      "run_background": false,
+      "spawn_subagent": true,
+      "todo_write": true
+    },
+    "features_default_true": {
+      "exit_plan_mode": true,
+      "run_background": true,
+      "spawn_subagent": true,
+      "todo_write": true
+    },
+    "hooks": {},
+    "initial_prompt": null,
+    "max_turns": null,
+    "model": null,
+    "permission_mode": "default",
+    "skills": [
+      "feishu"
+    ],
+    "spawn_targets": [
+      "data-analysis",
+      "wave-attribution",
+      "ab-experiment",
+      "know"
+    ],
+    "spawnable": [
+      "ab-experiment",
+      "data-analysis",
+      "know"
+    ],
+    "tools": [
+      "now",
+      "volcano_abtest_analyze",
+      "write_file",
+      "read_file",
+      "list_files",
+      "feishu_publish",
+      "read_skill",
+      "todo_write",
+      "request_human_input",
+      "exit_plan_mode",
+      "spawn_subagent"
+    ]
+  },
+  "wave-attribution": {
+    "disallowed_tools": [],
+    "effort": null,
+    "features_default_false": {
+      "exit_plan_mode": false,
+      "run_background": false,
+      "spawn_subagent": false,
+      "todo_write": false
+    },
+    "features_default_true": {
+      "exit_plan_mode": true,
+      "run_background": true,
+      "spawn_subagent": true,
+      "todo_write": true
+    },
+    "hooks": {},
+    "initial_prompt": null,
+    "max_turns": null,
+    "model": null,
+    "permission_mode": "default",
+    "skills": [],
+    "spawn_targets": null,
+    "spawnable": [
+      "ab-experiment",
+      "data-analysis",
+      "djy-daily-report",
+      "general",
+      "gray-release",
+      "know",
+      "volcano-abtest",
+      "zijian-data-analysis"
+    ],
+    "tools": null
+  },
+  "zijian-data-analysis": {
+    "disallowed_tools": [],
+    "effort": null,
+    "features_default_false": {
+      "exit_plan_mode": true,
+      "run_background": false,
+      "spawn_subagent": true,
+      "todo_write": true
+    },
+    "features_default_true": {
+      "exit_plan_mode": true,
+      "run_background": true,
+      "spawn_subagent": true,
+      "todo_write": true
+    },
+    "hooks": {},
+    "initial_prompt": null,
+    "max_turns": null,
+    "model": null,
+    "permission_mode": "default",
+    "skills": [
+      "kyuubi",
+      "feishu",
+      "nl-python"
+    ],
+    "spawn_targets": [
+      "ab-experiment",
+      "volcano-abtest",
+      "know",
+      "data-analysis"
+    ],
+    "spawnable": [
+      "ab-experiment",
+      "data-analysis",
+      "know",
+      "volcano-abtest"
+    ],
+    "tools": [
+      "now",
+      "kyuubi_query",
+      "execute_python",
+      "write_file",
+      "read_file",
+      "list_files",
+      "feishu_publish",
+      "feishu_upload_image",
+      "read_skill",
+      "read_agent_knowledge",
+      "todo_write",
+      "request_human_input",
+      "exit_plan_mode",
+      "spawn_subagent"
+    ]
+  }
+}

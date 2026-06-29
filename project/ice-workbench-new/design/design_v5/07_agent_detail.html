@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ICE Workbench v5 · Agent Detail (Moxt Style)</title>
+<script>(function(){var t=localStorage.getItem('ice-v5-theme')||'light';document.documentElement.dataset.theme=t;})();</script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root[data-theme="light"]{
+  --bg:#faf4ed;--surface:#ffffff;--surface-2:#f5efe4;--surface-3:#ece3d3;--paper-deep:#f0e9dc;
+  --border:#e5dcc8;--border-soft:#ede5d2;--border-strong:#d4c8ad;
+  --text:#1a1612;--text-dim:#5b5246;--text-muted:#8a7e69;--text-inv:#faf4ed;
+  --accent:#cc785c;--accent-hover:#b8624a;--accent-soft:#f5e8e2;--accent-text:#8a3a23;
+  --success:#5a7a4f;--success-soft:#e6ede0;
+  --warning:#b07d2a;--warning-soft:#f5ead0;
+  --error:#b54a3a;--error-soft:#f5dfd9;
+  --p-ab:#5e7d6a;--p-ab-soft:#e6ede6;
+  --p-biz:#b86b3a;--p-biz-soft:#f5e3d0;
+  --p-data:#4a7c8b;--p-data-soft:#d8e5ea;
+  --p-wave:#b04f5f;--p-wave-soft:#f0d8dc;
+  --p-gray:#7a6b8e;--p-gray-soft:#ebe5ee;
+  --accent-grad:var(--accent);
+  --accent-shadow:none;
+  --icon-emboss:none;
+  --icon-shadow:0 1px 2px rgba(26,22,18,.06);
+  --shadow-1:0 1px 0 rgba(26,22,18,.04);
+  --shadow-2:0 1px 2px rgba(26,22,18,.06),0 4px 16px rgba(26,22,18,.04);
+  --shadow-3:0 8px 32px rgba(26,22,18,.08);
+  --ring:0 0 0 3px rgba(204,120,92,.20);
+  --canvas:#f0e9dc;
+  --code-bg:#1a1612;--code-text:#f5f0e6;--code-comment:#8c8270;
+}
+:root[data-theme="dark"]{
+  --bg:#1f1d1a;--surface:#2a2723;--surface-2:#322e29;--surface-3:#3d3831;--paper-deep:#262320;
+  --border:#44403a;--border-soft:#322e29;--border-strong:#5a544c;
+  --text:#f5f0e6;--text-dim:#bdb19c;--text-muted:#8c8270;--text-inv:#1a1612;
+  --accent:#e89e83;--accent-hover:#f5b39a;--accent-soft:rgba(232,158,131,.16);--accent-text:#f0b59c;
+  --success:#8aa680;--success-soft:rgba(138,166,128,.14);
+  --warning:#d4a463;--warning-soft:rgba(212,164,99,.14);
+  --error:#d4756a;--error-soft:rgba(212,117,106,.14);
+  --p-ab:#8aa68f;--p-ab-soft:rgba(138,166,143,.14);
+  --p-biz:#d49070;--p-biz-soft:rgba(212,144,112,.14);
+  --p-data:#7aa5b3;--p-data-soft:rgba(122,165,179,.14);
+  --p-wave:#d4868f;--p-wave-soft:rgba(212,134,143,.14);
+  --p-gray:#a895b8;--p-gray-soft:rgba(168,149,184,.14);
+  --accent-grad:linear-gradient(135deg,#e89e83 0%,#f5b39a 100%);
+  --accent-shadow:0 1px 0 rgba(0,0,0,.45),0 4px 14px rgba(232,158,131,.22),inset 0 1px 0 rgba(255,255,255,.18);
+  --icon-emboss:inset 0 1px 0 rgba(255,255,255,.10),inset 0 -1px 0 rgba(0,0,0,.20);
+  --icon-shadow:0 1px 2px rgba(0,0,0,.30);
+  --shadow-1:0 1px 0 rgba(0,0,0,.3);
+  --shadow-2:0 4px 16px rgba(0,0,0,.4),0 1px 2px rgba(0,0,0,.4);
+  --shadow-3:0 16px 48px rgba(0,0,0,.5);
+  --ring:0 0 0 3px rgba(232,158,131,.30);
+  --canvas:#1a1815;
+  --code-bg:#16140f;--code-text:#f5f0e6;--code-comment:#8c8270;
+}
+*{box-sizing:border-box}html,body{margin:0;padding:0}
+body{background:var(--canvas);color:var(--text);
+  font-family:'Inter','PingFang SC',-apple-system,system-ui,sans-serif;
+  font-size:14px;line-height:1.6;letter-spacing:-.003em;
+  -webkit-font-smoothing:antialiased;,'cv11';padding:32px 0}
+.serif{font-family:'Inter',sans-serif;}
+.tnum{font-variant-numeric:tabular-nums}
+
+.outer-bar{max-width:1900px;margin:0 auto 24px;padding:0 32px;display:flex;align-items:center;gap:14px}
+.outer-tag{display:inline-flex;align-items:center;gap:8px;padding:5px 12px;
+  background:var(--accent-soft);color:var(--accent-text);border-radius:12px;font-size:11px;font-weight:500;
+  font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.06em}
+.outer-tag .dot{width:6px;height:6px;border-radius:50%;background:var(--accent)}
+.outer-bar .spacer{flex:1}
+.outer-bar a{color:var(--text-dim);font-size:13px;text-decoration:none;padding:6px 12px;border-radius:12px}
+.outer-bar a:hover{background:var(--surface-2);color:var(--text)}
+.outer-bar button{background:var(--surface);border:1px solid var(--border);color:var(--text);
+  height:36px;padding:0 14px;border-radius:12px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:500;
+  display:inline-flex;align-items:center;gap:6px}
+
+.canvas{max-width:1900px;margin:0 auto;padding:0 32px;
+  display:grid;grid-template-columns:1fr 420px;gap:32px;align-items:flex-start}
+@media (max-width:1500px){.canvas{grid-template-columns:1fr}}
+
+/* browser frame */
+.browser{background:var(--surface);border:1px solid var(--border);border-radius:10px;
+  overflow:hidden;box-shadow:var(--shadow-3)}
+.browser-bar{height:36px;background:var(--surface-2);border-bottom:1px solid var(--border-soft);
+  display:flex;align-items:center;padding:0 14px;gap:8px}
+.browser-dots{display:flex;gap:6px}
+.browser-dots span{width:11px;height:11px;border-radius:50%}
+.browser-dots span:nth-child(1){background:#cc6c5e}
+.browser-dots span:nth-child(2){background:#c4a55a}
+.browser-dots span:nth-child(3){background:#7a9a6e}
+.browser-url{flex:1;text-align:center;font-family:'JetBrains Mono',monospace;font-size:11.5px;
+  color:var(--text-muted);background:var(--surface);padding:5px 12px;border-radius:12px;
+  margin:0 80px;border:1px solid var(--border-soft)}
+.viewport{height:1700px;background:var(--bg);overflow:hidden;display:flex;flex-direction:column}
+
+/* TopNav */
+.appbar{height:54px;background:var(--bg);border-bottom:1px solid var(--border-soft);
+  display:flex;align-items:center;padding:0 24px;gap:14px;flex-shrink:0}
+.appbar .brand-mark{width:28px;height:28px;border-radius:12px;background:var(--accent-grad);
+  display:grid;place-items:center;color:#faf4ed;font-weight:600;font-size:13px;
+  font-family:'Inter',sans-serif;
+  box-shadow:var(--accent-shadow)}
+.crumb{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--text-dim);font-weight:500}
+.crumb a{color:var(--text-dim);text-decoration:none}
+.crumb a:hover{color:var(--text)}
+.crumb .sep{color:var(--text-muted);font-family:'JetBrains Mono',monospace;font-size:12px}
+.crumb .current{color:var(--text)}
+.appbar .spacer{flex:1}
+.icon-btn{width:34px;height:34px;border-radius:12px;display:grid;place-items:center;cursor:pointer;
+  color:var(--text-dim);border:none;background:transparent;font-size:14px}
+.icon-btn:hover{background:var(--surface-2);color:var(--text)}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--accent-grad);
+  display:grid;place-items:center;color:#faf4ed;font-weight:500;font-size:12px;
+  font-family:'Inter',sans-serif;
+  box-shadow:var(--accent-shadow)}
+
+/* main */
+.ad-main{max-width:1080px;margin:0 auto;padding:48px 32px 80px;width:100%;flex:1;overflow-y:auto;
+  display:flex;flex-direction:column;gap:36px}
+
+/* ===== Hero ===== */
+.ad-hero{display:grid;grid-template-columns:auto 1fr auto;gap:32px;align-items:center;
+  padding-bottom:36px;border-bottom:1px solid var(--border-soft)}
+.ad-icon{width:96px;height:96px;border-radius:20px;background:var(--p-ab-soft);color:var(--p-ab);
+  display:grid;place-items:center;font-size:48px;flex-shrink:0;
+  box-shadow:var(--icon-emboss),var(--icon-shadow)}
+.ad-meta-tag{display:inline-flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;
+  font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;
+  font-weight:500;margin-bottom:14px}
+.ad-meta-tag::before{content:"";width:24px;height:1px;background:var(--accent)}
+.ad-meta-tag .v{color:var(--accent)}
+.ad-h1{font-family:'Inter',sans-serif;font-size:44px;font-weight:500;letter-spacing:-.03em;line-height:1.05;
+  margin:0 0 12px;font-variation-settings:'opsz' 144,'wght' 500}
+.ad-desc{font-size:15.5px;color:var(--text-dim);line-height:1.55;margin:0;max-width:560px}
+.ad-cta-col{display:flex;flex-direction:column;gap:10px;flex-shrink:0}
+.btn{display:inline-flex;align-items:center;gap:6px;font-family:inherit;font-size:14px;font-weight:500;
+  padding:0 18px;height:42px;border-radius:12px;border:1px solid transparent;cursor:pointer;
+  transition:all .15s;letter-spacing:-.005em;white-space:nowrap;text-decoration:none}
+.btn-primary{background:var(--accent-grad);color:#faf4ed;box-shadow:var(--accent-shadow)}
+.btn-primary:hover{background:linear-gradient(135deg,#b8624a 0%,#cc785c 100%)}
+.btn-secondary{background:var(--surface);color:var(--text);border-color:var(--border);box-shadow:var(--shadow-1)}
+.btn-secondary:hover{background:var(--surface-2);border-color:var(--border-strong)}
+.btn-sm{height:34px;padding:0 14px;font-size:13px;border-radius:12px}
+.btn-ghost{background:transparent;color:var(--text-dim);border-color:transparent}
+.btn-ghost:hover{background:var(--surface-2);color:var(--text)}
+
+/* ===== Stat row ===== */
+.ad-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:0;
+  border:1px solid var(--border-soft);border-radius:10px;background:var(--surface);box-shadow:var(--shadow-1);overflow:hidden}
+.ad-stat{padding:20px 22px;border-right:1px solid var(--border-soft)}
+.ad-stat:last-child{border-right:none}
+.ad-stat .l{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--text-muted);
+  font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+.ad-stat .v{font-family:'Inter',sans-serif;font-size:30px;font-weight:500;letter-spacing:-.025em;line-height:1;
+  font-variant-numeric:tabular-nums}
+.ad-stat .v small{font-size:14px;color:var(--text-muted);margin-left:3px;font-weight:500}
+.ad-stat .d{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--success);font-weight:500;margin-top:4px;
+  font-variant-numeric:tabular-nums}
+.ad-stat .d.down{color:var(--error)}
+.ad-stat .d::before{content:"↗ ";display:inline-block}
+.ad-stat .d.down::before{content:"↘ "}
+
+/* ===== Section ===== */
+.ad-section{display:flex;flex-direction:column;gap:14px}
+.ad-section-h{display:flex;align-items:flex-end;justify-content:space-between;
+  border-bottom:1px solid var(--border-soft);padding-bottom:14px;margin-bottom:8px}
+.ad-section-h .titles{display:flex;flex-direction:column;gap:4px}
+.ad-section-h h2{font-family:'Inter',sans-serif;font-size:24px;font-weight:500;letter-spacing:-.02em;
+  margin:0;line-height:1.15}
+.ad-section-h .sub{font-size:13.5px;color:var(--text-dim);margin:0;line-height:1.5}
+.ad-section-h .num{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);
+  text-transform:uppercase;letter-spacing:.08em;font-weight:500}
+
+/* skills row */
+.skill-row{display:flex;flex-wrap:wrap;gap:8px}
+.skill-pill{display:inline-flex;align-items:center;gap:6px;background:var(--surface);
+  border:1px solid var(--border-soft);padding:6px 12px 6px 8px;border-radius:12px;font-size:12.5px;
+  color:var(--text);transition:all .12s}
+.skill-pill:hover{border-color:var(--accent)}
+.skill-pill .ic{width:22px;height:22px;border-radius:12px;background:var(--accent-soft);color:var(--accent);
+  display:grid;place-items:center;font-size:11px;
+  box-shadow:var(--icon-emboss),var(--icon-shadow)}
+.skill-pill .name{font-weight:500;letter-spacing:-.005em}
+.skill-pill .cat{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--text-muted);
+  text-transform:uppercase;letter-spacing:.06em;margin-left:4px}
+.skill-pill.sql .ic{background:var(--p-data-soft);color:var(--p-data)}
+.skill-pill.fs .ic{background:var(--p-biz-soft);color:var(--p-biz)}
+.skill-pill.api .ic{background:var(--p-gray-soft);color:var(--p-gray)}
+.skill-pill.doc .ic{background:var(--p-wave-soft);color:var(--p-wave)}
+
+/* prompt block · 暖墨深色 */
+.prompt-frame{background:var(--code-bg);color:var(--code-text);border-radius:10px;
+  border:1px solid var(--border);overflow:hidden}
+.prompt-toolbar{display:flex;align-items:center;gap:8px;padding:10px 14px;
+  background:rgba(255,255,255,.03);border-bottom:1px solid rgba(255,255,255,.06)}
+.prompt-toolbar .file{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:#bdb19c}
+.prompt-toolbar .v{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--code-comment);
+  text-transform:uppercase;letter-spacing:.06em;background:rgba(255,255,255,.06);padding:2px 7px;border-radius:3px}
+.prompt-toolbar .actions{margin-left:auto;display:flex;gap:6px}
+.prompt-toolbar button{height:26px;padding:0 10px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);
+  color:#bdb19c;font-family:inherit;font-size:11.5px;border-radius:12px;cursor:pointer;
+  display:inline-flex;align-items:center;gap:4px}
+.prompt-toolbar button:hover{background:rgba(255,255,255,.1);color:var(--code-text)}
+.prompt-toolbar button.btn-edit{background:var(--accent);color:#faf4ed;border-color:transparent}
+.prompt-body{padding:16px 18px;font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.7;
+  color:#cec6b1;max-height:340px;overflow-y:auto}
+.prompt-body .lineno{display:inline-block;width:32px;text-align:right;margin-right:14px;color:var(--code-comment);user-select:none}
+.prompt-body .h{color:#e89e83;font-weight:500}
+.prompt-body .c{color:var(--code-comment);font-style:italic}
+.prompt-body .k{color:#e89e83}
+
+/* admin edit textarea */
+.prompt-edit-box{background:var(--code-bg);color:var(--code-text);border-radius:10px;
+  border:1px solid var(--border);overflow:hidden}
+.prompt-edit-box textarea{width:100%;background:var(--code-bg);color:var(--code-text);border:none;outline:none;
+  font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.7;padding:14px 18px;resize:vertical;min-height:200px}
+.prompt-edit-actions{display:flex;align-items:center;gap:10px;margin-top:12px}
+.prompt-edit-actions input{flex:1;height:36px;padding:0 12px;border:1px solid var(--border);
+  background:var(--surface);color:var(--text);font-family:inherit;font-size:13px;border-radius:12px;outline:none}
+.prompt-edit-actions input:focus{border-color:var(--accent);box-shadow:var(--ring)}
+
+/* version history */
+.history-tbl{width:100%;border-collapse:collapse;background:var(--surface);
+  border:1px solid var(--border-soft);border-radius:10px;overflow:hidden;font-size:13px;box-shadow:var(--shadow-1)}
+.history-tbl thead th{background:var(--surface-2);text-align:left;padding:10px 16px;
+  font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:600;color:var(--text-muted);
+  text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--border-soft)}
+.history-tbl tbody td{padding:12px 16px;border-bottom:1px solid var(--border-soft);vertical-align:middle}
+.history-tbl tbody tr:last-child td{border-bottom:none}
+.history-tbl tbody tr:hover{background:var(--surface-2)}
+.h-time{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--text-dim);font-variant-numeric:tabular-nums}
+.h-version{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);font-weight:600;
+  background:var(--accent-soft);padding:2px 8px;border-radius:3px;text-transform:uppercase;letter-spacing:.06em;
+  display:inline-block}
+.h-author{font-weight:500}
+.h-note{color:var(--text-dim);font-size:13px;line-height:1.5}
+.h-actions{display:flex;gap:6px;justify-content:flex-end}
+.h-actions button{height:28px;padding:0 10px;background:transparent;border:1px solid var(--border);
+  color:var(--text-dim);font-family:inherit;font-size:11.5px;border-radius:12px;cursor:pointer}
+.h-actions button:hover{background:var(--surface-2);color:var(--text);border-color:var(--border-strong)}
+.h-actions button.danger:hover{color:var(--error);border-color:var(--error)}
+
+/* test sandbox */
+.test-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;background:var(--surface);
+  border:1px solid var(--border-soft);border-radius:10px;padding:18px;box-shadow:var(--shadow-1)}
+.test-pane{display:flex;flex-direction:column;gap:8px}
+.test-pane-h{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--text-muted);
+  font-weight:600;text-transform:uppercase;letter-spacing:.08em;display:flex;align-items:center;gap:8px}
+.test-pane-h::before{content:"";width:14px;height:1px;background:var(--accent)}
+.test-pane-h .ms{margin-left:auto;color:var(--success);text-transform:none;letter-spacing:0}
+.test-pane textarea{height:160px;padding:12px 14px;border:1px solid var(--border);background:var(--surface);
+  color:var(--text);font-family:'Inter',sans-serif;font-size:13.5px;border-radius:12px;outline:none;resize:vertical;
+  line-height:1.55}
+.test-pane textarea:focus{border-color:var(--accent);box-shadow:var(--ring)}
+.test-output{height:160px;background:var(--code-bg);color:#cec6b1;
+  padding:12px 14px;font-family:'JetBrains Mono',monospace;font-size:12.5px;border-radius:12px;line-height:1.7;
+  overflow-y:auto;border:1px solid var(--border)}
+.test-output .h{color:#e89e83;font-weight:500}
+.test-output strong{color:var(--code-text);font-weight:600}
+.test-output .c{color:var(--code-comment);font-style:italic}
+.test-actions{display:flex;align-items:center;gap:8px;margin-top:10px;padding-top:14px;border-top:1px solid var(--border-soft)}
+.test-actions .ml{margin-left:auto}
+
+/* ===== Phone preview ===== */
+.phone-wrap{background:var(--surface);border:1px solid var(--border);border-radius:10px;
+  box-shadow:var(--shadow-3);padding:32px 28px 36px;text-align:center;position:sticky;top:24px}
+.phone-tag{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;
+  background:var(--accent-soft);color:var(--accent-text);border-radius:12px;font-size:10.5px;font-weight:500;
+  letter-spacing:.06em;margin-bottom:8px;font-family:'JetBrains Mono',monospace;text-transform:uppercase}
+.phone-name{font-family:'Inter',sans-serif;font-size:18px;font-weight:600;letter-spacing:-.015em;margin-bottom:4px;
+  font-variation-settings:'opsz' 144}
+.phone-meta{font-size:12px;color:var(--text-muted);margin-bottom:18px;font-family:'JetBrains Mono',monospace}
+.phone{width:360px;height:760px;background:#1a1612;border-radius:42px;padding:10px;
+  box-shadow:0 24px 64px rgba(26,22,18,.3);position:relative;margin:0 auto}
+.phone-screen{width:100%;height:100%;background:var(--bg);border-radius:32px;overflow:hidden;
+  position:relative;display:flex;flex-direction:column}
+.phone-notch{position:absolute;top:14px;left:50%;transform:translateX(-50%);
+  width:104px;height:28px;background:#000;border-radius:99px;z-index:10}
+
+.p-top{padding:50px 14px 12px;display:flex;align-items:center;gap:8px;flex-shrink:0;
+  background:var(--bg);border-bottom:1px solid var(--border-soft)}
+.p-top .brand-mark{width:24px;height:24px;border-radius:12px;font-size:11px;
+  background:var(--accent-grad);display:grid;place-items:center;color:#faf4ed;font-weight:600;
+  font-family:'Inter',sans-serif;
+  box-shadow:var(--accent-shadow);flex-shrink:0}
+.p-crumb{flex:1;font-size:12.5px;color:var(--text-dim);font-weight:500;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.p-crumb .current{color:var(--text)}
+
+.p-content{flex:1;overflow-y:auto;padding:24px 16px 100px}
+
+/* phone hero - profile 风 */
+.p-hero{display:flex;flex-direction:column;align-items:center;text-align:center;
+  padding-bottom:24px;border-bottom:1px solid var(--border-soft);margin-bottom:18px}
+.p-icon{width:80px;height:80px;border-radius:20px;background:var(--p-ab-soft);color:var(--p-ab);
+  display:grid;place-items:center;font-size:42px;margin-bottom:14px;
+  box-shadow:var(--icon-emboss),var(--icon-shadow)}
+.p-tag{display:inline-flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;
+  font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;font-weight:500;margin-bottom:10px}
+.p-h1{font-family:'Inter',sans-serif;font-size:24px;font-weight:500;letter-spacing:-.025em;line-height:1.1;
+  margin:0 0 8px;font-variation-settings:'opsz' 144}
+.p-desc{font-size:13px;color:var(--text-dim);line-height:1.55;margin:0 0 16px;max-width:280px}
+
+.p-stats{display:grid;grid-template-columns:repeat(2,1fr);width:100%;border:1px solid var(--border-soft);
+  border-radius:12px;background:var(--surface);overflow:hidden;box-shadow:var(--shadow-1);margin-bottom:18px}
+.p-stat{padding:10px 12px;border-right:1px solid var(--border-soft)}
+.p-stat:nth-child(2n){border-right:none}
+.p-stat:nth-child(n+3){border-top:1px solid var(--border-soft)}
+.p-stat .l{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.p-stat .v{font-family:'Inter',sans-serif;font-size:18px;font-weight:500;letter-spacing:-.02em;line-height:1;font-variant-numeric:tabular-nums}
+
+.p-h2{font-family:'Inter',sans-serif;font-size:18px;font-weight:500;letter-spacing:-.015em;margin:24px 0 10px;
+  font-variation-settings:'opsz' 144}
+.p-skill-row{display:flex;flex-wrap:wrap;gap:6px}
+.p-skill-row .skill-pill{font-size:11.5px;padding:5px 10px 5px 7px}
+.p-skill-row .skill-pill .ic{width:18px;height:18px;font-size:10px}
+
+.p-prompt{background:var(--code-bg);color:var(--code-text);border-radius:12px;
+  border:1px solid var(--border);overflow:hidden;font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.6}
+.p-prompt-h{padding:8px 12px;background:rgba(255,255,255,.03);border-bottom:1px solid rgba(255,255,255,.06);
+  display:flex;align-items:center;gap:6px;font-size:10.5px;color:#bdb19c}
+.p-prompt-b{padding:10px 12px;color:#cec6b1;max-height:140px;overflow-y:auto}
+.p-prompt-b .h{color:#e89e83}
+
+/* sticky CTA */
+.p-cta{position:sticky;bottom:0;background:var(--bg);border-top:1px solid var(--border-soft);
+  padding:12px 14px;margin:0 -16px -100px}
+.p-cta button{width:100%;height:46px;background:var(--accent-grad);color:#faf4ed;border:none;border-radius:10px;
+  font-family:inherit;font-size:14.5px;font-weight:500;cursor:pointer;box-shadow:var(--accent-shadow)}
+
+/* spec footer */
+.spec{max-width:1900px;margin:32px auto 0;padding:0 32px}
+.spec-card{background:var(--surface);border:1px solid var(--border-soft);border-radius:10px;
+  padding:24px 28px;box-shadow:var(--shadow-1)}
+.spec-card h3{font-family:'Inter',sans-serif;font-size:18px;font-weight:600;margin:0 0 10px;letter-spacing:-.015em;
+  font-variation-settings:'opsz' 144}
+.spec-card ul{margin:0;padding-left:20px;font-size:13.5px;color:var(--text-dim);line-height:1.85}
+.spec-card code{background:var(--surface-2);padding:1px 6px;border-radius:12px;
+  font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--accent-text);
+  border:1px solid var(--border-soft)}
+.spec-card b{color:var(--text);font-weight:600}
+</style>
+</head>
+<body>
+
+<div class="outer-bar">
+  <span class="outer-tag"><span class="dot"></span>v5 · Agent Detail · 桌面 + 手机</span>
+  <span style="color:var(--text-muted);font-size:13px;font-family:'JetBrains Mono',monospace">基于 [AgentDetailPage.tsx](../frontend/src/pages/agent_detail/AgentDetailPage.tsx)</span>
+  <div class="spacer"></div>
+  <a href="06_create_task.html">← Create</a>
+  <a href="08_scheduled.html">Scheduled →</a>
+  <button onclick="toggleTheme()">
+    <span class="t-light">🌙 暗夜</span><span class="t-dark" style="display:none">☀️ 日间</span>
+  </button>
+</div>
+
+<script>
+function toggleTheme(){
+  var cur=document.documentElement.dataset.theme||'light';
+  var next=cur==='light'?'dark':'light';
+  document.documentElement.dataset.theme=next;
+  localStorage.setItem('ice-v5-theme',next);
+  document.querySelectorAll('.t-light').forEach(e=>e.style.display=next==='light'?'inline':'none');
+  document.querySelectorAll('.t-dark').forEach(e=>e.style.display=next==='dark'?'inline':'none');
+}
+(function(){if(document.documentElement.dataset.theme==='dark'){
+  document.querySelectorAll('.t-light').forEach(e=>e.style.display='none');
+  document.querySelectorAll('.t-dark').forEach(e=>e.style.display='inline');
+}})();
+</script>
+
+<div class="canvas">
+
+  <!-- ===== Desktop ===== -->
+  <div class="browser">
+    <div class="browser-bar">
+      <div class="browser-dots"><span></span><span></span><span></span></div>
+      <div class="browser-url">ice.workbench.local / agent / ab-experiment</div>
+    </div>
+    <div class="viewport">
+
+      <header class="appbar">
+        <div class="brand-mark">i</div>
+        <div class="crumb">
+          <a href="01_dashboard.html">Dashboard</a>
+          <span class="sep">/</span>
+          <a href="#">Agent</a>
+          <span class="sep">/</span>
+          <span class="current">AB 实验</span>
+        </div>
+        <div class="spacer"></div>
+        <button class="icon-btn" onclick="toggleTheme()" title="切换主题">
+          <span class="t-light">🌙</span><span class="t-dark" style="display:none">☀️</span>
+        </button>
+        <button class="icon-btn">🔔</button>
+        <div class="avatar">GY</div>
+      </header>
+
+      <main class="ad-main">
+
+        <!-- Hero -->
+        <section class="ad-hero">
+          <div class="ad-icon">🧪</div>
+          <div>
+            <div class="ad-meta-tag">PARADIGM · <span class="v">AB</span> · v1.4.2 · ADMIN-ONLY</div>
+            <h1 class="ad-h1 serif">AB 实验 Agent</h1>
+            <p class="ad-desc">用于 AB 实验全流程的智能助手 —— 实验设计 / 显著性检验（z / t）/ 样本均衡校验 / 效应量评估 / ARPU 复盘 / 自动出飞书报告。</p>
+          </div>
+          <div class="ad-cta-col">
+            <a class="btn btn-primary" href="06_create_task.html">＋ 用此 Agent 创建任务</a>
+            <button class="btn btn-secondary btn-sm">🔧 编辑 Prompt</button>
+          </div>
+        </section>
+
+        <!-- 4 Stats -->
+        <section class="ad-stats">
+          <div class="ad-stat">
+            <div class="l">总调用</div>
+            <div class="v tnum">8,294</div>
+            <div class="d tnum">12.4% 本月</div>
+          </div>
+          <div class="ad-stat">
+            <div class="l">活跃任务</div>
+            <div class="v tnum">42</div>
+            <div class="d tnum">6 本周</div>
+          </div>
+          <div class="ad-stat">
+            <div class="l">P95 延时</div>
+            <div class="v tnum">412<small>ms</small></div>
+            <div class="d down tnum">8ms</div>
+          </div>
+          <div class="ad-stat">
+            <div class="l">用户评分</div>
+            <div class="v tnum">4.7<small>/ 5</small></div>
+            <div class="d tnum">142 评价</div>
+          </div>
+        </section>
+
+        <!-- 能力 · skill list -->
+        <section class="ad-section">
+          <div class="ad-section-h">
+            <div class="titles">
+              <h2 class="serif">能力</h2>
+              <p class="sub">该 Agent 在对话中可调用以下 Skills（5 轮上限）。</p>
+            </div>
+            <span class="num">SKILLS · 6</span>
+          </div>
+          <div class="skill-row">
+            <span class="skill-pill sql"><span class="ic">🗃</span><span class="name">kyuubi_query</span><span class="cat">SQL</span></span>
+            <span class="skill-pill"><span class="ic">⏰</span><span class="name">now</span><span class="cat">UTIL</span></span>
+            <span class="skill-pill"><span class="ic">📢</span><span class="name">echo</span><span class="cat">UTIL</span></span>
+            <span class="skill-pill fs"><span class="ic">📁</span><span class="name">write_file</span><span class="cat">FS</span></span>
+            <span class="skill-pill api"><span class="ic">🐍</span><span class="name">execute_python</span><span class="cat">SANDBOX</span></span>
+            <span class="skill-pill doc"><span class="ic">📤</span><span class="name">feishu_publish</span><span class="cat">DOC</span></span>
+          </div>
+        </section>
+
+        <!-- System Prompt · 暖墨深色块 -->
+        <section class="ad-section">
+          <div class="ad-section-h">
+            <div class="titles">
+              <h2 class="serif">System Prompt</h2>
+              <p class="sub">Agent 的核心指令，<b>仅 admin 可编辑</b>。修改会版本化保存。</p>
+            </div>
+            <span class="num">v1.4.2 · 287 LINES</span>
+          </div>
+          <div class="prompt-frame">
+            <div class="prompt-toolbar">
+              <span class="file">prompt/system.md</span>
+              <span class="v">CURRENT</span>
+              <div class="actions">
+                <button>📋 复制</button>
+                <button>⤓ 下载</button>
+                <button class="btn-edit">✏ 编辑</button>
+              </div>
+            </div>
+            <div class="prompt-body">
+<span class="lineno">1</span><span class="h"># AB 实验 Agent · System Prompt</span>
+<span class="lineno">2</span>
+<span class="lineno">3</span><span class="c">## 角色定位</span>
+<span class="lineno">4</span>你是 AB 实验领域的资深数据科学家。你的目标是帮助产品 / 运营团队从假设到结论
+<span class="lineno">5</span>完成一次完整的实验复盘 —— 包括样本均衡校验、显著性检验、效应量计算、ARPU
+<span class="lineno">6</span>影响评估，最终输出一份可以发周会的 markdown 报告。
+<span class="lineno">7</span>
+<span class="lineno">8</span><span class="c">## 工作流</span>
+<span class="lineno">9</span><span class="k">1.</span> 接到用户问题后，先确认实验配置：实验组 / 对照组 / 流量分桶 / 时间窗
+<span class="lineno">10</span><span class="k">2.</span> 用 <span class="h">kyuubi_query</span> 从 dwd_*_ab 表查实验数据
+<span class="lineno">11</span><span class="k">3.</span> 用 <span class="h">execute_python</span> 跑 z / t 检验（statsmodels），得到 p 值与置信区间
+<span class="lineno">12</span><span class="k">4.</span> 校验样本均衡（PSM / propensity），如果失衡则警告
+<span class="lineno">13</span><span class="k">5.</span> 计算 lift % + 效应量 + ARPU 影响
+<span class="lineno">14</span><span class="k">6.</span> 输出 markdown 报告，含：结论 / 显著性 / 数据 / 建议下一步
+<span class="lineno">15</span>
+<span class="lineno">16</span><span class="c">## 风格</span>
+<span class="lineno">17</span>克制 / 量化 / 不夸大。所有结论必须有 p 值或置信区间支撑。<span class="c"># ... 287 行省略</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- 版本历史 -->
+        <section class="ad-section">
+          <div class="ad-section-h">
+            <div class="titles">
+              <h2 class="serif">📜 版本历史</h2>
+              <p class="sub">最近 12 个版本快照，可点击预览或回滚。</p>
+            </div>
+            <span class="num">12 SNAPSHOTS</span>
+          </div>
+          <table class="history-tbl">
+            <thead>
+              <tr>
+                <th style="width:160px">时间</th>
+                <th style="width:80px">版本</th>
+                <th style="width:120px">变更人</th>
+                <th>变更说明</th>
+                <th style="width:160px;text-align:right">操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="h-time">2026-05-26 14:32</span></td>
+                <td><span class="h-version">v1.4.2</span></td>
+                <td><span class="h-author">admin</span></td>
+                <td><span class="h-note">补充样本均衡 PSM 检查；调整 ARPU 复盘措辞</span></td>
+                <td><div class="h-actions"><button>预览</button><button>对比</button></div></td>
+              </tr>
+              <tr>
+                <td><span class="h-time">2026-05-21 09:18</span></td>
+                <td><span class="h-version">v1.4.1</span></td>
+                <td><span class="h-author">gongyunhe</span></td>
+                <td><span class="h-note">修正 statsmodels 调用方式（双比例 z 检验）</span></td>
+                <td><div class="h-actions"><button>预览</button><button class="danger">↩ 回滚</button></div></td>
+              </tr>
+              <tr>
+                <td><span class="h-time">2026-05-15 16:42</span></td>
+                <td><span class="h-version">v1.4.0</span></td>
+                <td><span class="h-author">admin</span></td>
+                <td><span class="h-note">引入 effect-size + 95% CI 输出，原 p 值单值方案弃用</span></td>
+                <td><div class="h-actions"><button>预览</button><button class="danger">↩ 回滚</button></div></td>
+              </tr>
+              <tr>
+                <td><span class="h-time">2026-04-30 11:05</span></td>
+                <td><span class="h-version">v1.3.0</span></td>
+                <td><span class="h-author">zhanghao</span></td>
+                <td><span class="h-note">小流量实验先看 95% CI（来自经验卡片）</span></td>
+                <td><div class="h-actions"><button>预览</button><button class="danger">↩ 回滚</button></div></td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <!-- 测试沙盒 -->
+        <section class="ad-section">
+          <div class="ad-section-h">
+            <div class="titles">
+              <h2 class="serif">🧪 测试沙盒</h2>
+              <p class="sub">用上方编辑中的 Prompt 试跑 —— <b>不入对话历史，不计入用量</b>。</p>
+            </div>
+            <span class="num">SANDBOX · ISOLATED</span>
+          </div>
+          <div class="test-grid">
+            <div class="test-pane">
+              <div class="test-pane-h">INPUT · USER</div>
+              <textarea>v2.3 vs v2.2 留存对比，样本均衡了吗？显著性怎么样？</textarea>
+            </div>
+            <div class="test-pane">
+              <div class="test-pane-h">OUTPUT · AGENT <span class="ms">1.8s · 412 ms p95</span></div>
+              <div class="test-output">
+<span class="h">## 结论</span>
+v2.3 vs v2.2：D7 留存提升 <strong>+5.6 pp</strong>（<span class="c">CI 95%: [3.2, 8.0]</span>）。
+
+<span class="h">### 数据</span>
+- 实验组 (v2.3) 样本：192,034
+- 对照组 (v2.2) 样本：187,432
+- 流量分桶比：49.7 / 50.3（<strong>均衡</strong>）
+
+<span class="h">### 显著性</span>
+- z = 4.21
+- <strong>p &lt; 0.0001</strong>
+- 效应量 (Cohen's h) = 0.124（小到中等效应）
+
+<span class="h">### 建议</span>
+推全。但建议先观察 D14 / D30 留存是否同样有正向。
+              </div>
+            </div>
+          </div>
+          <div class="test-actions">
+            <button class="btn btn-secondary btn-sm">🔁 重置</button>
+            <button class="btn btn-ghost btn-sm">📋 复制输出</button>
+            <span class="ml" style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em">SANDBOX · CLAUDE-OPUS-4.7</span>
+            <button class="btn btn-primary btn-sm">▶ 试跑</button>
+          </div>
+        </section>
+
+      </main>
+
+    </div>
+  </div>
+
+  <!-- ===== Phone ===== -->
+  <div class="phone-wrap">
+    <div class="phone-tag"><span style="width:6px;height:6px;border-radius:50%;background:var(--accent)"></span>iPhone 14 Pro · 390 × 844</div>
+    <div class="phone-name">Agent Detail · 移动版</div>
+    <div class="phone-meta">/ agent / ab-experiment</div>
+
+    <div class="phone">
+      <div class="phone-notch"></div>
+      <div class="phone-screen">
+
+        <div class="p-top">
+          <div class="brand-mark">i</div>
+          <div class="p-crumb"><span style="color:var(--text-muted)">Agent /</span> <span class="current">AB 实验</span></div>
+          <button class="icon-btn" style="width:30px;height:30px">⋯</button>
+        </div>
+
+        <div class="p-content">
+
+          <div class="p-hero">
+            <div class="p-icon">🧪</div>
+            <div class="p-tag">PARADIGM · AB · v1.4.2</div>
+            <h1 class="p-h1 serif">AB 实验 Agent</h1>
+            <p class="p-desc">实验设计 / 显著性检验 / 样本均衡 / ARPU 复盘 / 自动出飞书报告。</p>
+          </div>
+
+          <div class="p-stats">
+            <div class="p-stat"><div class="l">总调用</div><div class="v tnum">8,294</div></div>
+            <div class="p-stat"><div class="l">活跃任务</div><div class="v tnum">42</div></div>
+            <div class="p-stat"><div class="l">P95</div><div class="v tnum">412 ms</div></div>
+            <div class="p-stat"><div class="l">评分</div><div class="v tnum">4.7</div></div>
+          </div>
+
+          <h2 class="p-h2 serif">能力</h2>
+          <div class="p-skill-row">
+            <span class="skill-pill sql"><span class="ic">🗃</span><span class="name">kyuubi_query</span></span>
+            <span class="skill-pill"><span class="ic">⏰</span><span class="name">now</span></span>
+            <span class="skill-pill fs"><span class="ic">📁</span><span class="name">write_file</span></span>
+            <span class="skill-pill api"><span class="ic">🐍</span><span class="name">execute_python</span></span>
+            <span class="skill-pill doc"><span class="ic">📤</span><span class="name">feishu_publish</span></span>
+          </div>
+
+          <h2 class="p-h2 serif">System Prompt</h2>
+          <div class="p-prompt">
+            <div class="p-prompt-h">
+              <span>📋 prompt/system.md</span>
+              <span style="margin-left:auto;background:rgba(255,255,255,.06);padding:1px 5px;border-radius:2px;font-size:9.5px">CURRENT</span>
+            </div>
+            <div class="p-prompt-b">
+<span class="h"># AB 实验 Agent</span>
+
+你是 AB 实验领域的资深数据科学家。目标是帮助产品 / 运营团队从假设到结论完成一次完整的实验复盘…
+
+## 工作流
+1. 接到用户问题后，确认实验配置
+2. 用 kyuubi_query 查实验数据…
+            </div>
+          </div>
+
+          <h2 class="p-h2 serif">📜 版本历史</h2>
+          <div style="background:var(--surface);border:1px solid var(--border-soft);border-radius:12px;padding:12px 14px;margin-bottom:8px;box-shadow:var(--shadow-1)">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+              <span class="h-version" style="font-size:10px;padding:1px 6px">v1.4.2</span>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-muted)">2026-05-26 14:32</span>
+            </div>
+            <div style="font-size:12.5px;color:var(--text-dim);line-height:1.5">补充样本均衡 PSM 检查；调整 ARPU 复盘措辞 · admin</div>
+          </div>
+          <div style="background:var(--surface);border:1px solid var(--border-soft);border-radius:12px;padding:12px 14px;margin-bottom:8px;box-shadow:var(--shadow-1)">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+              <span class="h-version" style="font-size:10px;padding:1px 6px;background:var(--surface-2);color:var(--text-muted)">v1.4.1</span>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-muted)">2026-05-21 09:18</span>
+            </div>
+            <div style="font-size:12.5px;color:var(--text-dim);line-height:1.5">修正 statsmodels 调用方式 · gongyunhe</div>
+          </div>
+
+          <div class="p-cta">
+            <button>＋ 用此 Agent 创建任务</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="spec">
+  <div class="spec-card">
+    <h3 class="serif">📐 这张稿的布局重设计</h3>
+    <ul>
+      <li><b>原版</b>：max-width 980 单栏，header 60px icon + 单行 h1 + paradigm meta + 描述 + 右侧"+创建任务"按钮 / 4 段 ad-section（能力 / Prompt / 版本历史 / 测试沙盒）</li>
+      <li><b>v5</b>：max-width 1080，加入<b>更印刷感的 Hero</b>（96px icon 大圆角块 + Mono 大写 PARADIGM tag + 44px Inter  H1 + 副本 + 右侧 CTA 列）+ <b>4 stat 卡条</b>（调用 / 活跃任务 / P95 / 评分，等宽 grid 用 1px border 分隔，数字用 Inter 30px tnum）</li>
+      <li><b>能力 Section</b>：Skills 改成 <b>带 ico 的 pill</b>（22px 内嵌高光 icon + 名字 + Mono cat 标识 SQL/UTIL/FS/SANDBOX/DOC），不同 cat 用范式色背景</li>
+      <li><b>System Prompt</b>：升级为<b>暖墨深色代码块</b>（学 Claude Code / Anthropic 文档站）。toolbar：文件名 + version chip（CURRENT）+ 复制 / 下载 / 编辑（铜橙）按钮。body：行号 + 简化语法高亮（# 标题、## 注释、数字 / 关键词）</li>
+      <li><b>版本历史</b>：从原版 list rows 改成<b>表格</b>（5 列：时间 / 版本 / 变更人 / 说明 / 操作），表头 Mono 大写，version chip 当前版用铜橙 soft，回滚按钮 hover 错色 (.danger)</li>
+      <li><b>测试沙盒</b>：<b>左右分栏</b>（INPUT / OUTPUT），左 textarea 普通输入，右 OUTPUT 用<b>暖墨终端块</b>显示 Agent 输出（含 markdown 格式、p 值、置信区间），右上耗时 mono 字。底部 actions：重置 / 复制 / Mono 大写「SANDBOX · CLAUDE-OPUS-4.7」+ 试跑铜橙按钮</li>
+      <li><b>Section 头</b>：左 Inter H2 + 副标 / 右 Mono 大写计数（如 SKILLS · 6 / v1.4.2 · 287 LINES / 12 SNAPSHOTS / SANDBOX · ISOLATED）</li>
+      <li><b>移动端</b>：Profile 风 Hero（80px icon 居中 + 衬线居中标题 + 居中描述）+ 2×2 stats 网格 + skill chip 横滚 + 暖墨 prompt 折叠预览 + 版本历史紧凑卡 + sticky CTA「+ 用此 Agent 创建任务」</li>
+    </ul>
+
+    <h3 class="serif" style="margin-top:24px">和 v4 / 当前实现的差异</h3>
+    <ul>
+      <li>Hero icon：60×60 圆角 12 → <b>96×96 圆角 20 + 内嵌高光</b>（更大 / 更立体）</li>
+      <li>Hero 字号：22px → <b>44px Inter </b></li>
+      <li>新增 4 stat 卡条（调用 / 任务 / P95 / 评分）—— 原版没有数据维度</li>
+      <li>Skills：纯 chip 文字 → <b>icon + name + cat 标识 pill</b>（更具识别性）</li>
+      <li>Prompt 区：surface-2 浅色 textarea → <b>暖墨深色块（含工具栏 + 行号 + 语法高亮）</b></li>
+      <li>版本历史：list rows → <b>表格（5 列含 version chip）</b></li>
+      <li>测试沙盒：单 textarea + 输出 → <b>左右分栏 + 输出用暖墨终端块</b></li>
+      <li>Section 头：单行 h2 → <b>左标题 + 副标 / 右 Mono 计数 ID</b></li>
+    </ul>
+  </div>
+</div>
+
+</body>
+</html>

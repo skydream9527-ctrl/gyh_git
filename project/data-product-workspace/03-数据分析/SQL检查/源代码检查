@@ -1,0 +1,742 @@
+with t_new_feed_2024 as (
+    select
+        did
+    from 
+        iceberg_zjyprc_hadoop.browser.dwm_browser_feed_did_history_df
+    where
+        date in (
+            select 
+                max(date)
+            from 
+                iceberg_zjyprc_hadoop.browser.dwm_browser_feed_did_history_df
+            where
+                date >= ${date-1}
+        )
+        and first_feed_day = ${date-1}
+)
+
+,t_dau_feed_dapan_2024 as (
+    SELECT
+        did
+    FROM 
+        iceberg_zjyprc_hadoop.browser.dwm_browser_event_aggregation_di 
+    WHERE
+        date = ${date-1}
+        AND feed_status in ('true', 'false')
+        AND coalesce(card_type,'') not in ('operation_top')
+        AND expos_cnt + expose_enter_cnt + expose_noenter_cnt + click_cnt + click_enter_cnt + click_noenter_cnt + view_cnt + video_play_cnt > 0
+    group by
+        did
+)
+
+,t_dau_feed_toutiao_2024 as (
+    SELECT
+        did
+    FROM 
+        iceberg_zjyprc_hadoop.browser.dwm_browser_event_aggregation_di 
+    WHERE
+        date = ${date-1}
+        and feed_status in ('true', 'false')
+        and feed_alg_source IN ('toutiao')
+        AND expos_cnt + expose_enter_cnt + expose_noenter_cnt + click_cnt + click_enter_cnt + click_noenter_cnt + view_cnt + video_play_cnt > 0
+    group by 
+        did
+)
+
+,t_valid_dapan_2024 as (
+    SELECT
+        did
+    FROM 
+        (
+            select
+                did
+                ,sum(if(feed_status in ('true'),expos_cnt,0) + expose_enter_cnt) as expos_cnt
+                ,sum(if(feed_status in ('true'),click_cnt,0) + click_enter_cnt) as click_cnt
+            from 
+                iceberg_zjyprc_hadoop.browser.dwm_browser_event_aggregation_di
+            where
+                date = ${date-1}
+                and coalesce(card_type,'') not in ('operation_top')
+                and coalesce(feed_channel,'') not in ('push')
+            group by
+                did
+        ) t1
+    WHERE
+        expos_cnt >= 6 
+        OR click_cnt >= 1
+)
+
+,t_valid_toutiao_2024 as (
+    SELECT
+        did
+    FROM 
+        (
+            select
+                did
+                ,sum(if(feed_status in ('true'),expos_cnt,0) + expose_enter_cnt) as expos_cnt
+                ,sum(if(feed_status in ('true'),click_cnt,0) + click_enter_cnt) as click_cnt
+            from 
+                iceberg_zjyprc_hadoop.browser.dwm_browser_event_aggregation_di
+            where
+                date = ${date-1}
+                and coalesce(card_type,'') not in ('operation_top')
+                and coalesce(feed_channel,'') not in ('push')
+                AND feed_alg_source IN ('toutiao')
+            group by
+                did
+        ) t1
+    WHERE
+        expos_cnt >= 6 
+        OR click_cnt >= 1
+)
+
+,t_new_2024 as (
+    select
+        did 
+    from
+        iceberg_zjyprc_hadoop.browser.dwm_browser_did_history_df 
+    where
+        date in (
+            select 
+                max(date)
+            from 
+                iceberg_zjyprc_hadoop.browser.dwm_browser_did_history_df 
+            where
+                date >= ${date-1}
+        )
+        and first_app_day = ${date-1}
+)
+
+,t_app_dau_2024 as (
+    select
+        did 
+    from 
+        iceberg_zjyprc_hadoop.browser.dwm_browser_event_aggregation_di
+    where
+        date = ${date-1}
+        and app_open_cnt > 0 
+    group by
+        did 
+)
+
+,t_first_open_type as (
+    select
+        did
+        ,app_launch_way
+        ,row_number() over (partition by did order by first_tm) as rid
+    from
+        iceberg_zjyprc_hadoop.browser.dwm_browser_event_aggregation_di
+    where
+        date = ${date-1}
+        and coalesce(app_launch_way,'') != ''
+        and first_tm >= unix_timestamp(cast(${date-1} as string), 'yyyyMMdd') * 1000
+        and (
+            expos_cnt > 0
+            or expose_enter_cnt > 0
+            or expose_noenter_cnt > 0
+            or click_cnt > 0
+            or click_enter_cnt > 0
+            or click_noenter_cnt > 0
+            or view_cnt > 0
+            or video_play_cnt > 0
+            or app_open_cnt > 0
+        )
+)
+
+,t_is_first_open as (
+    SELECT
+        date
+        ,distinct_id as did
+        ,properties['sessionId'] as session_id
+        ,row_number() over (partition by date,distinct_id order by e_ts) as rid
+    FROM
+        iceberg_zjyprc_hadoop.dw.dwd_ot_event_di_31000000442
+    where
+        date = ${date-1}
+        and event_name in ('app_open','content_item_expose','content_item_expose_noenter','content_item_expose_enter')
+        and properties['sessionId'] is not null
+    having 
+        rid = 1
+)
+
+,t_ad_exp_id as (
+    select
+        did
+        ,concat_ws(',',array_distinct(split(concat_ws(',',collect_set(ad_exp_id)),','))) as ad_exp_id
+    from 
+        iceberg_zjyprc_hadoop.browser.dwm_browser_event_aggregation_di
+    where
+        date = ${date-1}
+    group by
+        did
+)
+
+,t_feed_alg_source_1 as (
+    select
+        *
+        ,case 
+            when feed_alg_source='toutiao' then '头条'
+            when feed_alg_source='baidu' then '百度'
+            when feed_alg_source='xiaomi' then '小米'
+            when feed_alg_source='yidian' then '一点'
+            else 'other'
+        end as feed_alg_source_1
+    from iceberg_zjyprc_hadoop.browser.dwm_browser_event_aggregation_di
+    where date = ${date-1}
+        and feed_status in ('true','false')
+)
+
+,t_feed_alg_source_max as (
+    select
+        t_feed_alg_source_1.did
+        ,max(
+            if(expos_cnt + expose_enter_cnt + expose_noenter_cnt + click_cnt + click_enter_cnt + click_noenter_cnt + view_cnt + video_play_cnt > 0
+            ,feed_alg_source_1
+            ,'')
+        ) as feed_alg_source_max
+    from 
+        t_feed_alg_source_1
+        join t_dau_feed_dapan_2024 on t_feed_alg_source_1.did = t_dau_feed_dapan_2024.did
+    where
+        coalesce(card_type,'') != 'operation_top'
+    group by
+        t_feed_alg_source_1.did
+)
+
+,t_content_vikingar as (
+    SELECT
+        regexp_extract(id, 'toutiao_newhome_(\\d+)', 1) as id
+        ,max(
+            case
+                when cType in ('VIDEO') then 'inline_video'
+                when cType in ('NEWS') then 'news'
+                when cType in ('MINIVIDEO') then 'mini_video'
+                when cType in ('SHORTSTORY') then 'shortstory'
+                when cType in ('NOVEL') then 'novel'
+                when cType in ('SHORTPLAY') then 'skit'
+            end   
+        ) as item_type_pool
+        ,max(category[0]) as item_category
+        ,max(subcategories[0]) as item_sub_category
+        ,max(videodetail.duration) as item_video_length
+    FROM
+        hive_zjyprc_hadoop.feeds.content_databus_vikingar_batch_index
+    WHERE
+        date = ${date-2}
+    group by 
+        regexp_extract(id, 'toutiao_newhome_(\\d+)', 1)
+)
+
+,t_content_djy as (
+    SELECT
+        basic.id as id
+        ,max(
+            case
+                when basic.cType in ('VIDEO') then 'inline_video'
+                when basic.cType in ('NEWS') then 'news'
+                when basic.cType in ('MINIVIDEO') then 'mini_video'
+                when basic.cType in ('SHORTSTORY') then 'shortstory'
+                when basic.cType in ('NOVEL') then 'novel'
+                when basic.cType in ('SHORTPLAY') then 'skit'
+            end   
+        ) as item_type_pool
+        ,max(basic.category[0]) as item_category
+        ,max(basic.subCategory[0]) as item_sub_category
+        ,max(basic.duration) as item_video_length
+    FROM
+        hive_zjyprc_hadoop.feeds.content_databus_dujiangyan_batch_index
+    WHERE
+        date = ${date-2}
+    group by
+        basic.id
+)
+
+, t_is_valid as (
+    select date
+        , did
+        , is_include_push_valid
+        , is_exclude_push_valid
+    from iceberg_zjyprc_hadoop.browser.dim_browser_did_basic_label_di
+    where date = ${date-1}
+
+)
+
+INSERT OVERWRITE iceberg_zjyprc_hadoop.browser.dwm_browser_event_aggregation_label_di
+SELECT
+    t_dwm_agg.date
+    ,t_dwm_agg.did
+    ,imei1
+    ,imei2
+    ,oaid
+    ,device_id
+    ,android_id
+    ,model
+    ,miui
+    ,build
+    ,os_ver
+    ,app_ver
+    ,version_code
+    ,toutiao_user_id
+    ,t_dwm_agg.session_id
+    ,net
+    ,country
+    ,province
+    ,city
+    ,exp_id
+    ,t_ad_exp_id.ad_exp_id
+    ,app_launch_way
+    ,notification_bar_status
+    ,is_receive_notification
+    ,feed_channel
+    ,feed_status
+    ,is_coldstart
+    ,page
+    ,from_page
+    ,feed_enter_way
+    ,feed_alg_source
+    ,coalesce(feed_alg_source_max,'') as feed_alg_source_max
+    ,feed_style
+    ,case
+        when 
+            --小说、短故事被自建算法在双频道分发的阅读：
+            book_type in ('shortstory','store','pre_add_book','pirate')
+            and (exp_id RLIKE '1566672' or exp_id RLIKE '1960891' or exp_id RLIKE '1643918' or exp_id RLIKE '2316339' or exp_id RLIKE '2316341')
+            and (read_source in ('rec','topnews','feed_main_info','unknown') or (read_source in ('feed_continue_view_card', 'browser_history') and last_read_source in ('rec','topnews','feed_main_info','unknown'))
+                )
+            and coalesce(item_book_id,'') not like 'duokan-djy_%'
+        then concat('duokan-djy_', coalesce(item_book_id,''))--如果是null或空字符串，也拼上前缀，因为由业务得知，空值在此场景和此人群下的item_book_id只是没被上而已。
+        when --上述一样的取自建阅读，如果打点侧加上前缀，就直接平移：
+            book_type in ('shortstory','store','pre_add_book','pirate')
+            and (exp_id RLIKE '1566672' or exp_id RLIKE '1960891' or exp_id RLIKE '1643918' or exp_id RLIKE '2316339' or exp_id RLIKE '2316341')
+            and (read_source in ('rec','topnews','feed_main_info','unknown') or (read_source in ('feed_continue_view_card', 'browser_history') and last_read_source in ('rec','topnews','feed_main_info','unknown'))
+                )
+            and coalesce(item_book_id,'') like 'duokan-djy_%'
+        then item_book_id
+        when --除了上述范围内的阅读事件，其余场景和人群的阅读事件把item_book_id取出来还是平移在此。
+            book_type in ('shortstory','store','pre_add_book','pirate')
+            and (exp_id RLIKE '1566672' or exp_id RLIKE '1960891' or exp_id RLIKE '1643918'  or exp_id RLIKE '2316339' or exp_id RLIKE '2316341' or exp_id RLIKE '1566673' or exp_id RLIKE '1960892' or exp_id RLIKE '1643917'  or exp_id RLIKE '2316340' or exp_id RLIKE '1960893')
+        then item_book_id
+        else item_docid
+    end as item_docid
+    ,item_title
+    ,item_type
+    ,item_author
+    ,item_cp_name
+    ,item_position
+    ,card_item_postition
+    ,NULL as item_category
+    ,NULL as item_subcategory
+    ,item_style
+    ,item_publish_time
+    ,enter_comment_way
+    ,minivideo_alg_source
+    ,duration_type
+    ,tag_id
+    ,ad_id
+    ,app_packagename
+    ,searchengine_channelid
+    ,if(t_app_dau_2024.did IS NOT NULL, 1, 0) as is_app_dau_2024
+    ,if(t_dau_feed_dapan_2024.did IS NOT NULL, 1, 0) as is_dau_feed_dapan_2024
+    ,if(t_dau_feed_toutiao_2024.did IS NOT NULL, 1, 0) as is_dau_feed_toutiao_2024
+    ,if(t_valid_dapan_2024.did IS NOT NULL, 1, 0) as is_valid_dapan_2024
+    ,if(t_valid_toutiao_2024.did IS NOT NULL, 1, 0) as is_valid_toutiao_2024
+    ,if(t_new_2024.did IS NOT NULL, 1, 0) as is_new_2024
+    ,if(t_new_feed_2024.did IS NOT NULL, 1, 0) as is_new_feed_2024 
+    ,first_app_launch_way
+    ,if(feed_channel = '推荐' and item_position = 5,1,0) as is_first_item
+    ,if(t_is_first_open.did is not null, 1, 0) as is_first_open
+    ,if(card_type = 'operation_top',1,0) as is_top
+    ,item_alg_source
+    ,first_tm
+    ,last_tm
+    ,page_origin
+    ,book_type
+    ,read_source
+    ,next_novel
+    ,last_read_source
+    ,book_name
+    ,skit_id
+    ,chapter_count
+    ,order
+    ,is_feed_sliding
+    , nvl(is_include_push_valid, 0) as is_include_push_valid
+    , nvl(is_exclude_push_valid, 0) as is_exclude_push_valid
+
+    ,app_open_cnt
+    ,app_duration_cnt
+    ,app_dura
+    ,expos_cnt + expose_enter_cnt + expose_noenter_cnt as expos_cnt
+    ,expose_enter_cnt + if(feed_status = 'true', expos_cnt, 0) as expose_enter_cnt
+    ,expose_noenter_cnt + if(feed_status = 'false', expos_cnt, 0) as expose_noenter_cnt
+    ,click_cnt + click_enter_cnt + click_noenter_cnt as click_cnt
+    ,click_enter_cnt + if(feed_status = 'true', click_cnt, 0) as click_enter_cnt
+    ,click_noenter_cnt + if(feed_status = 'false', click_cnt, 0) as click_noenter_cnt
+    ,view_cnt
+    ,view_quit_cnt
+    ,view_event_dura
+    ,video_play_cnt
+    ,video_over_cnt
+    ,video_over_event_dura
+    ,video_play_fail_cnt
+    ,max_play_dura
+    ,play_all_over_cnt
+    ,like_cnt
+    ,unlike_cnt
+    ,share_cnt
+    ,collect_cnt
+    ,enter_comment_cnt
+    ,comment_cnt
+    ,report_cnt
+    ,feed_dura
+    ,refresh_cnt
+    ,request_cnt
+    ,follow_cnt
+    ,unfollow_cnt
+    ,ad_content_expose_cnt
+    ,ad_content_click_cnt
+    ,ad_content_negative_cnt
+    ,ad_content_request_client_cnt
+    ,ad_content_request_sever_cnt
+    ,ad_content_return_sever_cnt
+    ,ad_content_return_client_cnt
+    ,deeplink_ad_request_cnt
+    ,deeplink_ad_return_cnt
+    ,deeplink_ad_expose_cnt
+    ,deeplink_ad_click_cnt
+    ,deeplink_ad_success_cnt
+    ,if(lower(item_type)='news',click_cnt + click_enter_cnt + click_noenter_cnt,0) as news_vv_cnt
+    ,if(lower(item_type)='inline_video',video_play_cnt,0) as short_vv_cnt
+    ,if(lower(item_type) in ('vertical_video','mini_video'),video_play_cnt,0) as mini_vv_cnt
+    ,case 
+        when lower(item_type)='news' then click_cnt + click_enter_cnt + click_noenter_cnt--图文点击、不包括PUSH内容的点击（端外上报）
+        when lower(item_type)='inline_video' then video_play_cnt
+        when lower(item_type) in ('vertical_video','mini_video') then video_play_cnt
+        when lower(item_type) ='livestream' then video_play_cnt
+        when lower(item_type) = 'skit' and t_dwm_agg.date >= 20251010 then video_play_cnt
+        when lower(item_type) = 'shortstory' and t_dwm_agg.date >= 20251202 then book_read_cnt
+        when lower(item_type) = 'novel' and t_dwm_agg.date >= 20251223 then book_read_cnt
+        else 0
+    end as consum_cnt
+    ,case 
+        when lower(item_type)='news' then view_cnt--图文view、包括PUSH内容的view（端内上报）
+        when lower(item_type)='inline_video' then video_play_cnt 
+        when lower(item_type) in ('vertical_video','mini_video') then video_play_cnt
+        when lower(item_type) ='livestream' then video_play_cnt
+        when lower(item_type) = 'skit' and t_dwm_agg.date >= 20251010 then video_play_cnt
+        when lower(item_type) = 'shortstory' and t_dwm_agg.date >= 20251202 then book_read_cnt
+        when lower(item_type) = 'novel' and t_dwm_agg.date >= 20251223 then book_read_cnt
+        else 0
+    end as consum_cnt_v2
+    ,case 
+        when lower(item_type)='news' then view_event_dura
+        when lower(item_type)='inline_video' then video_over_event_dura
+        when lower(item_type) in ('vertical_video','mini_video') then video_over_event_dura
+        when lower(item_type)='livestream' then video_over_event_dura
+        when lower(item_type) = 'skit' and t_dwm_agg.date >= 20251010 then video_over_event_dura
+        when lower(item_type) = 'shortstory' and t_dwm_agg.date >= 20251202 then book_read_dura
+        when lower(item_type) = 'novel' and t_dwm_agg.date >= 20251223 then book_read_dura
+        else 0
+    end as consum_dura
+    ,search_security_cnt
+    ,search_cnt
+    ,sug_expose_cnt
+    ,third_packagename
+    ,feed_trace_id
+    ,max_video_play_percent
+    ,NULL as item_video_length
+    ,vaild_play_cnt
+    ,vaild_view_cnt
+    ,max_view_percent
+    ,item_cpauthorid
+    ,user_switch
+    ,NULL as item_type_pool
+    ,item_order
+    ,regexp_replace(djy_rec_expid, '\\.0+', '') as djy_rec_expid
+    ,root_gid
+    ,is_click_content_enter,
+    comment_area_dura,
+    view_all_quit_cnt,
+    if(lower(item_type)='news',vaild_view_quit_cnt, vaild_play_over_cnt) as vaild_play_view_over_cnt,
+    negtive_cnt,
+    report_cnt_new,
+    rubbish_cnt,
+    repeat_cnt,
+    shield_cnt,
+    dislike_cnt,
+    if(item_video_switch_way = '手动上滑切换',fast_slide_play_cnt,0) as video_fast_slide_cnt
+    ,shortstory_read_cnt
+    ,shortstory_read_dura
+    , turn_pages
+    , if(lower(item_type) in ('novel', 'shortstory'), book_read_cnt , 0) as book_read_cnt 
+    , if(lower(item_type) in ('novel', 'shortstory'), book_read_vv  , 0) as book_read_vv  
+    , if(lower(item_type) in ('novel', 'shortstory'), book_read_dura, 0) as book_read_dura
+    , item_substyle
+    , fullscreen_click_cnt
+FROM
+    iceberg_zjyprc_hadoop.browser.dwm_browser_event_aggregation_di as t_dwm_agg
+    left join t_new_feed_2024 on t_dwm_agg.did = t_new_feed_2024.did
+    left join t_dau_feed_dapan_2024 on t_dwm_agg.did = t_dau_feed_dapan_2024.did
+    left join t_dau_feed_toutiao_2024 on t_dwm_agg.did = t_dau_feed_toutiao_2024.did
+    left join t_valid_dapan_2024 on t_dwm_agg.did = t_valid_dapan_2024.did
+    left join t_valid_toutiao_2024 on t_dwm_agg.did = t_valid_toutiao_2024.did
+    left join t_new_2024 on t_dwm_agg.did = t_new_2024.did
+    left join t_app_dau_2024 on t_dwm_agg.did = t_app_dau_2024.did
+    left join (
+        --first_open_type 当天首次打开方式
+        select
+            did
+            ,app_launch_way as first_app_launch_way
+        from
+            t_first_open_type
+        where
+            rid = 1
+    ) t1 on t_dwm_agg.did = t1.did
+    left join t_ad_exp_id on t_dwm_agg.did = t_ad_exp_id.did 
+    left join t_is_first_open on t_dwm_agg.did = t_is_first_open.did and t_dwm_agg.session_id = t_is_first_open.session_id
+    left join t_feed_alg_source_max on t_dwm_agg.did = t_feed_alg_source_max.did
+    left join t_is_valid on t_dwm_agg.did = t_is_valid.did
+
+WHERE
+    t_dwm_agg.date = ${date-1}
+    and coalesce(t_dwm_agg.item_docid,'') = ''
+
+union all
+
+SELECT
+    t_dwm_agg.date
+    ,t_dwm_agg.did
+    ,imei1
+    ,imei2
+    ,oaid
+    ,device_id
+    ,android_id
+    ,model
+    ,miui
+    ,build
+    ,os_ver
+    ,app_ver
+    ,version_code
+    ,toutiao_user_id
+    ,t_dwm_agg.session_id
+    ,net
+    ,country
+    ,province
+    ,city
+    ,exp_id
+    ,t_ad_exp_id.ad_exp_id
+    ,app_launch_way
+    ,notification_bar_status
+    ,is_receive_notification
+    ,feed_channel
+    ,feed_status
+    ,is_coldstart
+    ,page
+    ,from_page
+    ,feed_enter_way
+    ,feed_alg_source
+    ,coalesce(feed_alg_source_max,'') as feed_alg_source_max
+    ,feed_style
+    ,case
+        when 
+            --小说、短故事被自建算法在双频道分发的阅读：
+            book_type in ('shortstory','store','pre_add_book','pirate')
+            and (exp_id RLIKE '1566672' or exp_id RLIKE '1960891' or exp_id RLIKE '1643918' or exp_id RLIKE '2316339' or exp_id RLIKE '2316341')
+            and (read_source in ('rec','topnews','feed_main_info','unknown') or (read_source in ('feed_continue_view_card', 'browser_history') and last_read_source in ('rec','topnews','feed_main_info','unknown'))
+                )
+            and coalesce(item_book_id,'') not like 'duokan-djy_%'
+        then concat('duokan-djy_', coalesce(item_book_id,''))--如果是null或空字符串，也拼上前缀，因为由业务得知，空值在此场景和此人群下的item_book_id只是没被上而已。
+        when --上述一样的取自建阅读，如果打点侧加上前缀，就直接平移：
+            book_type in ('shortstory','store','pre_add_book','pirate')
+            and (exp_id RLIKE '1566672' or exp_id RLIKE '1960891' or exp_id RLIKE '1643918' or exp_id RLIKE '2316339' or exp_id RLIKE '2316341')
+            and (read_source in ('rec','topnews','feed_main_info','unknown') or (read_source in ('feed_continue_view_card', 'browser_history') and last_read_source in ('rec','topnews','feed_main_info','unknown'))
+                )
+            and coalesce(item_book_id,'') like 'duokan-djy_%'
+        then item_book_id
+        when --除了上述范围内的阅读事件，其余场景和人群的阅读事件把item_book_id取出来还是平移在此。
+            book_type in ('shortstory','store','pre_add_book','pirate')
+            and (exp_id RLIKE '1566672' or exp_id RLIKE '1960891' or exp_id RLIKE '1643918'  or exp_id RLIKE '2316339' or exp_id RLIKE '2316341' or exp_id RLIKE '1566673' or exp_id RLIKE '1960892' or exp_id RLIKE '1643917'  or exp_id RLIKE '2316340' or exp_id RLIKE '1960893')
+        then item_book_id
+        else item_docid
+    end as item_docid
+    ,item_title
+    ,item_type
+    ,item_author
+    ,item_cp_name
+    ,item_position
+    ,card_item_postition
+    ,coalesce(t_content_vikingar.item_category,t_content_djy.item_category,t_dwm_agg.item_category) as item_category
+    ,coalesce(t_content_vikingar.item_sub_category,t_content_djy.item_sub_category,t_dwm_agg.item_category) as item_subcategory
+    ,item_style
+    ,item_publish_time
+    ,enter_comment_way
+    ,minivideo_alg_source
+    ,duration_type
+    ,tag_id
+    ,ad_id
+    ,app_packagename
+    ,searchengine_channelid
+    ,if(t_app_dau_2024.did IS NOT NULL, 1, 0) as is_app_dau_2024
+    ,if(t_dau_feed_dapan_2024.did IS NOT NULL, 1, 0) as is_dau_feed_dapan_2024
+    ,if(t_dau_feed_toutiao_2024.did IS NOT NULL, 1, 0) as is_dau_feed_toutiao_2024
+    ,if(t_valid_dapan_2024.did IS NOT NULL, 1, 0) as is_valid_dapan_2024
+    ,if(t_valid_toutiao_2024.did IS NOT NULL, 1, 0) as is_valid_toutiao_2024
+    ,if(t_new_2024.did IS NOT NULL, 1, 0) as is_new_2024
+    ,if(t_new_feed_2024.did IS NOT NULL, 1, 0) as is_new_feed_2024 
+    ,first_app_launch_way
+    ,if(feed_channel = '推荐' and item_position = 5,1,0) as is_first_item
+    ,if(t_is_first_open.did is not null, 1, 0) as is_first_open
+    ,if(card_type = 'operation_top',1,0) as is_top
+    ,item_alg_source
+    ,first_tm
+    ,last_tm
+    ,page_origin
+    ,book_type
+    ,read_source
+    ,next_novel
+    ,last_read_source
+    ,book_name
+    ,skit_id
+    ,chapter_count
+    ,order
+    ,is_feed_sliding
+    , nvl(is_include_push_valid, 0) as is_include_push_valid
+    , nvl(is_exclude_push_valid, 0) as is_exclude_push_valid
+
+    ,app_open_cnt
+    ,app_duration_cnt
+    ,app_dura
+    ,expos_cnt + expose_enter_cnt + expose_noenter_cnt as expos_cnt
+    ,expose_enter_cnt + if(feed_status = 'true', expos_cnt, 0) as expose_enter_cnt
+    ,expose_noenter_cnt + if(feed_status = 'false', expos_cnt, 0) as expose_noenter_cnt
+    ,click_cnt + click_enter_cnt + click_noenter_cnt as click_cnt
+    ,click_enter_cnt + if(feed_status = 'true', click_cnt, 0) as click_enter_cnt
+    ,click_noenter_cnt + if(feed_status = 'false', click_cnt, 0) as click_noenter_cnt
+    ,view_cnt
+    ,view_quit_cnt
+    ,view_event_dura
+    ,video_play_cnt
+    ,video_over_cnt
+    ,video_over_event_dura
+    ,video_play_fail_cnt
+    ,max_play_dura
+    ,play_all_over_cnt
+    ,like_cnt
+    ,unlike_cnt
+    ,share_cnt
+    ,collect_cnt
+    ,enter_comment_cnt
+    ,comment_cnt
+    ,report_cnt
+    ,feed_dura
+    ,refresh_cnt
+    ,request_cnt
+    ,follow_cnt
+    ,unfollow_cnt
+    ,ad_content_expose_cnt
+    ,ad_content_click_cnt
+    ,ad_content_negative_cnt
+    ,ad_content_request_client_cnt
+    ,ad_content_request_sever_cnt
+    ,ad_content_return_sever_cnt
+    ,ad_content_return_client_cnt
+    ,deeplink_ad_request_cnt
+    ,deeplink_ad_return_cnt
+    ,deeplink_ad_expose_cnt
+    ,deeplink_ad_click_cnt
+    ,deeplink_ad_success_cnt
+    ,if(lower(coalesce(t_content_vikingar.item_type_pool,t_content_djy.item_type_pool,item_type))='news',click_cnt + click_enter_cnt + click_noenter_cnt,0) as news_vv_cnt
+    ,if(lower(coalesce(t_content_vikingar.item_type_pool,t_content_djy.item_type_pool,item_type))='inline_video',video_play_cnt,0) as short_vv_cnt
+    ,if(lower(coalesce(t_content_vikingar.item_type_pool,t_content_djy.item_type_pool,item_type)) in ('vertical_video','mini_video'),video_play_cnt,0) as mini_vv_cnt
+    ,case 
+        when lower(coalesce(t_content_vikingar.item_type_pool,t_content_djy.item_type_pool,item_type))='news' then click_cnt + click_enter_cnt + click_noenter_cnt--图文click、不包括PUSH内容的view（端外上报）
+        when lower(coalesce(t_content_vikingar.item_type_pool,t_content_djy.item_type_pool,item_type))='inline_video' then video_play_cnt
+        when lower(coalesce(t_content_vikingar.item_type_pool,t_content_djy.item_type_pool,item_type)) in ('vertical_video','mini_video') then video_play_cnt
+        when lower(coalesce(t_content_vikingar.item_type_pool,t_content_djy.item_type_pool,item_type)) ='livestream' then video_play_cnt
+        when lower(coalesce(t_content_vikingar.item_type_pool,t_content_djy.item_type_pool,item_type)) = 'skit' and t_dwm_agg.date >= 20251010 then video_play_cnt
+        when lower(coalesce(t_content_vikingar.item_type_pool,t_content_djy.item_type_pool,item_type)) = 'shortstory' and t_dwm_agg.date >= 20251202 then book_read_cnt
+        when lower(coalesce(t_content_vikingar.item_type_pool,t_content_djy.item_type_pool,item_type)) = 'novel' and t_dwm_agg.date >= 20251223 then book_read_cnt
+        else 0
+    end as consum_cnt
+    ,case 
+        when if(item_docid rlike 'djy',coalesce(lower(t_content_djy.item_type_pool),lower(item_type)),lower(item_type))='news' then view_cnt--图文view、包括PUSH内容的view（端内上报）
+        when if(item_docid rlike 'djy',coalesce(lower(t_content_djy.item_type_pool),lower(item_type)),lower(item_type))='inline_video' then video_play_cnt 
+        when if(item_docid rlike 'djy',coalesce(lower(t_content_djy.item_type_pool),lower(item_type)),lower(item_type)) in ('vertical_video','mini_video') then video_play_cnt
+        when if(item_docid rlike 'djy',coalesce(lower(t_content_djy.item_type_pool),lower(item_type)),lower(item_type)) ='livestream' then video_play_cnt
+        when if(item_docid rlike 'djy',coalesce(lower(t_content_djy.item_type_pool),lower(item_type)),lower(item_type)) = 'skit' and t_dwm_agg.date >= 20251010 then video_play_cnt
+        when if(item_docid rlike 'djy',coalesce(lower(t_content_djy.item_type_pool),lower(item_type)),lower(item_type)) = 'shortstory' and t_dwm_agg.date >= 20251202 then book_read_cnt
+        when if(item_docid rlike 'djy',coalesce(lower(t_content_djy.item_type_pool),lower(item_type)),lower(item_type)) = 'novel' and t_dwm_agg.date >= 20251223 then book_read_cnt
+        else 0
+    end as consum_cnt_v2
+    ,case 
+        when if(item_docid rlike 'djy',coalesce(lower(t_content_djy.item_type_pool),lower(item_type)),lower(item_type))='news' then view_event_dura
+        when if(item_docid rlike 'djy',coalesce(lower(t_content_djy.item_type_pool),lower(item_type)),lower(item_type))='inline_video' then video_over_event_dura
+        when if(item_docid rlike 'djy',coalesce(lower(t_content_djy.item_type_pool),lower(item_type)),lower(item_type)) in ('vertical_video','mini_video') then video_over_event_dura
+        when if(item_docid rlike 'djy',coalesce(lower(t_content_djy.item_type_pool),lower(item_type)),lower(item_type))='livestream' then video_over_event_dura
+        when if(item_docid rlike 'djy',coalesce(lower(t_content_djy.item_type_pool),lower(item_type)),lower(item_type)) = 'skit' and t_dwm_agg.date >= 20251010 then video_over_event_dura
+        when if(item_docid rlike 'djy',coalesce(lower(t_content_djy.item_type_pool),lower(item_type)),lower(item_type)) = 'shortstory' and t_dwm_agg.date >= 20251202 then book_read_dura
+        when if(item_docid rlike 'djy',coalesce(lower(t_content_djy.item_type_pool),lower(item_type)),lower(item_type)) = 'novel' and t_dwm_agg.date >= 20251223 then book_read_dura
+        else 0
+    end as consum_dura
+    ,search_security_cnt
+    ,search_cnt
+    ,sug_expose_cnt
+    ,third_packagename
+    ,feed_trace_id
+    ,max_video_play_percent
+    ,if(lower(item_type) in('news','inline_video','vertical_video','mini_video'),coalesce(t_content_vikingar.item_video_length,t_content_djy.item_video_length),t_dwm_agg.item_video_length) as item_video_length--三体裁用内容理解的长度、多体裁用打点的长度。
+    ,vaild_play_cnt
+    ,vaild_view_cnt
+    ,max_view_percent
+    ,item_cpauthorid
+    ,user_switch
+    ,coalesce(t_content_vikingar.item_type_pool,t_content_djy.item_type_pool) as item_type_pool
+    ,item_order
+    ,regexp_replace(djy_rec_expid, '\\.0+', '')
+    ,root_gid
+    ,is_click_content_enter,
+    comment_area_dura,
+    view_all_quit_cnt,
+    if(lower(item_type)='news',vaild_view_quit_cnt, vaild_play_over_cnt) as vaild_play_view_over_cnt,
+    negtive_cnt,
+    report_cnt_new,
+    rubbish_cnt,
+    repeat_cnt,
+    shield_cnt,
+    dislike_cnt,
+    if(item_video_switch_way = '手动上滑切换',fast_slide_play_cnt,0) as video_fast_slide_cnt
+    ,shortstory_read_cnt
+    ,shortstory_read_dura
+    ,turn_pages
+    , if(lower(item_type) in ('novel', 'shortstory'), book_read_cnt , 0) as book_read_cnt 
+    , if(lower(item_type) in ('novel', 'shortstory'), book_read_vv  , 0) as book_read_vv  
+    , if(lower(item_type) in ('novel', 'shortstory'), book_read_dura, 0) as book_read_dura
+    , item_substyle
+    , fullscreen_click_cnt
+FROM
+    iceberg_zjyprc_hadoop.browser.dwm_browser_event_aggregation_di as t_dwm_agg
+    left join t_new_feed_2024 on t_dwm_agg.did = t_new_feed_2024.did
+    left join t_dau_feed_dapan_2024 on t_dwm_agg.did = t_dau_feed_dapan_2024.did
+    left join t_dau_feed_toutiao_2024 on t_dwm_agg.did = t_dau_feed_toutiao_2024.did
+    left join t_valid_dapan_2024 on t_dwm_agg.did = t_valid_dapan_2024.did
+    left join t_valid_toutiao_2024 on t_dwm_agg.did = t_valid_toutiao_2024.did
+    left join t_new_2024 on t_dwm_agg.did = t_new_2024.did
+    left join t_app_dau_2024 on t_dwm_agg.did = t_app_dau_2024.did
+    left join (
+        --first_open_type 当天首次打开方式
+        select
+            did
+            ,app_launch_way as first_app_launch_way
+        from
+            t_first_open_type
+        where
+            rid = 1
+    ) t1 on t_dwm_agg.did = t1.did
+    left join t_ad_exp_id on t_dwm_agg.did = t_ad_exp_id.did 
+    left join t_is_first_open on t_dwm_agg.did = t_is_first_open.did and t_dwm_agg.session_id = t_is_first_open.session_id
+    left join t_feed_alg_source_max on t_dwm_agg.did = t_feed_alg_source_max.did
+    left join t_content_vikingar on t_dwm_agg.item_docid = t_content_vikingar.id
+    left join t_content_djy on t_dwm_agg.item_docid = t_content_djy.id
+    left join t_is_valid on t_dwm_agg.did = t_is_valid.did
+WHERE
+    t_dwm_agg.date = ${date-1}
+    and coalesce(t_dwm_agg.item_docid,'') != ''

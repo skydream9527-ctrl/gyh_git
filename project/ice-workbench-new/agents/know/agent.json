@@ -1,0 +1,44 @@
+{
+  "id": "know",
+  "name": "知识库 Agent",
+  "paradigm": "knowledge",
+  "icon": "📚",
+  "color": "#b6a07c",
+  "description": "对接飞书知识空间「内容生态数据产品知识库」，对话式管理 / 使用 / 维护",
+  "user_friendly_description": "帮你在飞书知识库里搜文档、查资料、管理文档目录。你可以用自然语言提问，我来帮你找到对应的知识库内容",
+  "use_cases": ["搜索知识库中的文档和资料", "查找指标口径和字段说明", "管理和维护飞书知识库文档"],
+  "starters": [
+    "帮我在知识库里找一下内容池相关的字段说明",
+    "搜一下之前写的BF信息流指标体系文档",
+    "知识库里有没有关于Kyuubi查询的使用指南",
+    "帮我整理一下知识库目录，看看有哪些过期文档"
+  ],
+  "tags": ["知识库", "飞书文档", "资料检索"],
+  "output_type": "文档内容 + 知识问答 + 文档管理操作",
+  "publish_status": "published",
+  "prompt_layout": "v3",
+  "tools": [
+    "now",
+    "execute_python",
+    "write_file",
+    "read_file",
+    "list_files",
+    "feishu_publish",
+    "feishu_upload_image",
+    "read_skill",
+    "memory_save",
+    "memory_delete",
+    "task_state_save",
+    "todo_write",
+    "request_human_input",
+    "exit_plan_mode"
+  ],
+  "model": null,
+  "spawn_targets": [],
+  "skills": ["feishu"],
+  "features": {
+    "todo_write": true,
+    "exit_plan_mode": true,
+    "spawn_subagent": false
+  }
+}

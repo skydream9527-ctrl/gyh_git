@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ICE Workbench v4 · 新建笔记本 · Desktop + Mobile</title>
+<script>(function(){var t=localStorage.getItem('ice-theme')||'light';document.documentElement.dataset.theme=t;})();</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+:root[data-theme="light"]{--bg:#faf9f6;--paper:#f4f1ec;--surface:#fff;--surface-2:#f7f5f0;--surface-3:#ece7df;
+  --border:#e6e2dc;--border-soft:#efece6;--text:#1f1f1f;--text-dim:#5f6368;--text-muted:#80868b;
+  --accent:#1a73e8;--accent-hover:#1557b0;--accent-soft:#e8f0fe;--accent-text:#174ea6;
+  --success:#137333;--success-soft:#e6f4ea;--warning:#b06000;--warning-soft:#fef7e0;--error:#b3261e;--error-soft:#fce8e6;
+  --p-ab:#1967d2;--p-ab-soft:#e8f0fe;--p-biz:#b06000;--p-biz-soft:#fef7e0;
+  --p-gray:#5f4b8b;--p-gray-soft:#f3edff;--p-data:#137333;--p-data-soft:#e6f4ea;--p-wave:#b3261e;--p-wave-soft:#fce8e6;
+  --shadow-1:0 1px 2px rgba(60,64,67,.06);--shadow-2:0 1px 3px rgba(60,64,67,.10),0 4px 8px rgba(60,64,67,.04);
+  --shadow-3:0 8px 32px rgba(60,64,67,.14);}
+:root[data-theme="dark"]{--bg:#1f1f1f;--paper:#2a2a2a;--surface:#262626;--surface-2:#2e2e2e;--surface-3:#363636;
+  --border:#3c3c3c;--border-soft:#2e2e2e;--text:#e8eaed;--text-dim:#9aa0a6;--text-muted:#6c7075;
+  --accent:#8ab4f8;--accent-hover:#aecbfa;--accent-soft:rgba(138,180,248,.16);--accent-text:#aecbfa;
+  --success:#81c995;--success-soft:rgba(129,201,149,.14);--warning:#fdd663;--warning-soft:rgba(253,214,99,.14);
+  --p-ab:#8ab4f8;--p-ab-soft:rgba(138,180,248,.16);--p-biz:#fdd663;--p-biz-soft:rgba(253,214,99,.14);
+  --p-gray:#c58af9;--p-gray-soft:rgba(197,138,249,.14);--p-data:#81c995;--p-data-soft:rgba(129,201,149,.14);
+  --p-wave:#f28b82;--p-wave-soft:rgba(242,139,130,.14);
+  --shadow-1:0 1px 2px rgba(0,0,0,.4);--shadow-2:0 4px 16px rgba(0,0,0,.5);--shadow-3:0 12px 48px rgba(0,0,0,.6);}
+*{box-sizing:border-box}html,body{margin:0;padding:0}
+body{background:var(--paper);color:var(--text);font-family:'Inter','PingFang SC','Microsoft YaHei',sans-serif;font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased}
+.canvas{max-width:1820px;margin:0 auto;padding:32px 24px 80px;display:grid;grid-template-columns:1fr 430px;gap:32px;align-items:flex-start}
+@media (max-width:1500px){.canvas{grid-template-columns:1fr;gap:48px}}
+.label{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.6px;font-weight:500;margin:0 0 12px;display:flex;align-items:center;gap:8px}
+.label .dot{width:6px;height:6px;border-radius:50%;background:var(--accent)}
+.vp-cap{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:14px}
+.vp-cap .name{font-family:'Inter',sans-serif;font-weight:500;font-size:18px;letter-spacing:-.2px;display:block;margin-top:0}
+.vp-cap .size{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted)}
+
+.browser{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow-2)}
+.browser-bar{background:var(--surface-2);padding:10px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border-soft)}
+.browser-bar .dots{display:flex;gap:6px}.browser-bar .dots span{width:11px;height:11px;border-radius:50%;background:var(--surface-3)}
+.browser-bar .url{flex:1;background:var(--surface);border:1px solid var(--border-soft);border-radius:99px;padding:5px 14px;font-size:12px;color:var(--text-dim);font-family:'JetBrains Mono',monospace;display:flex;align-items:center;gap:6px}
+.browser-bar .url::before{content:"🔒";font-size:11px}
+
+/* dimmed dashboard background */
+.dim-bg{height:760px;background:var(--bg);position:relative;overflow:hidden;display:grid;place-items:center;padding:24px}
+.dim-bg::before{content:"";position:absolute;inset:0;background-image:radial-gradient(circle at 20% 10%,var(--accent-soft),transparent 40%),radial-gradient(circle at 90% 90%,var(--p-biz-soft),transparent 40%);opacity:.5;pointer-events:none}
+.dim-bg::after{content:"";position:absolute;inset:0;background:rgba(0,0,0,.02);pointer-events:none}
+:root[data-theme="dark"] .dim-bg::after{background:rgba(0,0,0,.4)}
+
+.modal{position:relative;width:760px;max-width:100%;max-height:700px;background:var(--surface);border-radius:20px;
+  border:1px solid var(--border-soft);box-shadow:var(--shadow-3);display:flex;flex-direction:column;overflow:hidden}
+.modal-head{padding:22px 28px 18px;display:flex;align-items:center;gap:12px}
+.modal-head h2{font-family:'Inter',sans-serif;font-size:22px;font-weight:500;margin:0;letter-spacing:-.3px;flex:1}
+.modal-head .x{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;cursor:pointer;background:transparent;border:none;font-size:20px;color:var(--text-dim)}
+.modal-head .x:hover{background:var(--surface-2)}
+.modal-body{padding:0 28px 18px;overflow-y:auto;flex:1}
+.modal-foot{padding:16px 28px 22px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--border-soft);background:var(--surface)}
+.modal-foot .meta{font-size:12px;color:var(--text-muted)}
+
+.section-h{font-size:12px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px;font-weight:500;margin:18px 0 10px;display:flex;align-items:center;gap:8px}
+.section-h .req{color:var(--error)}
+.section-h .c{color:var(--text-muted);font-weight:400;text-transform:none;letter-spacing:0;font-size:11.5px}
+
+/* paradigm grid */
+.para-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.para-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px 12px;cursor:pointer;text-align:center;transition:all .15s;position:relative}
+.para-card:hover{border-color:var(--text-dim);background:var(--surface-2)}
+.para-card.selected{border-color:var(--accent);background:var(--accent-soft);box-shadow:0 0 0 3px var(--accent-soft)}
+.para-card.selected::before{content:"✓";position:absolute;top:8px;right:8px;width:20px;height:20px;border-radius:50%;background:var(--accent);color:#fff;font-size:11px;font-weight:600;display:grid;place-items:center}
+.para-card .e{font-size:28px;line-height:1;margin-bottom:6px}
+.para-card .n{font-size:13px;font-weight:500;letter-spacing:-.1px}
+.para-card .d{font-size:10.5px;color:var(--text-muted);margin-top:3px;line-height:1.35}
+
+.input{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px 14px;font-family:inherit;font-size:14px;color:var(--text);outline:none;width:100%;transition:all .15s}
+.input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:12px;font-weight:500;color:var(--text-dim);margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field textarea.input{resize:vertical;min-height:60px}
+
+.agent-row{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px 14px;cursor:pointer;transition:all .15s}
+.agent-row:hover{border-color:var(--text-dim)}
+.agent-row .e{width:36px;height:36px;border-radius:10px;background:var(--p-biz-soft);color:var(--p-biz);display:grid;place-items:center;font-size:18px;flex-shrink:0}
+.agent-row .info{flex:1;min-width:0}
+.agent-row .info .n{font-size:13.5px;font-weight:500}
+.agent-row .info .s{font-size:11.5px;color:var(--text-muted);margin-top:2px}
+.agent-row .arr{color:var(--text-muted);font-size:14px}
+
+.dropzone{border:2px dashed var(--border);border-radius:12px;padding:18px;text-align:center;cursor:pointer;transition:all .15s;background:var(--surface-2)}
+.dropzone:hover{border-color:var(--accent);background:var(--accent-soft)}
+.dropzone .ico{font-size:30px;margin-bottom:6px;color:var(--text-dim)}
+.dropzone .t{font-size:13px;font-weight:500}
+.dropzone .s{font-size:11.5px;color:var(--text-muted);margin-top:2px}
+.dropzone .types{margin-top:8px;display:flex;justify-content:center;gap:5px}
+.dropzone .types .tp{font-size:10px;padding:2px 7px;border-radius:99px;background:var(--surface);color:var(--text-dim);border:1px solid var(--border-soft)}
+
+.added-files{margin-top:8px;display:flex;flex-direction:column;gap:6px}
+.added-row{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--surface-2);border-radius:10px;font-size:12.5px}
+.added-row .ico{width:24px;height:24px;border-radius:6px;background:var(--p-data-soft);color:var(--p-data);display:grid;place-items:center;font-size:12px}
+.added-row .n{flex:1;font-weight:500}
+.added-row .s{color:var(--text-muted);font-size:11px}
+.added-row .x{cursor:pointer;color:var(--text-muted);background:none;border:none;font-size:14px}
+
+.btn{display:inline-flex;align-items:center;gap:6px;font-family:inherit;font-size:14px;font-weight:500;padding:10px 20px;border-radius:99px;border:1px solid transparent;cursor:pointer;transition:all .15s;line-height:1}
+.btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:var(--accent-hover)}
+.btn-tonal{background:var(--accent-soft);color:var(--accent-text)}
+.btn-ghost{background:transparent;color:var(--text);border-color:var(--border)}
+.btn-ghost:hover{background:var(--surface-2)}
+.btn-text{background:transparent;color:var(--accent-text);padding:8px 12px}
+
+/* peek behind: faint dashboard */
+.peek-app{position:absolute;top:0;left:0;right:0;bottom:0;padding:24px;opacity:.25}
+.peek-app .row{display:flex;gap:12px;margin-bottom:10px}
+.peek-app .ph{height:14px;border-radius:6px;background:var(--text);opacity:.3}
+
+/* phone */
+.phone{position:sticky;top:32px;justify-self:center}
+.phone-frame{width:390px;height:844px;background:var(--bg);border:9px solid #1a1a1a;border-radius:48px;overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--shadow-3);position:relative}
+.phone-frame::before{content:"";position:absolute;top:9px;left:50%;transform:translateX(-50%);width:120px;height:28px;background:#1a1a1a;border-radius:16px;z-index:10}
+.phone-status{height:48px;flex-shrink:0;padding:16px 26px 4px;display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:600;color:var(--text)}
+.phone-body{flex:1;overflow-y:auto;background:var(--bg);position:relative;display:flex;flex-direction:column}
+.phone-body::-webkit-scrollbar{display:none}
+
+.mob-head{padding:8px 16px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border-soft);flex-shrink:0;background:var(--bg)}
+.mob-head .x{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;cursor:pointer;font-size:20px;color:var(--text)}
+.mob-head h2{flex:1;font-size:17px;font-weight:500;margin:0;letter-spacing:-.2px}
+.mob-head .save{font-size:13px;color:var(--accent-text);font-weight:500;background:none;border:none;padding:6px 10px;cursor:pointer;font-family:inherit}
+
+.mob-body{padding:14px 16px 90px;flex:1}
+
+.mob-para{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.mob-para .para-card{padding:12px 6px}
+.mob-para .para-card .e{font-size:24px}
+.mob-para .para-card .n{font-size:11.5px}
+.mob-para .para-card .d{display:none}
+
+.mob-foot{position:absolute;left:0;right:0;bottom:0;padding:12px 16px 26px;background:var(--bg);border-top:1px solid var(--border-soft);display:flex;gap:8px}
+.mob-foot .btn{flex:1;justify-content:center}
+</style>
+</head>
+<body>
+
+<div class="canvas">
+  <!-- DESKTOP -->
+  <section>
+    <div class="vp-cap">
+      <div><p class="label"><span class="dot"></span>DESKTOP · 1440 × 900</p><span class="name">新建笔记本 · Modal</span></div>
+      <span class="size">单页表单 · 范式 + Agent + 数据源</span>
+    </div>
+    <div class="browser">
+      <div class="browser-bar"><div class="dots"><span></span><span></span><span></span></div><div class="url">ice.workbench.local/notebook/new</div></div>
+      <div class="dim-bg">
+        <!-- faint peek -->
+        <div class="peek-app">
+          <div class="row" style="height:50px"><div style="width:160px;height:30px;border-radius:6px;background:var(--text);opacity:.3"></div></div>
+          <div class="row"><div class="ph" style="width:30%"></div></div>
+          <div class="row"><div class="ph" style="width:25%;height:24px"></div><div class="ph" style="width:25%;height:24px"></div><div class="ph" style="width:25%;height:24px"></div><div class="ph" style="width:25%;height:24px"></div></div>
+          <div class="row" style="margin-top:30px"><div class="ph" style="width:140px"></div></div>
+          <div class="row" style="height:160px"><div class="ph" style="flex:1;height:100%"></div><div class="ph" style="flex:1;height:100%"></div><div class="ph" style="flex:1;height:100%"></div><div class="ph" style="flex:1;height:100%"></div></div>
+        </div>
+
+        <div class="modal">
+          <header class="modal-head">
+            <h2>📒 新建笔记本</h2>
+            <button class="x" title="关闭">×</button>
+          </header>
+          <div class="modal-body">
+
+            <div class="section-h">分析范式 <span class="req">*</span></div>
+            <div class="para-grid">
+              <div class="para-card"><div class="e">⚖️</div><div class="n">AB 实验</div><div class="d">显著性 · CI</div></div>
+              <div class="para-card selected"><div class="e">📈</div><div class="n">经营分析</div><div class="d">指标拆解</div></div>
+              <div class="para-card"><div class="e">🔌</div><div class="n">版本灰度</div><div class="d">放量监控</div></div>
+              <div class="para-card"><div class="e">📊</div><div class="n">数据分析</div><div class="d">SQL 探索</div></div>
+              <div class="para-card"><div class="e">🔥</div><div class="n">波动分析</div><div class="d">异动归因</div></div>
+            </div>
+
+            <div class="section-h">基本信息 <span class="req">*</span></div>
+            <div class="field">
+              <label>笔记本名称</label>
+              <input class="input" placeholder="例如：Q3 经营复盘分析" value="Q3 经营复盘分析" />
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label>Emoji</label>
+                <div style="display:flex;gap:4px;flex-wrap:wrap">
+                  <button class="para-card" style="padding:6px;width:38px;background:var(--surface)">📈</button>
+                  <button class="para-card" style="padding:6px;width:38px;background:var(--surface)">📊</button>
+                  <button class="para-card" style="padding:6px;width:38px;background:var(--surface)">💼</button>
+                  <button class="para-card" style="padding:6px;width:38px;background:var(--surface)">📅</button>
+                  <button class="para-card selected" style="padding:6px;width:38px">📈</button>
+                </div>
+              </div>
+              <div class="field">
+                <label>可见范围</label>
+                <select class="input" style="cursor:pointer">
+                  <option>仅自己</option>
+                  <option selected>团队可见</option>
+                  <option>公开（公共区）</option>
+                </select>
+              </div>
+            </div>
+            <div class="field">
+              <label>简介（可选）</label>
+              <textarea class="input" placeholder="一句话描述这个笔记本要回答什么问题…">复盘 Q3 经营核心指标变化，聚焦留存、付费、UGC 三个维度。</textarea>
+            </div>
+
+            <div class="section-h">Agent <span class="c">· 决定模型与可用 Skill</span></div>
+            <div class="agent-row">
+              <div class="e">📈</div>
+              <div class="info"><div class="n">经营洞察 Agent</div><div class="s">Claude Opus 4.7 · 7 个 Skill · 指标拆解 / 趋势 / 归因 …</div></div>
+              <div class="arr">▾</div>
+            </div>
+
+            <div class="section-h">数据源 <span class="c">· 可后续添加</span></div>
+            <div class="dropzone">
+              <div class="ico">⬆</div>
+              <div class="t">拖入文件 或 点击上传</div>
+              <div class="s">CSV / Excel / PDF / Markdown · 最多 50 MB</div>
+              <div class="types">
+                <span class="tp">📊 CSV</span>
+                <span class="tp">📝 MD</span>
+                <span class="tp">📄 PDF</span>
+                <span class="tp">🧠 飞书</span>
+                <span class="tp">📚 Mify</span>
+              </div>
+            </div>
+            <div class="added-files">
+              <div class="added-row">
+                <div class="ico">📊</div>
+                <span class="n">historical_metrics_2025.csv</span>
+                <span class="s">3.1 MB</span>
+                <button class="x">×</button>
+              </div>
+              <div class="added-row">
+                <div class="ico" style="background:var(--p-gray-soft);color:var(--p-gray)">🧠</div>
+                <span class="n">飞书 · 经营复盘方法论</span>
+                <span class="s">已链接</span>
+                <button class="x">×</button>
+              </div>
+            </div>
+          </div>
+          <footer class="modal-foot">
+            <span class="meta">⌘+↵ 创建并进入</span>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-ghost">取消</button>
+              <button class="btn btn-primary">创建笔记本 →</button>
+            </div>
+          </footer>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MOBILE -->
+  <section class="phone">
+    <div class="vp-cap"><div><p class="label"><span class="dot"></span>MOBILE · iPhone 14 Pro</p><span class="name">新建笔记本</span></div><span class="size">390 × 844</span></div>
+    <div class="phone-frame">
+      <div class="phone-status"><span>9:41</span><span style="display:flex;gap:5px"><span>📶</span><span>📡</span><span>🔋</span></span></div>
+      <div class="phone-body">
+        <div class="mob-head">
+          <button class="x">×</button>
+          <h2>新建笔记本</h2>
+          <button class="save">保存</button>
+        </div>
+        <div class="mob-body">
+          <div class="section-h">分析范式 <span class="req">*</span></div>
+          <div class="mob-para">
+            <div class="para-card"><div class="e">⚖️</div><div class="n">AB</div></div>
+            <div class="para-card selected"><div class="e">📈</div><div class="n">经营</div></div>
+            <div class="para-card"><div class="e">🔌</div><div class="n">灰度</div></div>
+            <div class="para-card"><div class="e">📊</div><div class="n">数据</div></div>
+            <div class="para-card"><div class="e">🔥</div><div class="n">波动</div></div>
+            <div class="para-card" style="background:var(--surface-2);border-style:dashed"><div class="e" style="color:var(--text-muted)">＋</div><div class="n" style="color:var(--text-dim)">空白</div></div>
+          </div>
+
+          <div class="section-h">名称 <span class="req">*</span></div>
+          <input class="input" value="Q3 经营复盘分析" />
+
+          <div class="section-h">Agent</div>
+          <div class="agent-row">
+            <div class="e">📈</div>
+            <div class="info"><div class="n">经营洞察 Agent</div><div class="s">Opus 4.7 · 7 Skills</div></div>
+            <div class="arr">▾</div>
+          </div>
+
+          <div class="section-h">数据源</div>
+          <div class="dropzone" style="padding:14px">
+            <div class="ico" style="font-size:24px">⬆</div>
+            <div class="t" style="font-size:12.5px">拖入或点击上传</div>
+            <div class="s" style="font-size:10.5px">CSV / MD / PDF · ≤50 MB</div>
+          </div>
+          <div class="added-files">
+            <div class="added-row">
+              <div class="ico">📊</div>
+              <span class="n">metrics_2025.csv</span>
+              <button class="x">×</button>
+            </div>
+          </div>
+
+          <div class="section-h">可见范围</div>
+          <div style="display:flex;gap:6px">
+            <button class="para-card" style="flex:1;padding:10px;font-size:12px"><div>🔒</div>仅我</button>
+            <button class="para-card selected" style="flex:1;padding:10px;font-size:12px"><div>👥</div>团队</button>
+            <button class="para-card" style="flex:1;padding:10px;font-size:12px"><div>🌐</div>公开</button>
+          </div>
+        </div>
+        <div class="mob-foot">
+          <button class="btn btn-ghost" style="flex:1;justify-content:center">取消</button>
+          <button class="btn btn-primary" style="flex:2;justify-content:center">创建并进入 →</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>function toggleTheme(){var c=document.documentElement.dataset.theme||'light';var n=c==='light'?'dark':'light';document.documentElement.dataset.theme=n;localStorage.setItem('ice-theme',n);}</script>
+</body>
+</html>

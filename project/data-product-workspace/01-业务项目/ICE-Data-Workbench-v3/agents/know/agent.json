@@ -1,0 +1,31 @@
+{
+  "id": "know",
+  "name": "知识库 Agent",
+  "paradigm": "knowledge",
+  "icon": "📚",
+  "color": "#b6a07c",
+  "description": "对接飞书知识空间「内容生态数据产品知识库」，对话式管理 / 使用 / 维护",
+  "publish_status": "published",
+  "prompt_layout": "v3",
+  "tools": [
+    "now",
+    "execute_python",
+    "write_file",
+    "read_file",
+    "list_files",
+    "feishu_publish",
+    "feishu_upload_image",
+    "read_skill",
+    "todo_write",
+    "request_human_input",
+    "exit_plan_mode"
+  ],
+  "model": null,
+  "spawn_targets": [],
+  "skills": ["feishu"],
+  "features": {
+    "todo_write": true,
+    "exit_plan_mode": true,
+    "spawn_subagent": false
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "id": "volcano-abtest",
+  "name": "火山实验分析",
+  "paradigm": "ab",
+  "icon": "🌋",
+  "color": "#e76f51",
+  "description": "火山引擎 ABtest · 浏览器 / 桌面内容中心实验数据查询与涨跌报告",
+  "user_friendly_description": "专门查询火山引擎ABtest平台的实验数据，输入实验ID和日期范围，自动拉取指标数据并生成涨跌分析报告",
+  "use_cases": ["查询火山引擎上的实验数据", "生成浏览器/内容中心实验涨跌报告", "快速获取实验显著性结果"],
+  "starters": [
+    "帮我查一下火山实验123456，时间4月1日到4月7日",
+    "看看浏览器实验789012最近一周的数据表现",
+    "查一下内容中心NH这个实验的核心指标涨跌情况",
+    "帮我拉一下实验ID 456789的显著性数据"
+  ],
+  "tags": ["火山引擎", "ABtest", "实验数据", "涨跌报告"],
+  "output_type": "实验涨跌报告 + 显著性分析 + 逐日趋势",
+  "publish_status": "published",
+  "tools": [
+    "now",
+    "volcano_abtest_analyze",
+    "write_file",
+    "read_file",
+    "list_files",
+    "feishu_publish",
+    "read_skill",
+    "todo_write",
+    "request_human_input",
+    "exit_plan_mode",
+    "spawn_subagent"
+  ],
+  "model": null,
+  "spawn_targets": ["data-analysis", "wave-attribution", "ab-experiment", "know"],
+  "skills": ["feishu"],
+  "features": {
+    "todo_write": true,
+    "exit_plan_mode": true,
+    "spawn_subagent": true
+  }
+}

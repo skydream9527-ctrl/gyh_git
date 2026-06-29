@@ -1,0 +1,29 @@
+# 环境与密钥
+.env
+*.local
+
+# Python
+backend/.venv/
+backend/.venv-sandbox/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+
+# Node / 前端
+frontend/node_modules/
+frontend/dist/
+*.log
+
+# 派生索引与缓存（可从 G3 文件重建）
+.cache/
+*.db
+
+# G3 运行时数据（保留目录结构与种子，不提交用户/任务运行数据）
+users/*/
+tasks/*/
+!users/.gitkeep
+!tasks/.gitkeep
+
+# 系统
+.DS_Store

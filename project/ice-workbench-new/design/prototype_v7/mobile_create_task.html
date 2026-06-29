@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>新建任务（移动端）· ICE Workbench v7</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <link rel="stylesheet" href="_shared/tokens.css" />
+  <link rel="stylesheet" href="_shared/components.css" />
+  <style>
+    /* ===== 移动端 CreateTask =====
+       设计策略：
+       - 步骤条改为 compact pill 横滚（与桌面端的 step+line 对应）
+       - 每一步全宽单列、垂直堆叠
+       - 范式/Agent 选择卡片改为 2 列紧凑网格
+       - 底部固定操作按钮（与桌面端的 form-card 内按钮对应）
+       - 可见性选择从横排改为竖排
+    */
+    body { background: var(--bg); }
+    .m-ct { display: flex; flex-direction: column; min-height: 100vh; min-height: 100svh; }
+
+    /* 顶栏 */
+    .m-ct-nav {
+      height: 48px; display: flex; align-items: center; gap: 8px;
+      padding: env(safe-area-inset-top, 0px) 12px 0;
+      padding-top: calc(env(safe-area-inset-top, 0px) + 4px);
+      background: rgba(250,244,237,.92); backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-soft); flex: none; z-index: 20;
+    }
+    .m-ct-nav .back { width: 32px; height: 32px; border-radius: 8px; border: none; background: transparent; color: var(--text-dim); display: grid; place-items: center; font-size: 18px; cursor: pointer; }
+    .m-ct-nav .title { flex: 1; font-size: 15px; font-weight: 600; color: var(--text); }
+
+    /* 步骤条 — compact pills 横滚 */
+    .m-steps {
+      display: flex; gap: 8px; padding: 12px 16px;
+      overflow-x: auto; scrollbar-width: none;
+      border-bottom: 1px solid var(--border-soft);
+      flex: none;
+    }
+    .m-steps::-webkit-scrollbar { display: none; }
+    .m-step {
+      display: inline-flex; align-items: center; gap: 6px; flex: none;
+      padding: 6px 12px; border-radius: var(--r-pill);
+      background: var(--surface-2); color: var(--text-muted);
+      font-size: 12px; font-weight: 500; white-space: nowrap;
+    }
+    .m-step .num { width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center; font-size: 10px; font-weight: 600; background: var(--surface-3); }
+    .m-step.active { background: var(--accent-soft); color: var(--accent-text); }
+    .m-step.active .num { background: var(--accent); color: #fff; }
+    .m-step.done { background: var(--success-soft); color: var(--success); }
+    .m-step.done .num { background: var(--success); color: #fff; }
+
+    /* 内容区 */
+    .m-ct-body { flex: 1; overflow-y: auto; padding: 16px 16px calc(72px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; gap: 20px; }
+
+    .m-ct-section h2 { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+    .m-ct-section .desc { font-size: 12px; color: var(--text-muted); margin-bottom: 12px; }
+
+    /* 范式 2 列 */
+    .m-para-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .m-para-card {
+      padding: 14px; border-radius: var(--r-lg); border: 1px solid var(--border-soft);
+      background: var(--surface); display: flex; flex-direction: column; gap: 6px;
+      cursor: pointer; position: relative;
+    }
+    .m-para-card.sel { border-color: var(--accent); box-shadow: var(--ring); }
+    .m-para-card.sel::after { content: "✓"; position: absolute; top: 8px; right: 8px; width: 18px; height: 18px; border-radius: 50%; background: var(--accent); color: #fff; display: grid; place-items: center; font-size: 10px; }
+    .m-para-card .ico { width: 32px; height: 32px; border-radius: 8px; display: grid; place-items: center; font-size: 16px; }
+    .m-para-card .name { font-size: 12px; font-weight: 600; color: var(--text); }
+    .m-para-card .tag { font-family: var(--font-mono); font-size: 9px; color: var(--text-muted); }
+
+    /* Agent 选择 */
+    .m-agent-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .m-agent-pick {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px; border-radius: var(--r-md); border: 1px solid var(--border-soft);
+      background: var(--surface); cursor: pointer;
+    }
+    .m-agent-pick.sel { border-color: var(--accent); box-shadow: var(--ring); }
+    .m-agent-pick .ico { width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center; font-size: 15px; flex: none; }
+    .m-agent-pick .name { font-size: 12px; font-weight: 600; color: var(--text); }
+    .m-agent-pick .sub { font-size: 10px; color: var(--text-muted); }
+
+    /* 表单 */
+    .m-field { display: flex; flex-direction: column; gap: 4px; }
+    .m-field label { font-size: 12px; font-weight: 600; color: var(--text-dim); }
+    .m-field input, .m-field textarea { font-size: 15px; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface); color: var(--text); outline: none; width: 100%; }
+    .m-field textarea { min-height: 80px; resize: none; line-height: 1.5; }
+    .m-field .hint { font-size: 11px; color: var(--text-muted); }
+
+    /* 可见性：竖排两行 */
+    .m-vis-col { display: flex; flex-direction: column; gap: 8px; }
+    .m-vis-opt {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 14px; border-radius: var(--r-md);
+      border: 1px solid var(--border-soft); background: var(--surface);
+      cursor: pointer;
+    }
+    .m-vis-opt.sel { border-color: var(--accent); box-shadow: var(--ring); }
+    .m-vis-opt .ico { font-size: 18px; color: var(--text-dim); flex: none; }
+    .m-vis-opt .t { font-size: 13px; font-weight: 600; color: var(--text); }
+    .m-vis-opt .d { font-size: 11px; color: var(--text-muted); }
+
+    /* 底部固定按钮 */
+    .m-ct-footer {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: var(--surface); border-top: 1px solid var(--border-soft);
+      padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px));
+      display: flex; gap: 8px; z-index: 20;
+    }
+    .m-ct-footer .btn { flex: 1; height: 44px; justify-content: center; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <div class="m-ct">
+    <!-- 顶栏 -->
+    <header class="m-ct-nav">
+      <button class="back" onclick="history.back()"><i class="ph ph-arrow-left"></i></button>
+      <span class="title">新建任务</span>
+    </header>
+
+    <!-- 步骤条 -->
+    <div class="m-steps">
+      <span class="m-step done"><span class="num"><i class="ph ph-check"></i></span> 选择范式</span>
+      <span class="m-step active"><span class="num">2</span> 绑定 Agent</span>
+      <span class="m-step"><span class="num">3</span> 任务详情</span>
+    </div>
+
+    <!-- 内容区 -->
+    <main class="m-ct-body">
+      <!-- Step 1: 范式 -->
+      <section class="m-ct-section">
+        <h2>分析范式</h2>
+        <p class="desc">范式决定 Agent 的工具集与输出模版</p>
+        <div class="m-para-grid">
+          <div class="m-para-card">
+            <span class="ico" style="background:var(--p-data-soft);color:var(--p-data)"><i class="ph ph-chart-bar"></i></span>
+            <span class="name">数据分析 <span class="tag">data</span></span>
+          </div>
+          <div class="m-para-card sel">
+            <span class="ico" style="background:var(--p-ab-soft);color:var(--p-ab)"><i class="ph ph-flask"></i></span>
+            <span class="name">AB 实验 <span class="tag">ab</span></span>
+          </div>
+          <div class="m-para-card">
+            <span class="ico" style="background:var(--p-biz-soft);color:var(--p-biz)"><i class="ph ph-presentation-chart"></i></span>
+            <span class="name">经营分析 <span class="tag">biz</span></span>
+          </div>
+          <div class="m-para-card">
+            <span class="ico" style="background:var(--p-gray-soft);color:var(--p-gray)"><i class="ph ph-sparkle"></i></span>
+            <span class="name">通用 <span class="tag">general</span></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Step 2: Agent -->
+      <section class="m-ct-section">
+        <h2>绑定 Agent</h2>
+        <p class="desc">该范式下可用的智能体</p>
+        <div class="m-agent-grid">
+          <div class="m-agent-pick sel">
+            <span class="ico" style="background:var(--p-ab-soft);color:var(--p-ab)"><i class="ph ph-flask"></i></span>
+            <div><span class="name">AB 实验官</span><br /><span class="sub">显著性一站式</span></div>
+          </div>
+          <div class="m-agent-pick">
+            <span class="ico" style="background:var(--p-gray-soft);color:var(--p-gray)"><i class="ph ph-sparkle"></i></span>
+            <div><span class="name">通用助理</span><br /><span class="sub">跨范式协作</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Step 3: 详情 -->
+      <section class="m-ct-section">
+        <h2>任务详情</h2>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div class="m-field">
+            <label>任务名称</label>
+            <input value="新版搜索 AB 实验显著性" />
+            <span class="hint">留空将自动命名</span>
+          </div>
+          <div class="m-field">
+            <label>初始需求（可选）</label>
+            <textarea placeholder="描述你想让 Agent 做什么…">实验组 CTR 提升 2.3%，帮我跑显著性检验。</textarea>
+          </div>
+          <div class="m-field">
+            <label>可见性</label>
+            <div class="m-vis-col">
+              <div class="m-vis-opt sel">
+                <span class="ico"><i class="ph ph-lock-simple"></i></span>
+                <div><span class="t">私有</span><br /><span class="d">仅自己可见</span></div>
+              </div>
+              <div class="m-vis-opt">
+                <span class="ico"><i class="ph ph-users-three"></i></span>
+                <div><span class="t">团队可见</span><br /><span class="d">审核后展示在公共区</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- 底部操作 -->
+    <div class="m-ct-footer">
+      <button class="btn btn-ghost" onclick="history.back()"><i class="ph ph-arrow-left"></i> 上一步</button>
+      <a class="btn btn-primary" href="mobile_workspace.html">创建 <i class="ph ph-arrow-right"></i></a>
+    </div>
+  </div>
+</body>
+</html>

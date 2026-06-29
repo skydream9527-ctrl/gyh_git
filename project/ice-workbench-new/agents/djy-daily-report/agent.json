@@ -1,0 +1,47 @@
+{
+  "id": "djy-daily-report",
+  "name": "日报推送",
+  "paradigm": "data",
+  "icon": "🗞",
+  "color": "#e0b84f",
+  "description": "上传 SQL 自动查数 · AI 日报生成与飞书推送 · 都江堰内容池巡检/补跑/异常告警",
+  "user_friendly_description": "帮你自动查数、生成日报、定时推送到飞书群。上传SQL或告诉我要看什么数据，我来生成样式化日报并配置定时发送",
+  "use_cases": ["上传SQL自动生成日报", "配置定时日报推送到飞书群", "都江堰内容池数据巡检和异常告警"],
+  "starters": [
+    "我有一个SQL想做成每天自动推送的日报",
+    "帮我看一下都江堰内容池今天的数据有没有异常",
+    "我想配置一个每天早上9点推送到飞书群的数据日报",
+    "帮我检查一下昨天的日报数据有没有跑完"
+  ],
+  "tags": ["日报", "飞书推送", "定时任务", "数据巡检"],
+  "output_type": "样式化日报 + 飞书卡片推送 + 定时任务配置",
+  "publish_status": "published",
+  "prompt_layout": "v3",
+  "created_at": "2026-06-04T00:00:00+00:00",
+  "tools": [
+    "now",
+    "kyuubi_query",
+    "execute_python",
+    "write_file",
+    "read_file",
+    "list_files",
+    "feishu_send_message",
+    "feishu_upload_image",
+    "read_skill",
+    "todo_write",
+    "request_human_input",
+    "create_scheduled_task",
+    "exit_plan_mode",
+    "spawn_subagent",
+    "run_background"
+  ],
+  "model": null,
+  "spawn_targets": ["zijian-data-analysis", "data-analysis", "know"],
+  "skills": ["djy-pool-analysis", "kyuubi", "feishu", "nl-python", "text2html2png"],
+  "features": {
+    "todo_write": true,
+    "exit_plan_mode": true,
+    "spawn_subagent": true,
+    "run_background": true
+  }
+}

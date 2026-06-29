@@ -1,0 +1,773 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TokenWisdom · Agent-to-Agent Workspace v3</title>
+  <style>
+    :root {
+      --bg: #f7f8fa;
+      --surface: #ffffff;
+      --surface-2: #f1f4f7;
+      --ink: #111827;
+      --muted: #667085;
+      --subtle: #98a2b3;
+      --line: #e5e7eb;
+      --line-strong: #d0d5dd;
+      --blue: #2563eb;
+      --blue-2: #1d4ed8;
+      --blue-soft: #eff6ff;
+      --green: #079455;
+      --green-soft: #ecfdf3;
+      --amber: #b54708;
+      --amber-soft: #fffaeb;
+      --red: #b42318;
+      --red-soft: #fef3f2;
+      --violet: #6941c6;
+      --violet-soft: #f4f3ff;
+      --shadow: 0 14px 40px rgba(16, 24, 40, 0.08);
+      --radius-lg: 20px;
+      --radius: 14px;
+      --radius-sm: 10px;
+      --body: "Avenir Next", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      --mono: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background: var(--bg);
+      font-family: var(--body);
+    }
+
+    button, input { font: inherit; }
+
+    .app {
+      display: grid;
+      grid-template-columns: 236px minmax(0, 1fr) 360px;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      padding: 20px 14px;
+      background: var(--surface);
+      border-right: 1px solid var(--line);
+      overflow: auto;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 8px 18px;
+      margin-bottom: 14px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .brand-mark {
+      width: 36px;
+      height: 36px;
+      border-radius: 11px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-weight: 800;
+      background: linear-gradient(135deg, #111827, var(--blue));
+    }
+
+    .brand strong { display: block; font-size: 15px; }
+    .brand span { display: block; color: var(--muted); font-size: 12px; margin-top: 1px; }
+
+    .nav-label {
+      padding: 14px 8px 7px;
+      color: var(--subtle);
+      font-size: 11px;
+      font-family: var(--mono);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .nav-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 0;
+      border-radius: 11px;
+      padding: 10px 9px;
+      color: var(--muted);
+      background: transparent;
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .nav-btn:hover { background: var(--surface-2); color: var(--ink); }
+    .nav-btn.active { background: var(--blue-soft); color: var(--blue); font-weight: 700; }
+    .nav-btn .icon { width: 22px; text-align: center; color: currentColor; }
+
+    .side-note {
+      margin: 18px 8px 0;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: var(--surface-2);
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .main {
+      min-width: 0;
+      padding: 22px 24px 48px;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      padding-bottom: 16px;
+      background: linear-gradient(180deg, rgba(247, 248, 250, 0.96), rgba(247, 248, 250, 0.82), transparent);
+      backdrop-filter: blur(10px);
+    }
+
+    .command {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 46px;
+      padding: 0 14px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: var(--surface);
+      box-shadow: 0 8px 22px rgba(16, 24, 40, 0.04);
+    }
+
+    .command kbd {
+      padding: 4px 7px;
+      border-radius: 7px;
+      background: var(--surface-2);
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 11px;
+    }
+
+    .command span { color: var(--subtle); font-size: 14px; }
+
+    .page { display: none; animation: fade 160ms ease; }
+    .page.active { display: block; }
+
+    .page-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 16px;
+      align-items: end;
+      margin: 8px 0 18px;
+    }
+
+    .eyebrow {
+      color: var(--blue);
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      margin-bottom: 7px;
+    }
+
+    h1, h2, h3 { margin: 0; }
+    h1 { max-width: 880px; font-size: clamp(28px, 3.4vw, 44px); line-height: 1.12; letter-spacing: -0.035em; }
+    h2 { font-size: 20px; letter-spacing: -0.02em; }
+    h3 { font-size: 15px; letter-spacing: -0.01em; }
+    p { margin: 0; }
+    .subtle { color: var(--muted); font-size: 14px; line-height: 1.7; }
+    .mono { font-family: var(--mono); }
+
+    .grid { display: grid; gap: 14px; }
+    .cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .main-side { grid-template-columns: minmax(0, 1fr) 340px; }
+    .room-layout { grid-template-columns: 260px minmax(0, 1fr) 320px; align-items: start; }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: 0 1px 0 rgba(255,255,255,.8), 0 10px 28px rgba(16,24,40,.045);
+    }
+
+    .card.pad { padding: 16px; }
+    .card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 15px 16px;
+      border-bottom: 1px solid var(--line);
+    }
+    .card-body { padding: 16px; }
+
+    .btn {
+      border: 1px solid var(--line-strong);
+      border-radius: 10px;
+      min-height: 36px;
+      padding: 0 12px;
+      background: var(--surface);
+      color: var(--ink);
+      font-weight: 650;
+      cursor: pointer;
+    }
+    .btn.primary { background: var(--blue); border-color: var(--blue); color: #fff; }
+    .btn.ghost { background: transparent; }
+    .btn.danger { color: var(--red); background: var(--red-soft); border-color: #fecdca; }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      width: fit-content;
+      padding: 5px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      color: var(--muted);
+      background: var(--surface);
+      font-size: 12px;
+      font-weight: 650;
+      white-space: nowrap;
+    }
+    .pill.blue { color: var(--blue); background: var(--blue-soft); border-color: #bfdbfe; }
+    .pill.green { color: var(--green); background: var(--green-soft); border-color: #bbf7d0; }
+    .pill.amber { color: var(--amber); background: var(--amber-soft); border-color: #fedf89; }
+    .pill.red { color: var(--red); background: var(--red-soft); border-color: #fecdca; }
+    .pill.violet { color: var(--violet); background: var(--violet-soft); border-color: #d9d6fe; }
+
+    .relationship {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr auto 1.4fr;
+      align-items: center;
+      gap: 12px;
+      padding: 18px;
+      min-height: 190px;
+    }
+
+    .rel-node {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px;
+      background: var(--surface);
+    }
+    .rel-node.hero { border-color: #bfdbfe; background: linear-gradient(180deg, #fff, var(--blue-soft)); }
+    .rel-node strong { display: block; font-size: 17px; margin-bottom: 6px; }
+    .rel-node span { display: block; color: var(--muted); font-size: 13px; line-height: 1.5; }
+    .arrow { color: var(--subtle); font-size: 24px; }
+
+    .agent-cluster { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .mini-agent { padding: 10px; border-radius: 12px; background: var(--surface-2); font-size: 12px; }
+    .mini-agent b { display: block; margin-bottom: 3px; }
+    .mini-agent small { color: var(--muted); }
+
+    .metric { padding: 15px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+    .metric b { display: block; font-size: 26px; letter-spacing: -.03em; }
+    .metric span { color: var(--muted); font-size: 13px; }
+
+    .rule-strip {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 14px;
+    }
+    .rule-card {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--surface);
+      padding: 13px;
+    }
+    .rule-card b { display: block; font-size: 13px; margin-bottom: 5px; }
+    .rule-card span { color: var(--muted); font-size: 12px; line-height: 1.45; }
+
+    .list { display: grid; gap: 10px; }
+    .list-item {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      gap: 11px;
+      align-items: center;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: var(--surface);
+    }
+    .list-item.compact { grid-template-columns: minmax(0, 1fr) auto; }
+    .marker { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; background: var(--blue-soft); color: var(--blue); font-weight: 800; }
+    .list-item strong { display: block; font-size: 14px; }
+    .list-item span { display: block; margin-top: 3px; color: var(--muted); font-size: 12px; line-height: 1.45; }
+
+    .room-tabs { display: grid; gap: 8px; }
+    .room-tab { border: 1px solid var(--line); border-radius: 12px; padding: 12px; background: var(--surface); cursor: pointer; }
+    .room-tab.active { border-color: #bfdbfe; background: var(--blue-soft); }
+    .room-tab strong { display: block; font-size: 13px; }
+    .room-tab span { display: block; color: var(--muted); font-size: 12px; margin-top: 3px; }
+
+    .participants { display: flex; flex-wrap: wrap; gap: 8px; }
+    .participant { display: inline-flex; align-items: center; gap: 7px; padding: 7px 9px; border-radius: 999px; background: var(--surface-2); font-size: 12px; }
+    .avatar { width: 20px; height: 20px; border-radius: 999px; display: grid; place-items: center; color: #fff; font-size: 10px; font-weight: 800; background: var(--blue); }
+    .avatar.user { background: #111827; }
+    .avatar.twin { background: var(--blue); }
+    .avatar.agent { background: var(--violet); }
+
+    .conversation { display: grid; gap: 10px; }
+    .msg {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 11px 12px;
+      background: var(--surface);
+      max-width: 86%;
+    }
+    .msg.user { margin-left: auto; background: #111827; color: #fff; }
+    .msg.twin { background: var(--blue-soft); border-color: #bfdbfe; }
+    .msg.agent { background: var(--violet-soft); border-color: #d9d6fe; }
+    .msg .who { display: block; font-size: 11px; font-weight: 800; margin-bottom: 5px; opacity: .74; }
+    .msg p { font-size: 13px; line-height: 1.55; }
+
+    .room-brief {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .brief-chip {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--surface-2);
+      padding: 10px;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+    .brief-chip b { display: block; margin-bottom: 4px; }
+    .brief-chip span { color: var(--muted); }
+
+    .room-composer {
+      margin-top: 14px;
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      background: #fff;
+      overflow: hidden;
+    }
+    .composer-to { display: flex; gap: 7px; flex-wrap: wrap; padding: 10px 12px; border-bottom: 1px solid var(--line); background: var(--surface-2); }
+    .composer-field { padding: 12px; min-height: 54px; color: var(--muted); font-size: 13px; line-height: 1.55; }
+
+    .protocol-list { display: grid; gap: 8px; margin-top: 12px; }
+    .protocol-step {
+      display: grid;
+      grid-template-columns: 26px minmax(0, 1fr);
+      gap: 9px;
+      align-items: start;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--surface-2);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+    .protocol-step b { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 999px; background: #111827; color: #fff; font-size: 11px; }
+    .protocol-step span { color: var(--muted); }
+
+    .decision {
+      border: 1px solid #fedf89;
+      background: var(--amber-soft);
+      border-radius: 14px;
+      padding: 13px;
+    }
+    .decision strong { display: block; margin-bottom: 6px; }
+    .decision p { color: #7a3f00; font-size: 13px; line-height: 1.55; }
+    .decision-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+
+    .table { width: 100%; border-collapse: collapse; }
+    .table th, .table td { padding: 12px; border-bottom: 1px solid var(--line); text-align: left; font-size: 13px; }
+    .table th { color: var(--muted); background: var(--surface-2); font-weight: 700; }
+    .table tr:last-child td { border-bottom: 0; }
+
+    .dock {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      padding: 18px 16px;
+      background: var(--surface);
+      border-left: 1px solid var(--line);
+      overflow: auto;
+    }
+
+    .dock-card {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .dock-head {
+      padding: 15px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(180deg, var(--blue-soft), #fff);
+    }
+    .dock-head-main { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+    .dock-head strong { display: block; font-size: 15px; }
+    .dock-head span { display: block; color: var(--muted); font-size: 12px; margin-top: 3px; }
+
+    .dock-chat { display: grid; gap: 10px; padding: 14px; max-height: 330px; overflow: auto; }
+    .dock-msg { padding: 10px 11px; border-radius: 13px; font-size: 12px; line-height: 1.5; background: var(--surface-2); }
+    .dock-msg.me { background: #111827; color: #fff; margin-left: 36px; }
+    .dock-msg.twin { background: var(--blue-soft); color: #174ea6; margin-right: 26px; }
+
+    .dock-input {
+      display: flex;
+      gap: 8px;
+      padding: 12px;
+      border-top: 1px solid var(--line);
+    }
+    .dock-input input {
+      min-width: 0;
+      flex: 1;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 0 10px;
+      min-height: 36px;
+      outline: none;
+    }
+
+    .dock-section { margin-top: 14px; }
+    .dock-section h3 { margin-bottom: 8px; }
+    .confirm-card { padding: 12px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); margin-bottom: 10px; }
+    .confirm-card strong { display: block; font-size: 13px; margin-bottom: 5px; }
+    .confirm-card p { color: var(--muted); font-size: 12px; line-height: 1.45; }
+    .confirm-actions { display: flex; gap: 6px; margin-top: 10px; }
+    .confirm-actions .btn { min-height: 30px; font-size: 12px; padding: 0 9px; }
+
+    .permission-matrix { display: grid; gap: 10px; }
+    .perm-row { display: grid; grid-template-columns: 130px repeat(4, 1fr); gap: 8px; align-items: center; }
+    .perm-cell { padding: 10px; border-radius: 11px; background: var(--surface); border: 1px solid var(--line); font-size: 12px; text-align: center; }
+    .perm-cell.head { background: var(--surface-2); color: var(--muted); font-weight: 700; }
+    .perm-cell.ok { color: var(--green); background: var(--green-soft); }
+    .perm-cell.no { color: var(--red); background: var(--red-soft); }
+    .perm-cell.ask { color: var(--amber); background: var(--amber-soft); }
+
+    .audit-line { display: grid; grid-template-columns: 84px 130px minmax(0,1fr) auto; gap: 10px; padding: 11px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+    .audit-line:last-child { border-bottom: 0; }
+    .audit-line time, .audit-line code { color: var(--muted); font-family: var(--mono); font-size: 12px; }
+
+    @keyframes fade { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+    @media (max-width: 1180px) {
+      .app { grid-template-columns: 1fr; }
+      .sidebar, .dock { position: relative; height: auto; }
+      .main { padding: 18px; }
+      .relationship, .grid, .main-side, .room-layout, .cols-2, .cols-3, .cols-4, .rule-strip, .room-brief { grid-template-columns: 1fr; }
+      .arrow { transform: rotate(90deg); justify-self: center; }
+    }
+
+    @media (max-width: 720px) {
+      .page-head, .list-item, .audit-line, .perm-row { grid-template-columns: 1fr; }
+      .table { display: block; overflow-x: auto; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">T</div>
+        <div>
+          <strong>TokenWisdom</strong>
+          <span>User → Twin → Agents</span>
+        </div>
+      </div>
+
+      <div class="nav-label">Navigation</div>
+      <button class="nav-btn active" data-page="home"><span class="icon">⌂</span>Home</button>
+      <button class="nav-btn" data-page="rooms"><span class="icon">◫</span>Agent Rooms</button>
+      <button class="nav-btn" data-page="agents"><span class="icon">✦</span>Agents</button>
+      <button class="nav-btn" data-page="permissions"><span class="icon">✓</span>Permissions</button>
+      <button class="nav-btn" data-page="knowledge"><span class="icon">□</span>Knowledge</button>
+      <button class="nav-btn" data-page="runtime"><span class="icon">⌘</span>Runtime</button>
+      <button class="nav-btn" data-page="audit"><span class="icon">≣</span>Audit</button>
+      <button class="nav-btn" data-page="sitemap"><span class="icon">☷</span>Page Hierarchy</button>
+
+      <div class="side-note">
+        v3 的核心不是“很多 Agent 的列表”，而是一个固定关系：用户拥有一个分身 Agent，分身 Agent 参与所有外部 Agent 对话，但最终确认权永远归用户。
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <div class="command"><kbd>⌘ K</kbd><span>告诉分身你想完成什么，分身会带着你进入对应 Agent Room。</span></div>
+      </div>
+
+      <section class="page active" id="page-home">
+        <div class="page-head">
+          <div>
+            <div class="eyebrow">Relationship Overview</div>
+            <h1>TokenWisdom 是一个 User → Twin Agent → Agents 的协作系统。</h1>
+            <p class="subtle">用户只需要面对自己的分身 Agent；分身 Agent 代表用户参与其他工具或应用类 Agent 的讨论，并把所有关键动作带回给用户确认。</p>
+          </div>
+          <button class="btn primary">创建 Agent Room</button>
+        </div>
+
+        <div class="card relationship">
+          <div class="rel-node">
+            <strong>User</strong>
+            <span>最终确认者。授权、拒绝、修改范围、采纳结论都由用户决定。</span>
+          </div>
+          <div class="arrow">→</div>
+          <div class="rel-node hero">
+            <strong>Twin Agent</strong>
+            <span>常驻右上角。理解用户、参与讨论、提出要求、整理结论、请求确认。</span>
+          </div>
+          <div class="arrow">→</div>
+          <div class="agent-cluster">
+            <div class="mini-agent"><b>Codex</b><small>代码执行 Agent</small></div>
+            <div class="mini-agent"><b>Claude Code</b><small>研发协作 Agent</small></div>
+            <div class="mini-agent"><b>Browser Agent</b><small>网页工具 Agent</small></div>
+            <div class="mini-agent"><b>File Agent</b><small>知识文件 Agent</small></div>
+          </div>
+        </div>
+
+        <div class="rule-strip">
+          <div class="rule-card"><b>1:1 入口</b><span>用户始终先面对自己的 Twin Agent，而不是直接管理一堆工具 Agent。</span></div>
+          <div class="rule-card"><b>Every Room Includes Twin</b><span>任何面向 Codex、Claude Code、Browser Agent 的对话框，都默认带上分身。</span></div>
+          <div class="rule-card"><b>User Final Confirm</b><span>分身可以讨论、追问和提出请求；执行、写入、发送、记忆固化都回到用户确认。</span></div>
+        </div>
+
+        <div class="grid cols-4" style="margin-top:14px">
+          <div class="metric"><b>1</b><span>用户专属分身 Agent</span></div>
+          <div class="metric"><b>4</b><span>活跃 Agent Rooms</span></div>
+          <div class="metric"><b>3</b><span>等待用户确认</span></div>
+          <div class="metric"><b>L3</b><span>分身可请求，不可越权</span></div>
+        </div>
+
+        <div class="grid main-side" style="margin-top:14px">
+          <div class="card">
+            <div class="card-head"><h2>Active Agent Rooms</h2><span class="pill blue">Twin joined all rooms</span></div>
+            <div class="card-body list">
+              <div class="list-item"><div class="marker">D</div><div><strong>Dev Room</strong><span>User + Twin Agent + Codex + Claude Code，正在讨论 HTML 页面重构。</span></div><span class="pill amber">Needs confirm</span></div>
+              <div class="list-item"><div class="marker">K</div><div><strong>Knowledge Room</strong><span>Twin Agent 要求 File Agent 总结 ICE Workbench 可复用能力。</span></div><span class="pill green">Running</span></div>
+              <div class="list-item"><div class="marker">A</div><div><strong>AI Tool Room</strong><span>Twin Agent 正在让 Browser Agent 冷启动网页工具能力卡。</span></div><span class="pill blue">Discussing</span></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-head"><h2>Next Decisions</h2></div>
+            <div class="card-body list">
+              <div class="list-item compact"><div><strong>允许 Codex 写入 v3 HTML？</strong><span>分身已评估风险，等待用户确认。</span></div><span class="pill amber">Confirm</span></div>
+              <div class="list-item compact"><div><strong>是否固化“页面要清晰干净”？</strong><span>作为长期 UI 偏好。</span></div><span class="pill blue">Memory</span></div>
+              <div class="list-item compact"><div><strong>Claude Code 默认权限</strong><span>建议：任务级授权，写文件前确认。</span></div><span class="pill red">Policy</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="page-rooms">
+        <div class="page-head">
+          <div>
+            <div class="eyebrow">Agent-to-Agent Rooms</div>
+            <h1>任何对其他 Agent 的对话框，都默认加入 Twin Agent。</h1>
+            <p class="subtle">分身 Agent 不是旁观者，而是用户代表：它会提问、约束、追问、压缩结论，但不会替用户做最终确认。</p>
+          </div>
+          <span class="pill green">Twin present</span>
+        </div>
+
+        <div class="grid room-layout">
+          <div class="card pad">
+            <h2>Room List</h2>
+            <p class="subtle" style="margin-top:8px">每个 Room 都是一个多方对话框：User Goal + Twin Agent + Tool Agents + Decision Panel。</p>
+            <div class="room-tabs" style="margin-top:12px">
+              <div class="room-tab active"><strong>Dev Agent Room</strong><span>Codex / Claude Code</span></div>
+              <div class="room-tab"><strong>Knowledge Room</strong><span>File Agent / Knowledge Agent</span></div>
+              <div class="room-tab"><strong>AI Tool Room</strong><span>Browser / MCP / Web App</span></div>
+              <div class="room-tab"><strong>Life Ops Room</strong><span>Calendar / Mail / Todo</span></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><h2>Dev Agent Room</h2><span class="pill amber">User confirmation required</span></div>
+            <div class="card-body">
+              <div class="participants" style="margin-bottom:14px">
+                <span class="participant"><span class="avatar user">U</span>User · final approver</span>
+                <span class="participant"><span class="avatar twin">T</span>Twin Agent · coordinator</span>
+                <span class="participant"><span class="avatar agent">C</span>Codex · executor</span>
+                <span class="participant"><span class="avatar agent">CC</span>Claude Code · reviewer</span>
+              </div>
+              <div class="room-brief">
+                <div class="brief-chip"><b>User Goal</b><span>把页面改成 User → Twin Agent → Agents 的系统。</span></div>
+                <div class="brief-chip"><b>Twin Role</b><span>代表用户追问、约束范围、整理结论和发起确认。</span></div>
+                <div class="brief-chip"><b>Permission</b><span>仅允许讨论与请求；写入动作必须用户确认。</span></div>
+              </div>
+              <div class="conversation">
+                <div class="msg user"><span class="who">User</span><p>页面层级和页面设计要改成 User → Twin Agent → Agents。</p></div>
+                <div class="msg twin"><span class="who">Twin Agent</span><p>我会把我自己固定为右上角常驻对话框，并加入所有外部 Agent Room。Codex，请基于这个关系重构 HTML。</p></div>
+                <div class="msg agent"><span class="who">Codex</span><p>收到。需要写入一个新的 v3 HTML 文件。风险：写文件。建议由用户确认。</p></div>
+                <div class="msg twin"><span class="who">Twin Agent</span><p>我建议允许写入新版本文件，不覆盖旧版本。用户确认后执行。</p></div>
+              </div>
+              <div class="room-composer">
+                <div class="composer-to">
+                  <span class="pill blue">@Twin Agent always included</span>
+                  <span class="pill violet">@Codex</span>
+                  <span class="pill violet">@Claude Code</span>
+                </div>
+                <div class="composer-field">输入给外部 Agent 的消息时，Twin Agent 会自动带入你的目标、约束和权限边界，并在发送前提示是否需要用户确认。</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card pad">
+            <h2>Decision Panel</h2>
+            <div class="decision" style="margin-top:12px">
+              <strong>Twin Agent 请求确认</strong>
+              <p>允许 Codex 新增 `tokenwisdom-agent-to-agent-v3.html`，不覆盖 v2。执行后同步归档。</p>
+              <div class="decision-actions">
+                <button class="btn primary">允许</button>
+                <button class="btn">修改范围</button>
+                <button class="btn danger">拒绝</button>
+              </div>
+            </div>
+            <div class="protocol-list">
+              <div class="protocol-step"><b>1</b><span>Twin Agent 先向外部 Agent 说明目标和边界。</span></div>
+              <div class="protocol-step"><b>2</b><span>外部 Agent 返回方案、风险、所需权限。</span></div>
+              <div class="protocol-step"><b>3</b><span>Twin Agent 压缩成确认请求，用户最终决定。</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="page-agents">
+        <div class="page-head">
+          <div><div class="eyebrow">Agent Network</div><h1>Agent 页面分两层：你的分身 Agent，以及它可协作的外部 Agent。</h1></div>
+          <button class="btn primary">Add Tool Agent</button>
+        </div>
+        <div class="grid cols-3">
+          <div class="card pad"><span class="pill blue">Twin Agent</span><h2 style="margin-top:10px">Wisdom Twin</h2><p class="subtle">唯一长期分身。理解用户，参与所有 Room，负责向外部 Agent 提要求。</p></div>
+          <div class="card pad"><span class="pill violet">Coding Agent</span><h2 style="margin-top:10px">Codex</h2><p class="subtle">执行代码任务。默认需要用户确认才能写文件或运行高风险命令。</p></div>
+          <div class="card pad"><span class="pill violet">Coding Agent</span><h2 style="margin-top:10px">Claude Code</h2><p class="subtle">长任务研发协作。分身负责准备任务包和验收标准。</p></div>
+          <div class="card pad"><span class="pill green">Knowledge Agent</span><h2 style="margin-top:10px">File Agent</h2><p class="subtle">读取用户授权文件，提取摘要和可确认记忆。</p></div>
+          <div class="card pad"><span class="pill amber">App Agent</span><h2 style="margin-top:10px">Browser Agent</h2><p class="subtle">使用网页工具或应用平台。分身参与对话并控制上下文暴露。</p></div>
+          <div class="card pad"><span class="pill red">Life Ops Agent</span><h2 style="margin-top:10px">Mail / Calendar</h2><p class="subtle">只能草拟和提醒。发送消息、创建日程必须用户确认。</p></div>
+        </div>
+      </section>
+
+      <section class="page" id="page-permissions">
+        <div class="page-head">
+          <div><div class="eyebrow">Permission Structure</div><h1>权限结构必须表达清楚：分身可讨论和请求，用户最终确认。</h1></div>
+        </div>
+        <div class="card pad">
+          <div class="permission-matrix">
+            <div class="perm-row"><div class="perm-cell head">角色 / 动作</div><div class="perm-cell head">参与讨论</div><div class="perm-cell head">提出要求</div><div class="perm-cell head">草拟执行</div><div class="perm-cell head">最终确认</div></div>
+            <div class="perm-row"><div class="perm-cell head">User</div><div class="perm-cell ok">可</div><div class="perm-cell ok">可</div><div class="perm-cell ok">可</div><div class="perm-cell ok">唯一确认者</div></div>
+            <div class="perm-row"><div class="perm-cell head">Twin Agent</div><div class="perm-cell ok">可</div><div class="perm-cell ok">可</div><div class="perm-cell ok">可</div><div class="perm-cell no">不可</div></div>
+            <div class="perm-row"><div class="perm-cell head">Tool Agent</div><div class="perm-cell ok">可</div><div class="perm-cell ask">按范围</div><div class="perm-cell ask">按授权</div><div class="perm-cell no">不可</div></div>
+          </div>
+        </div>
+        <div class="grid cols-4" style="margin-top:14px">
+          <div class="card pad"><h2>L1 Discuss</h2><p class="subtle">分身可加入所有 Agent 对话，代表用户提问和补充上下文。</p></div>
+          <div class="card pad"><h2>L2 Draft</h2><p class="subtle">分身可生成 prompt、任务包、执行计划和权限请求。</p></div>
+          <div class="card pad"><h2>L3 Request</h2><p class="subtle">分身把建议带回给用户，等待允许、拒绝或修改范围。</p></div>
+          <div class="card pad"><h2>L4 Execute</h2><p class="subtle">只在用户确认后触发 Tool Agent 执行；分身本身不拥有最终确认权。</p></div>
+        </div>
+      </section>
+
+      <section class="page" id="page-knowledge">
+        <div class="page-head"><div><div class="eyebrow">Knowledge for Twin</div><h1>知识页面的重点是：哪些上下文可以给分身，哪些可以共享给外部 Agent。</h1></div></div>
+        <div class="grid main-side">
+          <div class="card"><div class="card-head"><h2>Context Sharing Boundary</h2></div><table class="table"><thead><tr><th>上下文</th><th>给 Twin</th><th>给 Tool Agent</th><th>规则</th></tr></thead><tbody><tr><td>用户偏好</td><td>允许</td><td>摘要后允许</td><td>只给任务相关片段</td></tr><tr><td>项目文件</td><td>允许</td><td>需用户确认</td><td>默认只传摘要</td></tr><tr><td>密钥 / .env</td><td>禁止</td><td>禁止</td><td>显式授权也需强提醒</td></tr><tr><td>长期记忆</td><td>允许</td><td>筛选后允许</td><td>分身负责裁剪</td></tr></tbody></table></div>
+          <div class="card"><div class="card-head"><h2>Memory Queue</h2></div><div class="card-body list"><div class="list-item compact"><div><strong>页面偏好</strong><span>清晰、高效、干净。</span></div><span class="pill amber">待确认</span></div><div class="list-item compact"><div><strong>核心关系</strong><span>User → Twin → Agents。</span></div><span class="pill green">已确认</span></div><div class="list-item compact"><div><strong>权限原则</strong><span>分身请求，用户确认。</span></div><span class="pill green">已确认</span></div></div></div>
+        </div>
+      </section>
+
+      <section class="page" id="page-runtime">
+        <div class="page-head"><div><div class="eyebrow">Runtime</div><h1>Runtime 页面展示外部 Agent 如何被分身调度，但不绕过用户确认。</h1></div></div>
+        <div class="grid cols-3"><div class="card pad"><h2>Mac Local Runtime</h2><p class="subtle">在线。负责本地文件、CLI Agent 和命令审计。</p><span class="pill green">Online</span></div><div class="card pad"><h2>Codex Connector</h2><p class="subtle">可用。写文件前需 Approval。</p><span class="pill amber">Confirm write</span></div><div class="card pad"><h2>Browser Extension</h2><p class="subtle">可观察用户 AI 工具使用，并把 Room 上下文带入网页。</p><span class="pill blue">Observe</span></div></div>
+      </section>
+
+      <section class="page" id="page-audit">
+        <div class="page-head"><div><div class="eyebrow">Audit</div><h1>审计要覆盖三种对话：User↔Twin、Twin↔Agent、Agent↔Agent。</h1></div></div>
+        <div class="card"><div class="card-head"><h2>Recent Audit</h2></div><div class="card-body"><div class="audit-line"><time>10:18</time><code>TWIN_REQUEST</code><span>Twin Agent 请求 Codex 生成 v3 HTML。</span><span class="pill amber">pending</span></div><div class="audit-line"><time>10:19</time><code>USER_CONFIRM</code><span>用户允许新增文件，不覆盖 v2。</span><span class="pill green">allowed</span></div><div class="audit-line"><time>10:20</time><code>AGENT_ROOM</code><span>Codex 返回执行范围和风险说明。</span><span class="pill blue">logged</span></div><div class="audit-line"><time>10:21</time><code>MEMORY</code><span>提议固化页面设计偏好。</span><span class="pill amber">review</span></div></div></div>
+      </section>
+
+      <section class="page" id="page-sitemap">
+        <div class="page-head"><div><div class="eyebrow">Page Hierarchy v3</div><h1>层级围绕常驻分身和 Agent-to-Agent 对话重建。</h1></div></div>
+        <div class="card pad"><pre class="mono" style="white-space:pre-wrap;line-height:1.7;margin:0;color:var(--muted)">TokenWisdom App Shell
+├── Home：User → Twin Agent → Agents 关系总览
+├── Agent Rooms：所有外部 Agent 对话都加入 Twin Agent
+├── Agents：Twin Agent + Tool/App Agents 能力卡
+├── Permissions：User / Twin / Tool Agent 权限矩阵
+├── Knowledge：分身上下文与共享边界
+├── Runtime：本地执行与 Connector 状态
+└── Audit：User↔Twin、Twin↔Agent、Agent↔Agent 审计
+
+常驻：右上角 Twin Dock
+├── Persistent Conversation
+├── Pending Confirmations
+└── Room Participation</pre></div>
+      </section>
+    </main>
+
+    <aside class="dock" aria-label="Persistent Twin Agent Dock">
+      <div class="dock-card">
+        <div class="dock-head">
+          <div class="dock-head-main">
+            <div>
+              <strong>Wisdom Twin</strong>
+              <span>常驻分身 Agent · 参与所有 Agent Room</span>
+            </div>
+            <span class="pill blue">L3 Request</span>
+          </div>
+        </div>
+        <div class="dock-chat">
+          <div class="dock-msg twin">我会一直在这里。你在任何页面对其他 Agent 发起对话时，我都会加入并代表你提问。</div>
+          <div class="dock-msg me">你只能讨论和要求，最终确认要问我。</div>
+          <div class="dock-msg twin">已记住。高风险动作我只会生成请求，不会替你确认。</div>
+          <div class="dock-msg twin">当前我正在 Dev Room 中要求 Codex 重构 v3 页面。</div>
+        </div>
+        <div class="dock-input">
+          <input placeholder="对你的分身说话…" />
+          <button class="btn primary">Send</button>
+        </div>
+      </div>
+
+      <div class="dock-section">
+        <h3>Pending Confirmations</h3>
+        <div class="confirm-card">
+          <strong>允许 Codex 新增 v3 HTML？</strong>
+          <p>范围：只新增文件并归档，不覆盖旧版本。</p>
+          <div class="confirm-actions"><button class="btn primary">允许</button><button class="btn">修改</button><button class="btn danger">拒绝</button></div>
+        </div>
+        <div class="confirm-card">
+          <strong>固化页面偏好？</strong>
+          <p>“清晰、高效、干净；常驻分身；Agent-to-Agent Room。”</p>
+          <div class="confirm-actions"><button class="btn primary">确认</button><button class="btn">稍后</button></div>
+        </div>
+      </div>
+
+      <div class="dock-section">
+        <h3>Room Participation</h3>
+        <div class="list">
+          <div class="list-item compact"><div><strong>Dev Room</strong><span>Twin + Codex + Claude Code</span></div><span class="pill amber">Confirm</span></div>
+          <div class="list-item compact"><div><strong>Knowledge Room</strong><span>Twin + File Agent</span></div><span class="pill green">Running</span></div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <script>
+    const navButtons = Array.from(document.querySelectorAll('[data-page]'));
+    const pages = Array.from(document.querySelectorAll('.page'));
+    function showPage(name) {
+      pages.forEach((page) => page.classList.toggle('active', page.id === `page-${name}`));
+      navButtons.forEach((btn) => btn.classList.toggle('active', btn.dataset.page === name));
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    navButtons.forEach((btn) => btn.addEventListener('click', () => showPage(btn.dataset.page)));
+  </script>
+</body>
+</html>

@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>管理后台 · ICE Workbench v7</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <link rel="stylesheet" href="_shared/tokens.css" />
+  <link rel="stylesheet" href="_shared/components.css" />
+  <style>
+    .adm { display: flex; min-height: 100vh; }
+    /* 深色侧栏 */
+    .adm-sb { width: 248px; flex: none; background: #1a1612; color: #d8cfbe; display: flex; flex-direction: column; padding: 18px 14px; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+    .adm-logo { display: flex; align-items: center; gap: 10px; padding: 6px 8px 18px; border-bottom: 1px solid rgba(240,233,220,.08); }
+    .adm-logo .mark { width: 30px; height: 30px; border-radius: 8px; background: var(--accent-grad); display: grid; place-items: center; color: #fff; font-size: 16px; }
+    .adm-logo .name { font-size: 14px; font-weight: 600; color: #f0e9dc; }
+    .adm-logo .ver { font-size: 9px; font-family: var(--font-mono); padding: 2px 6px; border-radius: var(--r-pill); background: rgba(204,120,92,.2); color: #e89e83; margin-left: auto; }
+    .adm-group { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: #6f6553; font-weight: 600; padding: 18px 8px 6px; font-family: var(--font-mono); }
+    .adm-item { display: flex; align-items: center; gap: 11px; padding: 8px 10px; border-radius: var(--r-md); font-size: 13px; color: #b3a78f; cursor: pointer; transition: background var(--transition), color var(--transition); }
+    .adm-item i[class*="ph"] { font-size: 16px; }
+    .adm-item:hover { background: rgba(240,233,220,.06); color: #f0e9dc; }
+    .adm-item.is-active { background: rgba(204,120,92,.16); color: #e89e83; }
+    .adm-item .lock { margin-left: auto; font-size: 12px; opacity: .5; }
+    .adm-sb-foot { margin-top: auto; padding-top: 16px; border-top: 1px solid rgba(240,233,220,.08); }
+    .adm-return { display: flex; align-items: center; gap: 8px; width: 100%; padding: 9px 10px; border-radius: var(--r-md); background: rgba(240,233,220,.06); border: none; color: #d8cfbe; font-size: 12px; cursor: pointer; }
+    .adm-return:hover { background: rgba(240,233,220,.12); }
+
+    .adm-main { flex: 1; min-width: 0; padding: 28px 36px; display: flex; flex-direction: column; gap: 24px; }
+    .adm-topbar { display: flex; align-items: center; gap: 12px; }
+    .adm-topbar .crumb { font-size: 13px; color: var(--text-muted); }
+    .adm-topbar .crumb b { color: var(--text); }
+
+    .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--gap-5); }
+    .kpi { position: relative; }
+    .kpi .trend { font-size: var(--fs-xs); font-weight: 600; }
+    .kpi .trend.up { color: var(--success); }
+    .kpi .trend.down { color: var(--error); }
+    .kpi-spark { position: absolute; right: 16px; bottom: 16px; display: flex; align-items: flex-end; gap: 2px; height: 28px; }
+    .kpi-spark i { width: 4px; background: var(--accent-soft); border-radius: 2px; }
+
+    .adm-cols { display: grid; grid-template-columns: 1.5fr 1fr; gap: var(--gap-6); align-items: start; }
+    .adm-table { width: 100%; border-collapse: collapse; }
+    .adm-table th { text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--text-muted); font-family: var(--font-mono); padding: 10px 16px; border-bottom: 1px solid var(--border-soft); font-weight: 600; }
+    .adm-table td { padding: 12px 16px; border-bottom: 1px solid var(--border-soft); font-size: var(--fs-sm); color: var(--text-2); }
+    .adm-table tr:last-child td { border-bottom: none; }
+    .adm-table tr:hover td { background: var(--surface-2); }
+    .u-cell { display: flex; align-items: center; gap: 10px; }
+    .health { display: flex; flex-direction: column; gap: 12px; }
+    .health-row { display: flex; align-items: center; gap: 12px; }
+    .health-row .name { font-size: var(--fs-sm); color: var(--text-2); flex: 1; }
+    .health-bar { width: 90px; height: 6px; border-radius: 3px; background: var(--surface-3); overflow: hidden; }
+    .health-bar > i { display: block; height: 100%; border-radius: 3px; }
+  </style>
+</head>
+<body>
+  <div class="adm">
+    <aside class="adm-sb">
+      <div class="adm-logo"><span class="mark"><i class="ph-fill ph-hexagon"></i></span><span class="name">System Admin</span><span class="ver">v7</span></div>
+      <div class="adm-group">系统监控</div>
+      <div class="adm-item is-active"><i class="ph ph-chart-line-up"></i> 管理大盘</div>
+      <div class="adm-item"><i class="ph ph-trend-up"></i> 使用统计</div>
+      <div class="adm-item"><i class="ph ph-stethoscope"></i> 系统诊断</div>
+      <div class="adm-group">资源与权限</div>
+      <div class="adm-item"><i class="ph ph-users"></i> 用户管理</div>
+      <div class="adm-item"><i class="ph ph-ticket"></i> 体验卡管理</div>
+      <div class="adm-group">业务管理</div>
+      <div class="adm-item"><i class="ph ph-robot"></i> 全局智能体</div>
+      <div class="adm-item"><i class="ph ph-puzzle-piece"></i> 全局技能</div>
+      <div class="adm-item"><i class="ph ph-layout"></i> 提示词模板</div>
+      <div class="adm-item"><i class="ph ph-books"></i> 知识库</div>
+      <div class="adm-item"><i class="ph ph-folder"></i> 公共文件</div>
+      <div class="adm-group">运营与安全</div>
+      <div class="adm-item"><i class="ph ph-list-checks"></i> 审批中心 <span class="badge" style="margin-left:auto">5</span></div>
+      <div class="adm-item"><i class="ph ph-file-text"></i> 审计日志</div>
+      <div class="adm-item"><i class="ph ph-database"></i> SQL 审计</div>
+      <div class="adm-item"><i class="ph ph-gear"></i> 系统设置 <i class="ph-bold ph-lock-key lock"></i></div>
+      <div class="adm-sb-foot">
+        <button class="adm-return" onclick="location.href='dashboard.html'"><i class="ph ph-arrow-left"></i> 返回前台工作区</button>
+      </div>
+    </aside>
+
+    <main class="adm-main">
+      <div class="adm-topbar">
+        <div class="crumb">管理后台 / <b>管理大盘</b></div>
+        <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+          <div class="segmented"><button>今日</button><button class="is-active">近 7 天</button><button>近 30 天</button></div>
+          <button class="btn btn-secondary btn-sm"><i class="ph ph-download-simple"></i> 导出报表</button>
+        </div>
+      </div>
+
+      <div class="page-head" style="display:block">
+        <span class="kicker">Overview</span>
+        <h1 class="serif" style="font-size:26px;margin-top:6px">系统总览</h1>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="stat kpi"><span class="stat-label">活跃用户</span><span class="stat-value">342</span><span class="stat-meta"><span class="trend up"><i class="ph ph-trend-up"></i> +12.4%</span> 较上周</span><div class="kpi-spark"><i style="height:40%"></i><i style="height:60%"></i><i style="height:50%"></i><i style="height:75%"></i><i style="height:90%"></i></div></div>
+        <div class="stat kpi accent"><span class="stat-label">任务总数</span><span class="stat-value">1,284</span><span class="stat-meta"><span class="trend up"><i class="ph ph-trend-up"></i> +8.1%</span> 较上周</span></div>
+        <div class="stat kpi"><span class="stat-label">Token 消耗</span><span class="stat-value">48.2M</span><span class="stat-meta"><span class="trend up"><i class="ph ph-trend-up"></i> +21%</span> 较上周</span></div>
+        <div class="stat kpi"><span class="stat-label">待审批</span><span class="stat-value">5</span><span class="stat-meta"><span class="trend down"><i class="ph ph-clock"></i> 最久 2h</span></span></div>
+      </div>
+
+      <div class="adm-cols">
+        <div class="card" style="overflow:hidden">
+          <div class="section-head" style="padding:16px 20px;margin:0;border-bottom:1px solid var(--border-soft)"><div><h2 style="font-size:16px">最近活跃用户</h2></div><div class="actions"><a class="btn btn-ghost btn-sm" href="#">全部用户 <i class="ph ph-arrow-right"></i></a></div></div>
+          <table class="adm-table">
+            <thead><tr><th>用户</th><th>角色</th><th>任务数</th><th>最近活跃</th></tr></thead>
+            <tbody>
+              <tr><td><div class="u-cell"><span class="avatar">龚</span> 龚云鹤</div></td><td><span class="chip is-on">super_admin</span></td><td class="mono">86</td><td class="mono" style="color:var(--text-muted)">2 分钟前</td></tr>
+              <tr><td><div class="u-cell"><span class="avatar" style="background:var(--p-data)">李</span> 李雯</div></td><td><span class="chip">admin</span></td><td class="mono">52</td><td class="mono" style="color:var(--text-muted)">18 分钟前</td></tr>
+              <tr><td><div class="u-cell"><span class="avatar" style="background:var(--p-ab)">王</span> 王浩</div></td><td><span class="chip">user</span></td><td class="mono">31</td><td class="mono" style="color:var(--text-muted)">1 小时前</td></tr>
+              <tr><td><div class="u-cell"><span class="avatar" style="background:var(--p-biz)">陈</span> 陈思远</div></td><td><span class="chip">user</span></td><td class="mono">27</td><td class="mono" style="color:var(--text-muted)">3 小时前</td></tr>
+              <tr><td><div class="u-cell"><span class="avatar" style="background:var(--p-gray)">赵</span> 赵敏</div></td><td><span class="chip">user</span></td><td class="mono">19</td><td class="mono" style="color:var(--text-muted)">昨天</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:var(--gap-6)">
+          <div class="card" style="padding:20px">
+            <div class="section-head" style="margin-bottom:16px"><div><h2 style="font-size:16px">系统健康</h2></div><span class="status-pill done"><span class="dot"></span> 正常</span></div>
+            <div class="health">
+              <div class="health-row"><span class="name"><i class="ph ph-cpu"></i> API 延迟</span><div class="health-bar"><i style="width:30%;background:var(--success)"></i></div><span class="mono" style="font-size:11px;color:var(--text-muted)">120ms</span></div>
+              <div class="health-row"><span class="name"><i class="ph ph-database"></i> DB 连接池</span><div class="health-bar"><i style="width:55%;background:var(--success)"></i></div><span class="mono" style="font-size:11px;color:var(--text-muted)">11/20</span></div>
+              <div class="health-row"><span class="name"><i class="ph ph-broadcast"></i> WS 在线</span><div class="health-bar"><i style="width:42%;background:var(--info)"></i></div><span class="mono" style="font-size:11px;color:var(--text-muted)">86</span></div>
+              <div class="health-row"><span class="name"><i class="ph ph-warning"></i> 错误率</span><div class="health-bar"><i style="width:8%;background:var(--warning)"></i></div><span class="mono" style="font-size:11px;color:var(--text-muted)">0.4%</span></div>
+            </div>
+          </div>
+
+          <div class="card" style="padding:20px">
+            <div class="section-head" style="margin-bottom:16px"><div><h2 style="font-size:16px">待办审批</h2></div><span class="badge">5</span></div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div style="display:flex;align-items:center;gap:10px;font-size:var(--fs-sm)"><span class="status-pill hitl"><span class="dot"></span></span><span style="flex:1">王浩 申请任务编辑权限</span><button class="btn btn-tonal btn-sm">处理</button></div>
+              <div style="display:flex;align-items:center;gap:10px;font-size:var(--fs-sm)"><span class="status-pill hitl"><span class="dot"></span></span><span style="flex:1">「月度复盘」申请公开</span><button class="btn btn-tonal btn-sm">处理</button></div>
+              <div style="display:flex;align-items:center;gap:10px;font-size:var(--fs-sm)"><span class="status-pill hitl"><span class="dot"></span></span><span style="flex:1">陈思远 申请知识库访问</span><button class="btn btn-tonal btn-sm">处理</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

@@ -1,0 +1,44 @@
+{
+  "id": "ab-experiment",
+  "name": "实验分析 Agent",
+  "paradigm": "ab",
+  "icon": "⚖",
+  "color": "#7bafd4",
+  "description": "AB 显著性 · 下钻 · 放量决策（V2.4）",
+  "user_friendly_description": "帮你分析AB实验结果，判断实验指标是否统计显著，自动做AA/SRM校验，给出放量、继续观察或回滚的决策建议，并输出完整实验报告",
+  "use_cases": ["判断AB实验是否统计显著", "分析实验指标异动原因", "给出放量/回滚决策建议"],
+  "starters": [
+    "帮我分析一下实验 EXP12345 的结果，看看核心指标是否显著",
+    "这个实验的AA期通过了吗，可以开始看数据了吗",
+    "对比实验组和对照组的留存和VV，给出放量建议",
+    "帮我看看这个实验有没有SRM问题"
+  ],
+  "tags": ["AB实验", "显著性检验", "放量决策", "实验报告"],
+  "output_type": "实验分析报告 + 决策建议 + 统计图表",
+  "publish_status": "published",
+  "prompt_layout": "v3",
+  "tools": [
+    "now",
+    "kyuubi_query",
+    "execute_python",
+    "write_file",
+    "read_file",
+    "list_files",
+    "feishu_publish",
+    "feishu_upload_image",
+    "read_skill",
+    "read_agent_knowledge",
+    "todo_write",
+    "request_human_input",
+    "exit_plan_mode",
+    "spawn_subagent"
+  ],
+  "model": null,
+  "spawn_targets": ["data-analysis", "gray-release", "know", "volcano-abtest"],
+  "skills": ["kyuubi", "feishu", "nl-python"],
+  "features": {
+    "todo_write": true,
+    "exit_plan_mode": true,
+    "spawn_subagent": true
+  }
+}

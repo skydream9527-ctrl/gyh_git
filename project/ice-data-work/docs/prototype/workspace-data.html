@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ICE-DATA-WORK · 数据分析工作台</title>
+  <link rel="stylesheet" href="assets/app.css" />
+</head>
+<body data-page="workspace-data" data-title="数据分析工作台">
+  <div class="app">
+    <aside id="side" class="sidebar"></aside>
+    <main class="main">
+      <div id="top"></div>
+
+      <div class="page-head">
+        <div>
+          <div class="crumb"><a href="board.html">任务看板</a> / 数据分析工作台 · p_growth</div>
+          <div class="eyebrow">Data Analysis Workspace</div>
+          <h1>浏览器 6.20 版本 DAU 下滑归因分析</h1>
+          <div style="margin:8px 0 4px"><span class="pill blue">● 执行中</span> <span class="subtle" style="font-size:13px">现在：Data Agent 执行 kyuubi_query（2/3）</span></div>
+          <p class="subtle">核心 = 分析产出物 + 多方对话。状态、Agent、文件、对话、执行记录通过抽屉隐藏。</p>
+        </div>
+        <a class="btn primary" href="approvals.html">请求确认发布</a>
+      </div>
+
+      <div class="toolbar">
+        <span class="participants">
+          <span class="chip"><span class="ava me">我</span>云鹤 <small>owner</small></span>
+          <span class="chip"><span class="ava twin">TW</span>我的 Twin <small>L3</small></span>
+          <span class="chip"><span class="ava agent">DA</span>Data Agent <small>L2 只读</small></span>
+          <button class="btn sm" data-modal="invite-twin">+ 邀请</button>
+        </span>
+        <span style="flex:1"></span>
+        <button class="btn sm" data-drawer="status">任务状态</button>
+        <button class="btn sm" data-drawer="agents">参与者状态</button>
+        <button class="btn sm" data-drawer="artifacts">产物 (3)</button>
+        <button class="btn sm" data-drawer="files">文件 / 数据</button>
+        <button class="btn sm" data-drawer="conversations">对话列表</button>
+        <button class="btn sm" data-drawer="timeline">执行记录</button>
+      </div>
+
+      <div class="workspace-shell">
+        <section class="panel">
+          <div class="panel-head"><h2>工作产出物 · 分析报告草稿</h2><span class="pill amber">草稿 · v0.7</span></div>
+          <div class="panel-body">
+            <div class="report-title">
+              <div><h2>DAU 下滑主要由冷启动耗时上升 + 渠道流量回落共同造成</h2><p class="subtle">Twin 组织后的报告草稿，数据来自 Kyuubi 查询与历史任务文件。</p></div>
+              <span class="pill amber">草稿</span>
+            </div>
+            <div class="metric-grid">
+              <div class="metric"><b>-3.8%</b><span>DAU 环比</span></div>
+              <div class="metric"><b>+420ms</b><span>P95 冷启动</span></div>
+              <div class="metric"><b>-12.6%</b><span>渠道 A 新增</span></div>
+              <div class="metric"><b>72%</b><span>可解释占比</span></div>
+            </div>
+            <div class="chart">
+              <div class="bar" style="height:70%"></div><div class="bar" style="height:74%"></div><div class="bar" style="height:76%"></div><div class="bar" style="height:78%"></div><div class="bar" style="height:73%"></div><div class="bar" style="height:75%"></div>
+              <div class="bar warn" style="height:61%"></div><div class="bar warn" style="height:58%"></div><div class="bar warn" style="height:60%"></div>
+              <div class="bar" style="height:64%"></div><div class="bar" style="height:66%"></div><div class="bar" style="height:67%"></div><div class="bar" style="height:69%"></div><div class="bar" style="height:71%"></div>
+            </div>
+            <div class="finding"><strong>发现 1：版本维度异常集中在冷启动耗时</strong><p>6.20 版本 P95 冷启动耗时上升 420ms，首日留存与次日回访同步回落。</p></div>
+            <div class="finding"><strong>发现 2：渠道 A 流量下滑放大整体波动</strong><p>渠道 A 新增下降 12.6%，解释约 31% 的总下滑。</p></div>
+            <div class="finding"><strong>建议：补查 ANR 与设备分层</strong><p>Twin 建议继续调用 Data Agent 补查低端机型与 ANR 影响（需你确认）。</p></div>
+            <div class="actions" style="margin-top:12px"><button class="btn primary">保存为产物…</button><button class="btn">导出报告</button></div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head"><h2>对话窗口 · 我 + Twin + Data Agent</h2><span class="pill blue">Agent-to-Agent</span></div>
+          <div class="panel-body">
+            <div class="chat-stream">
+              <div class="turn"><div class="avatar">我</div><div class="bubble"><strong>User <span class="role">· 我</span></strong><p>我想知道 DAU 下滑是不是版本问题，结论要能发给业务。</p></div></div>
+              <div class="turn"><div class="avatar twin">T</div><div class="bubble"><strong>Wisdom Twin <span class="role">· 我的分身 · L3</span></strong><p>我先限定范围：版本、渠道、性能、留存。需要调用 Data Agent 做只读查询。</p></div></div>
+              <div class="turn"><div class="avatar agent">D</div><div class="bubble"><strong>Data Agent <span class="role">· 工具 Agent · L2</span></strong><p>已完成 DAU、渠道、性能查询。冷启动耗时与渠道 A 变化是主要解释项。</p><div class="tool-card">tool · kyuubi_query · success · rows: 14,238</div></div></div>
+              <div class="turn"><div class="avatar twin">T</div><div class="bubble"><strong>Wisdom Twin <span class="role">· 我的分身</span></strong><p>建议补查 ANR 与低端机型分层。这是新查询，我不直接执行，已生成确认请求。</p><div class="tool-card warn">request_approval · 补查 ANR（只读，约 12k tokens）· 待确认</div></div></div>
+              <div class="turn"><div class="avatar warn">!</div><div class="bubble"><strong>HITL 确认 <span class="role">· 待你决定</span></strong><p>允许 Data Agent 补查 ANR 与设备分层？</p><div class="actions"><a class="btn primary sm" href="approvals.html">确认</a><button class="btn sm">修改范围</button><button class="btn danger sm">拒绝</button></div></div></div>
+              <div class="turn"><div class="avatar">我</div><div class="bubble"><strong>User <span class="role">· 我</span></strong><p>Data Agent 没有 XX 新业务的查询。我把 SQL 给你，帮我跑一下：</p><div class="tool-card" style="background:#0d1117;color:#c9d1d9;border-color:#30363d">SELECT dt, channel, count(distinct uid) dau FROM biz_xx.user_active WHERE dt BETWEEN :s AND :e GROUP BY dt, channel</div></div></div>
+              <div class="turn"><div class="avatar agent">D</div><div class="bubble"><strong>Data Agent <span class="role">· 工具 Agent</span></strong><p>已在沙盒执行你的 SQL（kyuubi 只读 + SQL 审计）。</p><div class="tool-card">tool · run_user_code · sql · success · rows: 5,120</div></div></div>
+              <div class="turn"><div class="avatar twin">T</div><div class="bubble"><strong>Wisdom Twin <span class="role">· 我的分身</span></strong><p>跑通了。要把它沉淀为可复用 Skill 并让 Data Agent 学会吗？下次同业务我就直接调用，无需再贴代码。</p><div class="actions"><button class="btn primary sm" data-modal="contribute-skill">贡献为 Skill</button></div></div></div>
+            </div>
+          </div>
+          <div class="composer"><textarea placeholder="回复 Twin 或 @Data Agent…"></textarea><button class="btn primary">发送</button></div>
+        </section>
+      </div>
+    </main>
+    <aside id="dock" class="dock"></aside>
+  </div>
+  <script src="assets/shell.js"></script>
+</body>
+</html>

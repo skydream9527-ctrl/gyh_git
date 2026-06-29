@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ICE-DATA-WORK · 团队空间</title>
+  <link rel="stylesheet" href="assets/app.css" />
+</head>
+<body data-page="team" data-title="团队空间">
+  <div class="app">
+    <aside id="side" class="sidebar"></aside>
+    <main class="main">
+      <div id="top"></div>
+
+      <div class="page-head">
+        <div>
+          <div class="eyebrow">Team Space · 增长数据团队</div>
+          <h1>团队空间：团队级共享 + 项目列表。</h1>
+          <p class="subtle">团队级共享文件 / 知识 / 产物 / Agent 经验（按团队隔离）。成员角色：owner / admin / member。</p>
+        </div>
+        <button class="btn primary">新建项目</button>
+      </div>
+
+      <div class="grid cols-4">
+        <div class="stat"><b>14</b><span>团队成员</span></div>
+        <div class="stat"><b>3</b><span>项目</span></div>
+        <div class="stat"><b>12</b><span>团队共享经验</span></div>
+        <div class="stat"><b>126k</b><span>本周 Token</span></div>
+      </div>
+
+      <div class="grid cols-2 section-gap">
+        <div class="card"><div class="card-head"><h2>项目列表</h2><button class="btn sm">新建项目</button></div>
+          <div class="card-body list">
+            <div class="list-item"><div class="marker">G</div><div><strong>p_growth · 增长分析</strong><span>9 进行中 · 6 成员</span></div><a class="btn sm" href="project.html">进入</a></div>
+            <div class="list-item"><div class="marker">R</div><div><strong>p_retention · 留存</strong><span>4 进行中 · 5 成员</span></div><a class="btn sm" href="project.html">进入</a></div>
+            <div class="list-item"><div class="marker">E</div><div><strong>p_experiment · 实验平台</strong><span>2 进行中 · 4 成员</span></div><a class="btn sm" href="project.html">进入</a></div>
+          </div>
+        </div>
+        <div class="card"><div class="card-head"><h2>成员与角色</h2><button class="btn sm">管理</button></div>
+          <div class="card-body list">
+            <div class="list-item compact"><div><strong>王工</strong><span>团队 owner</span></div><span class="pill violet">owner</span></div>
+            <div class="list-item compact"><div><strong>云鹤</strong><span>团队 admin</span></div><span class="pill blue">admin</span></div>
+            <div class="list-item compact"><div><strong>张敏 等 12 人</strong><span>团队 member</span></div><span class="pill slate">member</span></div>
+          </div>
+        </div>
+        <div class="card"><div class="card-head"><h2>团队共享知识 / 产物</h2><a class="btn sm" href="knowledge.html">全部</a></div>
+          <div class="card-body grid cols-2">
+            <div class="artifact-card"><span class="pill green">Template</span><h3>AB 实验复盘模板</h3><p>团队共享工作流。</p><button class="btn sm">复用</button></div>
+            <div class="artifact-card"><span class="pill blue">Doc</span><h3>团队指标字典</h3><p>团队级共享知识。</p><button class="btn sm">打开</button></div>
+          </div>
+        </div>
+        <div class="card"><div class="card-head"><h2>团队共享 Agent 经验</h2><a class="btn sm" href="agent-detail.html">查看</a></div>
+          <div class="card-body list">
+            <div class="list-item compact"><div><strong>Data Agent · by-team</strong><span>「归因先查冷启动耗时」等 5 条</span></div><span class="pill green">共享</span></div>
+            <div class="list-item compact"><div><strong>波动归因 Agent · by-team</strong><span>多维拆解顺序经验 3 条</span></div><span class="pill green">共享</span></div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <aside id="dock" class="dock"></aside>
+  </div>
+  <script src="assets/shell.js"></script>
+</body>
+</html>

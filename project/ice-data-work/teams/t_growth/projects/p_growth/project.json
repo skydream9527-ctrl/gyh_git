@@ -1,0 +1,11 @@
+{
+  "id": "p_growth",
+  "team_id": "t_growth",
+  "name": "增长分析",
+  "members": [
+    {
+      "user_id": "admin",
+      "role": "member"
+    }
+  ]
+}

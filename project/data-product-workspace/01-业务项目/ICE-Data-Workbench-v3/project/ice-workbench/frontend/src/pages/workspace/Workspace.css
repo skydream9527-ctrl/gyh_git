@@ -1,0 +1,1191 @@
+.ws {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+/* 移动端：本页不渲染全局 MobileBottomBar，所以 .ws 直接占满视口，
+   底部由内嵌的 .ws-mobile-segs 自己负责 safe-area 让位。
+   小屏优先 svh：Android Chrome 的 100vh 会包含系统手势条区域（svh
+   则保证最小可见高度），ws-mobile-segs 才不会被画到手势条后面。 */
+@media (max-width: 800px) {
+  @supports (height: 100svh) {
+    .ws {
+      height: 100svh;
+    }
+  }
+}
+.ws-loading,
+.ws-error {
+  padding: 80px 32px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.ws-body {
+  flex: 1;
+  display: grid;
+  /* 5 列：侧栏 · 分隔 · 主聊天 · 分隔 · 右栏 —— 两个分隔的宽度默认 6px，
+     但实际宽度由 JSX 的 inline style gridTemplateColumns 覆盖（受 state 驱动）。
+     这里保留作为 fallback。 */
+  grid-template-columns: 280px 6px 1fr 6px 320px;
+  /* Grid items default to min-height:auto which leaks content height out of
+     this grid — forcing 0 lets each column own its own scrollbar. */
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+}
+.ws-resizer {
+  cursor: col-resize;
+  background: transparent;
+  transition: background 0.15s;
+  position: relative;
+  user-select: none;
+}
+.ws-resizer::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  background: var(--border);
+  transform: translateX(-50%);
+}
+.ws-resizer:hover {
+  background: rgba(123,175,212,0.25);
+}
+.ws-resizer:active {
+  background: rgba(123,175,212,0.45);
+}
+@media (max-width: 1100px) {
+  .ws-resizer {
+    display: none;
+  }
+}
+/* Every grid column gets its own scrollable viewport. Without these explicit
+   min-height:0 rules the columns inherit content height and the whole page
+   scrolls as one. */
+.ws-body > .ws-sidebar,
+.ws-body > .ws-main,
+.ws-body > .ws-right {
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+}
+/* Sidebar has no inner scroll region (sections + KB list flow as one column),
+   so it must scroll itself when files+KB exceed viewport. Override the
+   generic overflow:hidden above. */
+.ws-body > .ws-sidebar {
+  overflow-y: auto;
+}
+@media (max-width: 1100px) {
+  .ws-body {
+    grid-template-columns: 240px 1fr !important;
+  }
+  .ws-right {
+    display: none;
+  }
+}
+@media (max-width: 800px) {
+  .ws-body {
+    grid-template-columns: 1fr !important;
+  }
+  .ws-sidebar {
+    display: none;
+  }
+}
+
+.ws-sidebar {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  padding: 16px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.ws-sb-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.ws-sb-head {
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+.ws-upload {
+  margin-left: auto;
+  cursor: pointer;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  padding: 3px 9px;
+  border-radius: 4px;
+  font-size: 11px;
+  color: var(--text);
+}
+.ws-upload input {
+  display: none;
+}
+.ws-empty {
+  font-size: 12px;
+  color: var(--text-muted);
+  background: var(--surface-2);
+  border: 1px dashed var(--border);
+  padding: 14px;
+  border-radius: 6px;
+  text-align: center;
+}
+.ws-file-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ws-file-group {
+  display: flex;
+  flex-direction: column;
+}
+.ws-file-group-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 6px;
+  background: transparent;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-2, var(--text-muted));
+  text-align: left;
+  width: 100%;
+}
+.ws-file-group-head:hover {
+  background: var(--surface-2);
+}
+.ws-fg-caret {
+  font-size: 10px;
+  width: 10px;
+  display: inline-block;
+  color: var(--text-muted);
+}
+.ws-fg-icon {
+  font-size: 13px;
+  width: 16px;
+  flex-shrink: 0;
+}
+.ws-fg-label {
+  flex: 1;
+  font-weight: 500;
+}
+.ws-fg-count {
+  font-size: 10px;
+  color: var(--text-muted);
+  background: var(--surface-2);
+  padding: 1px 6px;
+  border-radius: 8px;
+  min-width: 18px;
+  text-align: center;
+}
+.ws-file-group.is-collapsed .ws-fg-count {
+  background: transparent;
+}
+.ws-file-list {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ws-file-list.ws-upload-list {
+  padding-left: 0;
+  margin-top: 4px;
+}
+.ws-file-list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 12px;
+}
+.ws-file-list li:hover {
+  background: var(--surface-2);
+}
+.fl-icon {
+  font-size: 14px;
+  width: 18px;
+  flex-shrink: 0;
+}
+.fl-name {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.fl-size {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+.fl-del {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 0 4px;
+}
+.fl-del:hover {
+  color: var(--error);
+}
+.fl-refresh {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 0 4px;
+}
+.fl-refresh:hover {
+  color: var(--primary);
+}
+.fl-download {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 13px;
+  padding: 0 4px;
+}
+.fl-download:hover {
+  color: var(--primary);
+}
+.fl-cite {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 13px;
+  padding: 0 4px;
+}
+.fl-cite:hover {
+  color: var(--primary);
+}
+
+/* Knowledge-base panel (left sidebar) */
+.ws-sb-kb {
+  border-top: 1px solid var(--border);
+}
+.ws-kb-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.ws-kb-item {
+  display: flex;
+  flex-direction: column;
+}
+.ws-kb-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--text);
+  font-size: 12px;
+  width: 100%;
+  text-align: left;
+}
+.ws-kb-row:hover {
+  background: var(--surface-2);
+}
+.ws-kb-caret {
+  width: 10px;
+  font-size: 9px;
+  color: var(--text-muted);
+}
+.ws-kb-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ws-kb-count {
+  font-size: 10px;
+  color: var(--text-muted);
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--surface-3);
+}
+.ws-kb-articles {
+  padding: 2px 4px 4px 24px;
+}
+.ws-kb-articles ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.ws-kb-article {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+}
+.ws-kb-article:hover {
+  background: var(--surface-2);
+}
+.ws-kb-article-title {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-dim);
+}
+.ws-kb-refbtn {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 3px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.ws-kb-refbtn:hover:not(:disabled) {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+.ws-kb-refbtn:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+.ws-kb-refbtn.is-referenced {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--primary-dim);
+  cursor: default;
+  opacity: 1;
+}
+.ws-kb-refbtn.is-referenced:disabled {
+  opacity: 1;
+  cursor: default;
+}
+.ws-upload-row {
+  background: var(--primary-dim);
+  color: var(--primary);
+}
+.ws-import-btn {
+  font-size: 11px;
+  padding: 2px 6px;
+  margin-left: 4px;
+}
+.ws-conv-tab {
+  padding: 8px 10px;
+  height: 100%;
+  overflow: auto;
+}
+
+.ws-main {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--bg);
+}
+/* The middle column is a flex column: chat head + MessageList (flex:1) + banner
+   + ChatInput + plan toggle. Everything NON-scroll needs flex-shrink:0 so the
+   MessageList is the only thing that stretches/scrolls. */
+.ws-main > .ws-chat-head,
+.ws-main > .ws-banner,
+.ws-main > .plan-mode-banner,
+.ws-main > .conv-locked-banner,
+.ws-main > .kb-ref-chips,
+.ws-main > .chat-input,
+.ws-main > .plan-toggle-row {
+  flex: 0 0 auto;
+}
+
+/* KB 引用 chips：贴在 ChatInput 上方，提醒用户当前会话挂了哪些 KB 文档。
+   点 chip 名 → 在输入框插入 @ 引用；点 × → 取消引用（删任务文件）。 */
+.kb-ref-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px 4px;
+}
+.kb-ref-chips__label {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-right: 2px;
+}
+.kb-ref-chip {
+  display: inline-flex;
+  align-items: center;
+  background: var(--primary-dim);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  font-size: 12px;
+  color: var(--text);
+  max-width: 240px;
+  overflow: hidden;
+}
+.kb-ref-chip__name {
+  background: transparent;
+  border: 0;
+  padding: 2px 6px 2px 10px;
+  color: inherit;
+  cursor: pointer;
+  font-size: inherit;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.kb-ref-chip__name:hover {
+  color: var(--primary);
+}
+.kb-ref-chip__close {
+  background: transparent;
+  border: 0;
+  padding: 2px 8px 2px 4px;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+}
+.kb-ref-chip__close:hover {
+  color: var(--danger, #d33);
+}
+.ws-chat-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 24px;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--text-dim);
+}
+.ws-chat-head .model {
+  font-family: var(--font-mono);
+  margin-right: auto;
+}
+.ws-banner {
+  margin: 16px 24px 0;
+}
+
+.ws-right {
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+}
+.ws-right-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+}
+.ws-right-tabs button {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  padding: 10px 14px;
+  font-size: 12px;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+}
+.ws-right-tabs button.active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+}
+.ws-right-body {
+  flex: 1;
+  /* min-height:0 is required for flex children whose parent is a column flex,
+     otherwise content keeps pushing the scrollbar up to the page. */
+  min-height: 0;
+  overflow-y: auto;
+  padding: 14px 16px;
+}
+.ws-agent-head {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 14px;
+}
+.ws-agent-name {
+  font-family: var(--font-head);
+  font-size: 14px;
+  font-weight: 600;
+}
+.ws-agent-paradigm {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.ws-agent-desc {
+  color: var(--text-dim);
+  font-size: 12px;
+  line-height: 1.6;
+}
+.ws-file-head {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.ws-file-name {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 500;
+}
+.ws-file-pre {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 540px;
+  overflow: auto;
+}
+.cfg-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+}
+.cfg-row:last-child {
+  border-bottom: none;
+}
+.cfg-row > span:first-child {
+  color: var(--text-muted);
+}
+
+/* ---- mobile 3-segment 底部 tab + 单栏切换（design_v4 mobile workspace） ----
+   原本放在 TopNav 下方；现挪到 .ws 最末，作为本页专属底栏，替代全局
+   MobileBottomBar（agent 对话场景下不需要任务/定时/指南/管理那 4 个入口）。
+   贴底布局靠 .ws 的 flex column 自然落位，外加 safe-area padding。 */
+.ws-mobile-segs {
+  display: none;
+}
+@media (max-width: 800px) {
+  .ws-mobile-segs {
+    display: flex;
+    background: var(--surface);
+    border-top: 1px solid var(--border-soft);
+    /* Android Chrome 经常把 env(safe-area-inset-bottom) 返回 0，结果手势条
+       会盖住整个底栏。用 max() 兜底强制至少 10px 视觉留白；iOS 上 env() 通常
+       返回 ≥34px 时仍按真值生效。 */
+    padding: 0 8px max(env(safe-area-inset-bottom, 0px), 10px);
+    flex-shrink: 0;
+  }
+  .ws-mobile-segs button {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 500;
+    /* 让 button 总高 ≥44px，接近 iOS HIG 推荐的最小触控目标。 */
+    padding: 10px 6px 8px;
+    cursor: pointer;
+    border-top: 2px solid transparent;
+    text-align: center;
+    font-family: inherit;
+    line-height: 1.2;
+    min-height: 44px;
+  }
+  .ws-mobile-segs button.active {
+    color: var(--text);
+    border-top-color: var(--accent);
+  }
+}
+
+@media (max-width: 800px) {
+  .ws-body {
+    grid-template-columns: 1fr !important;
+  }
+  /* 在 segments 模式下：默认只有 chat 主区可见，左右栏走 segments 切换 */
+  .ws-body > .ws-sidebar,
+  .ws-body > .ws-right,
+  .ws-body > .ws-main {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .ws-body[data-mobile-tab="files"] .ws-sidebar {
+    display: flex;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+  }
+  .ws-body[data-mobile-tab="files"] .ws-main,
+  .ws-body[data-mobile-tab="files"] .ws-right {
+    display: none;
+  }
+  .ws-body[data-mobile-tab="chat"] .ws-sidebar,
+  .ws-body[data-mobile-tab="chat"] .ws-right {
+    display: none;
+  }
+  .ws-body[data-mobile-tab="chat"] .ws-main {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+  .ws-body[data-mobile-tab="right"] .ws-right {
+    display: flex;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+  }
+  .ws-body[data-mobile-tab="right"] .ws-sidebar,
+  .ws-body[data-mobile-tab="right"] .ws-main {
+    display: none;
+  }
+  .ws-chat-head {
+    padding: 8px 12px;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .ws-chat-head .model {
+    flex-basis: 100%;
+    order: 10;
+    margin: 4px 0 0;
+  }
+  .msg-list {
+    padding: 12px 14px;
+  }
+  .bubble {
+    max-width: calc(100vw - 56px);
+  }
+  .bubble-row.user .bubble {
+    max-width: calc(100vw - 28px);
+  }
+  .chat-input {
+    padding: 10px 12px;
+  }
+  .chat-input textarea {
+    min-height: 60px;
+    /* iOS 16px 防自动放大 */
+    font-size: 16px;
+  }
+  .chat-input-actions {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .chat-hint {
+    flex: 1 1 100%;
+    order: 10;
+  }
+  .ws-back-home {
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+  /* 流式时长按钮 / 暂停按钮在窄屏不挤成一团 */
+  .plan-mode-banner {
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 8px 12px !important;
+  }
+  /* .plan-toggle-row 在手机端已隐藏（见后文 mobile-only 规则），
+     不再需要手机端的 padding 微调。 */
+}
+/* .ws-mobile-toggle is only used inside .ws-sec-more (the ⋯ overflow menu);
+   no global default needed. */
+
+/* Batch C-2: 第二栏在移动端折叠为 ⋯ 菜单 */
+.ws-sec-more {
+  position: relative;
+  display: none;
+}
+.ws-sec-more .ws-mobile-toggle {
+  display: inline-flex;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+  line-height: 1;
+}
+.ws-sec-more-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+}
+.ws-sec-more-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 6px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+  padding: 4px;
+  min-width: 140px;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+}
+.ws-sec-more-menu button {
+  background: transparent;
+  border: none;
+  color: var(--text);
+  text-align: left;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 13px;
+  border-radius: 4px;
+}
+.ws-sec-more-menu button:hover {
+  background: var(--surface-2);
+}
+
+@media (max-width: 720px) {
+  /* 移动端：隐藏 Desktop 的 💾/🔁 按钮，展示 ⋯ 菜单入口 */
+  .ws-sec-action {
+    display: none !important;
+  }
+  .ws-sec-more {
+    display: inline-flex;
+  }
+}
+
+/* Workspace 顶栏：返回首页按钮 */
+.ws-crumb {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.ws-crumb-sep {
+  color: var(--text-muted);
+  opacity: 0.6;
+}
+.ws-back-home {
+  appearance: none;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  line-height: 1.2;
+}
+.ws-back-home:hover {
+  background: var(--surface-alt, rgba(255,255,255,0.04));
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+/* Agent 右栏：本任务 skills 列表 */
+.ws-skill-section {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+.ws-skill-head {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+.ws-skill-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ws-skill-item {
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--surface-alt, rgba(255,255,255,0.03));
+  border: 1px solid var(--border);
+}
+.ws-skill-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ws-skill-badge {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-weight: 500;
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+}
+.ws-skill-badge-builtin {
+  background: var(--p-ab-dim);
+  color: var(--p-ab);
+  border-color: var(--p-ab-dim);
+}
+.ws-skill-badge-agentic {
+  background: var(--p-data-dim);
+  color: var(--p-data);
+  border-color: var(--p-data-dim);
+}
+.ws-skill-name {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text);
+}
+.ws-skill-desc {
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Agent 右栏 · 目录文件树 */
+.ws-agent-files-section {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+.ws-agent-files-section code {
+  font-size: 11px;
+  padding: 1px 4px;
+  background: var(--surface-2);
+  border-radius: 3px;
+  font-family: var(--font-mono, monospace);
+  color: var(--text-muted);
+}
+.ws-agent-files {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 240px;
+  overflow-y: auto;
+}
+.ws-agent-file-btn {
+  appearance: none;
+  border: 0;
+  width: 100%;
+  background: transparent;
+  color: var(--text-dim);
+  padding: 5px 8px;
+  font-size: 11.5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 4px;
+  text-align: left;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  line-height: 1.4;
+}
+.ws-agent-file-btn:hover {
+  background: var(--surface-alt, rgba(255,255,255,0.04));
+  color: var(--text);
+}
+.ws-agent-file-btn.is-active {
+  background: rgba(107,170,142,0.12);
+  color: var(--primary, #6baa8e);
+}
+.ws-agent-file-btn.is-binary {
+  opacity: 0.55;
+}
+.ws-af-icon {
+  flex-shrink: 0;
+  width: 14px;
+  text-align: center;
+}
+.ws-af-path {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ws-af-size {
+  flex-shrink: 0;
+  font-size: 10px;
+  color: var(--text-muted);
+}
+.ws-agent-file-preview {
+  margin-top: 10px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+.ws-agent-file-preview-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border);
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--text);
+  font-family: var(--font-mono, monospace);
+}
+.ws-af-close {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  color: var(--text-muted);
+  font-size: 15px;
+  cursor: pointer;
+  line-height: 1;
+  padding: 2px 4px;
+}
+.ws-af-close:hover {
+  color: var(--error, #c97b7b);
+}
+.ws-af-pre {
+  margin: 0;
+  padding: 10px 12px;
+  max-height: 360px;
+  overflow: auto;
+  font-size: 11.5px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--text);
+  font-family: var(--font-mono, monospace);
+}
+
+/* Agent 右栏 · Skill 增删 UI */
+.ws-skill-head-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.ws-skill-head-row .ws-skill-head {
+  margin-bottom: 0;
+}
+.ws-skill-add-btn {
+  appearance: none;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.ws-skill-add-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+.ws-skill-add-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.ws-skill-row {
+  position: relative;
+}
+.ws-skill-remove {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 15px;
+  line-height: 1;
+  padding: 0 4px;
+  margin-left: auto;
+}
+.ws-skill-remove:hover {
+  color: var(--error, #c97b7b);
+}
+.ws-skill-remove:disabled {
+  opacity: 0.4;
+  cursor: wait;
+}
+.ws-skill-picker {
+  margin-top: 10px;
+  padding: 10px;
+  background: var(--surface-alt, rgba(255,255,255,0.02));
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-sm);
+}
+.ws-skill-picker-head {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+.ws-skill-picker-list {
+  max-height: 280px;
+  overflow-y: auto;
+}
+.ws-skill-add-inline {
+  appearance: none;
+  border: 0;
+  background: var(--p-data-dim);
+  color: var(--p-data);
+  font-size: 13px;
+  font-weight: 600;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-left: auto;
+  line-height: 1;
+}
+.ws-skill-add-inline:hover {
+  background: rgba(107,170,142,0.3);
+}
+.ws-skill-add-inline:disabled {
+  opacity: 0.4;
+  cursor: wait;
+}
+
+/* 左侧栏 · 文件预览区（点击列表项后展开在下方）*/
+.ws-sb-filepreview {
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+.ws-sb-filepreview .ws-sb-head {
+  justify-content: space-between;
+  gap: 8px;
+}
+.ws-sb-filepreview .ws-file-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  color: var(--text);
+  font-weight: 500;
+}
+.ws-sb-filepreview-close {
+  padding: 2px 6px !important;
+  font-size: 14px !important;
+  line-height: 1;
+}
+.ws-sb-filepreview .ws-file-pre {
+  margin: 8px 0 0;
+  padding: 8px 10px;
+  max-height: 320px;
+  overflow: auto;
+  font-size: 11.5px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--text);
+  font-family: var(--font-mono, monospace);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+
+/* ---- TopNav 右侧动作：桌面横排 / 手机收进 ⋯ 菜单 ---- */
+.ws-actions-desktop {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.ws-actions-mobile {
+  display: none;
+  position: relative;
+}
+.ws-actions-more {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.ws-actions-more:hover {
+  background: var(--surface-2);
+}
+.ws-actions-mobile-menu {
+  /* override ws-sec-more-menu defaults — 给 TopNav 右上角更宽的菜单 */
+  min-width: 220px;
+  padding: 6px;
+}
+.ws-actions-mobile-menu button,
+.ws-actions-mobile-menu .btn-ghost {
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  font-size: 14px;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  white-space: nowrap;
+  display: block;
+}
+.ws-actions-mobile-menu button:hover,
+.ws-actions-mobile-menu .btn-ghost:hover {
+  background: var(--surface-2);
+}
+
+@media (max-width: 800px) {
+  .ws-actions-desktop {
+    display: none;
+  }
+  .ws-actions-mobile {
+    display: inline-flex;
+  }
+  /* chat 输入区简化：手机键盘没 Enter，"Enter 发送 · Shift+Enter 换行" 提示无意义 */
+  .chat-hint {
+    display: none;
+  }
+  /* model selector 长文字截断不溢出 */
+  .ws-chat-head .model {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  /* 3-段切换：≤375px 时 emoji+文字仍要紧凑可读 */
+  .ws-mobile-segs button {
+    font-size: 13px;
+    padding: 9px 4px;
+    white-space: nowrap;
+  }
+  /* Plan Mode 在手机端已经移进 TopNav 的 ⋯ 菜单（参见 WorkspacePage.tsx）。
+     整块隐藏 plan-toggle-row，把空间还给 chat-input —— 否则 ws-main 的
+     overflow:hidden 在内容紧凑时会把这一行裁掉。 */
+  .plan-toggle-row {
+    display: none !important;
+  }
+  .chat-input {
+    /* 8px 视觉间距即可：底部的 .ws-mobile-segs 是 .ws 的 flex 子元素，
+       自己负担 safe-area，chat-input 上方不再被任何 fixed bar 遮挡。 */
+    padding-bottom: 8px !important;
+  }
+}

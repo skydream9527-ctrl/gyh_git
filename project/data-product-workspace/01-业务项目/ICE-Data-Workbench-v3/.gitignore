@@ -1,0 +1,64 @@
+.DS_Store
+.env
+.env.local
+.env.*.local
+.ai/skills/external/text2html2png/node_modules/
+.ai/outputs/viz/**/*.png
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+backend/.venv/
+backend/.venv-sandbox/
+backend/build/
+backend/dist/
+
+# Node
+node_modules/
+frontend/dist/
+
+# Runtime data (G3 file-first storage; populated at runtime)
+.cache/
+**/.cache/
+users/*
+!users/README.md
+tasks/*
+!tasks/README.md
+agents/**/prompt/cards.md
+*.lock
+*.lock~
+.tmp-*
+
+# Logs
+*.log
+/tmp/uvicorn*.log
+/tmp/uv-*.log
+
+# Claude Code local settings (per-user, includes runtime PIDs/IPs)
+.claude/settings.local.json
+
+# OS / editor
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*~
+
+# Large extracted reference (legacy v2 codebase, not part of v3 build)
+extracted/
+ice_data_workspace_v2.zip
+
+# Distributable bundles produced by `make pack`
+ice-workbench-*.zip
+
+# 工作 staging
+update_file/
+test_file/
+SQL口径与取数表清单.md
+rewrite_guide.py

@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>核心功能｜ICE Data Workbench v3</title>
+    <meta name="description" content="ICE Data Workbench v3 核心功能介绍：任务创建、Workspace、Agent/Skill、数据分析、团队资产、定时任务与管理后台。" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <nav class="nav-shell" aria-label="项目介绍导航">
+        <a class="brand" href="./index.html"><span class="brand-mark">✦</span><span>ICE Data Workbench</span></a>
+        <div class="nav-links">
+          <a href="./index.html">总览</a>
+          <a class="active" href="./features.html">核心功能</a>
+          <a href="./core.html">核心点</a>
+          <a href="./highlights.html">项目亮点</a>
+        </div>
+        <a class="nav-cta" href="./core.html">继续阅读</a>
+      </nav>
+    </header>
+
+    <main class="page">
+      <section class="hero compact">
+        <div>
+          <span class="eyebrow">Core Functions</span>
+          <h1>一个工作台，串起从<span class="accent">提出问题</span>到产出报告。</h1>
+        </div>
+        <p class="lead">
+          核心功能围绕“创建任务、执行分析、管理上下文、沉淀资产、自动复跑”展开。
+          用户不需要理解底层工具链，只要在合适的范式里把问题交给 Agent。
+        </p>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <h2>入口与任务创建</h2>
+          <p class="section-intro">Dashboard 提供快速开始、我的任务与团队资产；创建任务采用 3 Step 工坊，降低从想法到 Workspace 的启动成本。</p>
+        </div>
+        <div class="card-grid three">
+          <article class="feature-card reveal" style="--glow: var(--amber-soft)">
+            <span class="card-number">01</span>
+            <h3>Dashboard 快捷入口</h3>
+            <p>首页聚合新建任务、定时任务、使用指南、公共任务，以及可一键创建的 Agent 范式卡片。</p>
+            <ul>
+              <li>快速开始卡片面向高频场景</li>
+              <li>我的任务与协作任务集中管理</li>
+              <li>团队资产以 Tab 组织，便于复用</li>
+            </ul>
+          </article>
+          <article class="feature-card reveal" style="--glow: var(--cyan-soft)">
+            <span class="card-number">02</span>
+            <h3>3 Step 创建工坊</h3>
+            <p>从空白、模板、公共任务或个人模板开始，配置范式、Agent、Skills、Prompt、可见性与可选定时。</p>
+            <ul>
+              <li>先选起点，再做能力配置</li>
+              <li>支持私有或开放给团队</li>
+              <li>成熟模板可一键使用</li>
+            </ul>
+          </article>
+          <article class="feature-card reveal" style="--glow: var(--rose-soft)">
+            <span class="card-number">03</span>
+            <h3>六种工作范式</h3>
+            <p>围绕经营分析、AB 实验、数据分析、波动分析、版本灰度、开放任务建立业务语义入口。</p>
+            <ul>
+              <li>范式决定默认 Agent 与工具组合</li>
+              <li>开放任务支持自由探索</li>
+              <li>灰度、AB 等场景沉淀 SOP</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <h2>Workspace 工作空间</h2>
+          <p class="section-intro">Workspace 是日常使用主界面，采用三栏布局，将上下文、Agent 对话和结果预览放在同一张工作台上。</p>
+        </div>
+        <div class="split-panel">
+          <article class="large-panel reveal">
+            <span class="tag cyan">Task Workspace</span>
+            <h3>对话不是孤立聊天，而是任务执行现场</h3>
+            <p>左侧管理文件，中间运行对话，右侧展示 Agent、文件、会话、待办和配置。任务内的所有动作都围绕同一个 task_id 记录和复现。</p>
+            <div class="mini-list">
+              <div class="mini-card"><strong>文件上下文</strong><span>本地上传、公共文件引用、Agent 产物、飞书链接导入都可进入任务。</span></div>
+              <div class="mini-card"><strong>会话分支</strong><span>同一任务可维护多个 Conversation，便于尝试不同分析路径。</span></div>
+              <div class="mini-card"><strong>执行待办</strong><span>Agent 自动维护 TODO，用于长任务拆解、进度跟踪和结果回看。</span></div>
+            </div>
+          </article>
+          <article class="flow-panel reveal">
+            <div class="flow-line">
+              <div class="flow-step"><b>Files</b><strong>文件预览</strong><span>支持 md/txt/csv/json/sql/py/pdf/png 等常见格式。</span></div>
+              <div class="flow-step"><b>Chat</b><strong>流式对话</strong><span>边生成边展示，可中止长回复和工具链。</span></div>
+              <div class="flow-step"><b>Plan</b><strong>只读规划</strong><span>Plan Mode 先输出方案，经用户确认后再执行。</span></div>
+              <div class="flow-step"><b>Export</b><strong>导出对话</strong><span>将对话、工具摘要和结论导出为 Markdown。</span></div>
+              <div class="flow-step"><b>Share</b><strong>开放团队</strong><span>任务经审核后进入公共任务，其他同学可 Fork。</span></div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <h2>Agent 与 Skill 能力</h2>
+          <p class="section-intro">Agent 负责领域方法论和任务编排，Skill 负责可调用能力。两者组合出不同数据工作范式。</p>
+        </div>
+        <div class="card-grid four">
+          <article class="agent-card reveal" style="--glow: var(--cyan-soft)">
+            <span class="icon">🤖</span>
+            <h3>通用 Agent</h3>
+            <p>作为入口编排者，适合不确定找谁的场景；支持派单、并行、后台任务和跨范式工具组合。</p>
+          </article>
+          <article class="agent-card reveal" style="--glow: var(--green-soft)">
+            <span class="icon">📊</span>
+            <h3>数据分析 Agent</h3>
+            <p>自然语言查数、Kyuubi SQL、Python 沙箱、趋势分析、预测和图表报告一体化。</p>
+          </article>
+          <article class="agent-card reveal" style="--glow: var(--rose-soft)">
+            <span class="icon">🧪</span>
+            <h3>AB / 火山实验</h3>
+            <p>围绕实验 ID、显著性、AA 期、涨跌报告和放量建议提供结构化分析。</p>
+          </article>
+          <article class="agent-card reveal" style="--glow: var(--amber-soft)">
+            <span class="icon">🌐</span>
+            <h3>灰度与监控</h3>
+            <p>对比版本核心指标、护栏指标和异常告警，支持灰度放量或回滚决策。</p>
+          </article>
+        </div>
+        <div class="card-grid three" style="margin-top: 18px">
+          <article class="feature-card reveal">
+            <span class="tag">SQL / 数据</span>
+            <h3>Kyuubi + NL→SQL</h3>
+            <p>用自然语言生成查询、执行 SQL、获取表结构和指标口径，服务数据分析主链路。</p>
+          </article>
+          <article class="feature-card reveal">
+            <span class="tag cyan">文档 / 知识</span>
+            <h3>飞书与知识库</h3>
+            <p>飞书文档、知识库、图片上传、报告发布与知识检索构成团队协作出口。</p>
+          </article>
+          <article class="feature-card reveal">
+            <span class="tag rose">计算 / 产物</span>
+            <h3>Python 沙箱与文件</h3>
+            <p>在隔离环境中执行分析代码，生成 CSV、图表、Markdown 报告等任务产物。</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <h2>团队资产与运营后台</h2>
+          <p class="section-intro">系统不仅服务单次分析，还把好的任务、模板、文件和经验变成可治理的团队资产。</p>
+        </div>
+        <div class="matrix">
+          <div class="matrix-row reveal"><b>公共任务</b><p>优秀 Workspace 可开放给团队，经 admin 审核后供其他用户 Fork 复刻。</p></div>
+          <div class="matrix-row reveal"><b>任务模板</b><p>预配置范式、Agent、Skills、Prompt 和定时策略，降低重复任务创建成本。</p></div>
+          <div class="matrix-row reveal"><b>公共文件</b><p>团队规范、指标口径、方法论、AB 文档可置顶，并通过 @ 文件注入上下文。</p></div>
+          <div class="matrix-row reveal"><b>经验卡片</b><p>对话中的优秀结论可沉淀为经验，经审核后注入 Agent 知识库。</p></div>
+          <div class="matrix-row reveal"><b>定时任务</b><p>支持 cron 配置、历史回放、日报巡检、异常告警和飞书推送。</p></div>
+          <div class="matrix-row reveal"><b>Admin 后台</b><p>维护用户、Agent、Skills、模板、公共文件、用量成本、审计日志和系统开关。</p></div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">核心功能 · ICE Data Workbench v3 · <span data-year></span></footer>
+    <script src="./app.js"></script>
+  </body>
+</html>

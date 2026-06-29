@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TokenWisdom · Product Workstation v11</title>
+  <style>
+    :root {
+      --bg: #f5f6f8;
+      --paper: #ffffff;
+      --paper-soft: #f0f3f7;
+      --ink: #14171f;
+      --muted: #667085;
+      --faint: #9aa3b2;
+      --line: #e4e7ec;
+      --line-strong: #d0d5dd;
+      --blue: #1e5eff;
+      --blue-soft: #eef4ff;
+      --green: #07885f;
+      --green-soft: #ecfdf3;
+      --amber: #b54708;
+      --amber-soft: #fffaeb;
+      --red: #b42318;
+      --red-soft: #fef3f2;
+      --violet: #6941c6;
+      --violet-soft: #f4f3ff;
+      --slate: #344054;
+      --shadow: 0 18px 48px rgba(16, 24, 40, .08);
+      --shadow-soft: 0 8px 22px rgba(16, 24, 40, .055);
+      --radius-xl: 26px;
+      --radius-lg: 18px;
+      --radius-md: 14px;
+      --body: "Aptos", "Avenir Next", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      --mono: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; min-height: 100vh; color: var(--ink); background: var(--bg); font-family: var(--body); }
+    h1, h2, h3, p { margin: 0; }
+    button, input, textarea { font: inherit; }
+    button { cursor: pointer; }
+
+    .app { display: grid; grid-template-columns: 236px minmax(0, 1fr) 360px; min-height: 100vh; }
+    .sidebar { position: sticky; top: 0; height: 100vh; overflow: auto; border-right: 1px solid var(--line); background: rgba(255,255,255,.94); backdrop-filter: blur(18px); }
+    .brand { display: flex; gap: 11px; align-items: center; padding: 22px 18px 18px; border-bottom: 1px solid var(--line); }
+    .brand-mark { width: 40px; height: 40px; border-radius: 15px; display: grid; place-items: center; color: #fff; font-weight: 900; background: linear-gradient(145deg, #111827, var(--blue)); box-shadow: 0 10px 28px rgba(30,94,255,.24); }
+    .brand strong { display: block; font-size: 15px; letter-spacing: -.02em; }
+    .brand span { display: block; margin-top: 2px; color: var(--muted); font-size: 12px; }
+    .nav { padding: 14px 12px 24px; display: grid; gap: 6px; }
+    .nav-label { padding: 12px 8px 6px; color: var(--faint); font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
+    .nav-btn { width: 100%; display: flex; align-items: center; gap: 10px; border: 0; border-radius: 13px; padding: 11px 10px; color: var(--muted); background: transparent; text-align: left; transition: .16s ease; }
+    .nav-btn:hover { color: var(--ink); background: var(--paper-soft); }
+    .nav-btn.active { color: var(--blue); background: var(--blue-soft); font-weight: 760; }
+    .nav-btn .icon { width: 24px; text-align: center; }
+    .side-card { margin: 16px 12px 0; padding: 13px; border: 1px solid var(--line); border-radius: 16px; background: var(--paper-soft); color: var(--muted); font-size: 12px; line-height: 1.55; }
+
+    .main { min-width: 0; padding: 18px 20px 44px; }
+    .topbar { position: sticky; top: 0; z-index: 20; padding-bottom: 14px; background: linear-gradient(180deg, rgba(245,246,248,.98), rgba(245,246,248,.82), transparent); backdrop-filter: blur(12px); }
+    .command { min-height: 50px; display: flex; align-items: center; justify-content: space-between; gap: 12px; border: 1px solid var(--line); border-radius: 17px; background: rgba(255,255,255,.94); box-shadow: var(--shadow-soft); padding: 0 14px; }
+    .command-left { min-width: 0; display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 14px; }
+    kbd { padding: 4px 7px; border-radius: 8px; background: var(--paper-soft); color: var(--muted); font-family: var(--mono); font-size: 11px; }
+
+    .page { display: none; animation: fade .18s ease; }
+    .page.active { display: block; }
+    .page-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 16px; align-items: end; margin: 8px 0 18px; }
+    .eyebrow { margin-bottom: 7px; color: var(--blue); font-family: var(--mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; }
+    h1 { font-size: clamp(28px, 3vw, 42px); line-height: 1.1; letter-spacing: -.045em; }
+    h2 { font-size: 18px; letter-spacing: -.02em; }
+    h3 { font-size: 15px; letter-spacing: -.01em; }
+    .subtle { color: var(--muted); font-size: 14px; line-height: 1.65; }
+    .section-gap { margin-top: 16px; }
+
+    .btn { min-height: 36px; padding: 0 12px; border: 1px solid var(--line-strong); border-radius: 10px; color: var(--ink); background: #fff; font-size: 13px; font-weight: 720; transition: .16s ease; }
+    .btn:hover { transform: translateY(-1px); box-shadow: var(--shadow-soft); }
+    .btn.primary { color: #fff; background: var(--blue); border-color: var(--blue); }
+    .btn.ghost { color: var(--muted); background: transparent; }
+    .btn.danger { color: var(--red); background: var(--red-soft); border-color: #fecdca; }
+    .btn.drawer-active { color: var(--blue); background: var(--blue-soft); border-color: #c7d7fe; }
+    .actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+
+    .pill { display: inline-flex; align-items: center; gap: 6px; width: fit-content; min-height: 24px; padding: 0 9px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); background: #fff; font-size: 12px; font-weight: 760; white-space: nowrap; }
+    .pill.blue { color: var(--blue); background: var(--blue-soft); border-color: #c7d7fe; }
+    .pill.green { color: var(--green); background: var(--green-soft); border-color: #bbf7d0; }
+    .pill.amber { color: var(--amber); background: var(--amber-soft); border-color: #fedf89; }
+    .pill.red { color: var(--red); background: var(--red-soft); border-color: #fecdca; }
+    .pill.violet { color: var(--violet); background: var(--violet-soft); border-color: #d9d6fe; }
+
+    .grid { display: grid; gap: 14px; }
+    .cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .card, .panel { border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--paper); box-shadow: var(--shadow-soft); overflow: hidden; }
+    .card-head, .panel-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 15px; border-bottom: 1px solid var(--line); }
+    .card-body, .panel-body { padding: 15px; }
+
+    .workstation-hero { position: relative; overflow: hidden; padding: 24px; border: 1px solid var(--line); border-radius: var(--radius-xl); background: radial-gradient(circle at top left, rgba(30,94,255,.14), transparent 34%), linear-gradient(135deg, #fff, #f8fbff); box-shadow: var(--shadow); }
+    .workstation-hero:after { content: ""; position: absolute; right: -80px; top: -90px; width: 260px; height: 260px; border-radius: 50%; background: rgba(30,94,255,.08); }
+    .workstation-hero h1 { max-width: 780px; margin-top: 10px; }
+    .workstation-hero p { max-width: 740px; margin-top: 12px; color: var(--muted); line-height: 1.68; }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 18px; }
+    .stat-line { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 14px; }
+    .stat { padding: 14px; border: 1px solid var(--line); border-radius: 16px; background: rgba(255,255,255,.8); }
+    .stat b { display: block; font-size: 24px; letter-spacing: -.03em; }
+    .stat span { color: var(--muted); font-size: 12px; }
+
+    .list { display: grid; gap: 10px; }
+    .list-item { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 11px; border: 1px solid var(--line); border-radius: 14px; background: #fff; }
+    .list-item.compact { grid-template-columns: minmax(0, 1fr) auto; }
+    .list-item strong { display: block; font-size: 14px; }
+    .list-item span { display: block; margin-top: 4px; color: var(--muted); font-size: 12px; line-height: 1.5; }
+    .marker { width: 34px; height: 34px; border-radius: 12px; display: grid; place-items: center; color: var(--blue); background: var(--blue-soft); font-weight: 900; }
+    .artifact-card { display: grid; gap: 10px; min-height: 138px; padding: 14px; border: 1px solid var(--line); border-radius: 16px; background: linear-gradient(180deg, #fff, #fafbfd); }
+    .artifact-card p { color: var(--muted); font-size: 13px; line-height: 1.6; }
+
+    .workspace-shell { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(340px, .85fr); gap: 14px; align-items: start; }
+    .workspace-toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 16px; }
+    .report-title { display: flex; justify-content: space-between; gap: 12px; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
+    .metric-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 14px 0; }
+    .metric { padding: 13px; border: 1px solid var(--line); border-radius: 15px; background: var(--paper-soft); }
+    .metric b { display: block; font-size: 23px; letter-spacing: -.04em; }
+    .metric span { color: var(--muted); font-size: 12px; }
+    .chart { height: 190px; display: grid; grid-template-columns: repeat(14, 1fr); align-items: end; gap: 7px; padding: 18px 12px 30px; border: 1px solid var(--line); border-radius: 18px; background: repeating-linear-gradient(to top, #fff 0, #fff 38px, #f1f4f8 39px); }
+    .bar { position: relative; border-radius: 9px 9px 3px 3px; background: linear-gradient(180deg, rgba(30,94,255,.9), rgba(30,94,255,.48)); }
+    .bar.warn { background: linear-gradient(180deg, rgba(181,71,8,.88), rgba(181,71,8,.4)); }
+    .bar:after { content: attr(data-label); position: absolute; left: 50%; bottom: -22px; transform: translateX(-50%); color: var(--faint); font-size: 10px; }
+    .finding-list { display: grid; gap: 10px; margin-top: 14px; }
+    .finding { padding: 13px; border: 1px solid var(--line); border-radius: 15px; background: #fff; }
+    .finding strong { display: block; margin-bottom: 5px; }
+    .finding p { color: var(--muted); font-size: 13px; line-height: 1.65; }
+    .doc-body { display: grid; gap: 12px; }
+    .doc-block { padding: 14px; border: 1px solid var(--line); border-radius: 15px; background: #fff; }
+    .doc-block strong { display: block; margin-bottom: 6px; }
+    .doc-block p, .doc-block li { color: var(--muted); font-size: 13px; line-height: 1.7; }
+    .doc-block ul { margin: 8px 0 0; padding-left: 18px; }
+
+    .chat-stream { display: grid; gap: 12px; max-height: 520px; overflow: auto; padding-right: 4px; }
+    .turn { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 10px; align-items: start; }
+    .avatar { width: 34px; height: 34px; border-radius: 12px; display: grid; place-items: center; color: #fff; background: var(--slate); font-size: 12px; font-weight: 900; }
+    .avatar.twin { background: var(--blue); }
+    .avatar.agent { background: var(--green); }
+    .avatar.warn { background: var(--amber); }
+    .bubble { padding: 11px 12px; border: 1px solid var(--line); border-radius: 15px; background: #fff; }
+    .bubble strong { display: block; margin-bottom: 4px; font-size: 13px; }
+    .bubble p { color: var(--muted); font-size: 13px; line-height: 1.65; }
+    .composer { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 9px; padding: 12px; border-top: 1px solid var(--line); background: #fff; }
+    textarea, input { width: 100%; border: 1px solid var(--line-strong); border-radius: 12px; background: #fff; outline: none; }
+    textarea { min-height: 42px; padding: 10px 12px; resize: vertical; }
+    input { min-height: 38px; padding: 0 12px; }
+
+    .agent-card { display: grid; gap: 11px; padding: 15px; border: 1px solid var(--line); border-radius: 17px; background: #fff; box-shadow: var(--shadow-soft); }
+    .agent-top { display: flex; align-items: start; justify-content: space-between; gap: 10px; }
+    .agent-icon { width: 42px; height: 42px; border-radius: 15px; display: grid; place-items: center; color: var(--blue); background: var(--blue-soft); font-weight: 900; }
+    .agent-card p { color: var(--muted); font-size: 13px; line-height: 1.6; }
+    .kv { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 8px; color: var(--muted); font-size: 13px; }
+    .kv b { color: var(--ink); }
+    .table { border: 1px solid var(--line); border-radius: 16px; overflow: hidden; background: #fff; }
+    .row { display: grid; grid-template-columns: 1.2fr .8fr .8fr .8fr auto; gap: 10px; align-items: center; padding: 12px 14px; border-bottom: 1px solid var(--line); font-size: 13px; }
+    .row:last-child { border-bottom: 0; }
+    .row.header { color: var(--muted); background: var(--paper-soft); font-weight: 760; }
+    .row strong { display: block; }
+    .row span { color: var(--muted); font-size: 12px; }
+
+    .dock { position: sticky; top: 0; height: 100vh; border-left: 1px solid var(--line); background: rgba(255,255,255,.92); backdrop-filter: blur(18px); overflow: auto; }
+    .dock-inner { display: grid; gap: 14px; padding: 18px 14px 24px; }
+    .dock-card, .dock-section { border: 1px solid var(--line); border-radius: 18px; background: #fff; box-shadow: var(--shadow-soft); overflow: hidden; }
+    .dock-head { padding: 14px; border-bottom: 1px solid var(--line); }
+    .dock-title { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .dock-title strong { display: block; }
+    .dock-title span { display: block; margin-top: 3px; color: var(--muted); font-size: 12px; }
+    .dock-chat { display: grid; gap: 9px; padding: 13px; }
+    .dock-msg { max-width: 88%; padding: 10px 11px; border-radius: 14px; color: var(--muted); background: var(--paper-soft); font-size: 12px; line-height: 1.55; }
+    .dock-msg.twin { color: var(--ink); background: var(--blue-soft); }
+    .dock-msg.me { justify-self: end; color: #fff; background: var(--slate); }
+    .dock-input { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; padding: 12px; border-top: 1px solid var(--line); }
+    .dock-section { padding: 14px; }
+    .dock-section h3 { margin-bottom: 10px; }
+    .suggestion, .confirm-card { display: grid; gap: 9px; padding: 12px; border: 1px solid var(--line); border-radius: 15px; background: var(--paper-soft); }
+    .confirm-card { background: var(--amber-soft); border-color: #fedf89; }
+    .suggestion p, .confirm-card p { color: var(--muted); font-size: 12px; line-height: 1.55; }
+
+    .drawer-backdrop { position: fixed; inset: 0; z-index: 60; display: none; background: rgba(16, 24, 40, .18); }
+    .drawer-backdrop.open { display: block; }
+    .drawer { position: fixed; top: 0; right: 0; z-index: 70; width: min(520px, 92vw); height: 100vh; transform: translateX(110%); transition: .22s ease; border-left: 1px solid var(--line); background: #fff; box-shadow: -20px 0 50px rgba(16,24,40,.16); overflow: auto; }
+    .drawer.open { transform: translateX(0); }
+    .drawer-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: #fff; z-index: 2; }
+    .drawer-body { padding: 16px; display: grid; gap: 12px; }
+    .drawer-section { padding: 14px; border: 1px solid var(--line); border-radius: 16px; background: var(--paper-soft); }
+    .drawer-section strong { display: block; margin-bottom: 6px; }
+    .drawer-section p { color: var(--muted); font-size: 13px; line-height: 1.65; }
+    .mini-list { display: grid; gap: 10px; }
+    .mini-row { display: flex; justify-content: space-between; gap: 12px; align-items: start; padding: 12px; border: 1px solid var(--line); border-radius: 14px; background: #fff; }
+    .mini-row strong { display: block; font-size: 13px; }
+    .mini-row span { display: block; margin-top: 3px; color: var(--muted); font-size: 12px; }
+
+    @keyframes fade { from { opacity: .45; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+    @media (max-width: 1320px) {
+      .app { grid-template-columns: 220px minmax(0, 1fr); }
+      .dock { grid-column: 1 / -1; position: relative; height: auto; border-left: 0; border-top: 1px solid var(--line); }
+    }
+    @media (max-width: 980px) {
+      .app { grid-template-columns: 1fr; }
+      .sidebar { position: relative; height: auto; }
+      .page-head, .workspace-shell, .cols-2, .cols-3, .cols-4, .stat-line, .metric-grid, .composer, .row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand"><div class="brand-mark">TW</div><div><strong>TokenWisdom</strong><span>User → Twin → Agents</span></div></div>
+      <nav class="nav" aria-label="Product Navigation">
+        <div class="nav-label">Operate</div>
+        <button class="nav-btn active" data-page="workstation"><span class="icon">⌂</span>Workstation</button>
+        <button class="nav-btn" data-page="new"><span class="icon">＋</span>新建任务</button>
+        <button class="nav-btn" data-page="data"><span class="icon">▦</span>数据分析工作台</button>
+        <button class="nav-btn" data-page="general"><span class="icon">▣</span>普通工作台</button>
+        <div class="nav-label">Assets</div>
+        <button class="nav-btn" data-page="agents"><span class="icon">◎</span>Agent 页面</button>
+        <button class="nav-btn" data-page="history"><span class="icon">◷</span>历史任务页</button>
+        <button class="nav-btn" data-page="knowledge"><span class="icon">◩</span>历史文档页</button>
+        <button class="nav-btn" data-page="public"><span class="icon">◇</span>公共内容页面</button>
+        <div class="nav-label">Control</div>
+        <button class="nav-btn" data-page="manager"><span class="icon">☉</span>数字分身管理</button>
+        <button class="nav-btn" data-page="audit"><span class="icon">☷</span>审批与审计</button>
+      </nav>
+      <div class="side-card">产品主线：Workstation 展示运行内容；点击任务、文档或 Agent 后进入 Workspace；Wisdom Twin 始终在右侧参与。</div>
+    </aside>
+
+    <main class="main">
+      <div class="topbar"><div class="command"><div class="command-left"><kbd>⌘ K</kbd><span>Ask or assign to your Wisdom Twin；高风险动作必须由用户确认。</span></div><button class="btn primary" data-page="new">交给分身</button></div></div>
+
+      <section class="page active" id="page-workstation" data-title="Workstation">
+        <div class="page-head"><div><div class="eyebrow">Main Workstation</div><h1>你的 AI 分身总控台：看见正在运行的任务、最近产物和下一步。</h1><p class="subtle">Workstation 是产品最外层主页，不是具体工作台。它负责把定时任务、当前一次对话任务、最近任务、核心产物和总结聚合成可点击入口。</p></div><button class="btn primary" data-page="new">新建 Mission</button></div>
+        <div class="workstation-hero">
+          <span class="pill blue">User → Wisdom Twin → Agents</span>
+          <h1>今天有 4 类内容值得继续推进</h1>
+          <p>Wisdom Twin 已把运行中的任务、当前对话派生任务、历史产出和核心文档整理为入口。点击任务会进入数据分析工作台或普通工作台；点击文档会进入对应产物页面。</p>
+          <div class="hero-actions"><button class="btn primary" data-page="data">进入数据分析工作台</button><button class="btn" data-page="general">进入普通工作台</button><button class="btn" data-page="audit">查看待确认</button></div>
+          <div class="stat-line"><div class="stat"><b>3</b><span>运行中任务</span></div><div class="stat"><b>2</b><span>待用户确认</span></div><div class="stat"><b>7</b><span>本周核心产物</span></div><div class="stat"><b>L3</b><span>当前权限等级</span></div></div>
+        </div>
+        <div class="grid cols-2 section-gap">
+          <div class="card"><div class="card-head"><h2>定时任务</h2><span class="pill amber">Autopilot</span></div><div class="card-body list"><div class="list-item"><div class="marker">D</div><div><strong>每日 DAU 波动巡检</strong><span>每天 10:00 自动查询核心指标；异常时请求用户确认。</span></div><button class="btn" data-page="data">打开</button></div><div class="list-item"><div class="marker">W</div><div><strong>每周知识沉淀</strong><span>整理一周任务产物，生成总结和 Memory Candidate。</span></div><button class="btn" data-page="knowledge">打开</button></div></div></div>
+          <div class="card"><div class="card-head"><h2>当前一次对话的任务</h2><span class="pill blue">Current</span></div><div class="card-body list"><div class="list-item"><div class="marker">A</div><div><strong>浏览器 6.20 DAU 下滑归因分析</strong><span>User + Twin + Data Agent 正在协作，报告草稿已生成。</span></div><button class="btn primary" data-page="data">进入</button></div><div class="list-item"><div class="marker">P</div><div><strong>TokenWisdom PRD 与页面原型</strong><span>Twin 正在把产品概念沉淀为 PRD 和实际页面设计。</span></div><button class="btn" data-page="general">进入</button></div></div></div>
+          <div class="card"><div class="card-head"><h2>最近任务</h2><span class="pill green">Recent</span></div><div class="card-body list"><div class="list-item compact"><div><strong>Claude Code 调用任务包整理</strong><span>已生成 Execution Brief，等待用户确认本地项目范围。</span></div><button class="btn" data-page="general">打开</button></div><div class="list-item compact"><div><strong>ICE Workbench 能力映射</strong><span>已将 Dashboard / Workspace / HITL 映射为 TokenWisdom 概念。</span></div><button class="btn" data-page="knowledge">打开</button></div><div class="list-item compact"><div><strong>浏览器插件观察规则</strong><span>定义保存 AI 对话、抽取工具能力和用户偏好的方式。</span></div><button class="btn" data-page="history">打开</button></div></div></div>
+          <div class="card"><div class="card-head"><h2>核心产物</h2><span class="pill violet">Artifacts</span></div><div class="card-body grid cols-2"><div class="artifact-card"><span class="pill green">Report</span><h3>DAU 下滑归因报告</h3><p>数据分析工作台产出，可继续补查 ANR 和渠道拆分。</p><button class="btn" data-page="data">进入工作台</button></div><div class="artifact-card"><span class="pill blue">PRD</span><h3>TokenWisdom 产品 PRD</h3><p>普通工作台产出，覆盖 Workstation、Workspace、权限与 Agent-to-Agent。</p><button class="btn" data-page="general">打开文档</button></div></div></div>
+        </div>
+      </section>
+
+      <section class="page" id="page-new" data-title="New Mission">
+        <div class="page-head"><div><div class="eyebrow">New Mission</div><h1>把任务交给分身，由分身选择工具 Agent 并生成确认请求。</h1><p class="subtle">用户只需要描述目标；Wisdom Twin 负责拆解、推荐 Agent、准备上下文、预估权限和风险。</p></div><button class="btn primary">生成计划</button></div>
+        <div class="grid cols-2">
+          <section class="panel"><div class="panel-head"><h2>任务输入</h2><span class="pill blue">Step 1</span></div><div class="panel-body"><textarea style="min-height:160px" placeholder="例如：帮我分析 6.20 版本 DAU 下滑原因，输出一份能同步给业务负责人的报告，并沉淀关键口径。">帮我分析 6.20 版本 DAU 下滑原因，输出一份能同步给业务负责人的报告，并沉淀关键口径。</textarea><div class="workspace-toolbar"><button class="btn">添加文件</button><button class="btn">选择历史产物</button><button class="btn">选择 Agent</button><button class="btn primary">让分身规划</button></div></div></section>
+          <section class="panel"><div class="panel-head"><h2>Twin 推荐路线</h2><span class="pill amber">需确认</span></div><div class="panel-body list"><div class="list-item compact"><div><strong>1. 使用 Data Agent 查询 DAU / 留存 / 渠道指标</strong><span>权限：只读查询，预计消耗 8k tokens。</span></div><span class="pill green">低风险</span></div><div class="list-item compact"><div><strong>2. 使用 General Workspace 生成报告草稿</strong><span>权限：写入当前工作区文档，不写本机文件。</span></div><span class="pill blue">中风险</span></div><div class="list-item compact"><div><strong>3. 固化 2 条 Memory Candidate</strong><span>需要用户确认后进入长期记忆。</span></div><span class="pill amber">确认</span></div></div></section>
+        </div>
+      </section>
+
+      <section class="page" id="page-data" data-title="Data Analysis Workspace">
+        <div class="page-head"><div><div class="eyebrow">Data Analysis Workspace</div><h1>浏览器 6.20 版本 DAU 下滑归因分析</h1><p class="subtle">数据分析工作台聚焦“分析视图 + 对话窗口”。状态、Agent、文件、对话列表、执行记录通过按钮隐藏。</p><div class="workspace-toolbar"><button class="btn" data-drawer="status">任务状态</button><button class="btn" data-drawer="agents">Agent / 工具</button><button class="btn" data-drawer="files">文件 / 数据</button><button class="btn" data-drawer="conversations">对话列表</button><button class="btn" data-drawer="timeline">执行记录</button></div></div><button class="btn primary">请求确认发布</button></div>
+        <div class="workspace-shell">
+          <section class="panel"><div class="panel-head"><h2>工作产出物 · 分析报告草稿</h2><span class="pill amber">等待确认</span></div><div class="panel-body"><div class="report-title"><div><h2>DAU 下滑主要由冷启动耗时上升 + 渠道流量回落共同造成</h2><p class="subtle">当前为 Twin 组织后的报告草稿，数据来自 Kyuubi 查询与历史任务文件。</p></div><span class="pill blue">v0.7</span></div><div class="metric-grid"><div class="metric"><b>-3.8%</b><span>DAU 环比变化</span></div><div class="metric"><b>+420ms</b><span>P95 冷启动耗时</span></div><div class="metric"><b>-12.6%</b><span>渠道 A 新增流量</span></div><div class="metric"><b>72%</b><span>可解释下滑占比</span></div></div><div class="chart"><div class="bar" style="height:70%" data-label="06/14"></div><div class="bar" style="height:74%" data-label="15"></div><div class="bar" style="height:76%" data-label="16"></div><div class="bar" style="height:78%" data-label="17"></div><div class="bar" style="height:73%" data-label="18"></div><div class="bar" style="height:75%" data-label="19"></div><div class="bar warn" style="height:61%" data-label="20"></div><div class="bar warn" style="height:58%" data-label="21"></div><div class="bar warn" style="height:60%" data-label="22"></div><div class="bar" style="height:64%" data-label="23"></div><div class="bar" style="height:66%" data-label="24"></div><div class="bar" style="height:67%" data-label="25"></div><div class="bar" style="height:69%" data-label="26"></div><div class="bar" style="height:71%" data-label="27"></div></div><div class="finding-list"><div class="finding"><strong>发现 1：版本维度异常集中在冷启动耗时</strong><p>6.20 版本 P95 冷启动耗时上升 420ms，首日留存和次日回访出现同步回落。</p></div><div class="finding"><strong>发现 2：渠道 A 流量下滑放大整体 DAU 波动</strong><p>渠道 A 新增流量下降 12.6%，解释约 31% 的总下滑。</p></div><div class="finding"><strong>建议：先补查 ANR 和设备分层</strong><p>Twin 建议继续调用 Data Agent 补查低端机型、ANR 与渠道组合影响。</p></div></div></div></section>
+          <section class="panel"><div class="panel-head"><h2>对话窗口 · User + Twin + Data Agent</h2><span class="pill blue">Agent-to-Agent</span></div><div class="panel-body"><div class="chat-stream"><div class="turn"><div class="avatar">我</div><div class="bubble"><strong>User</strong><p>我想知道 DAU 下滑是不是版本问题，结论要能发给业务。</p></div></div><div class="turn"><div class="avatar twin">T</div><div class="bubble"><strong>Wisdom Twin</strong><p>我会先限定分析范围：版本、渠道、性能和留存。需要调用 Data Agent 做只读查询。</p></div></div><div class="turn"><div class="avatar agent">D</div><div class="bubble"><strong>Data Agent</strong><p>已完成 DAU、渠道和性能指标查询。冷启动耗时与渠道 A 变化是主要解释项。</p></div></div><div class="turn"><div class="avatar twin">T</div><div class="bubble"><strong>Wisdom Twin</strong><p>建议补查 ANR 和低端机型分层。我不会直接发布报告，需要你确认。</p></div></div></div></div><div class="composer"><textarea placeholder="回复 Twin 或 Data Agent…"></textarea><button class="btn primary">发送</button></div></section>
+        </div>
+      </section>
+
+      <section class="page" id="page-general" data-title="General Workspace">
+        <div class="page-head"><div><div class="eyebrow">General Workspace</div><h1>TokenWisdom PRD 与页面原型工作台</h1><p class="subtle">普通工作台聚焦“文档 + 对话窗口”。按钮可以打开状态、Agent、文件、历史对话和执行时间线。</p><div class="workspace-toolbar"><button class="btn" data-drawer="status">任务状态</button><button class="btn" data-drawer="agents">Agent / 工具</button><button class="btn" data-drawer="files">文件 / 数据</button><button class="btn" data-drawer="conversations">对话列表</button><button class="btn" data-drawer="timeline">执行记录</button></div></div><button class="btn primary">保存为核心产物</button></div>
+        <div class="workspace-shell">
+          <section class="panel"><div class="panel-head"><h2>工作产出物 · PRD 文档</h2><span class="pill green">v1</span></div><div class="panel-body doc-body"><div class="doc-block"><strong>1. 产品定位</strong><p>TokenWisdom 是个人工作者的半自主 AI 分身系统，长期学习用户并代表用户与外部专业执行 Agent 协作。</p></div><div class="doc-block"><strong>2. 页面层级</strong><ul><li>Workstation：展示定时任务、当前对话任务、最近任务和核心产物。</li><li>Data Analysis Workspace：展示分析视图和对话窗口。</li><li>General Workspace：展示文档和对话窗口。</li><li>Twin Manager：管理分身画像、记忆文件、Agent MD 和 Token 消耗。</li></ul></div><div class="doc-block"><strong>3. 权限原则</strong><p>Wisdom Twin 可以讨论、请求、协调和草拟执行；最终确认权属于用户，尤其是写文件、发消息、付费调用、上传上下文和固化记忆。</p></div><div class="doc-block"><strong>4. 首版 MVP</strong><p>Web Workstation + Workspace + Twin Dock + Agent Hub + Knowledge & Artifacts + Approvals & Audit，Mac Local Runtime 作为 P1 接入本地执行 Agent。</p></div></div></section>
+          <section class="panel"><div class="panel-head"><h2>对话窗口 · User + Twin + Codex</h2><span class="pill blue">文档协作</span></div><div class="panel-body"><div class="chat-stream"><div class="turn"><div class="avatar">我</div><div class="bubble"><strong>User</strong><p>请把产品 PRD 整理完整，并按实际页面重新设计 HTML。</p></div></div><div class="turn"><div class="avatar twin">T</div><div class="bubble"><strong>Wisdom Twin</strong><p>我会坚持 Workstation / Workspace 的概念区分，并保持右侧分身常驻。</p></div></div><div class="turn"><div class="avatar agent">C</div><div class="bubble"><strong>Codex</strong><p>已生成 PRD v1 和产品页面 v11，包含 Workstation、工作台、Agent、历史、文档、公共内容、管理和审计页面。</p></div></div></div></div><div class="composer"><textarea placeholder="继续修改 PRD，例如：加强 Mac Local Runtime…"></textarea><button class="btn primary">发送</button></div></section>
+        </div>
+      </section>
+
+      <section class="page" id="page-agents" data-title="Agent 页面">
+        <div class="page-head"><div><div class="eyebrow">Agent Hub</div><h1>配置工具 Agent 和外部专业执行 Agent，形成用户的 Agent Network。</h1><p class="subtle">每个 Agent 都有能力卡、连接方式、权限边界、历史表现和最佳使用方式。Twin 可以冷启动采访 Agent，摸清能力和用法。</p></div><button class="btn primary">添加 Agent</button></div>
+        <div class="grid cols-3"><div class="agent-card"><div class="agent-top"><div><div class="agent-icon">CC</div><h3>Claude Code</h3></div><span class="pill amber">Local CLI</span></div><p>适合大范围代码理解、重构和执行。由 Mac Local Runtime 调用。</p><div class="kv"><b>权限</b><span>L3 请求执行</span><b>风险</b><span>写文件 / 跑命令</span></div><button class="btn">查看 Agent Card</button></div><div class="agent-card"><div class="agent-top"><div><div class="agent-icon">CX</div><h3>Codex</h3></div><span class="pill green">Connected</span></div><p>适合项目代码修改、文档生成、原型设计和本地仓库任务。</p><div class="kv"><b>权限</b><span>L3 请求执行</span><b>风险</b><span>文件修改</span></div><button class="btn">创建任务包</button></div><div class="agent-card"><div class="agent-top"><div><div class="agent-icon">CU</div><h3>Cursor</h3></div><span class="pill blue">IDE</span></div><p>适合 IDE 内联修改、局部重构和人工配合的代码任务。</p><div class="kv"><b>权限</b><span>L2 草拟执行</span><b>风险</b><span>项目上下文上传</span></div><button class="btn">连接 IDE</button></div><div class="agent-card"><div class="agent-top"><div><div class="agent-icon">DA</div><h3>Data Agent</h3></div><span class="pill green">Built-in</span></div><p>适合 SQL 查询、指标口径、归因分析和报告草稿。</p><div class="kv"><b>权限</b><span>L2 只读查询</span><b>风险</b><span>数据权限</span></div><button class="btn" data-page="data">进入分析</button></div><div class="agent-card"><div class="agent-top"><div><div class="agent-icon">BR</div><h3>Browser Agent</h3></div><span class="pill violet">Plugin</span></div><p>适合网页 Agent 自动化、对话保存、平台工具观察和总结。</p><div class="kv"><b>权限</b><span>L2 观察与草拟</span><b>风险</b><span>网页操作</span></div><button class="btn">查看规则</button></div><div class="agent-card"><div class="agent-top"><div><div class="agent-icon">FK</div><h3>File & Knowledge Agent</h3></div><span class="pill green">Built-in</span></div><p>适合整理文件、学习资料、生成知识库和沉淀 Memory Candidate。</p><div class="kv"><b>权限</b><span>L1 建议</span><b>风险</b><span>敏感文件读取</span></div><button class="btn">选择文件夹</button></div></div>
+      </section>
+
+      <section class="page" id="page-history" data-title="历史任务页">
+        <div class="page-head"><div><div class="eyebrow">Mission History</div><h1>历史任务不仅是记录，也是分身学习和复用经验的来源。</h1><p class="subtle">每个 Mission 都沉淀参与 Agent、产物、权限、失败原因、复盘结论和可复用记忆。</p></div><button class="btn">导出复盘</button></div>
+        <div class="table"><div class="row header"><div>任务</div><div>类型</div><div>参与 Agent</div><div>状态</div><div>操作</div></div><div class="row"><div><strong>浏览器 6.20 DAU 下滑归因</strong><span>生成报告和 2 条记忆候选</span></div><div>数据分析</div><div>Twin / Data Agent</div><div><span class="pill amber">待确认</span></div><button class="btn" data-page="data">打开</button></div><div class="row"><div><strong>TokenWisdom PRD v1</strong><span>产品文档和 HTML 原型</span></div><div>文档任务</div><div>Twin / Codex</div><div><span class="pill green">已完成</span></div><button class="btn" data-page="general">打开</button></div><div class="row"><div><strong>ICE Workbench 整合分析</strong><span>映射 Dashboard、Workspace、HITL</span></div><div>产品研究</div><div>Twin</div><div><span class="pill green">已归档</span></div><button class="btn" data-page="knowledge">查看</button></div></div>
+      </section>
+
+      <section class="page" id="page-knowledge" data-title="历史文档页">
+        <div class="page-head"><div><div class="eyebrow">Knowledge & Artifacts</div><h1>把过去工作中的好文档、报告、总结和记忆候选统一沉淀。</h1><p class="subtle">这里是分身长期成长的资产库：用户可确认记忆、复用产物、查看 Agent MD 文件和历史报告。</p></div><button class="btn primary">新增知识</button></div>
+        <div class="grid cols-3"><div class="artifact-card"><span class="pill blue">PRD</span><h3>TokenWisdom 产品 PRD v1</h3><p>完整产品需求，包含页面、权限、Agent-to-Agent、MVP。</p><button class="btn" data-page="general">打开</button></div><div class="artifact-card"><span class="pill green">Report</span><h3>DAU 下滑归因报告</h3><p>数据分析工作台生成，待补查 ANR 与设备分层。</p><button class="btn" data-page="data">打开</button></div><div class="artifact-card"><span class="pill amber">Memory</span><h3>用户偏好：表格优先</h3><p>候选记忆，需要用户确认后进入长期记忆。</p><button class="btn">确认记忆</button></div><div class="artifact-card"><span class="pill violet">Agent MD</span><h3>Codex 使用说明</h3><p>记录适用任务、输入格式、失败处理和历史表现。</p><button class="btn">查看</button></div><div class="artifact-card"><span class="pill blue">Summary</span><h3>本周工作总结</h3><p>分身基于任务和文档生成的周复盘。</p><button class="btn">打开</button></div><div class="artifact-card"><span class="pill green">Template</span><h3>Execution Brief 模板</h3><p>用于调用 Claude Code / Codex / Cursor 的标准任务包。</p><button class="btn">复用</button></div></div>
+      </section>
+
+      <section class="page" id="page-public" data-title="公共内容页面">
+        <div class="page-head"><div><div class="eyebrow">Public Content</div><h1>公共内容是可复用的 Agent Card、任务模板和工作流，但进入个人空间前需要审查。</h1><p class="subtle">公共内容帮助冷启动，但不会直接写入用户记忆；Twin 会解释来源、风险和适用场景。</p></div><button class="btn">提交模板</button></div>
+        <div class="grid cols-3"><div class="artifact-card"><span class="pill blue">Agent Card</span><h3>Claude Code 项目修复模板</h3><p>包含上下文收集、不可修改范围、验收标准和测试指令。</p><button class="btn">导入并审查</button></div><div class="artifact-card"><span class="pill green">Workflow</span><h3>每日数据巡检</h3><p>定时查询指标、异常解释、生成日报并请求确认。</p><button class="btn">创建 Mission</button></div><div class="artifact-card"><span class="pill violet">Template</span><h3>产品 PRD 工作流</h3><p>从讨论记录到 PRD、页面结构、HTML 原型和归档。</p><button class="btn">复用</button></div></div>
+      </section>
+
+      <section class="page" id="page-manager" data-title="数字分身管理">
+        <div class="page-head"><div><div class="eyebrow">Twin Manager</div><h1>管理你的数字分身：画像、记忆、Agent MD、成本和权限。</h1><p class="subtle">每个用户都有独立管理界面。这里不做具体任务，而是管理分身如何理解你、如何调用工具、能花多少成本。</p></div><button class="btn danger">暂停全部执行</button></div>
+        <div class="grid cols-2"><div class="card"><div class="card-head"><h2>分身画像</h2><span class="pill blue">Maturity 42%</span></div><div class="card-body list"><div class="list-item compact"><div><strong>工作偏好</strong><span>先结论后细节；表格优先；避免炫酷大屏。</span></div><button class="btn">编辑</button></div><div class="list-item compact"><div><strong>当前目标</strong><span>完成 TokenWisdom 产品方案、PRD 和原型。</span></div><button class="btn">编辑</button></div><div class="list-item compact"><div><strong>授权等级</strong><span>L3 Request Execution，高风险动作必须确认。</span></div><button class="btn">配置</button></div></div></div><div class="card"><div class="card-head"><h2>Token / 成本消耗</h2><span class="pill amber">Budget</span></div><div class="card-body list"><div class="list-item compact"><div><strong>Codex</strong><span>本周 126k tokens，主要用于文档和 HTML 设计。</span></div><span class="pill green">正常</span></div><div class="list-item compact"><div><strong>Data Agent</strong><span>本周 38k tokens，查询 4 次。</span></div><span class="pill green">正常</span></div><div class="list-item compact"><div><strong>Claude Code</strong><span>未连接本地 Runtime。</span></div><span class="pill amber">待连接</span></div></div></div><div class="card"><div class="card-head"><h2>Memory 文件</h2><span class="pill violet">18 条</span></div><div class="card-body list"><div class="list-item compact"><div><strong>用户表达偏好</strong><span>清晰、简洁、高效，产品页面要干净。</span></div><button class="btn">查看</button></div><div class="list-item compact"><div><strong>任务边界偏好</strong><span>全部能力都要，但按权限逐步开启。</span></div><button class="btn">查看</button></div></div></div><div class="card"><div class="card-head"><h2>Agent MD 文件</h2><span class="pill blue">6 个</span></div><div class="card-body list"><div class="list-item compact"><div><strong>Codex.md</strong><span>适合文档、代码、HTML 原型和本地项目任务。</span></div><button class="btn">打开</button></div><div class="list-item compact"><div><strong>DataAgent.md</strong><span>适合指标查询、归因分析和数据报告。</span></div><button class="btn">打开</button></div></div></div></div>
+      </section>
+
+      <section class="page" id="page-audit" data-title="审批与审计">
+        <div class="page-head"><div><div class="eyebrow">Approvals & Audit</div><h1>所有高风险动作都进入确认队列；所有执行动作都可追溯。</h1><p class="subtle">Twin 可以提出请求，但用户拥有最终确认权。审计记录用于复盘、回滚、权限优化和成本控制。</p></div><button class="btn danger">一键暂停</button></div>
+        <div class="grid cols-2"><div class="card"><div class="card-head"><h2>待用户确认</h2><span class="pill amber">2 Pending</span></div><div class="card-body list"><div class="list-item compact"><div><strong>允许 Data Agent 补查 ANR 与低端机型分层</strong><span>只读查询，预计消耗 12k tokens。</span></div><button class="btn primary">确认</button></div><div class="list-item compact"><div><strong>将“表格优先”固化为长期记忆</strong><span>来源：多次产品方案讨论。</span></div><button class="btn primary">确认</button></div></div></div><div class="card"><div class="card-head"><h2>权限日志</h2><span class="pill blue">Audit</span></div><div class="card-body list"><div class="list-item compact"><div><strong>Codex 生成 HTML 原型</strong><span>动作：写入项目目录和归档目录；用户当前任务授权。</span></div><span class="pill green">Done</span></div><div class="list-item compact"><div><strong>读取 TokenWisdom 历史文档</strong><span>动作：读取本地工作区资料；无外部上传。</span></div><span class="pill green">Done</span></div><div class="list-item compact"><div><strong>调用外部 Agent 修改本机项目</strong><span>动作：未执行，等待 Mac Local Runtime 连接。</span></div><span class="pill amber">Blocked</span></div></div></div></div>
+      </section>
+    </main>
+
+    <aside class="dock" aria-label="Wisdom Twin Dock">
+      <div class="dock-inner">
+        <div class="dock-card"><div class="dock-head"><div class="dock-title"><div><strong>Wisdom Twin</strong><span>当前页面：<b id="dock-page">Workstation</b></span></div><span class="pill blue">L3 Request</span></div></div><div class="dock-chat"><div class="dock-msg twin">我会始终在右侧，维护上下文、协调其他 Agent，并把高风险动作交给你确认。</div><div class="dock-msg me">这个产品核心是 User to Agent to Agents。</div><div class="dock-msg twin">已固化：用户对分身，分身再对工具 Agent；最终确认权归用户。</div></div><div class="dock-input"><input placeholder="问分身下一步…" /><button class="btn primary">Send</button></div></div>
+        <div class="dock-section"><h3>数字分身建议</h3><div class="suggestion"><strong>建议下一步：确认 MVP 页面</strong><p>当前 v11 已覆盖 Workstation、两类 Workspace、Agent、历史、文档、公共内容、管理和审计。</p><div class="actions"><button class="btn primary">继续计划</button><button class="btn">稍后</button></div></div></div>
+        <div class="dock-section"><h3>待用户确认</h3><div class="confirm-card"><strong>允许固化 2 条产品原则？</strong><p>1）Workstation 是外层总控；2）Workspace 聚焦产物与对话，其余内容抽屉隐藏。</p><div class="actions"><button class="btn primary">确认</button><button class="btn">修改</button><button class="btn danger">拒绝</button></div></div></div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="drawer-backdrop" id="drawerBackdrop"></div>
+  <aside class="drawer" id="drawer" aria-label="Hidden workspace panel"><div class="drawer-head"><div><h2 id="drawerTitle">任务状态</h2><p class="subtle" id="drawerSubtitle">非核心信息通过抽屉展示。</p></div><button class="btn" id="closeDrawer">关闭</button></div><div class="drawer-body" id="drawerBody"></div></aside>
+
+  <template id="drawer-status"><div class="drawer-section"><strong>状态 / 任务</strong><p>Workstation 汇总运行内容；Workspace 展示当前任务阶段、进度、阻塞点和待确认动作。</p></div><div class="mini-list"><div class="mini-row"><div><strong>当前阶段</strong><span>PRD 和 HTML 原型交付</span></div><span class="pill blue">Step 3</span></div><div class="mini-row"><div><strong>待确认</strong><span>是否以 v11 作为主设计稿</span></div><span class="pill amber">Waiting</span></div></div></template>
+  <template id="drawer-agents"><div class="drawer-section"><strong>Agent / 工具</strong><p>Wisdom Twin 负责协调；Codex 负责文档与原型；Data Agent 负责查询与分析；外部执行 Agent 需用户确认。</p></div><div class="mini-list"><div class="mini-row"><div><strong>Wisdom Twin</strong><span>上下文、建议、确认请求</span></div><span class="pill blue">Always</span></div><div class="mini-row"><div><strong>Codex</strong><span>PRD、HTML、项目文件修改</span></div><span class="pill green">Build</span></div><div class="mini-row"><div><strong>Data Agent</strong><span>指标拆解与归因</span></div><span class="pill violet">Analysis</span></div></div></template>
+  <template id="drawer-files"><div class="drawer-section"><strong>文件 / 数据</strong><p>工作台核心区不展示文件列表，输入文件、输出产物、数据源和上下文包都在抽屉里查看。</p></div><div class="mini-list"><div class="mini-row"><div><strong>TokenWisdom-产品PRD-v1.md</strong><span>完整 PRD 文档</span></div><span class="pill blue">PRD</span></div><div class="mini-row"><div><strong>tokenwisdom-product-prd-pages-v11.html</strong><span>新版产品页面 HTML</span></div><span class="pill green">HTML</span></div><div class="mini-row"><div><strong>dau_trend.csv</strong><span>数据分析查询结果</span></div><span class="pill amber">Data</span></div></div></template>
+  <template id="drawer-conversations"><div class="drawer-section"><strong>对话列表</strong><p>当前对话始终在主视图，历史对话默认隐藏，避免工作台过载。</p></div><div class="mini-list"><div class="mini-row"><div><strong>产品 PRD 交付</strong><span>User + Twin + Codex</span></div><span class="pill blue">Current</span></div><div class="mini-row"><div><strong>DAU 归因分析</strong><span>User + Twin + Data Agent</span></div><span class="pill green">Analysis</span></div></div></template>
+  <template id="drawer-timeline"><div class="drawer-section"><strong>执行记录</strong><p>工具调用、确认请求、文件写入、归档和复盘都进入 Timeline。</p></div><div class="mini-list"><div class="mini-row"><div><strong>读取历史讨论记录</strong><span>本地文件，无外部上传</span></div><span class="pill green">Done</span></div><div class="mini-row"><div><strong>生成 PRD v1</strong><span>写入项目目录并归档</span></div><span class="pill green">Done</span></div><div class="mini-row"><div><strong>生成 HTML v11</strong><span>覆盖实际页面结构</span></div><span class="pill green">Done</span></div></div></template>
+
+  <script>
+    const pages = Array.from(document.querySelectorAll('.page'));
+    const pageButtons = Array.from(document.querySelectorAll('[data-page]'));
+    const dockPage = document.getElementById('dock-page');
+    function showPage(name) {
+      pages.forEach((page) => page.classList.toggle('active', page.id === `page-${name}`));
+      document.querySelectorAll('.nav-btn[data-page]').forEach((btn) => btn.classList.toggle('active', btn.dataset.page === name));
+      const active = pages.find((page) => page.id === `page-${name}`);
+      if (active && dockPage) dockPage.textContent = active.dataset.title || name;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    pageButtons.forEach((button) => button.addEventListener('click', () => showPage(button.dataset.page)));
+
+    const drawer = document.getElementById('drawer');
+    const backdrop = document.getElementById('drawerBackdrop');
+    const drawerTitle = document.getElementById('drawerTitle');
+    const drawerBody = document.getElementById('drawerBody');
+    const closeDrawer = document.getElementById('closeDrawer');
+    const labels = { status: '状态 / 任务', agents: 'Agent / 工具', files: '文件 / 数据', conversations: '对话列表', timeline: '执行记录' };
+    function openDrawer(name) {
+      const template = document.getElementById(`drawer-${name}`);
+      if (!template) return;
+      drawerTitle.textContent = labels[name] || '详情';
+      drawerBody.innerHTML = template.innerHTML;
+      drawer.classList.add('open');
+      backdrop.classList.add('open');
+      document.querySelectorAll('[data-drawer]').forEach((btn) => btn.classList.toggle('drawer-active', btn.dataset.drawer === name));
+    }
+    function hideDrawer() {
+      drawer.classList.remove('open');
+      backdrop.classList.remove('open');
+      document.querySelectorAll('[data-drawer]').forEach((btn) => btn.classList.remove('drawer-active'));
+    }
+    document.querySelectorAll('[data-drawer]').forEach((button) => button.addEventListener('click', () => openDrawer(button.dataset.drawer)));
+    closeDrawer.addEventListener('click', hideDrawer);
+    backdrop.addEventListener('click', hideDrawer);
+    document.addEventListener('keydown', (event) => { if (event.key === 'Escape') hideDrawer(); });
+  </script>
+</body>
+</html>

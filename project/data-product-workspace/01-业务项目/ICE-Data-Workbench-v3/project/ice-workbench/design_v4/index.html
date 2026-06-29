@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ICE Workbench v4 · 设计稿索引</title>
+<script>(function(){var t=localStorage.getItem('ice-theme')||'light';document.documentElement.dataset.theme=t;})();</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+:root[data-theme="light"]{--bg:#faf9f6;--paper:#f4f1ec;--surface:#fff;--surface-2:#f7f5f0;--surface-3:#ece7df;
+  --border:#e6e2dc;--border-soft:#efece6;--text:#1f1f1f;--text-dim:#5f6368;--text-muted:#80868b;
+  --accent:#1a73e8;--accent-soft:#e8f0fe;--accent-text:#174ea6;
+  --success:#137333;--success-soft:#e6f4ea;--warning:#b06000;--warning-soft:#fef7e0;
+  --shadow-1:0 1px 2px rgba(60,64,67,.06);--shadow-2:0 1px 3px rgba(60,64,67,.10),0 4px 8px rgba(60,64,67,.04);}
+:root[data-theme="dark"]{--bg:#1f1f1f;--paper:#2a2a2a;--surface:#262626;--surface-2:#2e2e2e;--surface-3:#363636;
+  --border:#3c3c3c;--border-soft:#2e2e2e;--text:#e8eaed;--text-dim:#9aa0a6;--text-muted:#6c7075;
+  --accent:#8ab4f8;--accent-soft:rgba(138,180,248,.16);--accent-text:#aecbfa;
+  --success:#81c995;--success-soft:rgba(129,201,149,.14);--warning:#fdd663;--warning-soft:rgba(253,214,99,.14);
+  --shadow-1:0 1px 2px rgba(0,0,0,.4);--shadow-2:0 4px 16px rgba(0,0,0,.5);}
+.theme-btn{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:transparent;border:none;color:var(--text-dim);font-size:18px;cursor:pointer;transition:background .15s}
+.theme-btn:hover{background:var(--surface-2)}
+.theme-btn .t-light{display:inline}.theme-btn .t-dark{display:none}
+:root[data-theme="dark"] .theme-btn .t-light{display:none}
+:root[data-theme="dark"] .theme-btn .t-dark{display:inline}
+
+*{box-sizing:border-box}html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--text);
+  font-family:'Inter','PingFang SC','Microsoft YaHei',-apple-system,sans-serif;font-size:14px;line-height:1.6;
+  -webkit-font-smoothing:antialiased}
+
+.appbar{height:60px;background:var(--bg);border-bottom:1px solid var(--border-soft);
+  display:flex;align-items:center;padding:0 24px;gap:12px;position:sticky;top:0;z-index:50}
+.brand{display:flex;align-items:center;gap:10px}
+.brand-mark{width:32px;height:32px;display:grid;place-items:center}
+.brand-mark svg{width:32px;height:32px}
+.brand-text{font-family:'Inter',sans-serif;font-weight:500;font-size:18px;color:var(--text);letter-spacing:-.2px}
+.brand-text b{font-weight:600}
+
+.wrap{max-width:1100px;margin:0 auto;padding:48px 24px 100px}
+
+.hero{margin-bottom:36px}
+.hero-tag{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--accent-text);
+  background:var(--accent-soft);padding:5px 12px;border-radius:99px;font-weight:500;letter-spacing:.3px;margin-bottom:18px}
+h1{font-family:'Inter',sans-serif;font-size:38px;font-weight:500;margin:0 0 12px;letter-spacing:-.6px;line-height:1.2}
+.sub{color:var(--text-dim);font-size:15px;margin:0;max-width:680px;line-height:1.6}
+
+.btn{display:inline-flex;align-items:center;gap:8px;font-family:inherit;font-size:14px;font-weight:500;
+  padding:10px 20px;border-radius:99px;border:1px solid transparent;cursor:pointer;transition:all .15s;
+  text-decoration:none;line-height:1}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-tonal{background:var(--accent-soft);color:var(--accent-text)}
+.btn-ghost{background:transparent;color:var(--text);border-color:var(--border)}
+.btn-ghost:hover{background:var(--surface-2)}
+
+.section-h{font-family:'Inter',sans-serif;font-size:18px;font-weight:500;margin:48px 0 14px;
+  display:flex;align-items:center;gap:10px;letter-spacing:-.2px}
+.section-h .badge{font-family:'Inter';font-size:11px;font-weight:500;color:var(--text-dim);
+  background:var(--surface-2);padding:3px 10px;border-radius:99px;border:1px solid var(--border-soft)}
+.section-h .badge.ok{background:var(--success-soft);color:var(--success);border-color:var(--success-soft)}
+.section-h .num{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);font-weight:400;letter-spacing:.4px}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.card{background:var(--surface);border:1px solid var(--border-soft);border-radius:14px;
+  padding:18px;text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:10px;
+  transition:all .15s;position:relative;overflow:hidden;cursor:pointer;min-height:170px}
+.card:hover{border-color:var(--border);box-shadow:var(--shadow-2);transform:translateY(-1px)}
+.card .num{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);font-weight:500;letter-spacing:.5px}
+.card .name{font-family:'Inter',sans-serif;font-size:16px;font-weight:500;letter-spacing:-.2px;display:flex;align-items:center;gap:8px}
+.card .desc{font-size:12.5px;color:var(--text-dim);line-height:1.5;flex:1}
+.card .vps{display:flex;gap:5px;flex-wrap:wrap}
+.card .vp{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:500;
+  padding:3px 8px;border-radius:99px;background:var(--success-soft);color:var(--success);
+  border:1px solid var(--success-soft)}
+
+.notes{background:var(--surface);border:1px solid var(--border-soft);border-radius:14px;padding:24px;margin-top:36px;font-size:13.5px;line-height:1.75}
+.notes h3{font-family:'Inter',sans-serif;font-size:15px;margin:0 0 8px;font-weight:500;letter-spacing:-.1px}
+.notes h3:not(:first-child){margin-top:18px}
+.notes ul{padding-left:22px;margin:8px 0}
+.notes li{margin-bottom:5px}
+.notes code{background:var(--surface-2);padding:2px 7px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent-text)}
+.notes b{font-weight:500}
+
+.preview-strip{display:flex;align-items:center;gap:14px;margin-top:18px;padding:14px;
+  background:var(--paper);border-radius:12px;border:1px solid var(--border-soft);font-size:13px;color:var(--text-dim)}
+.preview-strip .ico{font-size:24px}
+</style>
+</head>
+<body>
+
+<header class="appbar">
+  <div class="brand">
+    <div class="brand-mark">
+      <svg viewBox="0 0 32 32" fill="none">
+        <rect x="2" y="2" width="28" height="28" rx="8" fill="#e8f0fe"/>
+        <path d="M9 11h10M9 16h14M9 21h7" stroke="#1a73e8" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="22" cy="21" r="3" fill="#fef7e0" stroke="#b06000" stroke-width="1.5"/>
+      </svg>
+    </div>
+    <span class="brand-text"><b>ICE</b> Workbench · Design v4</span>
+  </div>
+  <div style="margin-left:auto"></div>
+  <button class="theme-btn" title="切换主题" onclick="toggleTheme()" aria-label="切换主题"><span class="t-light">🌙</span><span class="t-dark">☀️</span></button>
+</header>
+<script>
+function toggleTheme(){
+  var cur=document.documentElement.dataset.theme||'light';
+  var next=cur==='light'?'dark':'light';
+  document.documentElement.dataset.theme=next;
+  localStorage.setItem('ice-theme',next);
+}
+</script>
+
+<div class="wrap">
+
+  <header class="hero">
+    <span class="hero-tag">v4 · 13 / 13 完成 · 2026-05-15</span>
+    <h1>Design v4 · NotebookLM 风</h1>
+    <p class="sub">把 ICE Workbench 重塑为「笔记本 + 三栏（Sources · Chat · Studio）」隐喻：暖白纸张底色、克制单色蓝、胶囊按钮、引用 chip、文档优先。每个页面同时给出 <b>电脑端</b> 和 <b>手机端</b> 设计方案，并排展示。</p>
+    <div style="margin-top:20px;display:flex;gap:8px;flex-wrap:wrap">
+      <a class="btn btn-primary" href="00_design_system.html">查看 Design System →</a>
+      <a class="btn btn-tonal" href="01_dashboard.html">看 Dashboard 双稿</a>
+      <a class="btn btn-ghost" href="02_workspace_chat.html">看 Workspace 双稿</a>
+    </div>
+  </header>
+
+  <div class="preview-strip">
+    <span class="ico">💡</span>
+    <span>每个页面文件 = 一张「<b>电脑浏览器框</b> + <b>手机 iPhone 14 Pro 框</b>」并排画布。手机预览 <code>390 × 844</code>，电脑预览 <code>≥ 1280px</code>。<br/>顶栏 🌙/☀️ 按钮切换暗夜模式，<b>选择会写入 localStorage 跨页持久化</b>。</span>
+  </div>
+
+  <h2 class="section-h">主流程页面 <span class="badge ok">✓ 全部完成</span><span class="num">01 → 07</span></h2>
+  <div class="grid">
+    <a class="card" href="00_design_system.html">
+      <span class="num">00 · DESIGN SYSTEM</span>
+      <span class="name">设计系统</span>
+      <span class="desc">颜色 tokens · Inter 字阶 · 胶囊按钮 · 范式 chip · Source 列表 · Studio 工具卡 · Notebook 卡 · 移动端预览</span>
+      <div class="vps"><span class="vp">✓ 含组件库</span></div>
+    </a>
+    <a class="card" href="01_dashboard.html">
+      <span class="num">01 · DASHBOARD</span>
+      <span class="name">📒 笔记本首页</span>
+      <span class="desc">桌面：1280 双栏（笔记本网格 + 团队动态）/ 手机：5 范式快开 + FAB + 4 Tab 底部导航</span>
+      <div class="vps"><span class="vp">🖥 桌面</span><span class="vp">📱 手机</span></div>
+    </a>
+    <a class="card" href="02_workspace_chat.html">
+      <span class="num">02 · WORKSPACE · CHAT</span>
+      <span class="name">💬 笔记本对话页</span>
+      <span class="desc">桌面：经典三栏 (Sources 280 / Chat / Studio 340) + Tool Card + 行内 cite chip / 手机：顶部三段切换</span>
+      <div class="vps"><span class="vp">🖥 桌面</span><span class="vp">📱 手机</span><span class="vp">📚 Cite</span></div>
+    </a>
+    <a class="card" href="03_workspace_files.html">
+      <span class="num">03 · WORKSPACE · FILES</span>
+      <span class="name">📁 笔记本文件视图</span>
+      <span class="desc">桌面：文件网格（数据/文档/图片分组）+ 右栏经验卡审批预览 / 手机：分类列表 + 上传 FAB</span>
+      <div class="vps"><span class="vp">🖥 桌面</span><span class="vp">📱 手机</span></div>
+    </a>
+    <a class="card" href="04_create_task.html">
+      <span class="num">04 · CREATE TASK</span>
+      <span class="name">＋ 新建笔记本</span>
+      <span class="desc">桌面：760 px Modal（范式 + 名称 + Agent + 数据源 + 可见范围）/ 手机：全屏分步</span>
+      <div class="vps"><span class="vp">🖥 桌面</span><span class="vp">📱 手机</span></div>
+    </a>
+    <a class="card" href="05_agent_detail.html">
+      <span class="num">05 · AGENT DETAIL</span>
+      <span class="name">🤖 Agent 详情</span>
+      <span class="desc">桌面：Hero + 4 stat + Skill 网格 + 评分分布 + 系统提示词 + 变更记录 / 手机：Profile 风</span>
+      <div class="vps"><span class="vp">🖥 桌面</span><span class="vp">📱 手机</span></div>
+    </a>
+    <a class="card" href="06_scheduled_task.html">
+      <span class="num">06 · SCHEDULED</span>
+      <span class="name">⏱ 定时任务</span>
+      <span class="desc">桌面：4 stat + 表格（cron + 状态 + 下次/上次 + 切换开关）/ 手机：卡片列表 + 状态标</span>
+      <div class="vps"><span class="vp">🖥 桌面</span><span class="vp">📱 手机</span></div>
+    </a>
+    <a class="card" href="07_notifications.html">
+      <span class="num">07 · NOTIFICATIONS</span>
+      <span class="name">🔔 通知中心</span>
+      <span class="desc">桌面：5 Tab + 按天分组 + 内嵌操作（审批/接受） / 手机：紧凑列表 + Tab</span>
+      <div class="vps"><span class="vp">🖥 桌面</span><span class="vp">📱 手机</span></div>
+    </a>
+  </div>
+
+  <h2 class="section-h">入口与引导 <span class="badge ok">✓</span><span class="num">08 → 10</span></h2>
+  <div class="grid">
+    <a class="card" href="08_login.html">
+      <span class="num">08 · LOGIN</span>
+      <span class="name">🔐 登录</span>
+      <span class="desc">桌面：左侧渐变介绍 + 右侧表单（账号/密码 + SSO）/ 手机：单栏全屏</span>
+      <div class="vps"><span class="vp">🖥 桌面</span><span class="vp">📱 手机</span></div>
+    </a>
+    <a class="card" href="09_introduce.html">
+      <span class="num">09 · INTRODUCE</span>
+      <span class="name">🎯 产品介绍 / 落地页</span>
+      <span class="desc">Hero + 演示截图 + 6 features + 5 范式 + CTA + 页脚 / 手机：滚动分段</span>
+      <div class="vps"><span class="vp">🖥 桌面</span><span class="vp">📱 手机</span></div>
+    </a>
+    <a class="card" href="10_guide.html">
+      <span class="num">10 · GUIDE</span>
+      <span class="name">🧭 新人引导</span>
+      <span class="desc">4 步 onboarding（账号 / 选范式 / 接知识库 / 邀请协作）· 当前展示 Step 2</span>
+      <div class="vps"><span class="vp">🖥 桌面</span><span class="vp">📱 手机</span></div>
+    </a>
+  </div>
+
+  <h2 class="section-h">管理后台 <span class="badge ok">✓</span><span class="num">11 → 12</span></h2>
+  <div class="grid">
+    <a class="card" href="11_admin_dashboard.html">
+      <span class="num">11 · ADMIN · DASHBOARD</span>
+      <span class="name">📊 管理后台首页</span>
+      <span class="desc">侧栏导航 + 4 stat + 趋势图 + 范式分布 donut + Top Agents + 待审批 / 手机：紧凑卡片</span>
+      <div class="vps"><span class="vp">🖥 桌面</span><span class="vp">📱 手机</span></div>
+    </a>
+    <a class="card" href="12_admin_agents.html">
+      <span class="num">12 · ADMIN · AGENTS</span>
+      <span class="name">🤖 Agent 池管理</span>
+      <span class="desc">审批 banner + 5 Tab + 范式过滤 + Agent 卡片网格（含调用/评分/P95）/ 手机：列表</span>
+      <div class="vps"><span class="vp">🖥 桌面</span><span class="vp">📱 手机</span></div>
+    </a>
+  </div>
+
+  <div class="notes">
+    <h3>📐 v4 设计决策（已锁定）</h3>
+    <ul>
+      <li><b>底色</b>：默认 <code>light</code>（纸张白 #faf9f6 + 侧栏 #f4f1ec + 纯白卡片），右上 🌙/☀️ 切 dark · localStorage 跨页持久化。</li>
+      <li><b>Accent</b>：单一克制蓝 <code>#1a73e8</code>，全部 CTA / 链接 / 选中态同色，不用渐变。</li>
+      <li><b>范式色</b>：5 个低饱和 chip（蓝/琥珀/紫/绿/红），仅作分类标识。</li>
+      <li><b>形状</b>：按钮全部胶囊形 <code>border-radius:99px</code>，卡片 14 px，头像 100% 圆。</li>
+      <li><b>三栏</b>：Sources 280 / Chat 1fr / Studio 340（已确认）。</li>
+      <li><b>Citation</b>：行内 <code>[1] [2]</code> chip + 下方面板默认展开第 1 条，2/3 折叠在 ▾ 后（已实装于 02）。</li>
+      <li><b>笔记本卡</b>：保留 emoji 作主图标（已确认）。</li>
+      <li><b>移动端 Workspace</b>：3 栏折叠为顶部三段切换 (数据源 · 对话 · Studio)（已确认）。</li>
+      <li><b>字体</b>：Inter 正文（500 字重做标题）+ PingFang SC 中文兜底 + JetBrains Mono 代码。</li>
+    </ul>
+
+    <h3>🎨 暗夜模式实现细节</h3>
+    <ul>
+      <li>每个 HTML 在 <code>&lt;head&gt;</code> 内置一段 IIFE，<b>渲染前</b>读 <code>localStorage.getItem('ice-theme')</code> 应用 <code>data-theme</code> 属性，避免 FOUC（白闪）。</li>
+      <li>顶栏图标按钮：<code>light</code> 显示 🌙 (点击切到 dark)，<code>dark</code> 显示 ☀️ (点击切到 light)。</li>
+      <li>所有色 token 走 <code>:root[data-theme="dark"]</code>，没有硬编码颜色（已修 alert / 浏览器 chrome 等边缘场景）。</li>
+    </ul>
+
+    <h3>📁 文件清单</h3>
+    <ul style="font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.9">
+      <li><code>index.html</code> — 你正在看这页</li>
+      <li><code>00_design_system.html</code> — 设计系统</li>
+      <li><code>01 → 12_*.html</code> — 12 个业务页面（每个含桌面 + 手机双稿）</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>

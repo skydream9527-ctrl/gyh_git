@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ICE-DATA-WORK · 任务看板</title>
+  <link rel="stylesheet" href="assets/app.css" />
+</head>
+<body data-page="board" data-title="任务看板">
+  <div class="app">
+    <aside id="side" class="sidebar"></aside>
+    <main class="main">
+      <div id="top"></div>
+
+      <div class="page-head">
+        <div>
+          <div class="eyebrow">Mission Board</div>
+          <h1>任务看板：Agent 和人一样，是一等的 assignee。</h1>
+          <p class="subtle">按状态分列；可指派给 人 / 我的 Twin / 工具 Agent（Squad 二期）。点卡片进入 Workspace。</p>
+        </div>
+        <a class="btn primary" href="new-mission.html">新建任务</a>
+      </div>
+
+      <div class="toolbar">
+        <span class="pill slate">项目：p_growth</span>
+        <select style="max-width:200px"><option>全部类型</option><option>数据分析</option><option>通用</option></select>
+        <select style="max-width:200px"><option>全部 assignee</option><option>我</option><option>我的 Twin</option><option>Data Agent</option></select>
+        <span class="subtle" style="margin-left:auto;font-size:12px">拖拽美化为二期；v1 用按钮/下拉切状态</span>
+      </div>
+
+      <div class="board">
+        <div class="lane">
+          <div class="lane-head">待办 <span class="count">2</span></div>
+          <a class="task-card" href="workspace-data.html"><div class="row" style="margin:0 0 8px"><span class="pill slate">待办</span><div class="assignees"><span class="ava agent">DA</span></div></div><strong>低端机型 ANR 专项</strong><span style="display:block;color:var(--muted);font-size:12px;margin-top:4px">数据分析 · 未开始</span></a>
+          <a class="task-card" href="workspace-general.html"><div class="row" style="margin:0 0 8px"><span class="pill slate">待办</span><div class="assignees"><span class="ava twin">TW</span></div></div><strong>归因报告对外版改写</strong><span style="display:block;color:var(--muted);font-size:12px;margin-top:4px">通用 · 未开始</span></a>
+        </div>
+        <div class="lane">
+          <div class="lane-head">执行中 <span class="count">4</span></div>
+          <a class="task-card" href="workspace-data.html"><div class="row" style="margin:0 0 8px"><span class="pill blue">执行中</span><div class="assignees"><span class="ava me">我</span><span class="ava twin">TW</span><span class="ava agent">DA</span></div></div><strong>浏览器 6.20 DAU 下滑归因</strong><span style="display:block;color:var(--muted);font-size:12px;margin-top:4px">现在：Data Agent 执行 kyuubi_query（2/3）</span></a>
+          <a class="task-card" href="workspace-general.html"><div class="row" style="margin:0 0 8px"><span class="pill blue">执行中</span><div class="assignees"><span class="ava me">我</span><span class="ava twin">TW</span></div></div><strong>ICE-DATA-WORK PRD 与原型</strong><span style="display:block;color:var(--muted);font-size:12px;margin-top:4px">现在：Codex 生成文件中</span></a>
+          <div class="task-card"><div class="row" style="margin:0 0 8px"><span class="pill red">报错</span><div class="assignees"><span class="ava agent">DA</span></div></div><strong>XX 报表导出</strong><span style="display:block;color:var(--muted);font-size:12px;margin-top:4px">kyuubi 超时（recoverable）· 建议：缩小时间窗重试</span><div class="actions" style="margin-top:8px"><button class="btn sm">重试</button><button class="btn sm">查看日志</button></div></div>
+          <div class="task-card"><div class="row" style="margin:0 0 8px"><span class="pill slate">已暂停</span><div class="assignees"><span class="ava agent">DA</span></div></div><strong>渠道明细回刷</strong><span style="display:block;color:var(--muted);font-size:12px;margin-top:4px">通用 · 一键暂停所致</span><div class="actions" style="margin-top:8px"><button class="btn sm">恢复</button></div></div>
+        </div>
+        <div class="lane">
+          <div class="lane-head">待确认 <span class="count">1</span></div>
+          <a class="task-card" href="approvals.html"><div class="row" style="margin:0 0 8px"><span class="pill amber">待确认</span><div class="assignees"><span class="ava agent">DA</span></div></div><strong>补查 ANR 与设备分层</strong><span style="display:block;color:var(--muted);font-size:12px;margin-top:4px">待确认：只读查询，约 12k tokens</span></a>
+        </div>
+        <div class="lane">
+          <div class="lane-head">已完成 <span class="count">2</span></div>
+          <a class="task-card" href="workspace-data.html"><div class="row" style="margin:0 0 8px"><span class="pill green">已完成</span><div class="assignees"><span class="ava twin">TW</span><span class="ava agent">DA</span></div></div><strong>渠道 A 新增归因</strong><span style="display:block;color:var(--muted);font-size:12px;margin-top:4px">结论已采纳 · 产物 ▸ 1</span></a>
+          <a class="task-card" href="knowledge.html"><div class="row" style="margin:0 0 8px"><span class="pill green">已完成</span><div class="assignees"><span class="ava me">我</span></div></div><strong>AB 实验复盘模板</strong><span style="display:block;color:var(--muted);font-size:12px;margin-top:4px">已沉淀为团队模板</span></a>
+        </div>
+      </div>
+    </main>
+    <aside id="dock" class="dock"></aside>
+  </div>
+  <script src="assets/shell.js"></script>
+</body>
+</html>

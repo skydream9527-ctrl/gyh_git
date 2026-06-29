@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TokenWisdom · Data Analysis Workspace v9</title>
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --panel: #ffffff;
+      --panel-soft: #f1f4f8;
+      --ink: #14171f;
+      --muted: #667085;
+      --faint: #9aa3b2;
+      --line: #e4e7ec;
+      --line-strong: #d0d5dd;
+      --blue: #245de8;
+      --blue-soft: #eff5ff;
+      --green: #07885f;
+      --green-soft: #ecfdf3;
+      --amber: #b54708;
+      --amber-soft: #fffaeb;
+      --red: #b42318;
+      --red-soft: #fef3f2;
+      --violet: #6941c6;
+      --violet-soft: #f4f3ff;
+      --slate: #344054;
+      --shadow: 0 18px 46px rgba(16, 24, 40, .08);
+      --shadow-soft: 0 8px 22px rgba(16, 24, 40, .055);
+      --radius-xl: 24px;
+      --radius-lg: 18px;
+      --radius: 14px;
+      --body: "Avenir Next", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      --mono: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; color: var(--ink); background: var(--bg); font-family: var(--body); }
+    h1, h2, h3, p { margin: 0; }
+    button, input, textarea { font: inherit; }
+    button { cursor: pointer; }
+
+    .app { display: grid; grid-template-columns: 236px minmax(0, 1fr) 356px; min-height: 100vh; }
+    .sidebar { position: sticky; top: 0; height: 100vh; border-right: 1px solid var(--line); background: rgba(255,255,255,.92); backdrop-filter: blur(18px); overflow: auto; }
+    .brand { display: flex; gap: 11px; align-items: center; padding: 22px 18px 18px; border-bottom: 1px solid var(--line); }
+    .brand-mark { width: 40px; height: 40px; border-radius: 14px; display: grid; place-items: center; color: #fff; font-weight: 900; background: linear-gradient(145deg, #111827, var(--blue)); }
+    .brand strong { display: block; font-size: 15px; letter-spacing: -.02em; }
+    .brand span { display: block; margin-top: 2px; color: var(--muted); font-size: 12px; }
+    .nav { padding: 14px 12px; display: grid; gap: 6px; }
+    .nav-label { padding: 12px 8px 6px; color: var(--faint); font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
+    .nav-btn { width: 100%; display: flex; align-items: center; gap: 10px; border: 0; border-radius: 13px; padding: 11px 10px; color: var(--muted); background: transparent; text-align: left; }
+    .nav-btn:hover { color: var(--ink); background: var(--panel-soft); }
+    .nav-btn.active { color: var(--blue); background: var(--blue-soft); font-weight: 760; }
+    .nav-btn .icon { width: 24px; text-align: center; }
+    .side-card { margin: 16px 12px; padding: 13px; border: 1px solid var(--line); border-radius: 16px; background: var(--panel-soft); color: var(--muted); font-size: 12px; line-height: 1.55; }
+
+    .main { min-width: 0; padding: 18px 20px 44px; }
+    .workspace-top { position: sticky; top: 0; z-index: 20; background: linear-gradient(180deg, rgba(246,247,249,.98), rgba(246,247,249,.82), transparent); backdrop-filter: blur(12px); padding-bottom: 14px; }
+    .task-header { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 14px; align-items: end; border: 1px solid var(--line); border-radius: 20px; background: #fff; box-shadow: var(--shadow-soft); padding: 15px 16px; }
+    .eyebrow { margin-bottom: 7px; color: var(--blue); font-family: var(--mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; }
+    h1 { font-size: clamp(24px, 2.4vw, 34px); line-height: 1.12; letter-spacing: -.04em; }
+    h2 { font-size: 18px; letter-spacing: -.02em; }
+    h3 { font-size: 15px; letter-spacing: -.01em; }
+    .subtle { color: var(--muted); font-size: 14px; line-height: 1.65; }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+
+    .btn { min-height: 36px; padding: 0 12px; border: 1px solid var(--line-strong); border-radius: 10px; color: var(--ink); background: #fff; font-size: 13px; font-weight: 720; }
+    .btn:hover { transform: translateY(-1px); box-shadow: var(--shadow-soft); }
+    .btn.primary { color: #fff; background: var(--blue); border-color: var(--blue); }
+    .btn.ghost { color: var(--muted); background: transparent; }
+    .btn.danger { color: var(--red); background: var(--red-soft); border-color: #fecdca; }
+    .btn.drawer-active { color: var(--blue); background: var(--blue-soft); border-color: #c7d7fe; }
+
+    .pill { display: inline-flex; align-items: center; gap: 6px; width: fit-content; min-height: 24px; padding: 0 9px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); background: #fff; font-size: 12px; font-weight: 760; white-space: nowrap; }
+    .pill.blue { color: var(--blue); background: var(--blue-soft); border-color: #c7d7fe; }
+    .pill.green { color: var(--green); background: var(--green-soft); border-color: #bbf7d0; }
+    .pill.amber { color: var(--amber); background: var(--amber-soft); border-color: #fedf89; }
+    .pill.red { color: var(--red); background: var(--red-soft); border-color: #fecdca; }
+    .pill.violet { color: var(--violet); background: var(--violet-soft); border-color: #d9d6fe; }
+
+    .focus-layout { display: grid; grid-template-columns: minmax(460px, 1.05fr) minmax(380px, .95fr); gap: 14px; align-items: stretch; margin-top: 14px; }
+    .panel { border: 1px solid var(--line); border-radius: var(--radius-lg); background: rgba(255,255,255,.96); box-shadow: var(--shadow-soft); overflow: hidden; min-height: 650px; display: flex; flex-direction: column; }
+    .panel-head { min-height: 56px; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 15px 16px; border-bottom: 1px solid var(--line); }
+    .panel-body { padding: 16px; flex: 1; overflow: auto; }
+
+    .report-title { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+    .report-title h2 { font-size: 24px; }
+    .metric-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-bottom: 14px; }
+    .metric { border: 1px solid var(--line); border-radius: 15px; background: var(--panel-soft); padding: 12px; }
+    .metric b { display: block; font-size: 22px; letter-spacing: -.04em; }
+    .metric span { display: block; margin-top: 4px; color: var(--muted); font-size: 12px; line-height: 1.4; }
+
+    .chart { height: 178px; border: 1px solid var(--line); border-radius: 16px; background: linear-gradient(180deg, #fff, var(--panel-soft)); padding: 16px; display: grid; align-items: end; grid-template-columns: repeat(14, 1fr); gap: 7px; margin-bottom: 14px; }
+    .bar { border-radius: 9px 9px 3px 3px; background: linear-gradient(180deg, #78a4ff, #245de8); min-height: 20px; position: relative; }
+    .bar.warn { background: linear-gradient(180deg, #ffc772, #b54708); }
+    .bar::after { content: attr(data-label); position: absolute; left: 50%; bottom: -20px; transform: translateX(-50%); color: var(--faint); font-size: 10px; }
+
+    .finding-list { display: grid; gap: 10px; }
+    .finding { border: 1px solid var(--line); border-radius: 15px; background: #fff; padding: 12px; }
+    .finding strong { display: block; font-size: 14px; margin-bottom: 5px; }
+    .finding p { color: var(--muted); font-size: 13px; line-height: 1.58; }
+
+    .artifact-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+
+    .chat-stream { display: grid; gap: 12px; padding-bottom: 10px; }
+    .turn { display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 11px; align-items: start; }
+    .avatar { width: 36px; height: 36px; display: grid; place-items: center; border-radius: 13px; color: #fff; background: #111827; font-size: 12px; font-weight: 850; }
+    .avatar.twin { background: var(--blue); }
+    .avatar.agent { background: var(--violet); }
+    .avatar.sql { background: var(--green); }
+    .bubble { border: 1px solid var(--line); border-radius: 16px; padding: 12px; background: var(--panel-soft); }
+    .bubble strong { display: block; font-size: 13px; margin-bottom: 5px; }
+    .bubble p { color: var(--muted); font-size: 13px; line-height: 1.6; }
+    .tool-card { margin-top: 9px; border: 1px solid #bbf7d0; border-radius: 13px; background: var(--green-soft); padding: 10px; color: #05603a; font-size: 12px; line-height: 1.45; }
+    .composer { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; padding: 14px; border-top: 1px solid var(--line); background: var(--panel-soft); }
+    .composer textarea { width: 100%; min-height: 76px; border: 1px solid var(--line); border-radius: 14px; padding: 12px; outline: none; resize: vertical; }
+
+    .dock { position: sticky; top: 0; height: 100vh; border-left: 1px solid var(--line); background: #fff; overflow: auto; }
+    .dock-inner { padding: 18px 16px; }
+    .dock-card { border: 1px solid var(--line); border-radius: 20px; background: #fff; box-shadow: var(--shadow); overflow: hidden; }
+    .dock-head { padding: 15px; border-bottom: 1px solid var(--line); background: linear-gradient(180deg, var(--blue-soft), #fff); }
+    .dock-title { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+    .dock-title strong { display: block; font-size: 15px; }
+    .dock-title span { display: block; margin-top: 3px; color: var(--muted); font-size: 12px; line-height: 1.45; }
+    .dock-chat { display: grid; gap: 10px; padding: 14px; max-height: 300px; overflow: auto; }
+    .dock-msg { padding: 10px 11px; border-radius: 14px; background: var(--panel-soft); font-size: 12px; line-height: 1.55; }
+    .dock-msg.me { margin-left: 42px; color: #fff; background: #111827; }
+    .dock-msg.twin { margin-right: 28px; color: #174ea6; background: var(--blue-soft); }
+    .dock-input { display: flex; gap: 8px; padding: 12px; border-top: 1px solid var(--line); }
+    .dock-input input { min-width: 0; flex: 1; border: 1px solid var(--line); border-radius: 10px; padding: 0 10px; outline: none; }
+    .dock-section { margin-top: 14px; }
+    .dock-section h3 { margin-bottom: 8px; }
+    .suggestion { border: 1px solid #c7d7fe; border-radius: 15px; background: var(--blue-soft); padding: 12px; margin-bottom: 10px; }
+    .suggestion strong { display: block; font-size: 13px; margin-bottom: 5px; }
+    .suggestion p { color: #174ea6; font-size: 12px; line-height: 1.55; }
+    .confirm-card { border: 1px solid #fedf89; border-radius: 15px; background: var(--amber-soft); padding: 12px; margin-bottom: 10px; }
+    .confirm-card strong { display: block; font-size: 13px; margin-bottom: 5px; }
+    .confirm-card p { color: #7a3f00; font-size: 12px; line-height: 1.55; }
+    .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+
+    .drawer-backdrop { position: fixed; inset: 0; background: rgba(17,24,39,.18); opacity: 0; pointer-events: none; transition: opacity .18s ease; z-index: 40; }
+    .drawer-backdrop.open { opacity: 1; pointer-events: auto; }
+    .drawer { position: fixed; top: 0; right: 0; width: min(440px, calc(100vw - 24px)); height: 100vh; background: #fff; border-left: 1px solid var(--line); box-shadow: -18px 0 50px rgba(16,24,40,.16); transform: translateX(104%); transition: transform .2s ease; z-index: 50; display: flex; flex-direction: column; }
+    .drawer.open { transform: translateX(0); }
+    .drawer-head { min-height: 62px; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px; border-bottom: 1px solid var(--line); }
+    .drawer-body { padding: 16px; overflow: auto; display: grid; gap: 12px; }
+    .drawer-section { border: 1px solid var(--line); border-radius: 15px; background: var(--panel-soft); padding: 12px; }
+    .drawer-section strong { display: block; font-size: 13px; margin-bottom: 5px; }
+    .drawer-section span, .drawer-section p { color: var(--muted); font-size: 12px; line-height: 1.5; }
+    .mini-list { display: grid; gap: 8px; }
+    .mini-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; border: 1px solid var(--line); border-radius: 13px; padding: 10px; background: #fff; }
+    .mini-row strong { display: block; font-size: 13px; }
+    .mini-row span { display: block; margin-top: 3px; color: var(--muted); font-size: 12px; }
+
+    @keyframes fade { from { opacity: .45; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+    @media (max-width: 1280px) {
+      .app { grid-template-columns: 220px minmax(0, 1fr); }
+      .dock { grid-column: 1 / -1; position: relative; height: auto; border-left: 0; border-top: 1px solid var(--line); }
+    }
+    @media (max-width: 980px) {
+      .app { grid-template-columns: 1fr; }
+      .sidebar { position: relative; height: auto; }
+      .task-header, .focus-layout, .metric-grid, .composer { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand"><div class="brand-mark">TW</div><div><strong>TokenWisdom</strong><span>Data Workspace</span></div></div>
+      <nav class="nav" aria-label="Workspace Navigation">
+        <div class="nav-label">Core</div>
+        <button class="nav-btn active"><span class="icon">▣</span>数据分析工作台</button>
+        <button class="nav-btn"><span class="icon">⌂</span>返回主任务台</button>
+        <button class="nav-btn"><span class="icon">＋</span>新建分析任务</button>
+        <div class="nav-label">Hidden Panels</div>
+        <button class="nav-btn" data-drawer="status"><span class="icon">◷</span>任务状态</button>
+        <button class="nav-btn" data-drawer="agents"><span class="icon">◎</span>Agent 与工具</button>
+        <button class="nav-btn" data-drawer="files"><span class="icon">◩</span>文件与数据</button>
+        <button class="nav-btn" data-drawer="conversations"><span class="icon">☷</span>对话列表</button>
+      </nav>
+      <div class="side-card">参考 ICE Workspace：保留对话、文件、工具调用、HITL，但默认隐藏非核心区域。主视图只看分析产出物和对话窗口。</div>
+    </aside>
+
+    <main class="main">
+      <div class="workspace-top">
+        <div class="task-header">
+          <div>
+            <div class="eyebrow">Data Analysis Mission</div>
+            <h1>浏览器 6.20 版本 DAU 下滑归因分析</h1>
+            <p class="subtle">目标：解释 6 月 20 日后 DAU 环比下滑 3.8% 的原因，并输出可同步给业务负责人的分析结论。</p>
+            <div class="toolbar">
+              <button class="btn drawer-toggle" data-drawer="status">任务状态</button>
+              <button class="btn drawer-toggle" data-drawer="agents">Agent / 工具</button>
+              <button class="btn drawer-toggle" data-drawer="files">文件 / 数据</button>
+              <button class="btn drawer-toggle" data-drawer="conversations">对话列表</button>
+              <button class="btn drawer-toggle" data-drawer="timeline">执行记录</button>
+            </div>
+          </div>
+          <div class="actions"><button class="btn">保存草稿</button><button class="btn primary">请求用户确认</button></div>
+        </div>
+      </div>
+
+      <div class="focus-layout">
+        <section class="panel" aria-label="工作产出物">
+          <div class="panel-head"><h2>工作产出物 · 分析报告草稿</h2><span class="pill amber">等待确认</span></div>
+          <div class="panel-body">
+            <div class="report-title"><div><h2>DAU 下滑主要由新版本冷启动耗时上升 + 渠道流量回落共同造成</h2><p class="subtle">当前为 Twin Agent 组织后的报告草稿，数据来自 Kyuubi 查询与历史任务文件。</p></div><span class="pill blue">v0.7</span></div>
+            <div class="metric-grid">
+              <div class="metric"><b>-3.8%</b><span>DAU 环比变化</span></div>
+              <div class="metric"><b>+420ms</b><span>P95 冷启动耗时</span></div>
+              <div class="metric"><b>-12.6%</b><span>渠道 A 新增流量</span></div>
+              <div class="metric"><b>72%</b><span>可解释下滑占比</span></div>
+            </div>
+            <div class="chart" aria-label="DAU trend chart">
+              <div class="bar" style="height:70%" data-label="06/14"></div><div class="bar" style="height:74%" data-label="15"></div><div class="bar" style="height:76%" data-label="16"></div><div class="bar" style="height:78%" data-label="17"></div><div class="bar" style="height:73%" data-label="18"></div><div class="bar" style="height:75%" data-label="19"></div><div class="bar warn" style="height:61%" data-label="20"></div><div class="bar warn" style="height:58%" data-label="21"></div><div class="bar warn" style="height:60%" data-label="22"></div><div class="bar" style="height:64%" data-label="23"></div><div class="bar" style="height:66%" data-label="24"></div><div class="bar" style="height:67%" data-label="25"></div><div class="bar" style="height:69%" data-label="26"></div><div class="bar" style="height:71%" data-label="27"></div>
+            </div>
+            <div class="finding-list">
+              <div class="finding"><strong>结论 1：版本性能指标异常与 DAU 下滑同日出现</strong><p>6.20 版本灰度后，P95 冷启动耗时从 1.8s 上升到 2.2s，影响新用户首日留存和次日回访。建议先回查灰度包启动链路和广告 SDK 初始化耗时。</p></div>
+              <div class="finding"><strong>结论 2：渠道 A 流量回落解释约 31% 的下滑</strong><p>渠道 A 新增用户下降 12.6%，但老用户活跃未同步下滑，因此该因素是辅助原因，不是唯一主因。</p></div>
+              <div class="finding"><strong>结论 3：需要业务确认是否执行灰度回滚或扩展观察窗口</strong><p>分身建议不要直接执行回滚，而是先让用户确认：继续查询崩溃率 / ANR，或让 Codex/数据 Agent 生成完整复盘报告。</p></div>
+            </div>
+            <div class="artifact-actions"><button class="btn primary">生成正式报告</button><button class="btn">导出 Markdown</button><button class="btn">沉淀为经验卡</button></div>
+          </div>
+        </section>
+
+        <section class="panel" aria-label="对话窗口">
+          <div class="panel-head"><h2>对话窗口 · Twin + Data Agent</h2><span class="pill blue">核心工作区</span></div>
+          <div class="panel-body">
+            <div class="chat-stream">
+              <div class="turn"><div class="avatar">我</div><div class="bubble"><strong>User</strong><p>帮我分析 6 月 20 日之后浏览器 DAU 下滑的主要原因，输出可以给业务看的结论。</p></div></div>
+              <div class="turn"><div class="avatar twin">T</div><div class="bubble"><strong>Wisdom Twin</strong><p>我会先让 Data Analysis Agent 做分层查询，再让 Kyuubi 工具拉取 DAU、版本、渠道和性能指标。高风险动作只生成建议，不会直接执行。</p></div></div>
+              <div class="turn"><div class="avatar agent">D</div><div class="bubble"><strong>Data Analysis Agent</strong><p>已拆成三个查询：DAU 趋势、版本维度、渠道维度。建议补充冷启动耗时和崩溃率作为解释变量。</p><div class="tool-card">Tool call · kyuubi_query · status: success · rows: 14,238 · duration: 8.4s</div></div></div>
+              <div class="turn"><div class="avatar sql">K</div><div class="bubble"><strong>Kyuubi Tool</strong><p>查询结果显示：6.20 版本用户 DAU 下滑更明显，渠道 A 新增流量同步下降，冷启动 P95 同日上升。</p></div></div>
+              <div class="turn"><div class="avatar twin">T</div><div class="bubble"><strong>Wisdom Twin</strong><p>我已把结果组织成左侧报告草稿。建议你确认下一步：继续查崩溃/ANR，还是先生成业务报告。</p></div></div>
+            </div>
+          </div>
+          <div class="composer"><textarea placeholder="继续提问，例如：继续查 ANR 和崩溃率，并把结论写进报告…"></textarea><button class="btn primary">发送</button></div>
+        </section>
+      </div>
+    </main>
+
+    <aside class="dock" aria-label="Digital Twin Dock">
+      <div class="dock-inner">
+        <div class="dock-card">
+          <div class="dock-head"><div class="dock-title"><div><strong>Wisdom Twin</strong><span>当前任务：DAU 下滑归因分析</span></div><span class="pill blue">L3 Request</span></div></div>
+          <div class="dock-chat"><div class="dock-msg twin">我把非核心页面隐藏到了顶部按钮里。当前主视图只保留“分析产出物”和“对话窗口”。</div><div class="dock-msg me">下一步应该做什么？</div><div class="dock-msg twin">建议先补查崩溃率和 ANR，再决定是否建议灰度回滚。</div></div>
+          <div class="dock-input"><input placeholder="问分身下一步…" /><button class="btn primary">Send</button></div>
+        </div>
+        <div class="dock-section"><h3>数字分身建议</h3><div class="suggestion"><strong>继续计划</strong><p>补充崩溃率、ANR 和留存指标，形成更稳的归因链。</p><div class="actions"><button class="btn primary">继续计划</button><button class="btn">调整指标</button></div></div><div class="suggestion"><strong>生成报告</strong><p>当前结论已可形成业务草稿，但建议标注“性能问题仍需验证”。</p><div class="actions"><button class="btn primary">生成正式报告</button><button class="btn">稍后</button></div></div></div>
+        <div class="dock-section"><h3>待用户确认</h3><div class="confirm-card"><strong>是否执行下一轮查询？</strong><p>调用 Kyuubi 查询崩溃率和 ANR。预计消耗 8k tokens，读取线上稳定性表。</p><div class="actions"><button class="btn primary">确认执行</button><button class="btn">修改范围</button><button class="btn danger">拒绝</button></div></div></div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="drawer-backdrop" id="drawerBackdrop"></div>
+  <aside class="drawer" id="drawer" aria-label="Hidden workspace panel">
+    <div class="drawer-head"><div><h2 id="drawerTitle">任务状态</h2><p class="subtle" id="drawerSubtitle">非核心信息通过抽屉展示，不占用主工作区。</p></div><button class="btn" id="closeDrawer">关闭</button></div>
+    <div class="drawer-body" id="drawerBody"></div>
+  </aside>
+
+  <template id="drawer-status">
+    <div class="drawer-section"><strong>任务状态</strong><span>Running · 第 3 轮分析 · 已完成 DAU / 版本 / 渠道 / 性能查询。</span></div>
+    <div class="mini-list"><div class="mini-row"><div><strong>当前阶段</strong><span>归因验证</span></div><span class="pill blue">Step 3</span></div><div class="mini-row"><div><strong>待确认动作</strong><span>继续查询崩溃率和 ANR</span></div><span class="pill amber">Confirm</span></div><div class="mini-row"><div><strong>产出状态</strong><span>报告草稿 v0.7</span></div><span class="pill green">Draft</span></div></div>
+  </template>
+  <template id="drawer-agents">
+    <div class="drawer-section"><strong>参与 Agent</strong><p>Twin Agent 负责协调；Data Analysis Agent 负责归因；Kyuubi Tool 负责 SQL；File Agent 读取历史报告。</p></div>
+    <div class="mini-list"><div class="mini-row"><div><strong>Wisdom Twin</strong><span>目标、上下文、确认请求</span></div><span class="pill blue">Coordinator</span></div><div class="mini-row"><div><strong>Data Analysis Agent</strong><span>指标拆解、归因假设</span></div><span class="pill violet">Active</span></div><div class="mini-row"><div><strong>Kyuubi Query</strong><span>SELECT 查询，只读</span></div><span class="pill green">Tool</span></div></div>
+  </template>
+  <template id="drawer-files">
+    <div class="drawer-section"><strong>文件与数据</strong><p>参考 ICE Workspace Files，但默认隐藏。只在用户需要查看数据来源、SQL 或导出文件时展开。</p></div>
+    <div class="mini-list"><div class="mini-row"><div><strong>dau_trend_0614_0627.csv</strong><span>查询结果 · 14 天</span></div><span class="pill green">CSV</span></div><div class="mini-row"><div><strong>version_breakdown.sql</strong><span>版本维度 SQL</span></div><span class="pill blue">SQL</span></div><div class="mini-row"><div><strong>analysis_report_v07.md</strong><span>报告草稿</span></div><span class="pill amber">Draft</span></div></div>
+  </template>
+  <template id="drawer-conversations">
+    <div class="drawer-section"><strong>对话列表</strong><p>参考 ICE 的 conversation 列表，但默认不占左栏。用户点击时再切换历史对话。</p></div>
+    <div class="mini-list"><div class="mini-row"><div><strong>主分析对话</strong><span>Twin + Data Agent</span></div><span class="pill blue">Current</span></div><div class="mini-row"><div><strong>SQL 校验对话</strong><span>Kyuubi 查询解释</span></div><span class="pill green">Done</span></div><div class="mini-row"><div><strong>报告润色对话</strong><span>等待用户确认</span></div><span class="pill amber">Pending</span></div></div>
+  </template>
+  <template id="drawer-timeline">
+    <div class="drawer-section"><strong>执行记录</strong><p>工具调用、HITL 请求和报告更新以事件流保存，默认隐藏。</p></div>
+    <div class="mini-list"><div class="mini-row"><div><strong>10:21 · kyuubi_query</strong><span>DAU 趋势查询成功</span></div><span class="pill green">OK</span></div><div class="mini-row"><div><strong>10:25 · tool_call</strong><span>版本维度查询成功</span></div><span class="pill green">OK</span></div><div class="mini-row"><div><strong>10:31 · approval_request</strong><span>请求继续查 ANR</span></div><span class="pill amber">Waiting</span></div></div>
+  </template>
+
+  <script>
+    const drawer = document.getElementById('drawer');
+    const backdrop = document.getElementById('drawerBackdrop');
+    const drawerTitle = document.getElementById('drawerTitle');
+    const drawerBody = document.getElementById('drawerBody');
+    const closeDrawer = document.getElementById('closeDrawer');
+    const labels = { status: '任务状态', agents: 'Agent 与工具', files: '文件与数据', conversations: '对话列表', timeline: '执行记录' };
+    const subtitles = {
+      status: '任务进度、阶段和待确认动作。',
+      agents: '参与本次数据分析的 Agent 和工具。',
+      files: '输入数据、SQL、报告草稿和导出文件。',
+      conversations: '历史对话隐藏在这里，主界面只保留当前对话。',
+      timeline: '工具调用、HITL 和审计事件。'
+    };
+    function openDrawer(name) {
+      const template = document.getElementById(`drawer-${name}`);
+      if (!template) return;
+      drawerTitle.textContent = labels[name] || '详情';
+      document.getElementById('drawerSubtitle').textContent = subtitles[name] || '详情信息';
+      drawerBody.innerHTML = template.innerHTML;
+      drawer.classList.add('open');
+      backdrop.classList.add('open');
+      document.querySelectorAll('.drawer-toggle, [data-drawer]').forEach((btn) => btn.classList.toggle('drawer-active', btn.dataset.drawer === name));
+    }
+    function hideDrawer() {
+      drawer.classList.remove('open');
+      backdrop.classList.remove('open');
+      document.querySelectorAll('.drawer-toggle, [data-drawer]').forEach((btn) => btn.classList.remove('drawer-active'));
+    }
+    document.querySelectorAll('[data-drawer]').forEach((button) => button.addEventListener('click', () => openDrawer(button.dataset.drawer)));
+    closeDrawer.addEventListener('click', hideDrawer);
+    backdrop.addEventListener('click', hideDrawer);
+    document.addEventListener('keydown', (event) => { if (event.key === 'Escape') hideDrawer(); });
+  </script>
+</body>
+</html>

@@ -1,0 +1,103 @@
+/* =====================================================================
+ * ICE Workbench · Prototype v7 · 设计令牌
+ * 暖米白纸张 + Claude 铜橙 + 5 范式色
+ * ===================================================================== */
+:root {
+  /* ===== 纸张层 ===== */
+  --bg:           #faf4ed;
+  --bg-tint:      #f5efe4;
+  --paper-deep:   #f0e9dc;
+  --surface:      #ffffff;
+  --surface-2:    #f6f0e4;
+  --surface-3:    #ece3d3;
+
+  /* ===== 边框 / 分隔 ===== */
+  --border:        #e5dcc8;
+  --border-soft:   #ede5d2;
+  --border-strong: #d4c8ad;
+  --divider:       #e8dfce;
+
+  /* ===== 文字（暖墨） ===== */
+  --text:        #1a1612;
+  --text-2:      #3a342b;
+  --text-dim:    #5b5246;
+  --text-muted:  #8a7e69;
+  --text-faint:  #b3a78f;
+  --text-on-accent: #ffffff;
+
+  /* ===== Accent · Claude 铜橙 ===== */
+  --accent:        #cc785c;
+  --accent-hover:  #b8624a;
+  --accent-press:  #a3503b;
+  --accent-soft:   #f5e8e2;
+  --accent-tint:   rgba(204, 120, 92, 0.10);
+  --accent-text:   #8a3a23;
+  --accent-grad:   linear-gradient(135deg, #cc785c 0%, #e89e83 100%);
+  --accent-shadow: 0 1px 0 rgba(166,84,57,.30), 0 4px 14px rgba(204,120,92,.18), inset 0 1px 0 rgba(255,255,255,.24);
+  --ring: 0 0 0 3px rgba(204, 120, 92, 0.18);
+
+  /* ===== 5 范式色 ===== */
+  --p-ab:   #5e7d6a; --p-ab-soft:   #e6ede6;
+  --p-biz:  #b86b3a; --p-biz-soft:  #f5e3d0;
+  --p-data: #4a7c8b; --p-data-soft: #d8e5ea;
+  --p-wave: #b04f5f; --p-wave-soft: #f0d8dc;
+  --p-gray: #7a6b8e; --p-gray-soft: #ebe5ee;
+
+  /* ===== 状态色 ===== */
+  --success: #5a7a4f; --success-soft: #e6ede0;
+  --warning: #b07d2a; --warning-soft: #f5ead0;
+  --error:   #b54a3a; --error-soft:   #f5dfd9;
+  --info:    #4a7c8b; --info-soft:    #d8e5ea;
+
+  /* ===== 代码块 ===== */
+  --code-bg: #1a1612; --code-text: #f0e9dc; --code-line: #2a2520; --code-comment: #6f6553;
+
+  /* ===== 阴影 ===== */
+  --shadow-1: 0 1px 2px rgba(26,22,18,.05);
+  --shadow-2: 0 2px 8px rgba(26,22,18,.05), 0 1px 2px rgba(26,22,18,.03);
+  --shadow-3: 0 12px 32px rgba(26,22,18,.10), 0 4px 12px rgba(26,22,18,.05), 0 0 0 1px var(--border-soft);
+
+  /* ===== 圆角 ===== */
+  --r-xs: 4px; --r-sm: 6px; --r-md: 8px; --r-lg: 12px; --r-xl: 16px; --r-pill: 999px;
+
+  /* ===== 字体 ===== */
+  --font-sans:  "Inter", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  --font-serif: "Fraunces", Georgia, "PingFang SC", serif;
+  --font-mono:  "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* ===== 字号 ===== */
+  --fs-h1: 28px; --lh-h1: 1.25;
+  --fs-h2: 20px; --lh-h2: 1.3;
+  --fs-h3: 15px; --lh-h3: 1.4;
+  --fs-body: 13px; --lh-body: 1.55;
+  --fs-sm: 12px; --fs-xs: 11px; --fs-kicker: 10px;
+
+  /* ===== 节奏 ===== */
+  --gap-2: 4px; --gap-3: 8px; --gap-4: 12px; --gap-5: 16px;
+  --gap-6: 20px; --gap-7: 24px; --gap-8: 32px; --gap-9: 40px; --gap-10: 56px;
+
+  /* ===== 组件常量 ===== */
+  --topnav-h: 56px; --sidenav-w: 220px; --transition: 0.18s ease;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--text);
+  font-family: var(--font-sans); font-size: var(--fs-body); line-height: var(--lh-body);
+  -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility; font-feature-settings: "cv11", "ss01";
+}
+h1, h2, h3, h4, p { margin: 0; }
+ul, ol { margin: 0; padding: 0; list-style: none; }
+button { font-family: inherit; cursor: pointer; }
+input, textarea, select { font-family: inherit; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { color: var(--accent-hover); }
+.serif { font-family: var(--font-serif); font-weight: 500; }
+.mono  { font-family: var(--font-mono); }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 6px; border: 2px solid var(--bg); }
+::-webkit-scrollbar-thumb:hover { background: var(--border-strong); }
+::-webkit-scrollbar-track { background: transparent; }
+::selection { background: var(--accent-soft); color: var(--accent-text); }

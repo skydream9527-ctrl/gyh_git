@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ICE-DATA-WORK · 审批与审计</title>
+  <link rel="stylesheet" href="assets/app.css" />
+</head>
+<body data-page="approvals" data-title="审批与审计">
+  <div class="app">
+    <aside id="side" class="sidebar"></aside>
+    <main class="main">
+      <div id="top"></div>
+
+      <div class="page-head">
+        <div>
+          <div class="eyebrow">Approvals & Audit</div>
+          <h1>高风险动作进确认队列；所有执行可追溯。</h1>
+          <p class="subtle">Twin 可请求，但最终确认权在你。审计用于复盘、回滚、权限优化、成本控制。</p>
+        </div>
+        <button class="btn danger">一键暂停全部执行</button>
+      </div>
+
+      <div class="grid cols-2">
+        <div class="card"><div class="card-head"><h2>待我确认</h2><span class="pill amber">3 Pending</span></div>
+          <div class="card-body list">
+            <div class="list-item compact"><div><strong>允许 Data Agent 补查 ANR 与设备分层</strong><span>只读查询，预计 12k tokens。来源：t_DAU0620。</span></div><div class="actions"><button class="btn primary sm">确认</button><button class="btn sm">拒绝</button></div></div>
+            <div class="list-item compact"><div><strong>允许 Codex 写入 16 个文件到项目目录</strong><span>本机写文件（高风险）。可先看 diff。</span></div><div class="actions"><button class="btn sm">看 diff</button><button class="btn primary sm">确认</button><button class="btn danger sm">拒绝</button></div></div>
+          </div>
+          <div class="card-body" style="border-top:1px solid var(--line)">
+            <div class="memory-card"><strong>记忆候选：表格优先</strong><p>晋升到 →（选择层级）</p>
+              <div class="seg"><label><input type="radio" name="s1" checked> 个人偏好</label><label><input type="radio" name="s1"> 项目</label><label><input type="radio" name="s1"> 团队</label><label><input type="radio" name="s1"> 贡献给 Data Agent（团队经验）</label></div>
+              <div class="actions"><button class="btn primary sm">确认晋升</button><button class="btn sm">编辑</button><button class="btn sm">拒绝</button></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card"><div class="card-head"><h2>权限日志 / 工具调用</h2><span class="pill blue">Audit</span></div>
+          <div class="card-body list">
+            <div class="list-item compact"><div><strong>kyuubi_query · Data Agent</strong><span>只读 · 14,238 行 · 任务授权 · 无外部上传。</span></div><span class="pill green">Done</span></div>
+            <div class="list-item compact"><div><strong>读取项目共享口径文档</strong><span>p_growth 成员授权 · 本地读取。</span></div><span class="pill green">Done</span></div>
+            <div class="list-item compact"><div><strong>跨空间读取请求（被拒）</strong><span>尝试读他用户 Twin 记忆 · 已拦截。</span></div><span class="pill red">Blocked</span></div>
+            <div class="list-item compact"><div><strong>Codex 写文件</strong><span>等待本机 Runtime（二期）。</span></div><span class="pill amber">Pending</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card section-gap"><div class="card-head"><h2>失败复盘</h2><span class="pill slate">Structured</span></div>
+        <div class="card-body list">
+          <div class="list-item compact"><div><strong>kyuubi 超时（一次）</strong><span>error_type: timeout · recoverable: true · suggested: 缩小时间窗重试。</span></div><span class="pill green">已恢复</span></div>
+        </div>
+      </div>
+    </main>
+    <aside id="dock" class="dock"></aside>
+  </div>
+  <script src="assets/shell.js"></script>
+</body>
+</html>

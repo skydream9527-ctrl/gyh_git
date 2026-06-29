@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>原型总览 · ICE Workbench v7</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <link rel="stylesheet" href="_shared/tokens.css" />
+  <link rel="stylesheet" href="_shared/components.css" />
+  <style>
+    .wrap { max-width: 1080px; margin: 0 auto; padding: 64px 40px; }
+    .hd { display: flex; align-items: center; gap: 14px; margin-bottom: 8px; }
+    .hd .mark { width: 44px; height: 44px; border-radius: 12px; background: var(--accent-grad); display: grid; place-items: center; color: #fff; font-size: 22px; box-shadow: var(--accent-shadow); }
+    .hd h1 { font-family: var(--font-serif); font-size: 34px; font-weight: 500; }
+    .lead { color: var(--text-dim); font-size: 15px; line-height: 1.7; max-width: 620px; margin-bottom: 40px; }
+    .palette { display: flex; gap: 8px; margin-bottom: 40px; flex-wrap: wrap; }
+    .sw { display: flex; align-items: center; gap: 8px; padding: 7px 12px; background: var(--surface); border: 1px solid var(--border-soft); border-radius: var(--r-pill); font-size: 11px; font-family: var(--font-mono); color: var(--text-dim); }
+    .sw .c { width: 16px; height: 16px; border-radius: 5px; border: 1px solid rgba(0,0,0,.06); }
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--gap-5); }
+    .pcard { display: flex; flex-direction: column; gap: 14px; padding: 20px; border-radius: var(--r-lg); background: var(--surface); border: 1px solid var(--border-soft); transition: box-shadow var(--transition), transform var(--transition); }
+    .pcard:hover { box-shadow: var(--shadow-2); transform: translateY(-3px); }
+    .pcard .thumb { height: 120px; border-radius: var(--r-md); border: 1px solid var(--border-soft); overflow: hidden; position: relative; background: var(--bg-tint); }
+    .pcard .thumb .mini-top { height: 18px; background: var(--surface); border-bottom: 1px solid var(--border-soft); display: flex; align-items: center; gap: 4px; padding: 0 8px; }
+    .pcard .thumb .mini-top i { width: 6px; height: 6px; border-radius: 50%; background: var(--border-strong); }
+    .pcard .thumb .mini-body { display: flex; height: calc(100% - 18px); }
+    .pcard .thumb .mini-side { width: 26%; background: var(--bg-tint); border-right: 1px solid var(--border-soft); }
+    .pcard .thumb .mini-main { flex: 1; padding: 8px; display: flex; flex-direction: column; gap: 5px; }
+    .pcard .thumb .bar { height: 8px; border-radius: 3px; background: var(--surface-3); }
+    .pcard .thumb .bar.accent { background: var(--accent-soft); width: 50%; }
+    .pcard .n { display: flex; align-items: center; gap: 8px; }
+    .pcard .n .ico { width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center; font-size: 15px; background: var(--accent-soft); color: var(--accent-text); }
+    .pcard h3 { font-size: 15px; font-weight: 600; color: var(--text); }
+    .pcard p { font-size: 12px; color: var(--text-muted); line-height: 1.6; flex: 1; }
+    .pcard .tag { font-family: var(--font-mono); font-size: 10px; color: var(--text-faint); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="hd">
+      <span class="mark"><i class="ph-fill ph-hexagon"></i></span>
+      <h1>ICE Workbench · 原型 v7</h1>
+    </div>
+    <p class="lead">一套面向「智能数据工作台」的视觉重设计原型。延续暖米白纸张 + Claude 铜橙的基调，统一了间距、字号、投影与组件语言。先用这些静态 HTML 对齐方向，确认后再回写到 React 代码。</p>
+
+    <div class="palette">
+      <span class="sw"><span class="c" style="background:#faf4ed"></span> bg #faf4ed</span>
+      <span class="sw"><span class="c" style="background:#cc785c"></span> accent #cc785c</span>
+      <span class="sw"><span class="c" style="background:#1a1612"></span> ink #1a1612</span>
+      <span class="sw"><span class="c" style="background:#4a7c8b"></span> data</span>
+      <span class="sw"><span class="c" style="background:#5e7d6a"></span> ab</span>
+      <span class="sw"><span class="c" style="background:#b86b3a"></span> biz</span>
+      <span class="sw">Inter / Fraunces / JetBrains Mono</span>
+    </div>
+
+    <div class="grid">
+      <a class="pcard" href="introduce.html">
+        <div class="thumb"><div class="mini-top"><i></i><i></i><i></i></div><div class="mini-body"><div class="mini-main" style="align-items:center;justify-content:center;gap:8px"><div class="bar accent" style="width:60%;height:14px"></div><div class="bar" style="width:40%"></div></div></div></div>
+        <div class="n"><span class="ico"><i class="ph ph-rocket-launch"></i></span><h3>落地页</h3></div>
+        <p>对外介绍页：Hero、能力矩阵、Agent 阵容、CTA。</p>
+        <span class="tag">introduce.html</span>
+      </a>
+      <a class="pcard" href="login.html">
+        <div class="thumb"><div class="mini-body"><div class="mini-side" style="width:50%;background:#1a1612"></div><div class="mini-main" style="justify-content:center"><div class="bar accent"></div><div class="bar"></div><div class="bar" style="width:70%"></div></div></div></div>
+        <div class="n"><span class="ico"><i class="ph ph-sign-in"></i></span><h3>登录页</h3></div>
+        <p>左侧深色品牌区 + 右侧飞书登录 / 体验码。</p>
+        <span class="tag">login.html</span>
+      </a>
+      <a class="pcard" href="dashboard.html">
+        <div class="thumb"><div class="mini-top"><i></i><i></i></div><div class="mini-body"><div class="mini-side"></div><div class="mini-main"><div class="bar accent"></div><div class="bar"></div><div class="bar" style="width:80%"></div><div class="bar" style="width:60%"></div></div></div></div>
+        <div class="n"><span class="ico"><i class="ph ph-squares-four"></i></span><h3>Dashboard 首页</h3></div>
+        <p>实时状态 + 快速入口 + Agent 选择 + 最近任务。</p>
+        <span class="tag">dashboard.html</span>
+      </a>
+      <a class="pcard" href="workspace.html">
+        <div class="thumb"><div class="mini-top"><i></i><i></i></div><div class="mini-body"><div class="mini-side"></div><div class="mini-main"><div class="bar"></div><div class="bar accent" style="margin-left:auto"></div><div class="bar" style="width:70%"></div></div><div class="mini-side" style="width:30%"></div></div></div>
+        <div class="n"><span class="ico"><i class="ph ph-chats-circle"></i></span><h3>Workspace 工作区</h3></div>
+        <p>三栏：文件/知识库 · 对话 · 执行台。含 HITL 卡。</p>
+        <span class="tag">workspace.html</span>
+      </a>
+      <a class="pcard" href="create_task.html">
+        <div class="thumb"><div class="mini-body"><div class="mini-main" style="justify-content:center"><div class="bar accent" style="width:40%"></div><div class="bar"></div><div class="bar"></div></div></div></div>
+        <div class="n"><span class="ico"><i class="ph ph-note-pencil"></i></span><h3>新建任务</h3></div>
+        <p>三步向导：范式 → Agent → 任务详情。</p>
+        <span class="tag">create_task.html</span>
+      </a>
+      <a class="pcard" href="scheduled.html">
+        <div class="thumb"><div class="mini-body"><div class="mini-side"></div><div class="mini-main"><div class="bar"></div><div class="bar" style="width:90%"></div><div class="bar accent" style="width:50%"></div></div></div></div>
+        <div class="n"><span class="ico"><i class="ph ph-timer"></i></span><h3>定时任务</h3></div>
+        <p>Cron 调度列表 + 开关 + 运行历史。</p>
+        <span class="tag">scheduled.html</span>
+      </a>
+      <a class="pcard" href="agent_detail.html">
+        <div class="thumb"><div class="mini-body"><div class="mini-main"><div class="bar accent" style="width:30%;height:14px"></div><div class="bar"></div><div class="bar" style="width:80%"></div></div></div></div>
+        <div class="n"><span class="ico"><i class="ph ph-robot"></i></span><h3>Agent 详情</h3></div>
+        <p>能力、技能、文件树与使用情况。</p>
+        <span class="tag">agent_detail.html</span>
+      </a>
+      <a class="pcard" href="admin.html">
+        <div class="thumb"><div class="mini-body"><div class="mini-side" style="background:#1a1612"></div><div class="mini-main"><div class="bar accent" style="width:40%"></div><div class="bar"></div><div class="bar" style="width:75%"></div></div></div></div>
+        <div class="n"><span class="ico"><i class="ph ph-shield-check"></i></span><h3>管理后台</h3></div>
+        <p>深色侧栏 + KPI 大盘 + 用户表 + 健康监控。</p>
+        <span class="tag">admin.html</span>
+      </a>
+      <a class="pcard" href="guide.html">
+        <div class="thumb"><div class="mini-top"><i></i></div><div class="mini-body"><div class="mini-side"></div><div class="mini-main"><div class="bar accent" style="width:50%;height:12px"></div><div class="bar"></div><div class="bar" style="width:85%"></div></div><div class="mini-side" style="width:20%"></div></div></div>
+        <div class="n"><span class="ico"><i class="ph ph-book-open"></i></span><h3>使用指南</h3></div>
+        <p>文档布局：左目录 · 正文 · 本页大纲。</p>
+        <span class="tag">guide.html</span>
+      </a>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+html { background: #ffffff; }
+body {
+  width: 720pt; height: 405pt; margin: 0; padding: 0;
+  background: #1a1a1a;
+  font-family: Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+}
+.header {
+  background: #2d2d2d;
+  padding: 15pt 40pt;
+  border-bottom: 2pt solid #f59e0b;
+}
+.header h1 {
+  color: #f59e0b;
+  font-size: 28pt;
+  margin: 0;
+}
+.content {
+  padding: 15pt 40pt 30pt 40pt;
+  flex: 1;
+}
+.step {
+  background: #2d2d2d;
+  padding: 12pt;
+  margin-bottom: 10pt;
+  border-radius: 8pt;
+  border-left: 3pt solid #10b981;
+}
+.step h3 {
+  color: #00d4ff;
+  font-size: 14pt;
+  margin: 0 0 6pt 0;
+}
+.step p {
+  color: #ffffff;
+  font-size: 12pt;
+  margin: 3pt 0;
+}
+.status-ok {
+  color: #10b981;
+  font-weight: bold;
+}
+.status-warn {
+  color: #f59e0b;
+  font-weight: bold;
+}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>⚙️ 执行过程</h1>
+</div>
+<div class="content">
+  <div class="step">
+    <h3>步骤1：SQL生成</h3>
+    <p><span class="status-ok">✅ 完成</span> - 生成16个SQL文件（8个指标查询 + 8个置信度计算）</p>
+  </div>
+  <div class="step">
+    <h3>步骤2：数据查询</h3>
+    <p><span class="status-warn">⚠️ 部分成功</span> - 5/8模块数据获取成功</p>
+    <p>成功：大盘、消费、留存、广告、DAU率</p>
+    <p>失败：埋点监控、规模体验、商业平台</p>
+  </div>
+  <div class="step">
+    <h3>步骤3：分析报告</h3>
+    <p><span class="status-ok">✅ 完成</span> - 生成完整分析报告并写入飞书文档</p>
+  </div>
+</div>
+</body>
+</html>

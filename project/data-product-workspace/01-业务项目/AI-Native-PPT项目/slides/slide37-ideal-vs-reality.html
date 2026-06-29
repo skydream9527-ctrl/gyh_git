@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html><head><style>
+html { background: #0D1117; }
+body { width: 720pt; height: 405pt; margin: 0; padding: 0; font-family: Arial, sans-serif; display: flex; background-image: url('bg-dark.png'); background-size: cover; }
+.wrap { margin: 36pt 50pt; width: 620pt; }
+.cols { display: flex; gap: 20pt; margin-top: 16pt; }
+.col { flex: 1; }
+.card { border-radius: 8pt; padding: 18pt 20pt; height: 260pt; }
+.ideal { background: #0B1F0B; border: 2pt solid #3FB950; }
+.reality { background: #1F0B0B; border: 2pt solid #F85149; }
+.problem { margin-bottom: 14pt; }
+.arrow-box { background: #132B13; border-radius: 6pt; padding: 10pt 14pt; margin: 10pt 0; text-align: center; }
+</style></head><body>
+<div class="wrap">
+  <h1 style="color: #FFFFFF; font-size: 26pt; margin: 0 0 4pt 0; text-align: center;">AI 应用：理想 vs 现实</h1>
+  <div class="cols">
+    <div class="col">
+      <div class="card ideal">
+        <p style="color: #3FB950; font-size: 22pt; font-weight: bold; margin: 0 0 20pt 0;">理想</p>
+        <div style="background: #1A2E1A; border-radius: 6pt; padding: 12pt 16pt;">
+          <p style="color: #C9D1D9; font-size: 13pt; margin: 0;"><b style="color: #FFFFFF;">输入：</b>xxx 做一下 xxx</p>
+        </div>
+        <div style="text-align: center;">
+          <p style="color: #3FB950; font-size: 20pt; margin: 12pt 0;">↓</p>
+        </div>
+        <div style="background: #1A2E1A; border-radius: 6pt; padding: 12pt 16pt;">
+          <p style="color: #3FB950; font-size: 13pt; font-weight: bold; margin: 0;">即可输出一个文档</p>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card reality">
+        <p style="color: #F85149; font-size: 22pt; font-weight: bold; margin: 0 0 14pt 0;">现实</p>
+        <div class="problem">
+          <p style="color: #F85149; font-size: 14pt; font-weight: bold; margin: 0 0 3pt 0;">1. 强幻觉</p>
+          <p style="color: #8B949E; font-size: 10pt; margin: 0;">AI 输出的文档要么逻辑不对，要么数据是编造的</p>
+        </div>
+        <div class="problem">
+          <p style="color: #F85149; font-size: 14pt; font-weight: bold; margin: 0 0 3pt 0;">2. 挑模型</p>
+          <p style="color: #8B949E; font-size: 10pt; margin: 0;">更强的模型可以完成任务要求，稍弱的模型不行</p>
+        </div>
+        <div class="problem">
+          <p style="color: #F85149; font-size: 14pt; font-weight: bold; margin: 0 0 3pt 0;">3. 抽卡式</p>
+          <p style="color: #8B949E; font-size: 10pt; margin: 0;">测试了几轮，只有一轮输出勉强符合任务要求</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body></html>

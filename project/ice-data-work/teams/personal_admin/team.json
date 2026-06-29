@@ -1,0 +1,12 @@
+{
+  "id": "personal_admin",
+  "name": "admin 的个人空间",
+  "type": "personal",
+  "members": [
+    {
+      "user_id": "admin",
+      "role": "owner"
+    }
+  ],
+  "created_at": "2026-06-27T00:00:00+00:00"
+}

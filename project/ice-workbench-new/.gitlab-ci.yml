@@ -1,0 +1,62 @@
+# ICE Data Workbench v3 — GitLab CI
+# Runs on: push to main, merge requests
+# Jobs: backend (pytest) + frontend (tsc + lint + vitest)
+
+stages:
+  - test
+
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  NPM_CONFIG_CACHE: "$CI_PROJECT_DIR/.cache/npm"
+
+# ---------------------------------------------------------------------------
+# Backend: Python 3.12, pytest
+# ---------------------------------------------------------------------------
+backend:test:
+  stage: test
+  image: python:3.12-slim
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  cache:
+    key: backend-pip-${CI_COMMIT_REF_SLUG}
+    paths:
+      - .cache/pip
+      - backend/.venv
+    policy: pull-push
+  before_script:
+    - cd backend
+    - python -m venv .venv
+    - . .venv/bin/activate
+    - pip install -U pip --quiet
+    - pip install -e ".[dev]" --quiet
+  script:
+    - . .venv/bin/activate
+    - pytest -q --tb=short
+  variables:
+    # Tests use isolated temp dirs; these placeholders prevent config errors
+    ICE_SECRET_KEY: "ci-test-secret-key-32-bytes-minimum-ok"
+    ICE_BOOTSTRAP_ADMIN_PASSWORD: "CI-Admin-Pw-2026!"
+
+# ---------------------------------------------------------------------------
+# Frontend: Node 20, typecheck + lint + vitest
+# ---------------------------------------------------------------------------
+frontend:test:
+  stage: test
+  image: node:20-alpine
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  cache:
+    key: frontend-npm-${CI_COMMIT_REF_SLUG}
+    paths:
+      - .cache/npm
+      - frontend/node_modules
+    policy: pull-push
+  before_script:
+    - cd frontend
+    - npm ci --prefer-offline --no-audit --no-fund
+  script:
+    - npx tsc --noEmit
+    - npm run lint
+    - npm run test:run

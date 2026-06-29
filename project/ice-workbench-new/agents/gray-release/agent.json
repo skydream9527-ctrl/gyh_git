@@ -1,0 +1,44 @@
+{
+  "id": "gray-release",
+  "name": "灰度版本 Agent",
+  "paradigm": "gray",
+  "icon": "🌐",
+  "color": "#9b8ec4",
+  "description": "版本灰度 SOP · 决策矩阵 · AI 下钻 · 放量决策（V1.2）",
+  "user_friendly_description": "帮你分析APP灰度版本的数据表现，对比对照包和业务包的核心指标，给出灰度放量或回滚的决策建议",
+  "use_cases": ["分析灰度版本核心指标对比", "判断灰度版本是否可以扩大放量", "版本灰度护栏指标监控"],
+  "starters": [
+    "帮我看一下最新灰度版本的核心指标表现怎么样",
+    "对比灰度包和对照包的DAU、崩溃率和留存数据",
+    "这个版本的灰度数据达到放量标准了吗",
+    "帮我分析一下灰度版本的护栏指标有没有异常"
+  ],
+  "tags": ["灰度发布", "版本对比", "放量决策", "护栏监控"],
+  "output_type": "灰度分析报告 + 决策矩阵 + 放量建议",
+  "publish_status": "published",
+  "prompt_layout": "v3",
+  "tools": [
+    "now",
+    "kyuubi_query",
+    "execute_python",
+    "write_file",
+    "read_file",
+    "list_files",
+    "feishu_publish",
+    "feishu_upload_image",
+    "read_skill",
+    "read_agent_knowledge",
+    "todo_write",
+    "request_human_input",
+    "exit_plan_mode",
+    "spawn_subagent"
+  ],
+  "model": null,
+  "spawn_targets": ["data-analysis", "ab-experiment", "know"],
+  "skills": ["kyuubi", "feishu", "nl-python"],
+  "features": {
+    "todo_write": true,
+    "exit_plan_mode": true,
+    "spawn_subagent": true
+  }
+}

@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ICE Workbench v4 · 定时任务 · Desktop + Mobile</title>
+<script>(function(){var t=localStorage.getItem('ice-theme')||'light';document.documentElement.dataset.theme=t;})();</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root[data-theme="light"]{--bg:#faf9f6;--paper:#f4f1ec;--surface:#fff;--surface-2:#f7f5f0;--surface-3:#ece7df;
+  --border:#e6e2dc;--border-soft:#efece6;--text:#1f1f1f;--text-dim:#5f6368;--text-muted:#80868b;
+  --accent:#1a73e8;--accent-soft:#e8f0fe;--accent-text:#174ea6;
+  --success:#137333;--success-soft:#e6f4ea;--warning:#b06000;--warning-soft:#fef7e0;--error:#b3261e;--error-soft:#fce8e6;
+  --p-ab:#1967d2;--p-ab-soft:#e8f0fe;--p-biz:#b06000;--p-biz-soft:#fef7e0;
+  --p-gray:#5f4b8b;--p-gray-soft:#f3edff;--p-data:#137333;--p-data-soft:#e6f4ea;--p-wave:#b3261e;--p-wave-soft:#fce8e6;
+  --shadow-1:0 1px 2px rgba(60,64,67,.06);--shadow-2:0 1px 3px rgba(60,64,67,.10),0 4px 8px rgba(60,64,67,.04);
+  --shadow-3:0 4px 24px rgba(60,64,67,.10);}
+:root[data-theme="dark"]{--bg:#1f1f1f;--paper:#2a2a2a;--surface:#262626;--surface-2:#2e2e2e;--surface-3:#363636;
+  --border:#3c3c3c;--border-soft:#2e2e2e;--text:#e8eaed;--text-dim:#9aa0a6;--text-muted:#6c7075;
+  --accent:#8ab4f8;--accent-soft:rgba(138,180,248,.16);--accent-text:#aecbfa;
+  --success:#81c995;--success-soft:rgba(129,201,149,.14);--warning:#fdd663;--warning-soft:rgba(253,214,99,.14);
+  --error:#f28b82;--error-soft:rgba(242,139,130,.14);
+  --p-ab:#8ab4f8;--p-ab-soft:rgba(138,180,248,.16);--p-biz:#fdd663;--p-biz-soft:rgba(253,214,99,.14);
+  --p-gray:#c58af9;--p-gray-soft:rgba(197,138,249,.14);--p-data:#81c995;--p-data-soft:rgba(129,201,149,.14);
+  --p-wave:#f28b82;--p-wave-soft:rgba(242,139,130,.14);
+  --shadow-1:0 1px 2px rgba(0,0,0,.4);--shadow-2:0 4px 16px rgba(0,0,0,.5);--shadow-3:0 6px 28px rgba(0,0,0,.5);}
+*{box-sizing:border-box}html,body{margin:0;padding:0}
+body{background:var(--paper);color:var(--text);font-family:'Inter','PingFang SC','Microsoft YaHei',sans-serif;font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased}
+.canvas{max-width:1820px;margin:0 auto;padding:32px 24px 80px;display:grid;grid-template-columns:1fr 430px;gap:32px;align-items:flex-start}
+@media (max-width:1500px){.canvas{grid-template-columns:1fr;gap:48px}}
+.label{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.6px;font-weight:500;margin:0 0 12px;display:flex;align-items:center;gap:8px}
+.label .dot{width:6px;height:6px;border-radius:50%;background:var(--accent)}
+.vp-cap{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:14px}
+.vp-cap .name{font-family:'Inter',sans-serif;font-weight:500;font-size:18px;letter-spacing:-.2px}
+.vp-cap .size{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted)}
+
+.browser{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow-2)}
+.browser-bar{background:var(--surface-2);padding:10px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border-soft)}
+.browser-bar .dots{display:flex;gap:6px}.browser-bar .dots span{width:11px;height:11px;border-radius:50%;background:var(--surface-3)}
+.browser-bar .url{flex:1;background:var(--surface);border:1px solid var(--border-soft);border-radius:99px;padding:5px 14px;font-size:12px;color:var(--text-dim);font-family:'JetBrains Mono',monospace}
+.browser-bar .url::before{content:"🔒 "}
+
+.appbar{height:60px;background:var(--bg);border-bottom:1px solid var(--border-soft);display:flex;align-items:center;padding:0 24px;gap:12px}
+.brand-mark{width:32px;height:32px;display:grid;place-items:center}
+.brand-mark svg{width:32px;height:32px}
+.crumb{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-dim)}
+.crumb a{color:var(--text-dim);text-decoration:none}.crumb b{color:var(--text);font-weight:500;font-size:14px}
+.crumb .sep{color:var(--text-muted)}
+.appbar .spacer{flex:1}
+.icon-btn{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;cursor:pointer;color:var(--text-dim);background:transparent;border:none;font-size:16px}
+.icon-btn:hover{background:var(--surface-2);color:var(--text)}
+.theme-btn .t-light{display:inline}.theme-btn .t-dark{display:none}
+:root[data-theme="dark"] .theme-btn .t-light{display:none}
+:root[data-theme="dark"] .theme-btn .t-dark{display:inline}
+.btn{display:inline-flex;align-items:center;gap:6px;font-family:inherit;font-size:13px;font-weight:500;padding:8px 16px;border-radius:99px;border:1px solid transparent;cursor:pointer;line-height:1}
+.btn-primary{background:var(--accent);color:#fff}.btn-tonal{background:var(--accent-soft);color:var(--accent-text)}
+.btn-ghost{background:transparent;color:var(--text);border-color:var(--border)}
+.btn-sm{padding:6px 12px;font-size:12px}
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:500;padding:3px 10px;border-radius:99px}
+.chip.biz{background:var(--p-biz-soft);color:var(--p-biz)}.chip.ab{background:var(--p-ab-soft);color:var(--p-ab)}
+.chip.gray{background:var(--p-gray-soft);color:var(--p-gray)}.chip.data{background:var(--p-data-soft);color:var(--p-data)}
+.chip.wave{background:var(--p-wave-soft);color:var(--p-wave)}
+.chip.ok{background:var(--success-soft);color:var(--success)}.chip.warn{background:var(--warning-soft);color:var(--warning)}
+.chip.err{background:var(--error-soft);color:var(--error)}
+
+.page{padding:28px 32px;background:var(--bg)}
+.page-h{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px}
+.page-h h1{font-family:'Inter',sans-serif;font-size:26px;font-weight:500;margin:0;letter-spacing:-.4px}
+.page-h .sub{color:var(--text-dim);font-size:13px;margin:4px 0 0}
+.page-h .actions{display:flex;gap:6px}
+
+/* stat strip */
+.stat-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+.stat-card{background:var(--surface);border:1px solid var(--border-soft);border-radius:14px;padding:14px}
+.stat-card .l{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;font-weight:500}
+.stat-card .v{font-family:'Inter',sans-serif;font-size:24px;font-weight:500;letter-spacing:-.4px;line-height:1}
+.stat-card .v.run{color:var(--success)}.stat-card .v.warn{color:var(--warning)}.stat-card .v.err{color:var(--error)}
+.stat-card .delta{margin-top:5px;font-size:11px;color:var(--text-muted)}
+
+/* filter chips */
+.filter-row{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.filter-chip{font-size:12.5px;padding:6px 12px;border-radius:99px;background:var(--surface);border:1px solid var(--border);color:var(--text);cursor:pointer;font-family:inherit;font-weight:500}
+.filter-chip.active{background:var(--accent-soft);color:var(--accent-text);border-color:var(--accent-soft)}
+.filter-row .spacer{flex:1}
+.filter-row .search{background:var(--surface);border:1px solid var(--border);border-radius:99px;padding:6px 12px;display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--text-dim);width:200px}
+
+/* table */
+.tbl-wrap{background:var(--surface);border:1px solid var(--border-soft);border-radius:14px;overflow:hidden}
+.tbl{width:100%;border-collapse:collapse;font-size:13px}
+.tbl th{text-align:left;padding:11px 14px;background:var(--surface-2);color:var(--text-dim);font-weight:500;border-bottom:1px solid var(--border-soft);font-size:11.5px;text-transform:uppercase;letter-spacing:.4px}
+.tbl td{padding:13px 14px;border-bottom:1px solid var(--border-soft);vertical-align:middle}
+.tbl tr:last-child td{border:none}
+.tbl tr:hover td{background:var(--surface-2)}
+.tbl .name-cell{display:flex;align-items:center;gap:10px}
+.tbl .name-cell .e{font-size:18px;width:32px;height:32px;border-radius:8px;display:grid;place-items:center;background:var(--p-biz-soft)}
+.tbl .name-cell .info{min-width:0}
+.tbl .name-cell .info .n{font-weight:500;font-size:13.5px;display:flex;align-items:center;gap:6px;line-height:1.3}
+.tbl .name-cell .info .nb{font-size:11.5px;color:var(--text-muted);margin-top:2px}
+.tbl .cron{font-family:'JetBrains Mono',monospace;font-size:11.5px;background:var(--surface-2);padding:3px 8px;border-radius:6px;color:var(--text-dim)}
+.tbl .schedule-text{font-size:11.5px;color:var(--text-muted);margin-top:3px}
+.tbl .status{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:500}
+.tbl .status .d{width:7px;height:7px;border-radius:50%}
+.tbl .status.run{color:var(--success)}.tbl .status.run .d{background:var(--success);box-shadow:0 0 0 4px var(--success-soft)}
+.tbl .status.warn{color:var(--warning)}.tbl .status.warn .d{background:var(--warning)}
+.tbl .status.err{color:var(--error)}.tbl .status.err .d{background:var(--error)}
+.tbl .status.off{color:var(--text-muted)}.tbl .status.off .d{background:var(--text-muted)}
+.tbl .last-run{font-size:11.5px;color:var(--text-dim);font-family:'JetBrains Mono',monospace}
+.tbl .last-run .ok{color:var(--success);font-weight:500}
+.tbl .last-run .err{color:var(--error);font-weight:500}
+.tbl .actions-cell{display:flex;gap:4px;justify-content:flex-end}
+.tbl .actions-cell button{width:30px;height:30px;border-radius:50%;background:transparent;border:none;cursor:pointer;color:var(--text-muted);font-size:14px;display:grid;place-items:center}
+.tbl .actions-cell button:hover{background:var(--surface-3);color:var(--text)}
+
+/* toggle */
+.tg{position:relative;display:inline-block;width:34px;height:20px;cursor:pointer}
+.tg input{opacity:0;width:0;height:0}
+.tg .slider{position:absolute;inset:0;background:var(--surface-3);border-radius:99px;transition:.2s}
+.tg .slider::before{content:"";position:absolute;height:14px;width:14px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s;box-shadow:var(--shadow-1)}
+.tg input:checked + .slider{background:var(--accent)}
+.tg input:checked + .slider::before{transform:translateX(14px)}
+
+/* phone */
+.phone{position:sticky;top:32px;justify-self:center}
+.phone-frame{width:390px;height:844px;background:var(--bg);border:9px solid #1a1a1a;border-radius:48px;overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--shadow-3);position:relative}
+.phone-frame::before{content:"";position:absolute;top:9px;left:50%;transform:translateX(-50%);width:120px;height:28px;background:#1a1a1a;border-radius:16px;z-index:10}
+.phone-status{height:48px;flex-shrink:0;padding:16px 26px 4px;display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:600;color:var(--text)}
+.phone-body{flex:1;overflow-y:auto;background:var(--bg);padding-bottom:80px;position:relative}
+.phone-body::-webkit-scrollbar{display:none}
+
+.mob-head{padding:14px 16px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border-soft);background:var(--bg)}
+.mob-head h1{font-size:20px;font-weight:500;margin:0;flex:1;letter-spacing:-.3px}
+.mob-stats{padding:14px 16px;display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.mob-stat{background:var(--surface);border:1px solid var(--border-soft);border-radius:12px;padding:11px;text-align:center}
+.mob-stat .v{font-size:18px;font-weight:500;letter-spacing:-.3px;line-height:1.1}
+.mob-stat .v.success{color:var(--success)}.mob-stat .v.error{color:var(--error)}
+.mob-stat .l{font-size:10.5px;color:var(--text-muted);margin-top:2px;text-transform:uppercase;letter-spacing:.3px}
+
+.mob-list{padding:0 14px;display:flex;flex-direction:column;gap:8px}
+.mob-card{background:var(--surface);border:1px solid var(--border-soft);border-radius:12px;padding:14px;cursor:pointer}
+.mob-card .h{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px}
+.mob-card .h .e{font-size:24px;width:36px;height:36px;border-radius:8px;display:grid;place-items:center;flex-shrink:0;background:var(--p-biz-soft)}
+.mob-card .h .info{flex:1;min-width:0}
+.mob-card .h .info .n{font-size:13.5px;font-weight:500;line-height:1.3;display:flex;align-items:center;gap:5px;margin-bottom:3px}
+.mob-card .h .info .meta{font-size:11px;color:var(--text-muted);margin-top:3px}
+.mob-card .body{padding-top:8px;border-top:1px solid var(--border-soft);font-size:11.5px;color:var(--text-dim);display:flex;align-items:center;justify-content:space-between;gap:8px}
+.mob-card .body .ln{font-family:'JetBrains Mono',monospace}
+.mob-card .body .next{color:var(--text);font-weight:500}
+
+.fab{position:absolute;right:18px;bottom:24px;width:54px;height:54px;border-radius:18px;background:var(--accent);color:#fff;display:grid;place-items:center;font-size:22px;cursor:pointer;box-shadow:var(--shadow-3);font-weight:300;border:none}
+</style>
+</head>
+<body>
+
+<div class="canvas">
+  <!-- DESKTOP -->
+  <section>
+    <div class="vp-cap"><div><p class="label"><span class="dot"></span>DESKTOP · 1440 × 900</p><span class="name">定时任务</span></div><span class="size">表格 · 状态 · 下次执行</span></div>
+    <div class="browser">
+      <div class="browser-bar"><div class="dots"><span></span><span></span><span></span></div><div class="url">ice.workbench.local/scheduled</div></div>
+      <header class="appbar">
+        <div class="brand-mark"><svg viewBox="0 0 32 32" fill="none"><rect x="2" y="2" width="28" height="28" rx="8" fill="#e8f0fe"/><path d="M9 11h10M9 16h14M9 21h7" stroke="#1a73e8" stroke-width="2" stroke-linecap="round"/><circle cx="22" cy="21" r="3" fill="#fef7e0" stroke="#b06000" stroke-width="1.5"/></svg></div>
+        <div class="crumb"><a href="#">工作台</a><span class="sep">›</span><b>⏱ 定时任务</b></div>
+        <div class="spacer"></div>
+        <button class="icon-btn theme-btn" onclick="toggleTheme()" title="主题"><span class="t-light">🌙</span><span class="t-dark">☀️</span></button>
+      </header>
+
+      <main class="page">
+        <div class="page-h">
+          <div>
+            <h1>⏱ 定时任务</h1>
+            <p class="sub">让 Agent 按照计划自动跑分析、写报告、推 IM</p>
+          </div>
+          <div class="actions">
+            <button class="btn btn-tonal">📋 模板</button>
+            <button class="btn btn-primary">＋ 新建定时任务</button>
+          </div>
+        </div>
+
+        <div class="stat-strip">
+          <div class="stat-card"><div class="l">总任务</div><div class="v">12</div><div class="delta">全部已配置</div></div>
+          <div class="stat-card"><div class="l">运行中</div><div class="v run">8</div><div class="delta">正常调度</div></div>
+          <div class="stat-card"><div class="l">告警</div><div class="v warn">2</div><div class="delta">连续失败 3 次</div></div>
+          <div class="stat-card"><div class="l">已暂停</div><div class="v" style="color:var(--text-muted)">2</div><div class="delta">手动关闭</div></div>
+        </div>
+
+        <div class="filter-row">
+          <span class="filter-chip active">全部 · 12</span>
+          <span class="filter-chip">运行中 · 8</span>
+          <span class="filter-chip">告警 · 2</span>
+          <span class="filter-chip">已暂停 · 2</span>
+          <span class="spacer"></span>
+          <div class="search">🔍 <span>搜索任务名 / 笔记本</span></div>
+          <button class="btn btn-ghost btn-sm">下次执行 ▾</button>
+        </div>
+
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <thead>
+              <tr>
+                <th style="width:32%">任务</th>
+                <th style="width:14%">范式</th>
+                <th style="width:18%">调度</th>
+                <th style="width:14%">状态</th>
+                <th style="width:14%">最近 / 下次</th>
+                <th style="width:8%;text-align:right">操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <div class="name-cell">
+                    <div class="e">📈</div>
+                    <div class="info">
+                      <div class="n">每日核心指标日报</div>
+                      <div class="nb">📒 Q2 经营复盘分析</div>
+                    </div>
+                  </div>
+                </td>
+                <td><span class="chip biz">经营</span></td>
+                <td><span class="cron">0 9 * * *</span><div class="schedule-text">每天 09:00</div></td>
+                <td><span class="status run"><span class="d"></span>运行中</span></td>
+                <td><div class="last-run">上次 <span class="ok">✓ 09:00</span></div><div class="last-run">下次 09:00 (明天)</div></td>
+                <td class="actions-cell"><label class="tg"><input type="checkbox" checked /><span class="slider"></span></label><button title="编辑">✎</button><button title="更多">⋯</button></td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="name-cell">
+                    <div class="e" style="background:var(--p-wave-soft)">🔥</div>
+                    <div class="info">
+                      <div class="n">DAU 异常监控</div>
+                      <div class="nb">📒 Android DAU 异常归因</div>
+                    </div>
+                  </div>
+                </td>
+                <td><span class="chip wave">波动</span></td>
+                <td><span class="cron">*/30 * * * *</span><div class="schedule-text">每 30 分钟</div></td>
+                <td><span class="status warn"><span class="d"></span>连续失败</span></td>
+                <td><div class="last-run"><span class="err">✗ 13:30</span></div><div class="last-run">下次 14:00</div></td>
+                <td class="actions-cell"><label class="tg"><input type="checkbox" checked /><span class="slider"></span></label><button title="编辑">✎</button><button title="更多">⋯</button></td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="name-cell">
+                    <div class="e" style="background:var(--p-ab-soft)">⚖️</div>
+                    <div class="info">
+                      <div class="n">AB 实验显著性快照</div>
+                      <div class="nb">📒 搜索推荐 v2.4 AB 实验</div>
+                    </div>
+                  </div>
+                </td>
+                <td><span class="chip ab">AB</span></td>
+                <td><span class="cron">0 0 * * MON</span><div class="schedule-text">每周一 00:00</div></td>
+                <td><span class="status run"><span class="d"></span>运行中</span></td>
+                <td><div class="last-run">上次 <span class="ok">✓ 周一 00:00</span></div><div class="last-run">下次 周一 00:00</div></td>
+                <td class="actions-cell"><label class="tg"><input type="checkbox" checked /><span class="slider"></span></label><button title="编辑">✎</button><button title="更多">⋯</button></td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="name-cell">
+                    <div class="e" style="background:var(--p-gray-soft)">🔌</div>
+                    <div class="info">
+                      <div class="n">v3.1 灰度放量监控</div>
+                      <div class="nb">📒 v3.1 灰度放量监控</div>
+                    </div>
+                  </div>
+                </td>
+                <td><span class="chip gray">灰度</span></td>
+                <td><span class="cron">0 */2 * * *</span><div class="schedule-text">每 2 小时</div></td>
+                <td><span class="status run"><span class="d"></span>运行中</span></td>
+                <td><div class="last-run">上次 <span class="ok">✓ 12:00</span></div><div class="last-run">下次 14:00</div></td>
+                <td class="actions-cell"><label class="tg"><input type="checkbox" checked /><span class="slider"></span></label><button title="编辑">✎</button><button title="更多">⋯</button></td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="name-cell">
+                    <div class="e" style="background:var(--p-data-soft)">📊</div>
+                    <div class="info">
+                      <div class="n">月底用户分层 RFM</div>
+                      <div class="nb">📒 用户分层 RFM 模型</div>
+                    </div>
+                  </div>
+                </td>
+                <td><span class="chip data">数据</span></td>
+                <td><span class="cron">0 1 28-31 * *</span><div class="schedule-text">每月底 01:00</div></td>
+                <td><span class="status off"><span class="d"></span>已暂停</span></td>
+                <td><div class="last-run">上次 ✓ 4-30</div><div class="last-run" style="color:var(--text-muted)">已暂停</div></td>
+                <td class="actions-cell"><label class="tg"><input type="checkbox" /><span class="slider"></span></label><button title="编辑">✎</button><button title="更多">⋯</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p style="color:var(--text-muted);font-size:12px;margin:14px 0 0;text-align:center">显示 5 / 12 条 · <a style="color:var(--accent-text)" href="#">查看全部</a></p>
+      </main>
+    </div>
+  </section>
+
+  <!-- MOBILE -->
+  <section class="phone">
+    <div class="vp-cap"><div><p class="label"><span class="dot"></span>MOBILE · iPhone 14 Pro</p><span class="name">定时任务</span></div><span class="size">390 × 844</span></div>
+    <div class="phone-frame">
+      <div class="phone-status"><span>9:41</span><span style="display:flex;gap:5px"><span>📶</span><span>📡</span><span>🔋</span></span></div>
+      <div class="phone-body">
+        <div class="mob-head">
+          <h1>⏱ 定时任务</h1>
+          <button class="icon-btn theme-btn" onclick="toggleTheme()"><span class="t-light">🌙</span><span class="t-dark">☀️</span></button>
+        </div>
+
+        <div class="mob-stats">
+          <div class="mob-stat"><div class="v success">8</div><div class="l">运行中</div></div>
+          <div class="mob-stat"><div class="v error">2</div><div class="l">告警</div></div>
+        </div>
+
+        <div style="padding:0 14px 12px;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none">
+          <span class="filter-chip active" style="white-space:nowrap;font-size:11px;padding:5px 10px">全部 12</span>
+          <span class="filter-chip" style="white-space:nowrap;font-size:11px;padding:5px 10px;color:var(--success);border-color:var(--success-soft);background:var(--success-soft)">运行 8</span>
+          <span class="filter-chip" style="white-space:nowrap;font-size:11px;padding:5px 10px;color:var(--warning);border-color:var(--warning-soft);background:var(--warning-soft)">告警 2</span>
+          <span class="filter-chip" style="white-space:nowrap;font-size:11px;padding:5px 10px">暂停 2</span>
+        </div>
+
+        <div class="mob-list">
+          <div class="mob-card">
+            <div class="h">
+              <div class="e">📈</div>
+              <div class="info">
+                <div class="n">每日核心指标日报 <span class="chip biz" style="font-size:9px;padding:1px 6px">经营</span></div>
+                <div class="meta">📒 Q2 经营复盘 · 每天 09:00</div>
+              </div>
+              <label class="tg"><input type="checkbox" checked /><span class="slider"></span></label>
+            </div>
+            <div class="body">
+              <span><span class="status run"><span class="d" style="width:6px;height:6px;border-radius:50%;background:var(--success);display:inline-block;margin-right:4px"></span>运行中</span> · 上次 ✓</span>
+              <span class="next">下次 09:00</span>
+            </div>
+          </div>
+
+          <div class="mob-card">
+            <div class="h">
+              <div class="e" style="background:var(--p-wave-soft)">🔥</div>
+              <div class="info">
+                <div class="n">DAU 异常监控 <span class="chip wave" style="font-size:9px;padding:1px 6px">波动</span></div>
+                <div class="meta">📒 Android DAU · 每 30 分钟</div>
+              </div>
+              <label class="tg"><input type="checkbox" checked /><span class="slider"></span></label>
+            </div>
+            <div class="body">
+              <span style="color:var(--warning)"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--warning);margin-right:4px"></span>连续失败</span>
+              <span class="next" style="color:var(--error)">⚠ 14:00</span>
+            </div>
+          </div>
+
+          <div class="mob-card">
+            <div class="h">
+              <div class="e" style="background:var(--p-ab-soft)">⚖️</div>
+              <div class="info">
+                <div class="n">AB 显著性快照 <span class="chip ab" style="font-size:9px;padding:1px 6px">AB</span></div>
+                <div class="meta">📒 搜索推荐 v2.4 · 每周一 00:00</div>
+              </div>
+              <label class="tg"><input type="checkbox" checked /><span class="slider"></span></label>
+            </div>
+            <div class="body">
+              <span><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--success);margin-right:4px"></span>运行中</span>
+              <span class="next">下周一 00:00</span>
+            </div>
+          </div>
+
+          <div class="mob-card">
+            <div class="h">
+              <div class="e" style="background:var(--p-gray-soft)">🔌</div>
+              <div class="info">
+                <div class="n">v3.1 灰度监控 <span class="chip gray" style="font-size:9px;padding:1px 6px">灰度</span></div>
+                <div class="meta">📒 v3.1 灰度放量 · 每 2 小时</div>
+              </div>
+              <label class="tg"><input type="checkbox" checked /><span class="slider"></span></label>
+            </div>
+            <div class="body">
+              <span><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--success);margin-right:4px"></span>运行中</span>
+              <span class="next">14:00</span>
+            </div>
+          </div>
+
+          <div class="mob-card" style="opacity:.65">
+            <div class="h">
+              <div class="e" style="background:var(--p-data-soft)">📊</div>
+              <div class="info">
+                <div class="n">月底 RFM 分层 <span class="chip data" style="font-size:9px;padding:1px 6px">数据</span></div>
+                <div class="meta">📒 用户分层 · 每月底 01:00</div>
+              </div>
+              <label class="tg"><input type="checkbox" /><span class="slider"></span></label>
+            </div>
+            <div class="body">
+              <span style="color:var(--text-muted)">已暂停</span>
+              <span class="next" style="color:var(--text-muted)">—</span>
+            </div>
+          </div>
+        </div>
+
+        <button class="fab">＋</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>function toggleTheme(){var c=document.documentElement.dataset.theme||'light';var n=c==='light'?'dark':'light';document.documentElement.dataset.theme=n;localStorage.setItem('ice-theme',n);}</script>
+</body>
+</html>

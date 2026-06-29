@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ICE Workbench v5 · Scheduled (定时任务) (Moxt Style)</title>
+<script>(function(){var t=localStorage.getItem('ice-v5-theme')||'light';document.documentElement.dataset.theme=t;})();</script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root[data-theme="light"]{
+  --bg:#faf4ed;--surface:#ffffff;--surface-2:#f5efe4;--surface-3:#ece3d3;--paper-deep:#f0e9dc;
+  --border:#e5dcc8;--border-soft:#ede5d2;--border-strong:#d4c8ad;
+  --text:#1a1612;--text-dim:#5b5246;--text-muted:#8a7e69;--text-inv:#faf4ed;
+  --accent:#cc785c;--accent-hover:#b8624a;--accent-soft:#f5e8e2;--accent-text:#8a3a23;
+  --success:#5a7a4f;--success-soft:#e6ede0;
+  --warning:#b07d2a;--warning-soft:#f5ead0;
+  --error:#b54a3a;--error-soft:#f5dfd9;
+  --p-ab:#5e7d6a;--p-ab-soft:#e6ede6;
+  --p-biz:#b86b3a;--p-biz-soft:#f5e3d0;
+  --p-data:#4a7c8b;--p-data-soft:#d8e5ea;
+  --p-wave:#b04f5f;--p-wave-soft:#f0d8dc;
+  --p-gray:#7a6b8e;--p-gray-soft:#ebe5ee;
+  --accent-grad:var(--accent);
+  --accent-shadow:none;
+  --icon-emboss:none;
+  --icon-shadow:0 1px 2px rgba(26,22,18,.06);
+  --shadow-1:0 1px 0 rgba(26,22,18,.04);
+  --shadow-2:0 1px 2px rgba(26,22,18,.06),0 4px 16px rgba(26,22,18,.04);
+  --shadow-3:0 8px 32px rgba(26,22,18,.08);
+  --ring:0 0 0 3px rgba(204,120,92,.20);
+  --canvas:#f0e9dc;
+  --code-bg:#1a1612;--code-text:#f5f0e6;--code-comment:#8c8270;
+}
+:root[data-theme="dark"]{
+  --bg:#1f1d1a;--surface:#2a2723;--surface-2:#322e29;--surface-3:#3d3831;--paper-deep:#262320;
+  --border:#44403a;--border-soft:#322e29;--border-strong:#5a544c;
+  --text:#f5f0e6;--text-dim:#bdb19c;--text-muted:#8c8270;--text-inv:#1a1612;
+  --accent:#e89e83;--accent-hover:#f5b39a;--accent-soft:rgba(232,158,131,.16);--accent-text:#f0b59c;
+  --success:#8aa680;--success-soft:rgba(138,166,128,.14);
+  --warning:#d4a463;--warning-soft:rgba(212,164,99,.14);
+  --error:#d4756a;--error-soft:rgba(212,117,106,.14);
+  --p-ab:#8aa68f;--p-ab-soft:rgba(138,166,143,.14);
+  --p-biz:#d49070;--p-biz-soft:rgba(212,144,112,.14);
+  --p-data:#7aa5b3;--p-data-soft:rgba(122,165,179,.14);
+  --p-wave:#d4868f;--p-wave-soft:rgba(212,134,143,.14);
+  --p-gray:#a895b8;--p-gray-soft:rgba(168,149,184,.14);
+  --accent-grad:linear-gradient(135deg,#e89e83 0%,#f5b39a 100%);
+  --accent-shadow:0 1px 0 rgba(0,0,0,.45),0 4px 14px rgba(232,158,131,.22),inset 0 1px 0 rgba(255,255,255,.18);
+  --icon-emboss:inset 0 1px 0 rgba(255,255,255,.10),inset 0 -1px 0 rgba(0,0,0,.20);
+  --icon-shadow:0 1px 2px rgba(0,0,0,.30);
+  --shadow-1:0 1px 0 rgba(0,0,0,.3);
+  --shadow-2:0 4px 16px rgba(0,0,0,.4),0 1px 2px rgba(0,0,0,.4);
+  --shadow-3:0 16px 48px rgba(0,0,0,.5);
+  --ring:0 0 0 3px rgba(232,158,131,.30);
+  --canvas:#1a1815;
+  --code-bg:#16140f;--code-text:#f5f0e6;--code-comment:#8c8270;
+}
+*{box-sizing:border-box}html,body{margin:0;padding:0}
+body{background:var(--canvas);color:var(--text);
+  font-family:'Inter','PingFang SC',-apple-system,system-ui,sans-serif;
+  font-size:14px;line-height:1.6;letter-spacing:-.003em;
+  -webkit-font-smoothing:antialiased;,'cv11';padding:32px 0}
+.serif{font-family:'Inter',sans-serif;}
+.tnum{font-variant-numeric:tabular-nums}
+
+.outer-bar{max-width:1900px;margin:0 auto 24px;padding:0 32px;display:flex;align-items:center;gap:14px}
+.outer-tag{display:inline-flex;align-items:center;gap:8px;padding:5px 12px;
+  background:var(--accent-soft);color:var(--accent-text);border-radius:12px;font-size:11px;font-weight:500;
+  font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.06em}
+.outer-tag .dot{width:6px;height:6px;border-radius:50%;background:var(--accent)}
+.outer-bar .spacer{flex:1}
+.outer-bar a{color:var(--text-dim);font-size:13px;text-decoration:none;padding:6px 12px;border-radius:12px}
+.outer-bar a:hover{background:var(--surface-2);color:var(--text)}
+.outer-bar button{background:var(--surface);border:1px solid var(--border);color:var(--text);
+  height:36px;padding:0 14px;border-radius:12px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:500;
+  display:inline-flex;align-items:center;gap:6px}
+
+.canvas{max-width:1900px;margin:0 auto;padding:0 32px;
+  display:grid;grid-template-columns:1fr 420px;gap:32px;align-items:flex-start}
+@media (max-width:1500px){.canvas{grid-template-columns:1fr}}
+
+/* browser */
+.browser{background:var(--surface);border:1px solid var(--border);border-radius:10px;
+  overflow:hidden;box-shadow:var(--shadow-3)}
+.browser-bar{height:36px;background:var(--surface-2);border-bottom:1px solid var(--border-soft);
+  display:flex;align-items:center;padding:0 14px;gap:8px}
+.browser-dots{display:flex;gap:6px}
+.browser-dots span{width:11px;height:11px;border-radius:50%}
+.browser-dots span:nth-child(1){background:#cc6c5e}
+.browser-dots span:nth-child(2){background:#c4a55a}
+.browser-dots span:nth-child(3){background:#7a9a6e}
+.browser-url{flex:1;text-align:center;font-family:'JetBrains Mono',monospace;font-size:11.5px;
+  color:var(--text-muted);background:var(--surface);padding:5px 12px;border-radius:12px;
+  margin:0 80px;border:1px solid var(--border-soft)}
+.viewport{height:1500px;background:var(--bg);overflow:hidden;display:flex;flex-direction:column}
+
+/* TopNav */
+.appbar{height:54px;background:var(--bg);border-bottom:1px solid var(--border-soft);
+  display:flex;align-items:center;padding:0 24px;gap:14px;flex-shrink:0}
+.appbar .brand-mark{width:28px;height:28px;border-radius:12px;background:var(--accent-grad);
+  display:grid;place-items:center;color:#faf4ed;font-weight:600;font-size:13px;
+  font-family:'Inter',sans-serif;
+  box-shadow:var(--accent-shadow)}
+.crumb{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--text-dim);font-weight:500}
+.crumb a{color:var(--text-dim);text-decoration:none}
+.crumb a:hover{color:var(--text)}
+.crumb .sep{color:var(--text-muted);font-family:'JetBrains Mono',monospace;font-size:12px}
+.crumb .current{color:var(--text)}
+.appbar .spacer{flex:1}
+.icon-btn{width:34px;height:34px;border-radius:12px;display:grid;place-items:center;cursor:pointer;
+  color:var(--text-dim);border:none;background:transparent;font-size:14px}
+.icon-btn:hover{background:var(--surface-2);color:var(--text)}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--accent-grad);
+  display:grid;place-items:center;color:#faf4ed;font-weight:500;font-size:12px;
+  font-family:'Inter',sans-serif;
+  box-shadow:var(--accent-shadow)}
+
+/* main */
+.sc-main{max-width:1080px;margin:0 auto;padding:48px 32px 80px;width:100%;flex:1;overflow-y:auto;
+  display:flex;flex-direction:column;gap:28px}
+
+/* Hero */
+.sc-hero{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;
+  border-bottom:1px solid var(--border-soft);padding-bottom:28px}
+.sc-hero-tag{display:inline-flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;
+  font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;
+  font-weight:500;margin-bottom:14px}
+.sc-hero-tag::before{content:"";width:24px;height:1px;background:var(--accent)}
+.sc-h1{font-family:'Inter',sans-serif;font-size:40px;font-weight:500;letter-spacing:-.03em;line-height:1.05;
+  margin:0 0 8px;font-variation-settings:'opsz' 144,'wght' 500}
+.sc-h1 em{font-style:italic;color:var(--accent);font-weight:500}
+.sc-lead{font-size:15px;color:var(--text-dim);margin:0;max-width:520px}
+
+.btn{display:inline-flex;align-items:center;gap:6px;font-family:inherit;font-size:14px;font-weight:500;
+  padding:0 18px;height:42px;border-radius:12px;border:1px solid transparent;cursor:pointer;
+  transition:all .15s;letter-spacing:-.005em;white-space:nowrap}
+.btn-primary{background:var(--accent-grad);color:#faf4ed;box-shadow:var(--accent-shadow)}
+.btn-primary:hover{background:linear-gradient(135deg,#b8624a 0%,#cc785c 100%)}
+.btn-secondary{background:var(--surface);color:var(--text);border-color:var(--border);box-shadow:var(--shadow-1)}
+.btn-secondary:hover{background:var(--surface-2);border-color:var(--border-strong)}
+.btn-ghost{background:transparent;color:var(--text-dim);border-color:transparent}
+.btn-ghost:hover{background:var(--surface-2);color:var(--text)}
+.btn-sm{height:32px;padding:0 12px;font-size:12.5px;border-radius:12px}
+.btn-xs{height:28px;padding:0 10px;font-size:11.5px;border-radius:12px}
+
+/* 4 Stats · 居中风（icon 上 / label 居中 / 数字居中 / 趋势居中） */
+.sc-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:0;
+  border:1px solid var(--border-soft);border-radius:10px;background:var(--surface);box-shadow:var(--shadow-1);overflow:hidden}
+.sc-stat{padding:22px 22px;border-right:1px solid var(--border-soft);position:relative;
+  display:flex;flex-direction:column;align-items:center;text-align:center}
+.sc-stat:last-child{border-right:none}
+.sc-stat-icon{width:44px;height:44px;border-radius:11px;display:grid;place-items:center;font-size:20px;
+  margin:0 auto 12px;background:var(--success-soft);color:var(--success);
+  box-shadow:var(--icon-emboss),var(--icon-shadow)}
+.sc-stat.s-pause .sc-stat-icon{background:var(--surface-2);color:var(--text-muted)}
+.sc-stat.s-run .sc-stat-icon{background:var(--accent-soft);color:var(--accent)}
+.sc-stat.s-err .sc-stat-icon{background:var(--error-soft);color:var(--error)}
+.sc-stat .l{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--text-muted);
+  font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+.sc-stat .v{font-family:'Inter',sans-serif;font-size:28px;font-weight:500;letter-spacing:-.025em;line-height:1;
+  font-variant-numeric:tabular-nums}
+.sc-stat .v small{font-size:13px;color:var(--text-muted);margin-left:3px;font-weight:500}
+.sc-stat .d{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--success);
+  font-weight:500;margin-top:6px;font-variant-numeric:tabular-nums}
+.sc-stat .d.down{color:var(--error)}
+.sc-stat .d.warn{color:var(--warning)}
+
+/* Filter bar */
+.sc-filter{display:flex;align-items:center;gap:10px;padding:14px 0}
+.sc-chip{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;
+  background:var(--surface);border:1px solid var(--border);color:var(--text-dim);
+  font-size:12.5px;font-weight:500;cursor:pointer;font-family:inherit;letter-spacing:-.005em;transition:all .12s}
+.sc-chip:hover{background:var(--surface-2);color:var(--text)}
+.sc-chip.active{background:var(--accent);color:var(--text-inv);border-color:var(--accent);
+  box-shadow:var(--accent-shadow)}
+.sc-chip .count{font-family:'JetBrains Mono',monospace;font-size:10px;background:var(--surface-2);
+  padding:1px 6px;border-radius:12px;color:var(--text-muted)}
+.sc-chip.active .count{background:rgba(255,255,255,.22);color:var(--text-inv)}
+.sc-search{margin-left:auto;position:relative;width:280px}
+.sc-search input{width:100%;height:36px;padding:0 12px 0 34px;border:1px solid var(--border);
+  border-radius:12px;background:var(--surface);color:var(--text);font-family:inherit;font-size:13px;outline:none;transition:all .15s}
+.sc-search input:focus{border-color:var(--accent);box-shadow:var(--ring)}
+.sc-search .ic{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:13px;pointer-events:none}
+
+/* Task card */
+.sc-list{display:flex;flex-direction:column;gap:10px}
+.sc-card{background:var(--surface);border:1px solid var(--border-soft);border-radius:10px;
+  padding:16px 20px;box-shadow:var(--shadow-1);transition:all .15s}
+.sc-card:hover{border-color:var(--border)}
+.sc-card.paused{opacity:.7}
+.sc-card-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.sc-status{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;
+  font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;
+  text-transform:uppercase;letter-spacing:.06em}
+.sc-status.on{background:var(--success-soft);color:var(--success)}
+.sc-status.off{background:var(--surface-2);color:var(--text-muted)}
+.sc-status.run{background:var(--accent-soft);color:var(--accent-text)}
+.sc-status.err{background:var(--error-soft);color:var(--error)}
+.sc-status .dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+.sc-status.run .dot{animation:pulse 1.4s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.sc-card-name{font-family:'Inter',sans-serif;font-size:16px;font-weight:600;letter-spacing:-.01em;line-height:1.3;
+  flex:1;min-width:0}
+.sc-card-actions{display:flex;gap:4px;flex-shrink:0}
+.sc-act-btn{height:28px;padding:0 10px;background:transparent;border:1px solid var(--border);
+  color:var(--text-dim);font-family:inherit;font-size:11.5px;border-radius:12px;cursor:pointer;
+  display:inline-flex;align-items:center;gap:4px;transition:all .12s}
+.sc-act-btn:hover{background:var(--surface-2);color:var(--text);border-color:var(--border-strong)}
+.sc-act-btn.primary{background:var(--accent-soft);color:var(--accent-text);border-color:transparent}
+.sc-act-btn.primary:hover{background:var(--accent);color:var(--text-inv)}
+.sc-act-btn.danger:hover{color:var(--error);border-color:var(--error)}
+
+.sc-card-body{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;
+  padding-top:12px;border-top:1px solid var(--border-soft)}
+.sc-field{display:flex;flex-direction:column;gap:3px;min-width:0}
+.sc-field-l{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--text-muted);
+  font-weight:600;text-transform:uppercase;letter-spacing:.08em}
+.sc-field-v{font-size:13px;color:var(--text);letter-spacing:-.005em;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sc-field-v.cron{font-family:'JetBrains Mono',monospace;font-size:11.5px;background:var(--surface-2);
+  padding:3px 8px;border-radius:12px;color:var(--accent-text);border:1px solid var(--border-soft);display:inline-block;width:fit-content}
+.sc-field-v.cron-hint{font-size:11.5px;color:var(--text-dim);margin-top:2px}
+.sc-field-v.task-link{color:var(--accent);font-weight:500;text-decoration:none;cursor:pointer}
+.sc-field-v.task-link:hover{text-decoration:underline}
+.sc-field-v.time{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--text-dim);font-variant-numeric:tabular-nums}
+.sc-field-v.time b{color:var(--text);font-weight:500}
+
+/* Detail expand area */
+.sc-card-detail{margin-top:14px;padding-top:14px;border-top:1px dashed var(--border-soft)}
+.sc-detail-h{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--text-muted);
+  font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;
+  display:flex;align-items:center;gap:8px}
+.sc-detail-h::before{content:"";width:14px;height:1px;background:var(--accent)}
+.sc-detail-h .arrow{margin-left:auto;color:var(--text-dim);font-size:10px}
+.sc-prompt-preview{background:var(--code-bg);color:#cec6b1;padding:10px 14px;border-radius:12px;
+  font-family:'JetBrains Mono',monospace;font-size:11.5px;line-height:1.65;
+  border:1px solid var(--border);margin-bottom:12px}
+.sc-prompt-preview .h{color:#e89e83}
+.sc-history{display:flex;flex-direction:column;gap:6px}
+.sc-history-row{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;
+  padding:7px 12px;background:var(--surface-2);border-radius:12px;font-size:12px}
+.sc-history-status{display:inline-flex;align-items:center;gap:5px;font-family:'JetBrains Mono',monospace;
+  font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;padding:2px 8px;border-radius:3px}
+.sc-history-status.ok{background:var(--success-soft);color:var(--success)}
+.sc-history-status.err{background:var(--error-soft);color:var(--error)}
+.sc-history-time{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-dim);font-variant-numeric:tabular-nums}
+.sc-history-out{font-size:11.5px;color:var(--text-dim);line-height:1.4;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sc-history-out b{color:var(--text);font-weight:500}
+.sc-history-tokens{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em}
+
+/* ===== Phone preview ===== */
+.phone-wrap{background:var(--surface);border:1px solid var(--border);border-radius:10px;
+  box-shadow:var(--shadow-3);padding:32px 28px 36px;text-align:center;position:sticky;top:24px}
+.phone-tag{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;
+  background:var(--accent-soft);color:var(--accent-text);border-radius:12px;font-size:10.5px;font-weight:500;
+  letter-spacing:.06em;margin-bottom:8px;font-family:'JetBrains Mono',monospace;text-transform:uppercase}
+.phone-name{font-family:'Inter',sans-serif;font-size:18px;font-weight:600;letter-spacing:-.015em;margin-bottom:4px;
+  font-variation-settings:'opsz' 144}
+.phone-meta{font-size:12px;color:var(--text-muted);margin-bottom:18px;font-family:'JetBrains Mono',monospace}
+.phone{width:360px;height:760px;background:#1a1612;border-radius:42px;padding:10px;
+  box-shadow:0 24px 64px rgba(26,22,18,.3);position:relative;margin:0 auto}
+.phone-screen{width:100%;height:100%;background:var(--bg);border-radius:32px;overflow:hidden;
+  position:relative;display:flex;flex-direction:column}
+.phone-notch{position:absolute;top:14px;left:50%;transform:translateX(-50%);
+  width:104px;height:28px;background:#000;border-radius:99px;z-index:10}
+
+.p-top{padding:50px 14px 12px;display:flex;align-items:center;gap:8px;flex-shrink:0;
+  background:var(--bg);border-bottom:1px solid var(--border-soft)}
+.p-top .brand-mark{width:24px;height:24px;border-radius:12px;font-size:11px;
+  background:var(--accent-grad);display:grid;place-items:center;color:#faf4ed;font-weight:600;
+  font-family:'Inter',sans-serif;
+  box-shadow:var(--accent-shadow)}
+.p-crumb{flex:1;font-size:12.5px;color:var(--text-dim);font-weight:500}
+.p-crumb .current{color:var(--text)}
+
+.p-content{flex:1;overflow-y:auto;padding:18px 14px 80px}
+.p-h1{font-family:'Inter',sans-serif;font-size:26px;font-weight:500;letter-spacing:-.025em;line-height:1.05;margin:0 0 6px;
+  font-variation-settings:'opsz' 144}
+.p-lead{font-size:13px;color:var(--text-dim);margin:0 0 16px}
+
+.p-stats{display:grid;grid-template-columns:repeat(2,1fr);border:1px solid var(--border-soft);
+  border-radius:12px;background:var(--surface);overflow:hidden;box-shadow:var(--shadow-1);margin-bottom:14px}
+.p-stat{padding:14px 12px;border-right:1px solid var(--border-soft);
+  display:flex;flex-direction:column;align-items:center;text-align:center}
+.p-stat:nth-child(2n){border-right:none}
+.p-stat:nth-child(n+3){border-top:1px solid var(--border-soft)}
+.p-stat-icon{width:30px;height:30px;border-radius:12px;display:grid;place-items:center;font-size:14px;
+  margin:0 auto 6px;background:var(--success-soft);color:var(--success);
+  box-shadow:var(--icon-emboss),var(--icon-shadow)}
+.p-stat.s-pause .p-stat-icon{background:var(--surface-2);color:var(--text-muted)}
+.p-stat.s-run .p-stat-icon{background:var(--accent-soft);color:var(--accent)}
+.p-stat.s-err .p-stat-icon{background:var(--error-soft);color:var(--error)}
+.p-stat .l{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text-muted);
+  text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.p-stat .v{font-family:'Inter',sans-serif;font-size:18px;font-weight:500;letter-spacing:-.02em;line-height:1;
+  font-variant-numeric:tabular-nums}
+
+.p-filter{display:flex;gap:6px;overflow-x:auto;margin:0 -14px 12px;padding:0 14px 4px;scrollbar-width:none}
+.p-filter::-webkit-scrollbar{display:none}
+.p-chip{flex-shrink:0;display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:999px;
+  background:var(--surface);border:1px solid var(--border);color:var(--text-dim);font-size:11.5px;font-weight:500}
+.p-chip.active{background:var(--accent);color:var(--text-inv);border-color:var(--accent)}
+
+.p-card{background:var(--surface);border:1px solid var(--border-soft);border-radius:10px;
+  padding:14px;margin-bottom:8px;box-shadow:var(--shadow-1)}
+.p-card-h{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.p-card-name{font-family:'Inter',sans-serif;font-size:14px;font-weight:600;letter-spacing:-.005em;line-height:1.3;flex:1;
+  min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.p-card-fields{display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:11.5px;
+  padding:8px 0;border-top:1px solid var(--border-soft)}
+.p-card-field .l{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text-muted);
+  text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px}
+.p-card-field .v{font-size:11.5px;color:var(--text);font-family:'JetBrains Mono',monospace}
+.p-card-actions{display:flex;gap:5px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border-soft)}
+.p-card-actions .sc-act-btn{flex:1;justify-content:center;height:30px}
+
+.p-fab{position:fixed;bottom:80px;right:14px;width:52px;height:52px;border-radius:50%;
+  background:var(--accent-grad);box-shadow:0 1px 0 rgba(166,84,57,.4),0 8px 24px rgba(204,120,92,.30),inset 0 1px 0 rgba(255,255,255,.24);
+  display:grid;place-items:center;color:#faf4ed;font-size:24px;border:none;cursor:pointer}
+
+/* ===== Modal preview ===== */
+.modal-card{background:var(--surface);border:1px solid var(--border-soft);border-radius:10px;
+  overflow:hidden;box-shadow:var(--shadow-1)}
+.modal-head{padding:14px 18px;border-bottom:1px solid var(--border-soft);
+  display:flex;align-items:center;justify-content:space-between}
+.modal-name{font-family:'Inter',sans-serif;font-size:15px;font-weight:600;letter-spacing:-.01em;
+  font-variation-settings:'opsz' 144}
+.modal-tag{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em}
+.modal-body{padding:24px;background:var(--bg)}
+.modal-form{background:var(--surface);border:1px solid var(--border);border-radius:10px;
+  box-shadow:var(--shadow-2);overflow:hidden}
+.modal-h{padding:18px 24px;border-bottom:1px solid var(--border-soft);
+  display:flex;align-items:center;justify-content:space-between}
+.modal-h h3{font-family:'Inter',sans-serif;font-size:20px;font-weight:500;letter-spacing:-.015em;margin:0;
+  font-variation-settings:'opsz' 144}
+.modal-h .x{width:30px;height:30px;border-radius:12px;border:none;background:transparent;color:var(--text-muted);font-size:18px;cursor:pointer}
+.modal-h .x:hover{background:var(--surface-2);color:var(--text)}
+.modal-content{padding:20px 24px;display:flex;flex-direction:column;gap:14px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:13px;font-weight:500;color:var(--text);letter-spacing:-.005em}
+.field input,.field select,.field textarea{height:38px;padding:0 12px;border:1px solid var(--border);
+  border-radius:12px;background:var(--surface);color:var(--text);font-family:inherit;font-size:13px;outline:none}
+.field textarea{height:auto;padding:10px 12px;min-height:74px;resize:vertical;line-height:1.55}
+.field input.cron-input{font-family:'JetBrains Mono',monospace;font-size:12.5px}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--accent);box-shadow:var(--ring)}
+.field .hint{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--text-muted);
+  text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
+.cron-presets{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.cron-presets button{height:26px;padding:0 10px;background:var(--surface-2);border:1px solid var(--border-soft);
+  border-radius:12px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-dim);cursor:pointer}
+.cron-presets button:hover{background:var(--surface-3);color:var(--text);border-color:var(--border)}
+.cron-presets button.active{background:var(--accent-soft);color:var(--accent-text);border-color:transparent}
+.ai-btn{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:var(--surface-2);
+  border:1px dashed var(--accent);color:var(--accent-text);font-family:inherit;font-size:12px;font-weight:500;
+  border-radius:12px;cursor:pointer;align-self:flex-start;margin-top:4px}
+.ai-btn:hover{background:var(--accent-soft);border-style:solid}
+.toggle-row{display:flex;align-items:center;gap:8px;padding-top:8px;border-top:1px solid var(--border-soft)}
+.toggle-row input{accent-color:var(--accent)}
+.modal-foot{padding:14px 24px;border-top:1px solid var(--border-soft);display:flex;gap:8px;justify-content:flex-end}
+
+/* spec footer */
+.spec{max-width:1900px;margin:32px auto 0;padding:0 32px}
+.spec-card{background:var(--surface);border:1px solid var(--border-soft);border-radius:10px;
+  padding:24px 28px;box-shadow:var(--shadow-1)}
+.spec-card h3{font-family:'Inter',sans-serif;font-size:18px;font-weight:600;margin:0 0 10px;letter-spacing:-.015em;
+  font-variation-settings:'opsz' 144}
+.spec-card ul{margin:0;padding-left:20px;font-size:13.5px;color:var(--text-dim);line-height:1.85}
+.spec-card code{background:var(--surface-2);padding:1px 6px;border-radius:12px;
+  font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--accent-text);
+  border:1px solid var(--border-soft)}
+.spec-card b{color:var(--text);font-weight:600}
+</style>
+</head>
+<body>
+
+<div class="outer-bar">
+  <span class="outer-tag"><span class="dot"></span>v5 · Scheduled · 桌面 + 手机 + Modal</span>
+  <span style="color:var(--text-muted);font-size:13px;font-family:'JetBrains Mono',monospace">基于 [ScheduledTasksPage.tsx](../frontend/src/pages/scheduled/ScheduledTasksPage.tsx)</span>
+  <div class="spacer"></div>
+  <a href="07_agent_detail.html">← Agent</a>
+  <a href="09_admin.html">Admin →</a>
+  <button onclick="toggleTheme()">
+    <span class="t-light">🌙 暗夜</span><span class="t-dark" style="display:none">☀️ 日间</span>
+  </button>
+</div>
+
+<script>
+function toggleTheme(){
+  var cur=document.documentElement.dataset.theme||'light';
+  var next=cur==='light'?'dark':'light';
+  document.documentElement.dataset.theme=next;
+  localStorage.setItem('ice-v5-theme',next);
+  document.querySelectorAll('.t-light').forEach(e=>e.style.display=next==='light'?'inline':'none');
+  document.querySelectorAll('.t-dark').forEach(e=>e.style.display=next==='dark'?'inline':'none');
+}
+(function(){if(document.documentElement.dataset.theme==='dark'){
+  document.querySelectorAll('.t-light').forEach(e=>e.style.display='none');
+  document.querySelectorAll('.t-dark').forEach(e=>e.style.display='inline');
+}})();
+</script>
+
+<div class="canvas">
+
+  <!-- ===== Desktop ===== -->
+  <div class="browser">
+    <div class="browser-bar">
+      <div class="browser-dots"><span></span><span></span><span></span></div>
+      <div class="browser-url">ice.workbench.local / scheduled-tasks</div>
+    </div>
+    <div class="viewport">
+
+      <header class="appbar">
+        <div class="brand-mark">i</div>
+        <div class="crumb">
+          <a href="01_dashboard.html">Dashboard</a>
+          <span class="sep">/</span>
+          <span class="current">定时任务</span>
+        </div>
+        <div class="spacer"></div>
+        <button class="icon-btn" onclick="toggleTheme()" title="切换主题">
+          <span class="t-light">🌙</span><span class="t-dark" style="display:none">☀️</span>
+        </button>
+        <button class="icon-btn">🔔</button>
+        <div class="avatar">GY</div>
+      </header>
+
+      <main class="sc-main">
+
+        <!-- Hero -->
+        <section class="sc-hero">
+          <div>
+            <div class="sc-hero-tag">CRON · AGENT-DRIVEN</div>
+            <h1 class="sc-h1 serif">定时任务<em>自动跑</em></h1>
+            <p class="sc-lead">用 cron 表达式或自然语言描述周期，Agent 在指定时间自动执行并把结果推送给你。</p>
+          </div>
+          <button class="btn btn-primary">＋ 新建定时任务</button>
+        </section>
+
+        <!-- 4 Stats · 居中风 -->
+        <section class="sc-stats">
+          <div class="sc-stat">
+            <div class="sc-stat-icon">▶</div>
+            <div class="l">活跃中</div>
+            <div class="v tnum">23</div>
+            <div class="d">3 本周新增</div>
+          </div>
+          <div class="sc-stat s-pause">
+            <div class="sc-stat-icon">⏸</div>
+            <div class="l">已暂停</div>
+            <div class="v tnum">7</div>
+            <div class="d down">2 上周</div>
+          </div>
+          <div class="sc-stat s-run">
+            <div class="sc-stat-icon">⚡</div>
+            <div class="l">今日已跑</div>
+            <div class="v tnum">42</div>
+            <div class="d">100% 成功</div>
+          </div>
+          <div class="sc-stat s-err">
+            <div class="sc-stat-icon">⚠</div>
+            <div class="l">本周失败</div>
+            <div class="v tnum">3</div>
+            <div class="d warn">需关注</div>
+          </div>
+        </section>
+
+        <!-- Filter -->
+        <section class="sc-filter">
+          <button class="sc-chip active">全部 <span class="count">30</span></button>
+          <button class="sc-chip">活跃 <span class="count">23</span></button>
+          <button class="sc-chip">暂停 <span class="count">7</span></button>
+          <button class="sc-chip">失败 <span class="count">3</span></button>
+          <div class="sc-search">
+            <span class="ic">🔍</span>
+            <input type="text" placeholder="搜索任务名 / cron / 所属任务…">
+          </div>
+        </section>
+
+        <!-- Task list -->
+        <section class="sc-list">
+
+          <!-- Card 1 · 运行中 + 详情展开 -->
+          <article class="sc-card">
+            <div class="sc-card-head">
+              <span class="sc-status run"><span class="dot"></span>RUNNING</span>
+              <h3 class="sc-card-name serif">每日 DAU 异动归因周报</h3>
+              <div class="sc-card-actions">
+                <button class="sc-act-btn primary">▶ 立即执行</button>
+                <button class="sc-act-btn">⏸ 暂停</button>
+                <button class="sc-act-btn">✏ 编辑</button>
+                <button class="sc-act-btn danger">🗑</button>
+              </div>
+            </div>
+            <div class="sc-card-body">
+              <div class="sc-field">
+                <span class="sc-field-l">CRON</span>
+                <span class="sc-field-v cron">0 9 * * 1-5</span>
+                <span class="sc-field-v cron-hint">工作日 09:00</span>
+              </div>
+              <div class="sc-field">
+                <span class="sc-field-l">所属任务</span>
+                <a class="sc-field-v task-link" href="05_workspace_chat.html">DAU 异动归因 · 5 月</a>
+              </div>
+              <div class="sc-field">
+                <span class="sc-field-l">下次执行</span>
+                <span class="sc-field-v time"><b>明天</b> 09:00</span>
+              </div>
+              <div class="sc-field">
+                <span class="sc-field-l">上次执行</span>
+                <span class="sc-field-v time">今天 09:00 · ✓ 成功</span>
+              </div>
+            </div>
+
+            <div class="sc-card-detail">
+              <div class="sc-detail-h">PROMPT 预览 <span class="arrow">▾</span></div>
+              <div class="sc-prompt-preview">
+<span class="h"># 任务</span>
+查询昨日 DAU 与上周同期对比，如果环比变化 &gt;3% 自动触发归因：
+1. 用 wave-attribution 多维下钻
+2. 找出异动 top 3 维度
+3. 输出 markdown 报告并飞书发送到 [#数据周报] 群
+              </div>
+
+              <div class="sc-detail-h">最近 3 次执行</div>
+              <div class="sc-history">
+                <div class="sc-history-row">
+                  <span class="sc-history-status ok"><span style="width:5px;height:5px;border-radius:50%;background:currentColor"></span>OK</span>
+                  <span class="sc-history-out"><b>2026-05-26 09:00</b> · DAU 1,284,302 · 环比 +1.2% · <b>无异动</b></span>
+                  <span class="sc-history-tokens">2.1s · 8.2k tok</span>
+                </div>
+                <div class="sc-history-row">
+                  <span class="sc-history-status ok"><span style="width:5px;height:5px;border-radius:50%;background:currentColor"></span>OK</span>
+                  <span class="sc-history-out"><b>2026-05-25 09:00</b> · DAU 1,268,914 · 环比 -3.2% · 上海推送故障</span>
+                  <span class="sc-history-tokens">3.4s · 12.1k tok</span>
+                </div>
+                <div class="sc-history-row">
+                  <span class="sc-history-status ok"><span style="width:5px;height:5px;border-radius:50%;background:currentColor"></span>OK</span>
+                  <span class="sc-history-out"><b>2026-05-24 09:00</b> · DAU 1,310,821 · 环比 +0.8% · 无异动</span>
+                  <span class="sc-history-tokens">1.9s · 7.8k tok</span>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <!-- Card 2 -->
+          <article class="sc-card">
+            <div class="sc-card-head">
+              <span class="sc-status on"><span class="dot"></span>ACTIVE</span>
+              <h3 class="sc-card-name serif">每周一 AB 实验汇总</h3>
+              <div class="sc-card-actions">
+                <button class="sc-act-btn primary">▶ 立即执行</button>
+                <button class="sc-act-btn">⏸ 暂停</button>
+                <button class="sc-act-btn">✏ 编辑</button>
+                <button class="sc-act-btn danger">🗑</button>
+              </div>
+            </div>
+            <div class="sc-card-body">
+              <div class="sc-field">
+                <span class="sc-field-l">CRON</span>
+                <span class="sc-field-v cron">0 9 * * 1</span>
+                <span class="sc-field-v cron-hint">每周一 09:00</span>
+              </div>
+              <div class="sc-field">
+                <span class="sc-field-l">所属任务</span>
+                <a class="sc-field-v task-link" href="05_workspace_chat.html">双十一 AB 实验复盘</a>
+              </div>
+              <div class="sc-field">
+                <span class="sc-field-l">下次执行</span>
+                <span class="sc-field-v time"><b>下周一</b> 09:00</span>
+              </div>
+              <div class="sc-field">
+                <span class="sc-field-l">上次执行</span>
+                <span class="sc-field-v time">5/19 09:00 · ✓ 成功</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- Card 3 · 暂停 -->
+          <article class="sc-card paused">
+            <div class="sc-card-head">
+              <span class="sc-status off"><span class="dot"></span>PAUSED</span>
+              <h3 class="sc-card-name serif">付费转化漏斗 · 每小时</h3>
+              <div class="sc-card-actions">
+                <button class="sc-act-btn primary">▶ 立即执行</button>
+                <button class="sc-act-btn">▶ 恢复</button>
+                <button class="sc-act-btn">✏ 编辑</button>
+                <button class="sc-act-btn danger">🗑</button>
+              </div>
+            </div>
+            <div class="sc-card-body">
+              <div class="sc-field">
+                <span class="sc-field-l">CRON</span>
+                <span class="sc-field-v cron">0 * * * *</span>
+                <span class="sc-field-v cron-hint">每小时整点</span>
+              </div>
+              <div class="sc-field">
+                <span class="sc-field-l">所属任务</span>
+                <a class="sc-field-v task-link" href="#">付费转化漏斗 Q2</a>
+              </div>
+              <div class="sc-field">
+                <span class="sc-field-l">下次执行</span>
+                <span class="sc-field-v time" style="color:var(--text-muted)">— 已暂停 —</span>
+              </div>
+              <div class="sc-field">
+                <span class="sc-field-l">上次执行</span>
+                <span class="sc-field-v time">5/22 14:00 · ✓ 成功</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- Card 4 · 失败 -->
+          <article class="sc-card">
+            <div class="sc-card-head">
+              <span class="sc-status err"><span class="dot"></span>ERROR</span>
+              <h3 class="sc-card-name serif">小红书素材 ROI 日报</h3>
+              <div class="sc-card-actions">
+                <button class="sc-act-btn primary">▶ 重试</button>
+                <button class="sc-act-btn">⏸ 暂停</button>
+                <button class="sc-act-btn">✏ 编辑</button>
+                <button class="sc-act-btn danger">🗑</button>
+              </div>
+            </div>
+            <div class="sc-card-body">
+              <div class="sc-field">
+                <span class="sc-field-l">CRON</span>
+                <span class="sc-field-v cron">30 8 * * *</span>
+                <span class="sc-field-v cron-hint">每天 08:30</span>
+              </div>
+              <div class="sc-field">
+                <span class="sc-field-l">所属任务</span>
+                <a class="sc-field-v task-link" href="#">上新增长归因</a>
+              </div>
+              <div class="sc-field">
+                <span class="sc-field-l">下次执行</span>
+                <span class="sc-field-v time"><b>明天</b> 08:30</span>
+              </div>
+              <div class="sc-field">
+                <span class="sc-field-l">上次执行</span>
+                <span class="sc-field-v time" style="color:var(--error)">今天 08:30 · ✗ KYUUBI_TIMEOUT</span>
+              </div>
+            </div>
+          </article>
+
+        </section>
+
+      </main>
+
+    </div>
+  </div>
+
+  <!-- ===== Phone ===== -->
+  <div class="phone-wrap">
+    <div class="phone-tag"><span style="width:6px;height:6px;border-radius:50%;background:var(--accent)"></span>iPhone 14 Pro · 390 × 844</div>
+    <div class="phone-name">定时任务 · 移动版</div>
+    <div class="phone-meta">/ scheduled-tasks</div>
+
+    <div class="phone">
+      <div class="phone-notch"></div>
+      <div class="phone-screen">
+
+        <div class="p-top">
+          <div class="brand-mark">i</div>
+          <div class="p-crumb"><span style="color:var(--text-muted)">/</span> <span class="current">定时任务</span></div>
+          <button class="icon-btn" style="width:30px;height:30px">⋯</button>
+        </div>
+
+        <div class="p-content">
+          <h1 class="p-h1 serif">定时任务</h1>
+          <p class="p-lead">cron 驱动的自动化</p>
+
+          <div class="p-stats">
+            <div class="p-stat"><div class="p-stat-icon">▶</div><div class="l">活跃</div><div class="v tnum">23</div></div>
+            <div class="p-stat s-pause"><div class="p-stat-icon">⏸</div><div class="l">暂停</div><div class="v tnum">7</div></div>
+            <div class="p-stat s-run"><div class="p-stat-icon">⚡</div><div class="l">今日已跑</div><div class="v tnum">42</div></div>
+            <div class="p-stat s-err"><div class="p-stat-icon">⚠</div><div class="l">本周失败</div><div class="v tnum">3</div></div>
+          </div>
+
+          <div class="p-filter">
+            <button class="p-chip active">全部 30</button>
+            <button class="p-chip">活跃 23</button>
+            <button class="p-chip">暂停 7</button>
+            <button class="p-chip">失败 3</button>
+          </div>
+
+          <article class="p-card">
+            <div class="p-card-h">
+              <span class="sc-status run" style="font-size:8.5px;padding:2px 7px"><span class="dot"></span>RUN</span>
+              <span class="p-card-name serif">每日 DAU 异动归因周报</span>
+            </div>
+            <div class="p-card-fields">
+              <div class="p-card-field"><div class="l">CRON</div><div class="v">0 9 * * 1-5</div></div>
+              <div class="p-card-field"><div class="l">下次</div><div class="v">明天 09:00</div></div>
+            </div>
+            <div class="p-card-actions">
+              <button class="sc-act-btn primary">▶ 跑</button>
+              <button class="sc-act-btn">⏸</button>
+              <button class="sc-act-btn">✏</button>
+            </div>
+          </article>
+
+          <article class="p-card">
+            <div class="p-card-h">
+              <span class="sc-status on" style="font-size:8.5px;padding:2px 7px"><span class="dot"></span>ON</span>
+              <span class="p-card-name serif">每周一 AB 实验汇总</span>
+            </div>
+            <div class="p-card-fields">
+              <div class="p-card-field"><div class="l">CRON</div><div class="v">0 9 * * 1</div></div>
+              <div class="p-card-field"><div class="l">下次</div><div class="v">下周一 09:00</div></div>
+            </div>
+          </article>
+
+          <article class="p-card" style="opacity:.7">
+            <div class="p-card-h">
+              <span class="sc-status off" style="font-size:8.5px;padding:2px 7px"><span class="dot"></span>OFF</span>
+              <span class="p-card-name serif">付费转化漏斗 · 每小时</span>
+            </div>
+            <div class="p-card-fields">
+              <div class="p-card-field"><div class="l">CRON</div><div class="v">0 * * * *</div></div>
+              <div class="p-card-field"><div class="l">下次</div><div class="v" style="color:var(--text-muted)">已暂停</div></div>
+            </div>
+          </article>
+
+          <article class="p-card">
+            <div class="p-card-h">
+              <span class="sc-status err" style="font-size:8.5px;padding:2px 7px"><span class="dot"></span>ERR</span>
+              <span class="p-card-name serif">小红书 ROI 日报</span>
+            </div>
+            <div class="p-card-fields">
+              <div class="p-card-field"><div class="l">CRON</div><div class="v">30 8 * * *</div></div>
+              <div class="p-card-field"><div class="l">上次</div><div class="v" style="color:var(--error)">TIMEOUT</div></div>
+            </div>
+          </article>
+        </div>
+
+        <button class="p-fab">＋</button>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Modal preview -->
+<div class="states" style="max-width:1900px;margin:32px auto 0;padding:0 32px">
+  <h2 style="font-family:'Inter',sans-serif;font-size:22px;font-weight:500;letter-spacing:-.02em;margin:0 0 14px;
+    font-variation-settings:'opsz' 144">新建 / 编辑 Modal</h2>
+  <div style="display:grid;grid-template-columns:680px 1fr;gap:32px;align-items:start">
+
+    <div class="modal-card">
+      <div class="modal-head">
+        <span class="modal-name serif">新建定时任务 · Modal</span>
+        <span class="modal-tag">FORM · MAX 680px</span>
+      </div>
+      <div class="modal-body">
+        <div class="modal-form">
+          <div class="modal-h">
+            <h3 class="serif">＋ 新建定时任务</h3>
+            <button class="x">×</button>
+          </div>
+          <div class="modal-content">
+
+            <div class="field">
+              <label>所属任务</label>
+              <select>
+                <option>📊 双十一 AB 实验复盘</option>
+                <option>🌊 上新增长归因</option>
+                <option>📊 付费转化漏斗 · Q2</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label>名称</label>
+              <input type="text" value="每日 DAU 异动归因周报">
+            </div>
+
+            <div class="field">
+              <label>任务提示（自然语言）</label>
+              <textarea>查询昨日 DAU 与上周同期对比，如果环比变化 >3% 自动触发归因：用 wave-attribution 多维下钻找 top 3 维度，输出 markdown 报告并飞书发送到 [#数据周报] 群</textarea>
+              <button class="ai-btn">✨ 根据提示智能生成 cron + todo</button>
+            </div>
+
+            <div class="field">
+              <label>cron 表达式</label>
+              <input class="cron-input" type="text" value="0 9 * * 1-5">
+              <span class="hint">分=0 时=9 日=* 月=* 周=1-5 · 工作日 09:00</span>
+              <div class="cron-presets">
+                <button>每天 09:00</button>
+                <button class="active">工作日 09:00</button>
+                <button>每周一 09:00</button>
+                <button>每小时</button>
+                <button>每天 18:00</button>
+              </div>
+            </div>
+
+            <div class="field">
+              <label>AI 模型</label>
+              <select>
+                <option>claude-opus-4-7 · 1M context</option>
+                <option>claude-sonnet-4-6</option>
+                <option>claude-haiku-4-5</option>
+              </select>
+            </div>
+
+            <label class="toggle-row">
+              <input type="checkbox" checked>
+              <span>启用定时执行（取消勾选则保存为草稿）</span>
+            </label>
+          </div>
+          <div class="modal-foot">
+            <button class="btn btn-secondary btn-sm">取消</button>
+            <button class="btn btn-primary btn-sm">✓ 创建定时任务</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="spec-card">
+      <h3 class="serif">📐 这张稿的布局重设计</h3>
+      <ul>
+        <li><b>原版</b>：max-width 1080，header（标题 + 创建按钮）→ 过滤栏（chip + 搜索）→ 任务卡片流。每卡：状态 badge + 名字 + 操作按钮组 + 4 字段网格 + 可展开 prompt + 历史。</li>
+        <li><b>v5</b>：保留单栏 max-width 1080，加入<b>更印刷感的 Hero</b>（Mono 大写 tag「CRON · AGENT-DRIVEN」+ 40px Inter H1「定时任务 <em>自动跑</em>」+ 副标题）+ 右上 ＋创建按钮</li>
+        <li><b>4 stat 卡条</b>：活跃 / 暂停 / 今日已跑 / 本周失败（border 1px 分隔，Inter 28px 数字 tnum，趋势 Mono 字）—— 原版没有数据维度</li>
+        <li><b>过滤栏</b>：4 个 chip pill（全部 30 / 活跃 23 / 暂停 7 / 失败 3）+ 右侧搜索框；active chip 铜橙实色</li>
+        <li><b>任务卡</b>：状态 chip（Mono 大写 RUNNING / ACTIVE / PAUSED / ERROR，run 状态 dot 脉冲动画）+ 衬线 16px 卡名 + 操作按钮组（▶ 立即执行用 accent-soft 突出）。Body 4 字段 grid（CRON 用 mono code 块 + 译文 / 所属任务 link / 下次时间 / 上次时间）</li>
+        <li><b>cron 字段</b>：Mono 等宽 + accent-soft 底 + 1px border code 块（如 <code>0 9 * * 1-5</code>），下一行小灰字译文（"工作日 09:00"）</li>
+        <li><b>详情展开</b>（虚线 border-top）：「PROMPT 预览」用<b>暖墨深色块</b>（# 标题铜橙）+「最近 3 次执行」紧凑历史 row（status chip + 时间 + 输出摘要 + tokens 用量）</li>
+        <li><b>Modal 表单</b>：680px 宽，Inter H3 标题 + 字段（所属任务 / 名称 / 提示 / ✨ AI 生成按钮 / cron + 译文 hint + <b>5 个 cron preset Mono 按钮</b> / AI 模型 / 启用 toggle）。<b>新增 cron preset</b>（原代码没有）</li>
+        <li><b>移动端</b>：Profile 风 hero + 2×2 stats 网格 + chip 横滚 + 紧凑卡片（status RUN/ON/OFF/ERR 缩写）+ FAB 浮动新建</li>
+      </ul>
+
+      <h3 class="serif" style="margin-top:24px">和 v4 / 当前实现的差异</h3>
+      <ul>
+        <li>Hero：单行 h1 + 按钮 → <b>Mono tag + 40px 衬线 H1 + 副标</b></li>
+        <li>新增 4 stat 卡条（活跃 / 暂停 / 今日 / 失败）</li>
+        <li>状态 badge：text 直显 → <b>Mono 大写 + 状态色 chip + 脉冲 dot</b>（运行中）</li>
+        <li>cron：纯文本 → <b>Mono code 块 + accent-soft + 译文</b></li>
+        <li>历史：badge + 行 → <b>暖墨 prompt 块 + 紧凑 row（status / 时间 / 输出 / tokens）</b></li>
+        <li>Modal：原版无 cron preset → <b>新增 5 个 Mono preset 按钮</b>（每天 09:00 / 工作日 09:00 / 每周一 09:00 / 每小时 / 每天 18:00）</li>
+        <li>「✨ AI 生成 cron+todo」按钮：保留功能，改用 1px dashed accent border 突出</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

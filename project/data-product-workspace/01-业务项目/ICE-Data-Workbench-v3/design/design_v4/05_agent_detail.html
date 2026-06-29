@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ICE Workbench v4 · Agent 详情 · Desktop + Mobile</title>
+<script>(function(){var t=localStorage.getItem('ice-theme')||'light';document.documentElement.dataset.theme=t;})();</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+:root[data-theme="light"]{--bg:#faf9f6;--paper:#f4f1ec;--surface:#fff;--surface-2:#f7f5f0;--surface-3:#ece7df;
+  --border:#e6e2dc;--border-soft:#efece6;--text:#1f1f1f;--text-dim:#5f6368;--text-muted:#80868b;
+  --accent:#1a73e8;--accent-hover:#1557b0;--accent-soft:#e8f0fe;--accent-text:#174ea6;
+  --success:#137333;--success-soft:#e6f4ea;--warning:#b06000;--warning-soft:#fef7e0;--error:#b3261e;--error-soft:#fce8e6;
+  --p-ab:#1967d2;--p-ab-soft:#e8f0fe;--p-biz:#b06000;--p-biz-soft:#fef7e0;
+  --p-gray:#5f4b8b;--p-gray-soft:#f3edff;--p-data:#137333;--p-data-soft:#e6f4ea;--p-wave:#b3261e;--p-wave-soft:#fce8e6;
+  --shadow-1:0 1px 2px rgba(60,64,67,.06);--shadow-2:0 1px 3px rgba(60,64,67,.10),0 4px 8px rgba(60,64,67,.04);
+  --shadow-3:0 4px 24px rgba(60,64,67,.10);}
+:root[data-theme="dark"]{--bg:#1f1f1f;--paper:#2a2a2a;--surface:#262626;--surface-2:#2e2e2e;--surface-3:#363636;
+  --border:#3c3c3c;--border-soft:#2e2e2e;--text:#e8eaed;--text-dim:#9aa0a6;--text-muted:#6c7075;
+  --accent:#8ab4f8;--accent-hover:#aecbfa;--accent-soft:rgba(138,180,248,.16);--accent-text:#aecbfa;
+  --success:#81c995;--success-soft:rgba(129,201,149,.14);--warning:#fdd663;--warning-soft:rgba(253,214,99,.14);
+  --p-ab:#8ab4f8;--p-ab-soft:rgba(138,180,248,.16);--p-biz:#fdd663;--p-biz-soft:rgba(253,214,99,.14);
+  --p-gray:#c58af9;--p-gray-soft:rgba(197,138,249,.14);--p-data:#81c995;--p-data-soft:rgba(129,201,149,.14);
+  --p-wave:#f28b82;--p-wave-soft:rgba(242,139,130,.14);
+  --shadow-1:0 1px 2px rgba(0,0,0,.4);--shadow-2:0 4px 16px rgba(0,0,0,.5);--shadow-3:0 6px 28px rgba(0,0,0,.5);}
+*{box-sizing:border-box}html,body{margin:0;padding:0}
+body{background:var(--paper);color:var(--text);font-family:'Inter','PingFang SC','Microsoft YaHei',sans-serif;font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased}
+.canvas{max-width:1820px;margin:0 auto;padding:32px 24px 80px;display:grid;grid-template-columns:1fr 430px;gap:32px;align-items:flex-start}
+@media (max-width:1500px){.canvas{grid-template-columns:1fr;gap:48px}}
+.label{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.6px;font-weight:500;margin:0 0 12px;display:flex;align-items:center;gap:8px}
+.label .dot{width:6px;height:6px;border-radius:50%;background:var(--accent)}
+.vp-cap{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:14px}
+.vp-cap .name{font-family:'Inter',sans-serif;font-weight:500;font-size:18px;letter-spacing:-.2px;display:block;margin-top:0}
+.vp-cap .size{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted)}
+
+.browser{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow-2)}
+.browser-bar{background:var(--surface-2);padding:10px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border-soft)}
+.browser-bar .dots{display:flex;gap:6px}.browser-bar .dots span{width:11px;height:11px;border-radius:50%;background:var(--surface-3)}
+.browser-bar .url{flex:1;background:var(--surface);border:1px solid var(--border-soft);border-radius:99px;padding:5px 14px;font-size:12px;color:var(--text-dim);font-family:'JetBrains Mono',monospace}
+.browser-bar .url::before{content:"🔒 ";font-size:11px}
+
+/* Top app bar */
+.appbar{height:60px;background:var(--bg);border-bottom:1px solid var(--border-soft);display:flex;align-items:center;padding:0 24px;gap:12px}
+.brand-mark{width:32px;height:32px;display:grid;place-items:center}
+.brand-mark svg{width:32px;height:32px}
+.crumb{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-dim)}
+.crumb a{color:var(--text-dim);text-decoration:none}
+.crumb b{color:var(--text);font-weight:500;font-size:14px}
+.crumb .sep{color:var(--text-muted)}
+.appbar .spacer{flex:1}
+.icon-btn{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;cursor:pointer;color:var(--text-dim);background:transparent;border:none;font-size:16px;transition:background .15s}
+.icon-btn:hover{background:var(--surface-2);color:var(--text)}
+.theme-btn .t-light{display:inline}.theme-btn .t-dark{display:none}
+:root[data-theme="dark"] .theme-btn .t-light{display:none}
+:root[data-theme="dark"] .theme-btn .t-dark{display:inline}
+.btn{display:inline-flex;align-items:center;gap:6px;font-family:inherit;font-size:13px;font-weight:500;padding:8px 16px;border-radius:99px;border:1px solid transparent;cursor:pointer;transition:all .15s;line-height:1}
+.btn-primary{background:var(--accent);color:#fff}.btn-tonal{background:var(--accent-soft);color:var(--accent-text)}
+.btn-ghost{background:transparent;color:var(--text);border-color:var(--border)}
+.btn-lg{padding:12px 26px;font-size:14px}
+
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:500;padding:3px 10px;border-radius:99px}
+.chip.biz{background:var(--p-biz-soft);color:var(--p-biz)}
+.chip.ab{background:var(--p-ab-soft);color:var(--p-ab)}
+.chip.gray{background:var(--p-gray-soft);color:var(--p-gray)}
+.chip.data{background:var(--p-data-soft);color:var(--p-data)}
+.chip.wave{background:var(--p-wave-soft);color:var(--p-wave)}
+.chip.ok{background:var(--success-soft);color:var(--success)}
+
+/* hero */
+.agent-page{padding:32px 32px 48px;background:var(--bg)}
+.agent-hero{display:flex;align-items:flex-start;gap:24px;margin-bottom:28px;padding-bottom:24px;border-bottom:1px solid var(--border-soft)}
+.hero-emoji{width:96px;height:96px;border-radius:24px;display:grid;place-items:center;font-size:50px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--p-biz-soft),var(--warning-soft));border:1px solid var(--border-soft)}
+.hero-info{flex:1;min-width:0}
+.hero-info .name{font-family:'Inter',sans-serif;font-size:28px;font-weight:500;letter-spacing:-.4px;line-height:1.2;margin:0 0 6px;display:flex;align-items:center;gap:10px}
+.hero-info .name .ver{font-size:11px;color:var(--text-muted);background:var(--surface-2);padding:3px 9px;border-radius:99px;font-weight:500;border:1px solid var(--border-soft);font-family:'JetBrains Mono',monospace}
+.hero-info .desc{color:var(--text-dim);font-size:14px;line-height:1.55;margin:0 0 12px;max-width:680px}
+.hero-info .meta{display:flex;align-items:center;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--text-muted)}
+.hero-info .meta b{color:var(--text);font-weight:500}
+.hero-info .meta .sep{width:3px;height:3px;border-radius:50%;background:var(--text-muted)}
+.hero-actions{display:flex;flex-direction:column;gap:8px;align-items:flex-end;flex-shrink:0}
+
+/* stats */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px}
+.stat-card{background:var(--surface);border:1px solid var(--border-soft);border-radius:14px;padding:16px}
+.stat-card .l{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.4px;font-weight:500;margin-bottom:8px}
+.stat-card .v{font-family:'Inter',sans-serif;font-size:26px;font-weight:500;letter-spacing:-.4px;line-height:1.1}
+.stat-card .v.success{color:var(--success)}
+.stat-card .v.accent{color:var(--accent)}
+.stat-card .delta{margin-top:5px;font-size:12px;display:inline-flex;align-items:center;gap:4px}
+.stat-card .delta.up{color:var(--success)}
+.stat-card .delta.down{color:var(--error)}
+
+/* main 2col */
+.agent-grid{display:grid;grid-template-columns:1fr 320px;gap:24px;align-items:flex-start}
+@media (max-width:1100px){.agent-grid{grid-template-columns:1fr}}
+.section-h{font-size:13px;font-weight:500;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px;margin:24px 0 12px;display:flex;align-items:center;gap:10px}
+.section-h:first-child{margin-top:0}
+.section-h .c{font-weight:400;color:var(--text-muted);text-transform:none;letter-spacing:0;font-size:12px}
+.section-h .more{margin-left:auto;color:var(--accent-text);font-size:12px;text-transform:none;letter-spacing:0;font-weight:500;cursor:pointer;text-decoration:none}
+
+/* skill list (作品集 = NotebookLM 的 study guide / FAQ 风) */
+.skill-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.skill-card{background:var(--surface);border:1px solid var(--border-soft);border-radius:12px;padding:14px;display:flex;gap:12px;align-items:flex-start}
+.skill-card .ico{width:36px;height:36px;border-radius:10px;background:var(--p-data-soft);color:var(--p-data);display:grid;place-items:center;font-size:16px;flex-shrink:0}
+.skill-card.biz .ico{background:var(--p-biz-soft);color:var(--p-biz)}
+.skill-card.ab .ico{background:var(--p-ab-soft);color:var(--p-ab)}
+.skill-card.gray .ico{background:var(--p-gray-soft);color:var(--p-gray)}
+.skill-card.wave .ico{background:var(--p-wave-soft);color:var(--p-wave)}
+.skill-card .info{flex:1;min-width:0}
+.skill-card .info .n{font-size:13.5px;font-weight:500;display:flex;align-items:center;gap:6px}
+.skill-card .info .ver{font-size:10px;color:var(--text-muted);font-family:'JetBrains Mono',monospace;background:var(--surface-2);padding:1px 6px;border-radius:99px}
+.skill-card .info .d{font-size:11.5px;color:var(--text-dim);line-height:1.5;margin-top:3px}
+.skill-card .info .ex{font-size:10.5px;color:var(--text-muted);margin-top:6px;font-family:'JetBrains Mono',monospace;background:var(--surface-2);padding:4px 7px;border-radius:6px;display:inline-block}
+
+/* sample notebooks */
+.nb-card{background:var(--surface);border:1px solid var(--border-soft);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px;cursor:pointer;transition:all .15s;min-height:140px}
+.nb-card:hover{border-color:var(--border);box-shadow:var(--shadow-1)}
+.nb-card .e{font-size:24px;line-height:1}
+.nb-card .n{font-size:13.5px;font-weight:500;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.nb-card .meta{margin-top:auto;font-size:10.5px;color:var(--text-muted);display:flex;gap:5px;align-items:center}
+.nb-card .meta .d{width:2px;height:2px;border-radius:50%;background:var(--text-muted)}
+
+/* right rail */
+.rail{display:flex;flex-direction:column;gap:18px}
+.rail-card{background:var(--surface);border:1px solid var(--border-soft);border-radius:14px;padding:16px}
+.rail-h{font-size:11px;font-weight:500;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
+.kv-row{display:flex;align-items:center;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:1px solid var(--border-soft)}
+.kv-row:last-child{border:none}
+.kv-row .k{color:var(--text-muted);font-size:12px}
+.kv-row .v{font-weight:500;font-size:12.5px}
+.kv-row .v.accent{color:var(--accent-text)}
+
+/* rating bar */
+.rating-bar{display:flex;align-items:center;gap:8px;font-size:12px;margin-bottom:6px}
+.rating-bar .num{font-family:'Inter',sans-serif;font-size:24px;font-weight:500;letter-spacing:-.4px}
+.rating-bar .stars{color:var(--p-biz);font-size:14px;letter-spacing:1px}
+.rating-bar .ct{color:var(--text-muted);font-size:11px}
+.rate-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:11px;color:var(--text-dim)}
+.rate-row .l{width:14px}
+.rate-row .bar{flex:1;height:5px;border-radius:99px;background:var(--surface-2);overflow:hidden}
+.rate-row .bar i{display:block;height:100%;background:var(--p-biz);border-radius:99px}
+.rate-row .pct{width:32px;text-align:right;color:var(--text-muted)}
+
+/* phone */
+.phone{position:sticky;top:32px;justify-self:center}
+.phone-frame{width:390px;height:844px;background:var(--bg);border:9px solid #1a1a1a;border-radius:48px;overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--shadow-3);position:relative}
+.phone-frame::before{content:"";position:absolute;top:9px;left:50%;transform:translateX(-50%);width:120px;height:28px;background:#1a1a1a;border-radius:16px;z-index:10}
+.phone-status{height:48px;flex-shrink:0;padding:16px 26px 4px;display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:600;color:var(--text)}
+.phone-body{flex:1;overflow-y:auto;background:var(--bg);padding-bottom:90px}
+.phone-body::-webkit-scrollbar{display:none}
+
+.mob-head{padding:8px 12px;display:flex;align-items:center;gap:6px;border-bottom:1px solid var(--border-soft);background:var(--bg);position:sticky;top:0;z-index:5}
+.mob-head .back{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;cursor:pointer;font-size:18px;color:var(--text)}
+.mob-head h2{flex:1;font-size:15px;font-weight:500;margin:0}
+
+.mob-hero{padding:18px 16px;text-align:center;border-bottom:1px solid var(--border-soft);background:var(--bg)}
+.mob-hero .e{width:80px;height:80px;border-radius:22px;display:grid;place-items:center;font-size:40px;margin:0 auto 10px;background:linear-gradient(135deg,var(--p-biz-soft),var(--warning-soft));border:1px solid var(--border-soft)}
+.mob-hero h1{font-size:20px;font-weight:500;margin:0 0 4px;letter-spacing:-.3px}
+.mob-hero .desc{font-size:12.5px;color:var(--text-dim);max-width:280px;margin:0 auto 12px;line-height:1.5}
+.mob-hero .meta{display:flex;justify-content:center;gap:16px;font-size:11.5px;color:var(--text-muted);margin-bottom:12px}
+.mob-hero .meta b{color:var(--text);font-weight:500}
+.mob-hero .actions{display:flex;gap:6px;justify-content:center}
+
+.mob-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;padding:14px}
+.mob-stat{background:var(--surface);border:1px solid var(--border-soft);border-radius:12px;padding:12px;text-align:center}
+.mob-stat .v{font-size:20px;font-weight:500;letter-spacing:-.3px;line-height:1.1}
+.mob-stat .l{font-size:10.5px;color:var(--text-muted);margin-top:3px;text-transform:uppercase;letter-spacing:.3px}
+
+.mob-sect{padding:0 16px;font-size:12px;font-weight:500;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px;margin:12px 0 10px;display:flex;align-items:center;justify-content:space-between}
+.mob-sect .a{color:var(--accent-text);text-transform:none;letter-spacing:0;font-size:11px;text-decoration:none}
+
+.mob-list{padding:0 14px;display:flex;flex-direction:column;gap:6px}
+.mob-skill{background:var(--surface);border:1px solid var(--border-soft);border-radius:12px;padding:11px 12px;display:flex;gap:10px;align-items:flex-start}
+.mob-skill .ico{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;font-size:14px;flex-shrink:0;background:var(--p-data-soft);color:var(--p-data)}
+.mob-skill .info{flex:1;min-width:0}
+.mob-skill .info .n{font-size:12.5px;font-weight:500;display:flex;align-items:center;gap:5px}
+.mob-skill .info .d{font-size:10.5px;color:var(--text-dim);margin-top:2px;line-height:1.4}
+
+.mob-cta{position:fixed;left:14px;right:14px;bottom:24px;background:var(--accent);color:#fff;padding:14px;border-radius:18px;font-weight:500;text-align:center;box-shadow:var(--shadow-3);display:none}
+.phone-frame .mob-cta-inner{position:absolute;left:14px;right:14px;bottom:24px;background:var(--accent);color:#fff;padding:14px;border-radius:18px;font-weight:500;font-size:14px;text-align:center;box-shadow:var(--shadow-3)}
+</style>
+</head>
+<body>
+
+<div class="canvas">
+  <!-- DESKTOP -->
+  <section>
+    <div class="vp-cap"><div><p class="label"><span class="dot"></span>DESKTOP · 1440 × 900</p><span class="name">Agent 详情</span></div><span class="size">Profile + 评分 + Skill 集 + 历史</span></div>
+    <div class="browser">
+      <div class="browser-bar"><div class="dots"><span></span><span></span><span></span></div><div class="url">ice.workbench.local/agents/biz-insight</div></div>
+      <header class="appbar">
+        <div class="brand-mark"><svg viewBox="0 0 32 32" fill="none"><rect x="2" y="2" width="28" height="28" rx="8" fill="#e8f0fe"/><path d="M9 11h10M9 16h14M9 21h7" stroke="#1a73e8" stroke-width="2" stroke-linecap="round"/><circle cx="22" cy="21" r="3" fill="#fef7e0" stroke="#b06000" stroke-width="1.5"/></svg></div>
+        <div class="crumb"><a href="#">工作台</a><span class="sep">›</span><a href="#">Agent 池</a><span class="sep">›</span><b>📈 经营洞察 Agent</b></div>
+        <div class="spacer"></div>
+        <button class="icon-btn theme-btn" onclick="toggleTheme()" title="主题"><span class="t-light">🌙</span><span class="t-dark">☀️</span></button>
+        <button class="icon-btn">⋯</button>
+      </header>
+
+      <main class="agent-page">
+        <!-- HERO -->
+        <div class="agent-hero">
+          <div class="hero-emoji">📈</div>
+          <div class="hero-info">
+            <h1 class="name">经营洞察 Agent <span class="ver">v2.3.1</span> <span class="chip biz">经营分析</span></h1>
+            <p class="desc">面向经营复盘场景的 AI 数据分析助手，擅长多维指标拆解 / 趋势识别 / 归因定位 / 报告生成。已在团队 32 个笔记本中使用，平均反馈 4.7 / 5。</p>
+            <div class="meta">
+              <span>👤 维护者：<b>张明远</b></span>
+              <span class="sep"></span>
+              <span>🤖 模型：<b>Claude Opus 4.7</b></span>
+              <span class="sep"></span>
+              <span>⚡ <b>7</b> Skills</span>
+              <span class="sep"></span>
+              <span>📚 接入 <b>2</b> 知识库</span>
+              <span class="sep"></span>
+              <span>🌐 公开</span>
+            </div>
+          </div>
+          <div class="hero-actions">
+            <button class="btn btn-primary btn-lg">＋ 用此 Agent 新建笔记本</button>
+            <div style="display:flex;gap:6px">
+              <button class="btn btn-tonal">📋 复制配置</button>
+              <button class="btn btn-ghost">★ 收藏</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- STATS -->
+        <div class="stats-row">
+          <div class="stat-card"><div class="l">使用笔记本</div><div class="v">32</div><div class="delta up">↑ +5 本月</div></div>
+          <div class="stat-card"><div class="l">总对话轮次</div><div class="v accent">1,248</div><div class="delta up">↑ +186</div></div>
+          <div class="stat-card"><div class="l">平均反馈</div><div class="v success">4.7</div><div style="font-size:11px;color:var(--text-muted);margin-top:5px;letter-spacing:1px;color:var(--p-biz)">★★★★★</div></div>
+          <div class="stat-card"><div class="l">P95 响应</div><div class="v">2.4s</div><div class="delta up" style="color:var(--success)">↓ -0.3s</div></div>
+        </div>
+
+        <div class="agent-grid">
+          <!-- LEFT: skills + history -->
+          <div>
+            <div class="section-h">⚡ 内置 Skills <span class="c">· 7 个</span><a class="more" href="#">查看 Skill 文档</a></div>
+            <div class="skill-grid">
+              <div class="skill-card biz">
+                <div class="ico">📐</div>
+                <div class="info">
+                  <div class="n">指标拆解 <span class="ver">v1.3</span></div>
+                  <div class="d">按维度（地域/版本/渠道）多重拆解核心指标，定位贡献度</div>
+                  <div class="ex">drill_down(metric, dims=...)</div>
+                </div>
+              </div>
+              <div class="skill-card data">
+                <div class="ico">📈</div>
+                <div class="info">
+                  <div class="n">趋势分析 <span class="ver">v2.0</span></div>
+                  <div class="d">时间序列分解：趋势 / 季节性 / 异常点</div>
+                  <div class="ex">trend_decompose(series)</div>
+                </div>
+              </div>
+              <div class="skill-card ab">
+                <div class="ico">🎯</div>
+                <div class="info">
+                  <div class="n">归因分析 <span class="ver">v1.1</span></div>
+                  <div class="d">因子分解模型估算各驱动因素的贡献占比</div>
+                  <div class="ex">attribution(target, factors)</div>
+                </div>
+              </div>
+              <div class="skill-card biz">
+                <div class="ico">🔢</div>
+                <div class="info">
+                  <div class="n">SQL 查询 <span class="ver">v3.2</span></div>
+                  <div class="d">在已接入数据源上执行 SQL，自动校验语义</div>
+                  <div class="ex">execute_sql(query)</div>
+                </div>
+              </div>
+              <div class="skill-card gray">
+                <div class="ico">📊</div>
+                <div class="info">
+                  <div class="n">渲染图表 <span class="ver">v1.5</span></div>
+                  <div class="d">折线 / 柱状 / 漏斗 / 饼图，自动适配最佳类型</div>
+                  <div class="ex">render_chart(type, data)</div>
+                </div>
+              </div>
+              <div class="skill-card wave">
+                <div class="ico">🔥</div>
+                <div class="info">
+                  <div class="n">异动检测 <span class="ver">v1.0</span></div>
+                  <div class="d">对核心指标做 z-score 异常检测，触发告警</div>
+                  <div class="ex">anomaly_detect(metric)</div>
+                </div>
+              </div>
+              <div class="skill-card">
+                <div class="ico" style="background:var(--accent-soft);color:var(--accent-text)">📝</div>
+                <div class="info">
+                  <div class="n">报告生成 <span class="ver">v1.2</span></div>
+                  <div class="d">把对话结论结构化为 PDF / Markdown 报告</div>
+                  <div class="ex">render_report(template, data)</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="section-h">📚 已链接知识库</div>
+            <div class="skill-grid">
+              <div class="skill-card">
+                <div class="ico" style="background:var(--p-gray-soft);color:var(--p-gray)">📖</div>
+                <div class="info"><div class="n">飞书 · 经营分析方法论 <span class="chip ok" style="font-size:10px;padding:1px 7px;margin-left:auto">已同步</span></div><div class="d">12 篇文档 · 留存口径 / 归因方法 / 复盘模板</div></div>
+              </div>
+              <div class="skill-card">
+                <div class="ico" style="background:var(--p-gray-soft);color:var(--p-gray)">🧠</div>
+                <div class="info"><div class="n">Mify · 数据规范 <span class="chip ok" style="font-size:10px;padding:1px 7px;margin-left:auto">已同步</span></div><div class="d">8 篇 · RAG 向量检索 · 字段定义 / 表结构</div></div>
+              </div>
+            </div>
+
+            <div class="section-h">📒 最近笔记本 <span class="c">· 此 Agent 创建</span><a class="more" href="#">全部 32</a></div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">
+              <div class="nb-card">
+                <div class="e">📈</div>
+                <div class="n">Q2 经营复盘分析</div>
+                <div class="meta"><span>张明远</span><span class="d"></span><span>2 小时前</span></div>
+              </div>
+              <div class="nb-card">
+                <div class="e">📊</div>
+                <div class="n">月度收入归因分析</div>
+                <div class="meta"><span>李思涵</span><span class="d"></span><span>2 周前</span></div>
+              </div>
+              <div class="nb-card">
+                <div class="e">💼</div>
+                <div class="n">用户付费意愿洞察</div>
+                <div class="meta"><span>王子轩</span><span class="d"></span><span>3 周前</span></div>
+              </div>
+              <div class="nb-card">
+                <div class="e">📈</div>
+                <div class="n">Q1 季度经营复盘</div>
+                <div class="meta"><span>张明远</span><span class="d"></span><span>1 月前</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- RIGHT: rail -->
+          <aside class="rail">
+            <div class="rail-card">
+              <div class="rail-h"><span>反馈评分</span><span class="c">· 286 评价</span></div>
+              <div class="rating-bar">
+                <span class="num">4.7</span>
+                <span>
+                  <div class="stars">★★★★★</div>
+                  <div class="ct">基于近 286 次反馈</div>
+                </span>
+              </div>
+              <div style="margin-top:10px">
+                <div class="rate-row"><span class="l">5</span><div class="bar"><i style="width:78%"></i></div><span class="pct">78%</span></div>
+                <div class="rate-row"><span class="l">4</span><div class="bar"><i style="width:18%"></i></div><span class="pct">18%</span></div>
+                <div class="rate-row"><span class="l">3</span><div class="bar"><i style="width:3%"></i></div><span class="pct">3%</span></div>
+                <div class="rate-row"><span class="l">2</span><div class="bar"><i style="width:1%"></i></div><span class="pct">1%</span></div>
+                <div class="rate-row"><span class="l">1</span><div class="bar"><i style="width:0%"></i></div><span class="pct">0%</span></div>
+              </div>
+            </div>
+
+            <div class="rail-card">
+              <div class="rail-h"><span>系统提示词</span><a class="a" style="color:var(--accent-text);font-size:11px;text-decoration:none;font-weight:500" href="#">编辑</a></div>
+              <div style="background:var(--surface-2);border-radius:8px;padding:10px 12px;font-size:11.5px;color:var(--text-dim);line-height:1.6;font-family:'JetBrains Mono',monospace;max-height:160px;overflow:hidden;position:relative">
+                你是「经营洞察 Agent」，专注于经营复盘场景。当用户提出问题时，你应该：
+
+                1. 先识别核心指标和拆解维度…
+                2. 调用 drill_down / trend_decompose…
+                3. 引用数据源时使用 [n] 标记…
+                <div style="position:absolute;bottom:0;left:0;right:0;height:30px;background:linear-gradient(transparent,var(--surface-2))"></div>
+              </div>
+            </div>
+
+            <div class="rail-card">
+              <div class="rail-h"><span>变更记录</span></div>
+              <div class="kv-row"><span class="k">v2.3.1 当前</span><span class="v accent">2 周前</span></div>
+              <div class="kv-row"><span class="k">v2.3.0</span><span class="v">1 月前</span></div>
+              <div class="kv-row"><span class="k">v2.2.0</span><span class="v">2 月前</span></div>
+              <div class="kv-row"><span class="k">v2.1.x</span><span class="v">2 月前</span></div>
+            </div>
+          </aside>
+        </div>
+      </main>
+    </div>
+  </section>
+
+  <!-- MOBILE -->
+  <section class="phone">
+    <div class="vp-cap"><div><p class="label"><span class="dot"></span>MOBILE · iPhone 14 Pro</p><span class="name">Agent 详情</span></div><span class="size">390 × 844</span></div>
+    <div class="phone-frame">
+      <div class="phone-status"><span>9:41</span><span style="display:flex;gap:5px"><span>📶</span><span>📡</span><span>🔋</span></span></div>
+      <div class="phone-body">
+        <div class="mob-head">
+          <button class="back">‹</button>
+          <h2>Agent 详情</h2>
+          <button class="icon-btn theme-btn" onclick="toggleTheme()" title="主题"><span class="t-light">🌙</span><span class="t-dark">☀️</span></button>
+          <button class="icon-btn">⋯</button>
+        </div>
+
+        <div class="mob-hero">
+          <div class="e">📈</div>
+          <h1>经营洞察 Agent</h1>
+          <div class="desc">经营复盘场景 · 指标拆解 · 趋势识别 · 归因定位</div>
+          <div class="meta">
+            <span><b>32</b> 笔记本</span>
+            <span><b>4.7</b> ★</span>
+            <span><b>7</b> Skills</span>
+          </div>
+          <div class="actions">
+            <button class="btn btn-tonal">★ 收藏</button>
+            <button class="btn btn-ghost">📋 复制</button>
+          </div>
+        </div>
+
+        <div class="mob-stats">
+          <div class="mob-stat"><div class="v">1,248</div><div class="l">总对话</div></div>
+          <div class="mob-stat"><div class="v" style="color:var(--success)">2.4s</div><div class="l">P95 响应</div></div>
+        </div>
+
+        <div class="mob-sect">⚡ Skills <span style="color:var(--text-muted);text-transform:none;letter-spacing:0;font-weight:400">· 7 个</span></div>
+        <div class="mob-list">
+          <div class="mob-skill">
+            <div class="ico" style="background:var(--p-biz-soft);color:var(--p-biz)">📐</div>
+            <div class="info"><div class="n">指标拆解 <span style="font-size:10px;color:var(--text-muted);font-family:'JetBrains Mono',monospace">v1.3</span></div><div class="d">按维度多重拆解核心指标，定位贡献度</div></div>
+          </div>
+          <div class="mob-skill">
+            <div class="ico">📈</div>
+            <div class="info"><div class="n">趋势分析 <span style="font-size:10px;color:var(--text-muted);font-family:'JetBrains Mono',monospace">v2.0</span></div><div class="d">时间序列分解：趋势/季节性/异常</div></div>
+          </div>
+          <div class="mob-skill">
+            <div class="ico" style="background:var(--p-ab-soft);color:var(--p-ab)">🎯</div>
+            <div class="info"><div class="n">归因分析 <span style="font-size:10px;color:var(--text-muted);font-family:'JetBrains Mono',monospace">v1.1</span></div><div class="d">因子分解模型估算贡献占比</div></div>
+          </div>
+          <div class="mob-skill">
+            <div class="ico" style="background:var(--accent-soft);color:var(--accent-text)">📝</div>
+            <div class="info"><div class="n">报告生成 <span style="font-size:10px;color:var(--text-muted);font-family:'JetBrains Mono',monospace">v1.2</span></div><div class="d">输出 PDF / Markdown 报告</div></div>
+          </div>
+        </div>
+
+        <div class="mob-sect">📒 近期笔记本 <a class="a" href="#">全部 32</a></div>
+        <div class="mob-list">
+          <div class="mob-skill" style="cursor:pointer">
+            <div style="font-size:24px">📈</div>
+            <div class="info"><div class="n">Q2 经营复盘分析</div><div class="d">张明远 · 2 小时前</div></div>
+            <div style="color:var(--text-muted)">›</div>
+          </div>
+          <div class="mob-skill" style="cursor:pointer">
+            <div style="font-size:24px">📊</div>
+            <div class="info"><div class="n">月度收入归因</div><div class="d">李思涵 · 2 周前</div></div>
+            <div style="color:var(--text-muted)">›</div>
+          </div>
+        </div>
+      </div>
+      <div class="mob-cta-inner">＋ 用此 Agent 新建笔记本</div>
+    </div>
+  </section>
+</div>
+
+<script>function toggleTheme(){var c=document.documentElement.dataset.theme||'light';var n=c==='light'?'dark':'light';document.documentElement.dataset.theme=n;localStorage.setItem('ice-theme',n);}</script>
+</body>
+</html>

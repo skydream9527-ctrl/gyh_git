@@ -1,0 +1,351 @@
+﻿事件名（英文）,事件名（中文）,上报时机,属性名（英文）,属性名（中文）,属性值类型,属性名的对应值及说明,备注,,,,,,,,,,,,
+event name（English）,event name（Chinese）,report time,key name（English）,key name（Chinese）,key value type,key value & other notes,remark,,,,,,,,,,,,
+search_click,搜索框点击,点击时（不需要page、frompage、module、from_module不需要）,​common key,公共属性,,,,,,,,,,,,,,,
+novel_search_click,小说搜索框点击,点击时上报，多次点击多次上报,​common key,公共属性,,,,,,,,,,,,,,,
+search_security,搜索_安全网址,请求安全网址时,​common key,公共属性,,,"详见：浏览器搜索onetrack埋点(服务端) 
+20111130新增浏览器渠道号：1027624b，1027624c，1027624d，1027624f，1027624g",详见：【需求文档-对内】浏览器接入百度SDK ,,,,,,,,,,,
+,,,from_page,上级页面,string,"从浏览器首页搜索框产生的搜索，from_page=browser
+从搜索结果页换query产生的搜索，from_page=search_result",,,,,,,,,,,,,
+,,,is_baidu_sdk,是否百度sdk,boolean,0：原h5；1：百度sdk,,,,,,,,,,,,,
+,,,searchengine_id,搜索引擎配置模版,string,cms中配置的引擎模版,多个模版（对应不同的线上策略）可能对应同一个引擎,,,,,,,,,,,,
+,,,searchengine_channelid,搜索引擎渠道号,string,"百度：from参数（1012852u等）
+360：srcg参数（ff_xiaomi_4等）
+搜狗：bid参数或pid参数（sogou-mobp-6018df1842f7130f等）
+头条：original_source参数（21等）
+神马：from参数（wy974204）",,,,,,,,,,,,,
+,,,search_enter_way,进入搜索的方式,string,"信息流
+首页
+第三方app调起
+rs
+名站
+长按菜单键
+底tab搜索
+下滑（简洁版下）",,,,,,,,,,,,,
+,,,search_way,搜索方式,string,"widget
+热榜
+名站（我的页面-点击百度icon）
+书签
+三方调起搜索
+搜索框输入
+sugword
+历史记录
+搜索发现
+预置词
+搜索框提示词
+文末rs
+切换搜索引擎
+阅后rs",,,,,,,,,,,,,
+,,,query,搜索词,string,,,,,,,,,,,,,,
+,,,third_packagename,第三方调起包名,string,app_launch_way等于“第三方调起”时，上报第三方调起包名，其余情况为空,,,,,,,,,,,,,
+,,,device_id,device_id,string,,,,,,,,,,,,,,
+,,,network,网络类型,string,WIFI/5G/4G/3G/2G/ETHERNET/NONE/UNKNOWN,,,,,,,,,,,,,
+,,,app_version,APP版本,string,,安全网址app参数:version_name,,,,,,,,,,,,
+,,,os_version,系统版本,string,,安全网址app参数:version_release,,,,,,,,,,,,
+,,,stable,版本类别,string,,安全网址app参数:stable,,,,,,,,,,,,
+,,,miui_version,MIUI版本,string,,安全网址app参数:version_incremental,,,,,,,,,,,,
+,,,model_name,设备名称,string,,,,,,,,,,,,,,
+,,,androidid,安卓_id,string,,,,,,,,,,,,,,
+search_homepage_expose,搜索首页曝光,只要进入或回到搜索首页都记，包括从浏览器内其他页面进入或返回，以及从系统内其他地方进入（点击桌面icon进入、从其他app返回、其他app调起、拉回通知栏、从多任务进入、屏幕解锁、点击桌面书签进入）,common key,公共属性,,从其他app返回、其他app调起、桌面书签当前无场景,,,,,,,,,,,,,
+,,,page_type,首页类型,string,"from_desktop（针对具备应用建议和热榜功能的首页）
+new_search_homepage：新版搜索首页
+old_search_homepage:旧版搜索首页",,,,,,,,,,,,,
+,,,search_homepage_enter_way,进入搜索首页的方式,string,"home_page：首页搜索框
+feed：资讯信息流
+search_detail_page：sug页返回
+web_page：普通网页（包括点击宫格名站里的百度）
+menu：长按菜单
+gongge：宫格上的搜索框
+desktop：桌面
+down：下滑（简洁版下）
+search_back：搜索返回",切到后台，再点击icon或点击后台进程进入，延续上一次的值,,,,,,,,,,,,
+search_homepage_module_expose,搜索首页模块曝光,"1、item漏出三分之一记曝光（图片icon+文字一起算三分之一）
+2、我的书签最多曝光前20个
+3、如下不曝光：未在视线范围内出现的（包括键盘挡住的）、隐藏了的卡片、未展开的搜索历史
+4、如下反复操作不重复曝光：页面反复上下滑动、展开收起（搜索历史）、隐藏展开（我的书签和经常访问）、键盘收起弹出、
+5、滑动过程中不曝光，停止了才曝光
+6、只要再次回到该页面都进行重新曝光，包括从浏览器内其他页面进入或返回，以及从系统内其他地方进入（点击桌面icon进入、从其他app返回、其他app调起、拉回通知栏、从多任务进入、屏幕解锁、点击桌面书签进入）
+7、无痕模式下不曝光",common key,公共属性,,,"和one track确认压缩效果
+1、标准的GZIPOutputStream压缩方法
+2、压缩率在70%（压缩后占原来的30%），实际可能会比70%更好一些，取决于上报数据的重复度
+",,,,,,,,,,,,
+,,,page_type,首页类型,string,"from_desktop（针对具备应用建议和热榜功能的首页）
+new_search_homepage：新版搜索首页
+old_search_homepage:旧版搜索首页",,,,,,,,,,,,,
+,,,search_homepage_enter_way,进入搜索首页的方式,string,"home_page：首页搜索框
+feed：资讯信息流
+search_detail_page：sug页返回
+web_page：普通网页（包括点击宫格名站里的百度）
+menu：长按菜单
+gongge：宫格上的搜索框
+desktop：桌面
+down：下滑（简洁版下）
+search_back：搜索返回",切到后台，再点击icon或点击后台进程进入，延续上一次的值,,,,,,,,,,,,
+,,,card_type,卡片类型,string,"网址
+剪贴板
+搜索历史
+我的书签（只打前20个）
+经常访问
+应用建议
+今日热搜
+预置词
+搜索发现
+小说榜单
+猜你想搜",当前搜索历史最多6行，经常访问最多5个，我的书签无上限（业务侧考虑优化），按照我的书签最多上报20个，整体最多不超过50,,,,,,,,,,,,
+,,,novels_list_type,小说热榜类型,string,"当模块类型为小说榜单时上报，否则为空
+boy：男生
+girl：女生",,,,,,,,,,,,,
+,,,card_position,模块位置,number,0、1、2……,,,,,,,,,,,,,
+,,,item_title,item标题,string,"网址为网址的标题
+剪贴板为复制的内容
+搜索历史为搜索词
+我的书签为每条书签的标题
+经常访问为每个item的标题
+应用建议为应用名
+今日热搜为热词
+预置词为每个item标题
+搜索发现为每个item标题
+小说榜单为每个小说标题",,,,,,,,,,,,,
+,,,item_value,item的value,string,"应用建议为应用包名
+其他情况值为空",,,,,,,,,,,,,
+,,,card_item_position,模块内位置,number,0、1、2……,,,,,,,,,,,,,
+search_homepage_module_click,搜索首页模块点击,"无去重逻辑
+多次点击多次上报
+删除、清空、隐藏、展示操作后引起了位置的变动，后续的位置以真实位置为准上报，前面的已经打过点的不改变，均以当下真实的位置上报",common key,公共属性,,,,,,,,,,,,,,,
+,,,page_type,首页类型,string,"from_desktop（针对具备应用建议和热榜功能的首页）
+new_search_homepage：新版搜索首页
+old_search_homepage:旧版搜索首页",,,,,,,,,,,,,
+,,,search_homepage_enter_way,进入搜索首页的方式,string,"home_page：首页搜索框
+feed：资讯信息流
+search_detail_page：sug页返回
+web_page：普通网页（包括点击宫格名站里的百度）
+menu：长按菜单
+gongge：宫格上的搜索框
+desktop：桌面
+down：下滑（简洁版下）
+search_back：搜索返回",,,,,,,,,,,,,
+,,,card_type,模块类型,string,"网址
+剪贴板
+搜索历史
+我的书签
+经常访问
+应用建议
+今日热搜
+键盘_书签
+键盘_剪贴板
+键盘_无痕浏览
+预置词
+搜索发现
+小说榜单
+猜你想搜",键盘_书签、键盘_剪贴板、键盘_无痕浏览不需要对应的曝光事件,,,,,,,,,,,,
+,,,novels_list_type,小说热榜类型,number,"当模块类型为小说榜单时上报，否则为空
+boy：男生
+girl：女生",,,,,,,,,,,,,
+,,,card_position,模块位置,string,"0、1、2……
+键盘类为空",,,,,,,,,,,,,
+,,,item_title,item标题,string,"网址为网址的标题
+剪贴板为复制的内容
+搜索历史为搜索词
+我的书签为每条书签的标题
+经常访问为每个item的标题
+应用建议为应用名
+今日热搜为热词
+键盘类为空
+预置词为每个item标题
+搜索发现为每个item标题
+小说榜单为每个小说标题",,,,,,,,,,,,,
+,,,item_value,item的value,string,"应用建议为应用包名
+键盘类为空",,,,,,,,,,,,,
+,,,card_item_position,模块内位置,number,"0、1、2……
+键盘类为空",,,,,,,,,,,,,
+,,,item_type,item类型,string,common,广告定义在商业化_事件sheet中,,,,,,,,,,,,
+,,,click_area,点击位置,string,"复制（网址）
+编辑（网址）
+二维码（网址）
+搜索词（搜索历史）
+删除（搜索历史、应用建议）
+清空（搜索历史）
+默认（我的书签/经常访问、点击每个item、应用建议、全网热榜、键盘_书签、键盘_剪贴板、键盘_无痕浏览、预置词、搜索发现、小说热榜）
+隐藏（我的书签/经常访问、点击隐藏）
+展示（我的书签/经常访问、点击展示）
+折叠（应用建议、搜索历史）
+展开（应用建议、搜索历史）
+查看更多（小说热榜）","真正删除一个应用的时候上报删除的点击，删除过程中产生的交互操作不记埋点
+
+删除后产生的新的打点的按照删除后的实际位置记录
+
+折叠/收起时item相关值无",,,,,,,,,,,,
+search_sugpage_expose,搜索sug页曝光,"1、sug页每刷新一次即上报一次，即考虑连续输入
+2、只要再次回到该页面都进行重新曝光，包括从浏览器内其他页面进入或返回，以及从系统内其他地方进入（点击桌面icon进入、从其他app返回、其他app调起、拉回通知栏、从多任务进入、屏幕解锁、点击桌面书签进入）",​common key,公共属性,,,,,,,,,,,,,,,
+,,,query,搜索词,string,用户的搜索词,,,,,,,,,,,,,
+,,,searchid,searchid,string,每一次即搜生成唯一id,"SearchId = UUID.randomUUID() + Long.toHexString(System.currentTimeMillis());
+随机UUID +当前毫秒的十六进制
+UUID代表冲突小的随机数
+不同用户之间重复的概率很低
+如：
+5c7f7dae-141d-48f2-be80-9352a73533401788c951bf5",,,,,,,,,,,,
+search_sugpage_module_expose,"搜索sug页模块曝光
+","前端上报
+1、item漏出三分之一记曝光（图片icon+文字一起算三分之一）
+2、我的书签最多曝光前20个
+3、如下不曝光：未在视线范围内出现的（包括键盘挡住的）
+4、如下反复操作不重复曝光：页面反复上下滑动、键盘收起弹出
+5、滑动过程中不曝光，停止了才曝光
+6、只要再次回到该页面都进行重新曝光，包括从浏览器内其他页面进入或返回，以及从系统内其他地方进入（点击桌面icon进入、从其他app返回、其他app调起、拉回通知栏、从多任务进入、屏幕解锁、点击桌面书签进入）",​common key,公共属性,,,"2022年3月更新逻辑，各卡片样式的判定逻辑，详见：
+浏览器搜索sug埋点需求（onetrack）- “sug卡片样式埋点映射表”
+前端打点，全量时间3月23日。
+此事件仅包含非广告卡片，广告卡片见“ad商业化事件”：ad_search_expose、ad_search_click",,,,,,,,,,,,
+,,,req_id,请求id,string,每次请求的唯一标识,,,,,,,,,,,,,
+,,,project_rev,前端版本,string,,,,,,,,,,,,,,
+,,,card_type,"卡片类型
+（卡片的一级分类）",string,"app：游戏 / 应用
+product：小米有品 / 小米商城
+video：小米视频
+book：浏览器小说  
+website：网址  
+box：快递/ 彩票/ 天气
+sugword：sugword 
+local：书签/历史/本地
+search_button：搜索按钮
+local_app：本机应用 
+local_setting：设置 
+ads_browser_brand：sug品牌专区非标资源位（非sug卡片）
+（请注意：广告卡片使用事件ad_search_expose、ad_search_click）",,,,,,,,,,,,,
+,,,item_type,"item类型
+（卡片的二级分类）",string,"card_type='app'时：
+gamecenter_app：游戏
+app：应用
+
+card_type='product'时：
+mi_product：小米商城商品
+youpin_product：小米有品商品
+
+card_type='video'时：
+short：短视频
+cartoon：卡通片
+movie：电影
+tv：电视剧
+variety：综艺
+documentary：纪录片
+
+card_type='box'时：
+express：快递
+lottery：彩票
+weather：天气
+
+card_type='book'时：browser_book
+card_type='website'时：website
+card_type='sugword'时：sugword
+card_type='local'时：local
+card_type='ads_browser_brand'时：ads_browser_brand",,,,,,,,,,,,,
+,,,item_template,"卡片样式
+（卡片具体的样式）",string,"card_type='app' & item_type='gamecenter_app'时：
+top-game-banner：游戏大卡下载
+top-game-banner-order：游戏大卡预约
+top-game：游戏小卡下载
+top-game-order：游戏小卡预约
+
+card_type='product' & item_type='mi_product'时：
+top-product-common：小米商城
+top-product-special：小米商城大卡
+
+card_type='product' & item_type='youpin_product'时：
+top-app：小米有品
+
+card_type='app' & item_type='app'时：
+top-app：应用
+
+card_type='website' & item_type='website'时：
+top-website：网址
+
+card_type='box' & item_type='express'时：
+top-express：快递
+
+card_type='box' & item_type='lottery'时：
+top-lottery：彩票
+
+card_type='box' & item_type='weather'时：
+top-weather：天气
+
+card_type='ads_browser_brand' & item_type='ads_browser_brand'时：
+top-brand：sug品牌专区非标资源位
+其他情况为空
+",,,,,,,,,,,,,
+,,,item_value,item_value,string,"card_type为app时，记录应用包名
+其他情况值为空",,,,,,,,,,,,,
+,,,item_exp_id,游戏实验id,string,sug为游戏类型时需要展示游戏实验id，其他情况为空,,,,,,,,,,,,,
+,,,alg_exp_id,检索端实验id,string,,,,,,,,,,,,,,
+,,,sug_exp_id,融合实验id,string,各种实验ID的融合,,,,,,,,,,,,,
+,,,item_id,item id,string,"索引库里的每条数据的id，包含游戏id
+本机应用和设置为空",,,,,,,,,,,,,
+,,,item_title,item标题,string,,,,,,,,,,,,,,
+,,,item_position,模块位置,number,"每个item的位置，（未展开的位置也计算在内，但未展开前无实际曝光）
+0、1、2……","按照item从上至下依次排序，每个sug卡片、sugword都算一条
+sug品牌专区非标资源位与sug卡片作为一个模块，一起参与排序",,,,,,,,,,,,
+,,,card_item_position,模块内位置,number,"item在模块中的位置
+0、1、2……",先区分sug卡片模块、sugword模块等，在模块内item依次排序,,,,,,,,,,,,
+,,,query,搜索词,string,,,,,,,,,,,,,,
+,,,searchid,searchid,string,每一次即搜生成唯一id,客户端传递,,,,,,,,,,,,
+search_sugpage_module_click,搜索sug页模块点击,"前端上报
+无去重逻辑
+多次点击多次上报",​common key,公共属性,,,,,,,,,,,,,,,
+,,,req_id,请求id,string,同上,,,,,,,,,,,,,
+,,,project_rev,前端版本,string,,,,,,,,,,,,,,
+,,,card_type,模块类型,string,,,,,,,,,,,,,,
+,,,item_type,item类型,string,,,,,,,,,,,,,,
+,,,item_template,卡片样式,string,,,,,,,,,,,,,,
+,,,item_value,item_value,string,,,,,,,,,,,,,,
+,,,item_exp_id,实验id,string,,,,,,,,,,,,,,
+,,,alg_exp_id,检索端实验id,string,,,,,,,,,,,,,,
+,,,sug_exp_id,融合实验id,string,,,,,,,,,,,,,,
+,,,item_id,item id,string,,,,,,,,,,,,,,
+,,,item_title,item标题,string,,,,,,,,,,,,,,
+,,,item_position,模块位置,number,,,,,,,,,,,,,,
+,,,card_item_position,模块内位置,number,,,,,,,,,,,,,,
+,,,query,搜索词,string,,,,,,,,,,,,,,
+,,,searchid,searchid,string,,,,,,,,,,,,,,
+,,,click_area,点击位置,string,"安装（应用）
+下载（应用）
+打开（应用）
+预约（应用）
+已预约（应用）
+阅读（小说）
+大图（小米商品）
+商品（小米商品）
+播放（视频）
+打开（商品）
+query（sugword）
+上框（sugword）
+打开（box-天气/本机应用/设置）
+展开（本机应用/设置）
+折叠（本机应用/设置）
+默认（其他卡片不区分位置的统一值、以及如上卡片的其他位置）","快递：输入快递单号后点击查询打点，未输入不打点
+其他无特殊
+
+本机应用和设置展开折叠时无item相关信息
+
+",,,,,,,,,,,,
+"search_result_item_expose
+search_result_item_click","搜索结果页内容曝光
+搜索结果页内容点击","内容露出1/3时上报，同一用户根据内容id去重，不重复上报
+多次点击多次上报",common key,公共属性,,,,,,,,,,,,,,,
+,,,item_type,媒体类型,string,词条，广告，大家还在搜,,,,,,,,,,,,,
+,,,url,网址,string,,,,,,,,,,,,,,
+,,,query,搜索词,string,,,,,,,,,,,,,,
+baidu_sdk_tab_click,百度sdk中tab点击,点击时上报，多次点击多次上报,common key,公共属性,,,,,,,,,,,,,,,
+,,,function,功能名称,string,全部/视频/资讯/热议/问答/文库/贴吧/图片/小视频/音乐/应用/购物/地图/采购/小说/用户/直播/笔记/下一页,,,,,,,,,,,,,
+baidu_sdk_exit,百度sdk退出,离开百度sdk时上报,commen key,公共属性,,,,,,,,,,,,,,,
+,,,duration_type ,时长类型,string,"从任何场景发起搜索开始计时，离开sdk结束计时：
+quit：直接home退到后台
+home：返回浏览器界面（非百度sdk页面）
+add_window：新建窗口
+lock：锁屏
+push：点击push跳转
+
+在结果页直接重新搜索累计计时",,,,,,,,,,,,,
+,,,duration,时长,number,单位：毫秒,,,,,,,,,,,,,
+baidu_applet_sling,小程序调起,调起百度小程序时上报,commen key,公共属性,,,,,,,,,,,,,,,
+,,,is_baidu_sdk,是否百度sdk,boolean,0：原api；1：百度sdk,,,,,,,,,,,,,
+"appbundle_download
+",appbundle 安装,appbundle开始下载时上报,commen key,公共属性,,,,,,,,,,,,,,,
+,,,is_success,是否下载成功,string,"success:安装成功
+fail：安装失败",,,,,,,,,,,,,

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+html { background: #ffffff; }
+body {
+  width: 720pt; height: 405pt; margin: 0; padding: 0;
+  background: #f7fafc;
+  font-family: Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+}
+.header {
+  background: #667eea;
+  padding: 15pt 40pt;
+}
+.header h1 {
+  color: #ffffff;
+  font-size: 28pt;
+  margin: 0;
+}
+.content {
+  padding: 20pt 40pt 30pt 40pt;
+  flex: 1;
+}
+.table-container {
+  background: #ffffff;
+  padding: 15pt;
+  border-radius: 8pt;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+th {
+  background: #667eea;
+  color: #ffffff;
+  padding: 10pt;
+  text-align: left;
+  font-size: 13pt;
+}
+td {
+  padding: 10pt;
+  border-bottom: 1pt solid #e2e8f0;
+  font-size: 13pt;
+}
+.positive {
+  color: #48bb78;
+  font-weight: bold;
+}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>📈 核心指标对比（大盘用户）</h1>
+</div>
+<div class="content">
+  <div class="table-container">
+    <table>
+      <tr>
+        <th>指标</th>
+        <th>对照组</th>
+        <th>实验组</th>
+        <th>提升幅度</th>
+      </tr>
+      <tr>
+        <td>DAU</td>
+        <td>206,619</td>
+        <td>219,990</td>
+        <td class="positive">+6.47%</td>
+      </tr>
+      <tr>
+        <td>人均曝光</td>
+        <td>11.70</td>
+        <td>11.81</td>
+        <td class="positive">+0.90%</td>
+      </tr>
+      <tr>
+        <td>人均VV</td>
+        <td>3.65</td>
+        <td>3.77</td>
+        <td class="positive">+3.10%</td>
+      </tr>
+      <tr>
+        <td>CTR</td>
+        <td>31.04%</td>
+        <td>31.70%</td>
+        <td class="positive">+2.10%</td>
+      </tr>
+    </table>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>登录（移动端）· ICE Workbench v7</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <link rel="stylesheet" href="_shared/tokens.css" />
+  <link rel="stylesheet" href="_shared/components.css" />
+  <style>
+    /* ===== 移动端登录 =====
+       设计策略：去掉左侧大面板（手机屏宽不够 split-view），
+       把品牌信息缩减为顶部 compact header，登录表单占主体。
+       保留暖色渐变作为顶部背景色块，增强品牌辨识。 */
+    body { background: var(--bg); min-height: 100vh; min-height: 100svh; }
+
+    .m-login { display: flex; flex-direction: column; min-height: 100vh; min-height: 100svh; }
+
+    /* 顶部品牌区：缩减版的 login-aside */
+    .m-login-brand {
+      background: linear-gradient(155deg, #1a1612 0%, #2a211b 60%, #3a2a20 100%);
+      color: #f0e9dc;
+      padding: calc(env(safe-area-inset-top, 20px) + 24px) 24px 32px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .m-login-brand::before {
+      content: ""; position: absolute; top: -30%; right: -20%;
+      width: 260px; height: 260px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(204,120,92,.35), transparent 65%);
+      filter: blur(16px);
+    }
+    .m-brand-row { display: flex; align-items: center; justify-content: center; gap: 10px; position: relative; margin-bottom: 16px; }
+    .m-brand-mark { width: 32px; height: 32px; border-radius: 9px; background: var(--accent-grad); display: grid; place-items: center; font-size: 17px; color: #fff; box-shadow: var(--accent-shadow); }
+    .m-brand-name { font-size: 15px; font-weight: 600; letter-spacing: .02em; }
+    .m-login-brand h2 { font-family: var(--font-serif); font-size: 22px; line-height: 1.3; font-weight: 500; position: relative; }
+    .m-login-brand h2 .accent { color: #e89e83; }
+    .m-login-brand p { color: #b3a78f; font-size: 12px; margin-top: 8px; position: relative; max-width: 300px; margin-left: auto; margin-right: auto; }
+
+    /* 主体表单区 */
+    .m-login-body {
+      flex: 1; display: flex; flex-direction: column; justify-content: center;
+      padding: 32px 24px calc(24px + env(safe-area-inset-bottom, 0px));
+      gap: 20px;
+    }
+    .m-login-body h1 { font-family: var(--font-serif); font-size: 22px; font-weight: 500; color: var(--text); }
+    .m-login-body .lead { color: var(--text-dim); font-size: 13px; margin-top: 4px; }
+
+    .m-feishu-btn {
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      height: 50px; border-radius: var(--r-lg); background: #1a1612; color: #fff;
+      border: none; font-size: 15px; font-weight: 500; width: 100%;
+      cursor: pointer; transition: filter var(--transition);
+    }
+    .m-feishu-btn:active { filter: brightness(1.2); }
+    .m-feishu-btn .fl { width: 22px; height: 22px; border-radius: 5px; background: #3370ff; display: grid; place-items: center; font-size: 12px; }
+
+    .m-or { display: flex; align-items: center; gap: 12px; color: var(--text-faint); font-size: 11px; }
+    .m-or::before, .m-or::after { content: ""; flex: 1; height: 1px; background: var(--divider); }
+
+    .m-exp-row { display: flex; gap: 8px; }
+    .m-exp-row .input { flex: 1; height: 44px; font-size: 15px; }
+    .m-exp-row .btn { height: 44px; padding: 0 16px; flex: none; }
+
+    .m-login-terms { font-size: 11px; color: var(--text-muted); text-align: center; line-height: 1.6; padding-top: 12px; }
+
+    /* 快捷入口按钮 */
+    .m-enter-btn { display: block; width: 100%; text-align: center; height: 50px; line-height: 50px; border-radius: var(--r-lg); font-size: 15px; font-weight: 500; }
+  </style>
+</head>
+<body>
+  <div class="m-login">
+    <!-- 品牌区（compact） -->
+    <header class="m-login-brand">
+      <div class="m-brand-row">
+        <span class="m-brand-mark"><i class="ph-fill ph-hexagon"></i></span>
+        <span class="m-brand-name">ICE Workbench</span>
+      </div>
+      <h2>让每位同学都拥有<br /><span class="accent">一支 AI 数据团队</span></h2>
+      <p>基于 Agent 范式的智能数据工作台</p>
+    </header>
+
+    <!-- 登录表单 -->
+    <main class="m-login-body">
+      <div>
+        <h1>欢迎回来</h1>
+        <p class="lead">使用飞书账号登录，开启你的智能工作区</p>
+      </div>
+
+      <button class="m-feishu-btn">
+        <span class="fl"><i class="ph-fill ph-chat-circle"></i></span> 使用飞书登录
+      </button>
+
+      <div class="m-or">或使用体验码</div>
+
+      <div class="m-exp-row">
+        <input class="input" placeholder="输入 8 位体验码" />
+        <button class="btn btn-secondary">验证</button>
+      </div>
+
+      <a class="btn btn-primary m-enter-btn" href="mobile_dashboard.html">进入工作台 <i class="ph ph-arrow-right"></i></a>
+
+      <p class="m-login-terms">登录即代表同意 <a href="#">服务条款</a> 与 <a href="#">隐私政策</a></p>
+    </main>
+  </div>
+</body>
+</html>

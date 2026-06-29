@@ -1,0 +1,522 @@
+第二个任务
+with t_tar as (
+    SELECT
+        new_flag,
+        cp_name,
+        valid_flag,
+        exp_id,
+        sum(if (expose_tally>0, xiaofei_duration/60000, 0))/count(distinct if (expose_tally>0, distinct_id, null)) as avg_dur
+    from
+        dw.dwm_browser_feeds_user_exp_di_v2
+    where
+        date=${date-1}
+    group by
+        new_flag,
+        cp_name,
+        valid_flag,
+        exp_id
+    with
+        cube
+)
+INSERT OVERWRITE table iceberg_zjyprc_hadoop.browser.feeds_exp_avg_xiaofeiduration partition (date=${date-1})
+SELECT
+    user_type,
+    valid_type,
+    exp_id,
+    avg_dur,
+    cp_name
+from
+    (
+        SELECT
+            case
+                when new_flag=1 then '新用户'
+                when new_flag=0 then '老用户'
+                when new_flag is null then '大盘用户'
+                else 'other'
+            end as user_type,
+            if (cp_name is null, '大盘流量', cp_name) as cp_name,
+            case
+                when valid_flag=1 then '有效用户'
+                when valid_flag=0 then '无效用户'
+                when valid_flag is null then '大盘用户'
+                else 'other'
+            end as valid_type,
+            exp_id,
+            avg_dur
+        from
+            t_tar
+    ) a
+where
+    valid_type!='无效用户'
+    and user_type!='老用户'
+
+
+;
+
+第一个任务
+with t_old as (
+    SELECT
+        did
+        ,exp_id as exp_id_o
+        ,is_valid_dapan_2024 as valid_flag
+        ,is_new_feed_2024 as new_flag
+        ,max(feed_alg_source_max) as cp_name
+        ,sum(app_open_cnt) as open_tally
+        ,sum(if(is_top = 0 , expos_cnt,0)) as expose_tally
+        ,sum(if(is_top = 0 , click_cnt,0)) as click_tally
+        ,sum(if(is_top = 0 , consum_cnt, 0)) as vv_tally
+        ,sum(if(feed_status in ('true'), feed_dura, 0)) as feed_dur
+        ,max(last_tm) as e_ts_max
+        ,sum(consum_dura) as xiaofei_duration
+        ,sum(if(is_top = 0 , news_vv_cnt, 0)) as news_v
+        ,sum(if(is_top = 0 , short_vv_cnt, 0)) as short_v
+        ,sum(if(is_top = 0 , mini_vv_cnt, 0)) as mini_v
+    from
+        iceberg_zjyprc_hadoop.browser.dwm_browser_event_aggregation_label_di
+    where
+        date=${date - 1}
+    group by
+        did
+        ,exp_id
+        ,is_valid_dapan_2024
+        ,is_new_feed_2024
+)
+
+,t_explode0_o as (
+    SELECT
+        did
+        ,new_flag
+        ,valid_flag
+        ,cp_name
+        ,exp_id
+        ,open_tally
+        ,expose_tally
+        ,click_tally
+        ,vv_tally
+        ,feed_dur
+        ,e_ts_max
+        ,xiaofei_duration
+        ,news_v
+        ,short_v
+        ,mini_v
+    from
+        t_old
+        lateral view explode (split(exp_id_o, ',')) tmptab as exp_id
+)
+,t_explode0 as (
+    SELECT
+        did
+        ,new_flag
+        ,valid_flag
+        ,cp_name
+        ,exp_id
+        ,open_tally
+        ,expose_tally
+        ,click_tally
+        ,vv_tally
+        ,feed_dur
+        ,e_ts_max
+        ,xiaofei_duration
+        ,news_v
+        ,short_v
+        ,mini_v
+    from
+        t_explode0_o
+    group by
+        did
+        ,new_flag
+        ,valid_flag
+        ,cp_name
+        ,exp_id
+        ,open_tally
+        ,expose_tally
+        ,click_tally
+        ,vv_tally
+        ,feed_dur
+        ,e_ts_max
+        ,xiaofei_duration
+        ,news_v
+        ,short_v
+        ,mini_v
+)
+,result as (
+    select
+        a.did
+        ,new_flag
+        ,cp_name
+        ,exp_id
+        ,open_tally
+        ,valid_flag
+        ,coalesce(search_tally,0) as search_tally
+        ,expose_tally
+        ,click_tally
+        ,vv_tally
+        ,feed_dur
+        ,xiaofei_duration
+        ,news_v
+        ,short_v
+        ,mini_v
+    from
+        (
+            SELECT
+                did
+                ,exp_id
+                ,max(new_flag) as new_flag
+                ,max(valid_flag) as valid_flag
+                ,max(cp_name) as cp_name
+                ,sum(open_tally) as open_tally
+                ,sum(expose_tally) as expose_tally
+                ,sum(click_tally) as click_tally
+                ,sum(vv_tally) as vv_tally
+                ,sum(feed_dur) as feed_dur
+                ,sum(xiaofei_duration) as xiaofei_duration
+                ,sum(news_v) as news_v
+                ,sum(short_v) as short_v
+                ,sum(mini_v) as mini_v
+            from
+                t_explode0
+            where
+                coalesce(exp_id,'') != ''
+            group by
+                did,
+                exp_id
+        ) a
+        left join (
+            SELECT
+                did
+                ,sum(search_security_cnt) as search_tally
+            FROM
+                iceberg_zjyprc_hadoop.browser.dwm_browser_event_aggregation_label_di
+            WHERE
+                date=${date-1}
+            group by
+                did
+        ) b on a.did = b.did
+)
+insert overwrite table hive_zjyprc_hadoop.dw.dwm_browser_feeds_user_exp_di_v2 partition (date=${date - 1})
+select
+    did,
+    new_flag,
+    cp_name,
+    exp_id,
+    open_tally,
+    valid_flag,
+    search_tally,
+    expose_tally,
+    click_tally,
+    vv_tally,
+    feed_dur,
+    xiaofei_duration,
+    news_v,
+    short_v,
+    mini_v,
+    sum(expose_tally) over (
+        PARTITION by
+            did
+    ) sum_expose_flag,
+    sum(open_tally) over (
+        PARTITION by
+            did
+    ) sum_open_flag
+FROM
+    result
+;
+
+
+
+
+
+INSERT OVERWRITE iceberg_zjyprc_hadoop.browser.dwm_browser_event_aggregation_di 
+select
+    date
+    ,distinct_id as did
+    ,imei as imei1
+    ,properties['imei2'] as imei2
+    ,oaid
+    ,properties['deviceid'] as device_id
+    ,android_id
+    ,model
+    ,miui
+    ,build
+    ,os_ver
+    ,app_ver
+    ,properties['version_code'] as version_code
+    ,properties['cp_id'] as toutiao_user_id
+    ,properties['sessionId'] as session_id
+    ,net
+    ,country
+    ,province
+    ,city
+    ,properties['exp_id'] as exp_id
+    ,properties['adExpldlList'] as ad_exp_id
+    ,properties['app_launch_way'] as app_launch_way
+    ,properties['notification_bar_status'] as notification_bar_status
+    ,properties['is_receive_notification'] as is_receive_notification
+    ,properties['feed_channel'] as feed_channel
+    ,properties['feed_status'] as feed_status
+    ,properties['card_type'] as card_type
+    ,properties['is_coldstart'] as is_coldstart
+    ,properties['page'] as page
+    ,properties['from_page'] as from_page
+    ,properties['feed_enter_way'] as feed_enter_way
+    ,properties['feed_alg_source'] as feed_alg_source
+    ,properties['feed_style'] as feed_style
+    ,properties['item_docid'] as item_docid
+    ,properties['item_title'] as item_title
+    , case when event_name in ('book_read_begin_sdk', 'book_read_quit_sdk') and properties.book_type = 'shortstory' then 'shortstory'
+           when event_name in ('book_read_begin_sdk', 'book_read_quit_sdk') and properties.book_type in ('store', 'pre_add_book', 'pirate') then 'novel'
+           else properties.item_type
+     end as item_type
+    ,properties['item_auther'] as item_author
+    ,properties['item_cp_name'] as item_cp_name
+    ,properties['item_position'] as item_position
+    ,properties['card_item_postition'] as card_item_postition
+    ,properties['item_category'] as item_category
+    ,properties['item_subcategory'] as item_subcategory
+    ,properties['item_style'] as item_style
+    ,properties['item_publish_time'] as item_publish_time
+    ,properties['enter_comment_way'] as enter_comment_way
+    ,properties['minivideo_alg_source'] as minivideo_alg_source
+    ,properties['duration_type'] as duration_type
+    ,properties['tag_id'] as tag_id
+    ,properties['ad_id'] as ad_id
+    ,properties['app_packagename'] as app_packagename
+    ,properties['searchengine_channelid'] as searchengine_channelid
+    ,properties['item_alg_source'] as item_alg_source
+    ,properties['item_video_switch_way'] as item_video_switch_way
+    ,cast(properties['page_number'] as int) as page_number
+    ,min(e_ts) as first_tm
+    ,max(e_ts) as last_tm
+    ,properties['page_origin'] as page_origin
+    ,properties['book_type'] as book_type
+    ,properties['read_source'] as read_source
+    ,properties['next_novel'] as next_novel
+    ,properties['last_read_source'] as last_read_source
+    ,properties['book_name'] as book_name
+    ,properties['skit_id'] as skit_id
+    ,properties['chapter_count'] as chapter_count
+    ,properties['order'] as order
+    ,properties['item_book_id'] as item_book_id
+    ,properties['is_feed_sliding'] as is_feed_sliding
+
+    ,sum(if(event_name in ('app_open'),1,0)) as app_open_cnt
+    ,sum(if(event_name in ('app_duration'),1,0)) as app_duration_cnt
+    ,sum(if(event_name in ('app_duration') and properties['duration'] BETWEEN 0 and 86400000,properties['duration'],0)) as app_dura
+    ,sum(if(event_name in ('content_item_expose'),1,0)) as expose_cnt
+    ,sum(if(event_name in ('content_item_expose_enter'),1,0)) as expose_enter_cnt
+    ,sum(if(event_name in ('content_item_expose_noenter'),1,0)) as expose_noenter_cnt
+    ,sum(if(event_name in ('content_item_click'),1,0)) as click_cnt
+    ,sum(if(event_name in ('content_item_click_enter'),1,0)) as click_enter_cnt
+    ,sum(if(event_name in ('content_item_click_noenter'),1,0)) as click_noenter_cnt
+    ,sum(if(event_name in ('content_item_view'),1,0)) as view_cnt
+    ,sum(if(event_name in ('content_item_view_quit'),1,0)) as view_quit_cnt
+    ,sum(if(event_name in ('content_item_view_quit') and properties['duration'] BETWEEN 0 and 86400000,properties['duration'],0)) as view_event_dura
+    ,sum(if(event_name in ('content_item_video_play'),1,0)) as video_play_cnt
+    ,sum(if(event_name in ('content_item_video_over'),1,0)) as video_over_cnt
+    ,sum(if(event_name in ('content_item_video_over') and properties['play_duration'] BETWEEN 0 and 86400000,properties['play_duration'],0)) as video_over_event_dura
+    ,sum(if(event_name in ('content_item_video_failed'),1,0)) as video_play_fail_cnt
+    ,max(if(event_name in ('content_item_video_over') and properties['play_duration'] BETWEEN 0 and 86400000,cast(properties['play_duration'] as bigint),0)) as max_play_dura
+    ,sum(if(event_name in ('content_item_video_over') and properties['item_percent'] = 100,1,0)) as play_all_over_cnt
+    ,sum(if(event_name in ('content_item_like'),1,0)) as like_cnt
+    ,sum(if(event_name in ('content_item_unlike'),1,0)) as unlike_cnt
+    ,sum(if(event_name in ('content_item_share'),1,0)) as share_cnt
+    ,sum(if(event_name in ('content_item_collect'),1,0)) as collect_cnt
+    ,sum(if(event_name in ('content_enter_comment'),1,0)) as enter_comment_cnt
+    ,sum(if(event_name in ('content_item_comment'),1,0)) as comment_cnt
+    ,sum(if(event_name in ('content_item_negative_click'),1,0)) as report_cnt
+    ,sum(if(event_name = 'content_duration' 
+        and properties["duration"] between 0 and 86400000 
+        and (
+            properties["duration_type"] in ('detail_page','feed_channel') 
+            or (
+                properties["duration_type"]='video_play' and properties["feed_style"]='immersion'
+            )
+        )
+        ,properties["duration"]
+        ,0
+    )) as feed_dura
+    ,sum(if(event_name in ('content_feed_refresh'),1,0)) as refresh_cnt
+    ,sum(if(event_name in ('content_item_request_client'),1,0)) as request_cnt
+    ,sum(if(event_name in ('follow_button_click'),1,0)) as follow_cnt
+    ,0 as unfollow_cnt
+    ,sum(if(event_name in ('ad_content_expose'),1,0)) as ad_content_expose_cnt
+    ,sum(if(event_name in ('ad_content_click'),1,0)) as ad_content_click_cnt
+    ,sum(if(event_name in ('ad_content_negative'),1,0)) as ad_content_negative_cnt
+    ,sum(if(event_name in ('ad_content_request_client'),1,0)) as ad_content_request_client_cnt
+    ,sum(if(event_name in ('ad_content_request_sever'),1,0)) as ad_content_request_sever_cnt
+    ,sum(if(event_name in ('ad_content_return_sever'),1,0)) as ad_content_return_sever_cnt
+    ,sum(if(event_name in ('ad_content_return_client'),1,0)) as ad_content_return_client_cnt
+    ,sum(if(event_name in ('deeplink_ad_request'),1,0)) as deeplink_ad_request_cnt
+    ,sum(if(event_name in ('deeplink_ad_return'),1,0)) as deeplink_ad_return_cnt
+    ,sum(if(event_name in ('deeplink_ad_expose'),1,0)) as deeplink_ad_expose_cnt
+    ,sum(if(event_name in ('deeplink_ad_click'),1,0)) as deeplink_ad_click_cnt
+    ,sum(if(event_name in ('deeplink_ad_success'),1,0)) as deeplink_ad_success_cnt
+    ,sum(if(event_name in ('search_security'),1,0)) as search_security_cnt
+    ,sum(if(event_name in ('search'),1,0)) as search_cnt
+    ,sum(if(event_name in ('search_sugpage_expose','search_homepage_expose'),1,0)) as sug_expose_cnt
+    ,properties['third_packagename'] as third_packagename
+    ,properties['feed_trace_id'] as feed_trace_id
+    ,max(if(event_name in ('content_item_video_over'), cast(properties['item_percent'] as bigint), NULL)) as max_video_play_percent
+    ,max(if(event_name in ('content_item_video_over','content_item_video_play'), cast(properties['item_video_length'] as bigint), NULL)) as item_video_length
+    ,sum(if(event_name in ('content_item_video_over') and properties['play_duration'] > 2000 and properties['play_duration'] <= 86400000 ,1,0)) as vaild_play_cnt
+    ,sum(if(event_name in ('content_item_view_quit') and properties['duration'] > 2000 and properties['duration'] <= 86400000,1,0)) as vaild_view_cnt
+    ,max(if(event_name in ('content_item_view_quit'), cast(properties['percent'] as bigint), NULL)) as max_view_percent
+    ,properties['item_cpauthorid'] as item_cpauthorid
+    ,properties['user_switch'] as user_switch
+    ,properties['item_order'] as item_order
+    ,get_json_object(properties ['ext'], '$.expid') as djy_rec_expid
+    ,properties['root_gid'] as root_gid
+    ,properties['is_click_content_enter'] as is_click_content_enter,
+    sum(if(event_name in ('content_exit_comment') and properties.duration>=0 and properties.duration<=86400000,properties.duration,0)) comment_area_dura,
+    sum(if(event_name in ('content_item_view_quit') and properties.percent=100,1,0)) view_all_quit_cnt,
+    sum(if(event_name in ('content_item_video_over') and properties['play_duration'] >= 3000 and properties['play_duration'] <= 86400000 ,1,0)) as vaild_play_over_cnt,
+    sum(if(event_name in ('content_item_view_quit') and properties['duration'] >= 3000 and properties['duration'] <= 86400000,1,0)) as vaild_view_quit_cnt,
+    sum(if(event_name in ('content_item_video_over') and properties['play_duration'] < 3000,1,0)) as fast_slide_play_cnt,
+    sum(if(event_name in ('content_item_view_quit') and properties['duration'] < 3000,1,0)) as fast_slide_view_cnt,
+    sum(if(event_name in ('content_item_negative_click') and properties.negative_type !='report',1,0)) as negative_cnt,
+    sum(if(event_name in ('content_item_negative_click') and properties.negative_type ='report',1,0)) as report_cnt_new,
+    sum(if(event_name in ('content_item_negative_click') and properties.negative_type ='rubbish',1,0)) as rubbish_cnt,
+    sum(if(event_name in ('content_item_negative_click') and properties.negative_type ='repeat',1,0)) as repeat_cnt,
+    sum(if(event_name in ('content_item_negative_click') and properties.negative_type ='shield',1,0)) as shield_cnt,
+    sum(if(event_name in ('content_item_negative_click') and properties.negative_type ='dislike',1,0)) as dislike_cnt,
+    sum(if(event_name in ('book_read_begin_sdk') and properties.book_type = 'shortstory',1,0)) as shortstory_read_cnt
+    ,sum(if(event_name in ('book_read_quit_sdk') and properties.book_type = 'shortstory' and properties.read_time>=0 and properties.read_time<=86400000,properties.read_time, 0)) as shortstory_read_dura
+    ,coalesce(cast(properties.turn_pages as bigint), 0) as turn_pages
+    ,sum(if(event_name in ('book_read_begin_sdk'), 1, 0)) as book_read_cnt
+    ,sum(if(event_name in ('book_read_quit_sdk'), properties.turn_pages, 0)) as book_read_vv
+    ,sum(if(event_name in ('book_read_quit_sdk') and properties.read_time>=0 and properties.read_time<=86400000, properties.read_time, 0)) as book_read_dura
+    ,properties.item_substyle as item_substyle
+    ,sum(if(event_name in ('fullscreen_click'),1,0)) as fullscreen_click_cnt
+from
+    iceberg_zjyprc_hadoop.dw.dwd_ot_event_di_31000000442 
+where
+    date = ${date-1}
+    and (
+        event_name in (
+            'content_exit_comment',
+            'app_open'
+            ,'app_duration'
+            ,'content_item_expose'
+            ,'content_item_expose_enter'
+            ,'content_item_expose_noenter'
+            ,'content_item_click'
+            ,'content_item_click_enter'
+            ,'content_item_click_noenter'
+            ,'content_item_view'
+            ,'content_item_view_quit'
+            ,'content_item_video_play'
+            ,'content_item_video_over'
+            ,'content_item_video_failed'
+            ,'content_item_like'
+            ,'content_item_unlike'
+            ,'content_item_share'
+            ,'content_item_collect'
+            ,'content_item_comment'
+            ,'content_enter_comment'
+            ,'content_item_negative_click'
+            ,'content_duration' 
+            ,'content_feed_refresh'
+            ,'content_item_request_client'
+            ,'follow_button_click'
+            ,'ad_content_expose'
+            ,'ad_content_click'
+            ,'ad_content_negative'
+            ,'ad_content_request_client'
+            ,'ad_content_request_sever'
+            ,'ad_content_return_sever'
+            ,'ad_content_return_client'
+            ,'deeplink_ad_request'
+            ,'deeplink_ad_return'
+            ,'deeplink_ad_expose'
+            ,'deeplink_ad_click'
+            ,'deeplink_ad_success'
+            ,'search_security'
+            ,'search'
+            ,'search_sugpage_expose'
+            ,'search_homepage_expose'
+            ,'book_read_begin_sdk'
+            ,'book_read_quit_sdk'
+            ,'fullscreen_click'
+        )
+        or properties['feed_status'] in ('true','false')
+    )
+group by
+    date
+    ,distinct_id
+    ,imei
+    ,properties['imei2']
+    ,oaid
+    ,properties['deviceid']
+    ,android_id
+    ,model
+    ,miui
+    ,build
+    ,os_ver
+    ,app_ver
+    ,properties['version_code']
+    ,properties['cp_id']
+    ,properties['sessionId']
+    ,net
+    ,country
+    ,province
+    ,city
+    ,properties['exp_id']
+    ,properties['adExpldlList']
+    ,properties['app_launch_way']
+    ,properties['notification_bar_status']
+    ,properties['is_receive_notification']
+    ,properties['feed_channel']
+    ,properties['feed_status']
+    ,properties['card_type']
+    ,properties['is_coldstart']
+    ,properties['page']
+    ,properties['from_page']
+    ,properties['feed_enter_way']
+    ,properties['feed_alg_source']
+    ,properties['feed_style']
+    ,properties['item_docid']
+    ,properties['item_title']
+    ,case when event_name in ('book_read_begin_sdk', 'book_read_quit_sdk') and properties.book_type = 'shortstory' then 'shortstory'
+          when event_name in ('book_read_begin_sdk', 'book_read_quit_sdk') and properties.book_type in ('store', 'pre_add_book', 'pirate') then 'novel'
+          else properties.item_type
+     end
+    ,properties['item_auther']
+    ,properties['item_cp_name']
+    ,properties['item_position']
+    ,properties['card_item_postition']
+    ,properties['item_category']
+    ,properties['item_subcategory']
+    ,properties['item_style']
+    ,properties['item_publish_time']
+    ,properties['enter_comment_way']
+    ,properties['minivideo_alg_source']
+    ,properties['duration_type']
+    ,properties['tag_id']
+    ,properties['ad_id']
+    ,properties['app_packagename']
+    ,properties['searchengine_channelid']
+    ,properties['third_packagename']
+    ,properties['feed_trace_id']
+    ,properties['item_cpauthorid']
+    ,properties['user_switch']
+    ,properties['item_order']
+    --,get_json_object(properties['ext'], '$.expid')
+    ,properties['root_gid']
+    ,properties['is_click_content_enter']
+    ,properties['item_alg_source']
+    ,properties['item_video_switch_way']
+    ,cast(properties['page_number'] as int)
+    ,get_json_object(properties ['ext'], '$.expid')
+    ,properties['page_origin']
+    ,properties['book_type']
+    ,properties['read_source']
+    ,properties['book_name']
+    ,properties['skit_id'] 
+    ,properties['chapter_count'] 
+    ,properties['order']
+    ,properties.turn_pages
+    ,properties.item_substyle
+    ,properties['next_novel']
+    ,properties['last_read_source']
+    ,properties['item_book_id']
+    ,properties['is_feed_sliding']

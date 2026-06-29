@@ -1,0 +1,3 @@
+# data-monitor agent knowledge base
+# Stores alert templates, threshold presets, and monitoring best practices.
+entries: []

@@ -1,0 +1,33 @@
+{
+  "tasks": [
+    {
+      "name": "周一工作梳理更新",
+      "schedule": "0 9 * * 1",
+      "doc_url": "https://mi.feishu.cn/wiki/E7OMwSP5ti15yMkjOQwcIxRHntg",
+      "doc_token": "E7OMwSP5ti15yMkjOQwcIxRHntg",
+      "update_type": "weekly_work_review",
+      "timezone": "Asia/Shanghai",
+      "feishu": {
+        "app_id": "",
+        "app_secret": ""
+      }
+    },
+    {
+      "name": "周五文档更新",
+      "schedule": "0 9 * * 5",
+      "doc_url": "https://mi.feishu.cn/wiki/LeQawaZDUiSp3XkCkWWc27TInCe",
+      "doc_token": "LeQawaZDUiSp3XkCkWWc27TInCe",
+      "update_type": "weekly_summary",
+      "timezone": "Asia/Shanghai",
+      "feishu": {
+        "app_id": "",
+        "app_secret": ""
+      }
+    }
+  ],
+  "notification": {
+    "feishu_webhook": "",
+    "notify_on_success": true,
+    "notify_on_failure": true
+  }
+}

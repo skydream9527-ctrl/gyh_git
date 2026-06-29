@@ -1,0 +1,61 @@
+{
+  "task_name": "每日核心指标监控",
+  "schedule": "0 9 * * *",
+  "timezone": "Asia/Shanghai",
+  "feishu": {
+    "webhook_url": "https://open.feishu.cn/open-apis/bot/v2/hook/YOUR_WEBHOOK_TOKEN",
+    "secret": "",
+    "at_users": [],
+    "at_all": false
+  },
+  "database": {
+    "type": "kyuubi",
+    "cluster": "production"
+  },
+  "metrics": [
+    {
+      "name": "DAU",
+      "sql": "SELECT COUNT(DISTINCT user_id) as dau FROM dwd_user_active_daily WHERE dt = '{{date}}'",
+      "compare_yesterday": true,
+      "compare_last_week": true,
+      "alert_threshold": -0.05
+    },
+    {
+      "name": "人均使用时长",
+      "sql": "SELECT AVG(duration) as avg_duration FROM dws_user_usage_daily WHERE dt = '{{date}}'",
+      "unit": "分钟",
+      "compare_yesterday": true,
+      "compare_last_week": true,
+      "alert_threshold": -0.03
+    },
+    {
+      "name": "信息流点击率",
+      "sql": "SELECT SUM(click_cnt)/SUM(show_cnt) as ctr FROM dws_feed_consume_daily WHERE dt = '{{date}}'",
+      "unit": "%",
+      "decimal_places": 2,
+      "compare_yesterday": true,
+      "compare_last_week": true,
+      "alert_threshold": -0.02
+    },
+    {
+      "name": "次日留存率",
+      "sql": "SELECT COUNT(DISTINCT CASE WHEN dt = date_add('{{date}}', 1) THEN user_id END)/COUNT(DISTINCT user_id) as retention FROM dwd_user_active_daily WHERE dt = '{{date}}'",
+      "unit": "%",
+      "decimal_places": 2,
+      "compare_yesterday": false,
+      "compare_last_week": true,
+      "alert_threshold": -0.01
+    }
+  ],
+  "report": {
+    "title": "📊 每日核心指标监控日报",
+    "output_dir": "reports",
+    "save_excel": true,
+    "save_markdown": true
+  },
+  "alert": {
+    "enabled": true,
+    "webhook_url_alert": "",
+    "alert_on_error": true
+  }
+}

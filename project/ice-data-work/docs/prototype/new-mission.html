@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ICE-DATA-WORK · 新建任务</title>
+  <link rel="stylesheet" href="assets/app.css" />
+</head>
+<body data-page="new-mission" data-title="New Mission">
+  <div class="app">
+    <aside id="side" class="sidebar"></aside>
+    <main class="main">
+      <div id="top"></div>
+
+      <div class="page-head">
+        <div>
+          <div class="eyebrow">New Mission</div>
+          <h1>把任务交给分身，由分身选 Agent、备上下文、预估权限与成本。</h1>
+          <p class="subtle">你只需描述目标；Wisdom Twin 负责拆解、推荐 Agent、预估权限与风险。任务将归属到当前项目 p_growth。</p>
+        </div>
+        <a class="btn primary" href="workspace-data.html">确认执行</a>
+      </div>
+
+      <div class="grid cols-2">
+        <section class="panel">
+          <div class="panel-head"><h2>任务输入</h2><span class="pill blue">Step 1</span></div>
+          <div class="panel-body">
+            <textarea style="min-height:150px">帮我分析 6.20 版本 DAU 下滑原因，输出一份能同步给业务负责人的报告，并沉淀关键口径。</textarea>
+            <div class="toolbar">
+              <button class="btn sm">添加文件</button>
+              <button class="btn sm">选择历史产物</button>
+              <button class="btn sm">指定项目：p_growth</button>
+              <a class="btn primary sm" href="#plan">让分身规划</a>
+            </div>
+            <div class="kv" style="margin-top:8px">
+              <b>任务类型</b><span>数据分析（自动识别）</span>
+              <b>初始参与者</b><span>我 + 我的 Twin</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel" id="plan">
+          <div class="panel-head"><h2>Twin 推荐路线</h2><span class="pill amber">需确认</span></div>
+          <div class="panel-body list">
+            <div class="list-item compact"><div><strong>1. 邀请 Data Agent 查询 DAU / 留存 / 渠道 / 性能</strong><span>权限：只读查询，预计 8k tokens。</span></div><span class="pill green">低风险</span></div>
+            <div class="list-item compact"><div><strong>2. 在数据分析工作台生成报告草稿</strong><span>权限：写当前任务工作区，不写本机文件。</span></div><span class="pill blue">中风险</span></div>
+            <div class="list-item compact"><div><strong>3. 固化 2 条 Memory Candidate</strong><span>需你确认后进长期记忆。</span></div><span class="pill amber">确认</span></div>
+            <div class="list-item compact"><div><strong>4. 报告保存为项目级产物</strong><span>沉淀到 p_growth 共享空间。</span></div><span class="pill violet">项目</span></div>
+            <div class="actions" style="margin-top:6px"><a class="btn primary" href="workspace-data.html">确认并创建任务</a><button class="btn">调整路线</button></div>
+          </div>
+        </section>
+      </div>
+    </main>
+    <aside id="dock" class="dock"></aside>
+  </div>
+  <script src="assets/shell.js"></script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+/* MobileBottomBar — v7 mobile design */
+.m-bottombar-tab {
+  text-decoration: none;
+}
+.m-bottombar-tab:active {
+  background: var(--surface-2);
+}
+.m-bottombar-tab i {
+  font-size: 20px;
+  line-height: 1;
+}

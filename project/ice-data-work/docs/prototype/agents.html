@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ICE-DATA-WORK · Agent Hub</title>
+  <link rel="stylesheet" href="assets/app.css" />
+</head>
+<body data-page="agents" data-title="Agent Hub">
+  <div class="app">
+    <aside id="side" class="sidebar"></aside>
+    <main class="main">
+      <div id="top"></div>
+
+      <div class="page-head">
+        <div>
+          <div class="eyebrow">Agent Hub</div>
+          <h1>工具 Agent 与我的 Twin，组成你的 Agent Network。</h1>
+          <p class="subtle">每张卡固定展示三件套：当前状态 · 核心能力 · 正在执行的工作。详情进 Agent Card。</p>
+        </div>
+        <button class="btn primary">添加 Agent</button>
+      </div>
+
+      <div class="grid cols-3">
+        <a class="agent-card" href="agent-detail.html"><div class="agent-top"><div><div class="agent-icon" style="background:var(--blue-soft)">TW</div><h3 style="margin-top:8px">我的 Twin</h3></div><span class="pill blue">● 工作中</span></div><p>核心能力：维护上下文、协调 Agent、请求确认。</p><p class="subtle" style="font-size:12px">正在：汇总 DAU 归因结果并请求确认</p><div class="kv"><b>记忆</b><span>用户长期记忆</span><b>权限</b><span>L3 · 私有</span></div></a>
+
+        <a class="agent-card" href="agent-detail.html"><div class="agent-top"><div><div class="agent-icon">DA</div><h3 style="margin-top:8px">Data Agent</h3></div><span class="pill blue">● 工作中</span></div><p>核心能力：SQL 查询与归因分析。</p><p class="subtle" style="font-size:12px">正在：为「DAU 下滑归因」执行 kyuubi_query（2/3）</p><div class="kv"><b>权限</b><span>L2 只读</span><b>记忆</b><span>按用户分区 + 团队共享</span></div></a>
+
+        <a class="agent-card" href="agent-detail.html"><div class="agent-top"><div><div class="agent-icon">WA</div><h3 style="margin-top:8px">波动归因 Agent</h3></div><span class="pill slate">○ 空闲</span></div><p>核心能力：指标波动的多维拆解与归因。</p><p class="subtle" style="font-size:12px">空闲 · 上次：6.18 波动拆解</p><div class="kv"><b>权限</b><span>L2 只读</span><b>风险</b><span>数据权限</span></div></a>
+
+        <a class="agent-card" href="agent-detail.html"><div class="agent-top"><div><div class="agent-icon">AB</div><h3 style="margin-top:8px">AB 实验 Agent</h3></div><span class="pill slate">○ 空闲</span></div><p>核心能力：实验显著性与结论建议。</p><p class="subtle" style="font-size:12px">空闲</p><div class="kv"><b>权限</b><span>L2 只读</span><b>风险</b><span>数据权限</span></div></a>
+
+        <a class="agent-card" href="agent-detail.html"><div class="agent-top"><div><div class="agent-icon">CX</div><h3 style="margin-top:8px">Codex</h3></div><span class="pill amber">⊘ 未连接</span></div><p>核心能力：项目代码修改、文档生成、原型设计。</p><p class="subtle" style="font-size:12px">未连接本机 Runtime（二期 P2-01）</p><div class="kv"><b>权限</b><span>L3 请求执行</span><b>风险</b><span>写文件 / 跑命令</span></div></a>
+
+        <a class="agent-card" href="agent-detail.html"><div class="agent-top"><div><div class="agent-icon">CC</div><h3 style="margin-top:8px">Claude Code</h3></div><span class="pill amber">⊘ 未连接</span></div><p>核心能力：大范围代码理解、重构、执行。</p><p class="subtle" style="font-size:12px">未连接本机 Runtime（二期 P2-01）</p><div class="kv"><b>权限</b><span>L3 请求执行</span><b>风险</b><span>写文件 / 跑命令</span></div></a>
+      </div>
+    </main>
+    <aside id="dock" class="dock"></aside>
+  </div>
+  <script src="assets/shell.js"></script>
+</body>
+</html>

@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Agent 详情 · ICE Workbench v7</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <link rel="stylesheet" href="_shared/tokens.css" />
+  <link rel="stylesheet" href="_shared/components.css" />
+  <link rel="stylesheet" href="_shared/shell.css" />
+  <style>
+    .ad-hero { display: flex; gap: var(--gap-6); align-items: flex-start; padding: var(--gap-7); position: relative; overflow: hidden; }
+    .ad-hero::before { content: ""; position: absolute; inset: 0; background: radial-gradient(700px 200px at 0% 0%, var(--p-ab-tint), transparent 70%); pointer-events: none; }
+    .ad-avatar { width: 72px; height: 72px; border-radius: 18px; display: grid; place-items: center; font-size: 36px; flex: none; background: var(--p-ab-soft); color: var(--p-ab); position: relative; }
+    .ad-title { font-family: var(--font-serif); font-size: 26px; font-weight: 500; color: var(--text); }
+    .ad-sub { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
+    .ad-desc { color: var(--text-dim); font-size: var(--fs-body); line-height: 1.65; margin-top: 12px; max-width: 620px; }
+    .ad-grid { display: grid; grid-template-columns: 1.6fr 1fr; gap: var(--gap-6); align-items: start; }
+    .cap-list { display: flex; flex-direction: column; gap: 10px; }
+    .cap { display: flex; gap: 12px; padding: 12px 14px; border-radius: var(--r-md); background: var(--surface-2); }
+    .cap .ico { width: 30px; height: 30px; flex: none; border-radius: 8px; background: var(--surface); border: 1px solid var(--border-soft); display: grid; place-items: center; color: var(--p-ab); font-size: 15px; }
+    .cap .t { font-size: var(--fs-body); font-weight: 600; color: var(--text); }
+    .cap .d { font-size: var(--fs-xs); color: var(--text-muted); margin-top: 2px; }
+    .file-tree { font-family: var(--font-mono); font-size: 12px; color: var(--text-dim); line-height: 2; }
+    .file-tree .dir { color: var(--accent-text); font-weight: 600; }
+    .file-tree a { color: var(--text-dim); }
+    .file-tree a:hover { color: var(--accent); }
+    .skill-tag { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: var(--r-pill); background: var(--surface-2); border: 1px solid var(--border-soft); font-size: var(--fs-xs); color: var(--text-2); }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topnav">
+      <a class="topnav-brand" href="dashboard.html"><span class="logo-mark"><i class="ph-fill ph-hexagon"></i></span><span class="brand-name"><b>ICE</b> Workbench</span></a>
+      <div class="topnav-crumb" style="margin-left:8px"><a class="back" href="dashboard.html"><i class="ph ph-arrow-left"></i> 首页</a><span class="sep">/</span><span>团队公共区</span><span class="sep">/</span><span class="current">AB 实验官</span></div>
+      <div class="topnav-right"><button class="user-pill"><span class="avatar">龚</span><span>龚云鹤</span></button></div>
+    </header>
+
+    <div class="app-body">
+      <main class="main main-narrow" style="gap:var(--gap-6)">
+        <div class="card ad-hero">
+          <div class="ad-avatar"><i class="ph ph-flask"></i></div>
+          <div style="flex:1;position:relative">
+            <div class="ad-title">AB 实验官</div>
+            <div class="ad-sub">
+              <span class="chip ab"><span class="chip-dot"></span> ab 范式</span>
+              <span class="chip ok"><span class="chip-dot"></span> 已上线</span>
+              <span class="meta-row"><span><i class="ph ph-cube"></i> Claude Sonnet 4.5</span></span>
+            </div>
+            <p class="ad-desc">面向 A/B 实验全流程的智能体：从假设设定、样本量估算，到显著性检验与效应量评估，自动产出可复用的实验结论报告。擅长把"实验组 vs 对照组"的原始数据转化为可决策的结论。</p>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;position:relative">
+            <a class="btn btn-primary btn-lg" href="workspace.html"><i class="ph ph-lightning"></i> 以此 Agent 创建任务</a>
+            <button class="btn btn-secondary"><i class="ph ph-bookmark-simple"></i> 收藏</button>
+          </div>
+        </div>
+
+        <div class="ad-grid">
+          <div style="display:flex;flex-direction:column;gap:var(--gap-6)">
+            <section class="card" style="padding:var(--gap-6)">
+              <div class="section-head"><div><h2>核心能力</h2></div></div>
+              <div class="cap-list">
+                <div class="cap"><span class="ico"><i class="ph ph-chart-scatter"></i></span><div><div class="t">显著性检验</div><div class="d">自动选择 Z / T / 卡方检验，输出 p 值与置信区间</div></div></div>
+                <div class="cap"><span class="ico"><i class="ph ph-scales"></i></span><div><div class="t">样本均衡诊断</div><div class="d">AA 校验、SRM 检测，识别分流偏差</div></div></div>
+                <div class="cap"><span class="ico"><i class="ph ph-ruler"></i></span><div><div class="t">最小样本量估算</div><div class="d">根据 MDE 与功效反推所需样本与实验周期</div></div></div>
+                <div class="cap"><span class="ico"><i class="ph ph-file-text"></i></span><div><div class="t">结论报告生成</div><div class="d">一键导出含图表的实验结论 Markdown</div></div></div>
+              </div>
+            </section>
+
+            <section class="card" style="padding:var(--gap-6)">
+              <div class="section-head"><div><h2>挂载技能</h2><div class="desc">Skills 提供可复用的子流程</div></div></div>
+              <div style="display:flex;flex-wrap:wrap;gap:8px">
+                <span class="skill-tag"><i class="ph ph-puzzle-piece"></i> 显著性计算器</span>
+                <span class="skill-tag"><i class="ph ph-puzzle-piece"></i> 样本量估算</span>
+                <span class="skill-tag"><i class="ph ph-puzzle-piece"></i> 实验报告模板</span>
+                <span class="skill-tag"><i class="ph ph-puzzle-piece"></i> 火山引擎 ABTest 连接器</span>
+              </div>
+            </section>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:var(--gap-6)">
+            <section class="card" style="padding:var(--gap-6)">
+              <div class="section-head"><div><h2>Agent 文件</h2></div></div>
+              <div class="file-tree">
+                <div><span class="dir"><i class="ph ph-folder-open"></i> ab-experiment/</span></div>
+                <div style="padding-left:18px"><a href="#"><i class="ph ph-file-code"></i> agent.json</a></div>
+                <div style="padding-left:18px"><span class="dir"><i class="ph ph-folder"></i> prompt/</span></div>
+                <div style="padding-left:36px"><a href="#"><i class="ph ph-file-text"></i> identity.md</a></div>
+                <div style="padding-left:36px"><a href="#"><i class="ph ph-file-text"></i> sop.md</a></div>
+                <div style="padding-left:18px"><span class="dir"><i class="ph ph-folder"></i> knowledge/</span></div>
+                <div style="padding-left:36px"><a href="#"><i class="ph ph-file-text"></i> index.yaml</a></div>
+                <div style="padding-left:36px"><a href="#"><i class="ph ph-file-text"></i> changelog.md</a></div>
+              </div>
+            </section>
+
+            <section class="card" style="padding:var(--gap-6)">
+              <div class="section-head"><div><h2>使用情况</h2></div></div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                <div class="stat"><span class="stat-label">累计任务</span><span class="stat-value">128</span></div>
+                <div class="stat accent"><span class="stat-label">本周</span><span class="stat-value">17</span></div>
+              </div>
+            </section>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+</body>
+</html>

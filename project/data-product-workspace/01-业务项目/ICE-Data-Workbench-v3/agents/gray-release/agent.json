@@ -1,0 +1,34 @@
+{
+  "id": "gray-release",
+  "name": "灰度版本 Agent",
+  "paradigm": "gray",
+  "icon": "🌐",
+  "color": "#9b8ec4",
+  "description": "版本灰度 SOP · 决策矩阵 · AI 下钻 · 放量决策（V1.2）",
+  "publish_status": "published",
+  "prompt_layout": "v3",
+  "tools": [
+    "now",
+    "kyuubi_query",
+    "execute_python",
+    "write_file",
+    "read_file",
+    "list_files",
+    "feishu_publish",
+    "feishu_upload_image",
+    "read_skill",
+    "read_agent_knowledge",
+    "todo_write",
+    "request_human_input",
+    "exit_plan_mode",
+    "spawn_subagent"
+  ],
+  "model": null,
+  "spawn_targets": ["data-analysis", "ab-experiment", "know"],
+  "skills": ["kyuubi", "feishu", "nl-python"],
+  "features": {
+    "todo_write": true,
+    "exit_plan_mode": true,
+    "spawn_subagent": true
+  }
+}

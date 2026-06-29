@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ICE Workbench v5 · Moxt Style</title>
+<script>(function(){var t=localStorage.getItem('ice-v5-theme')||'light';document.documentElement.dataset.theme=t;})();</script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    darkMode: ['class', '[data-theme="dark"]'],
+    theme: {
+      extend: {
+        colors: {
+          bg: 'var(--bg)',
+          surface: 'var(--bg)', /* Moxt doesn't distinguish much between bg and surface */
+          'surface-2': 'var(--surface-2)',
+          'surface-3': 'var(--surface-3)',
+          canvas: 'var(--bg)',
+          border: 'var(--border)',
+          'border-soft': 'var(--border-soft)',
+          'border-strong': 'var(--border)',
+          txt: 'var(--text)',
+          'txt-dim': 'var(--text-dim)',
+          'txt-muted': 'var(--text-muted)',
+          'txt-inv': '#ffffff',
+          accent: 'var(--brand)',
+          'accent-hover': 'var(--brand-deep)',
+          'accent-soft': 'var(--brand-soft)',
+          'accent-text': 'var(--brand-deep)',
+          success: '#10b981',
+          warning: '#d97706',
+          error: '#ef4444',
+          /* Map the paradigm colors to moxt muted grays or just keep them subtle */
+          'p-ab': '#64748b',
+          'p-biz': '#64748b',
+          'p-gray': '#64748b',
+          'p-data': '#64748b',
+          'p-wave': '#64748b',
+        },
+        fontFamily: {
+          sans: ['Inter', '-apple-system', 'system-ui', 'PingFang SC', 'sans-serif'],
+          serif: ['Inter', 'sans-serif'], /* Override serif to sans for moxt style */
+          mono: ['ui-monospace', 'monospace'],
+        },
+        boxShadow: {
+          'icon-emboss': 'none',
+          'icon-shadow': 'none',
+          'accent-shadow': 'none',
+          '1': '0 1px 2px rgba(0,0,0,.04)',
+          '2': '0 4px 6px -1px rgba(0,0,0,.05)',
+          '3': '0 10px 15px -3px rgba(0,0,0,.05)',
+        },
+        backgroundImage: {
+          'accent-grad': 'none',
+        },
+        borderRadius: {
+          'xl': '10px',
+          '2xl': '12px',
+        }
+      }
+    }
+  }
+</script>
+<style type="text/tailwindcss">
+  @layer base {
+    :root[data-theme="light"]{
+      --bg:#faf4ed;
+      --surface-2:#f5efe4;
+      --surface-3:#ece3d3;
+      --border:#e5dcc8;
+      --border-soft:#ede5d2;
+      --text:#1a1612;
+      --text-dim:#5b5246;
+      --text-muted:#8a7e69;
+      --brand:#cc785c;
+      --brand-deep:#b8624a;
+      --brand-soft:#f5e8e2;
+    }
+    :root[data-theme="dark"]{
+      --bg:#1c1917;
+      --surface-2:#34302d;
+      --surface-3:#44403c;
+      --border:#44403c;
+      --border-soft:#34302d;
+      --text:#f5efe4;
+      --text-dim:#a8a29e;
+      --text-muted:#78716c;
+      --brand:#cc785c;
+      --brand-deep:#e89e83;
+      --brand-soft:rgba(52, 211, 153, 0.1);
+    }
+    body {
+      @apply bg-bg text-txt font-sans antialiased text-[14px] leading-relaxed tracking-tight py-8;
+    }
+    h1, h2, h3, h4, h5, h6, .serif {
+      @apply font-sans font-semibold tracking-tight;
+    }
+  }
+
+  @layer components {
+    .appbar {
+      @apply h-[60px] bg-bg border-b border-border-soft flex items-center px-7 gap-4 sticky top-0 z-50;
+    }
+    .brand {
+      @apply flex items-center gap-2.5 cursor-pointer;
+    }
+    .brand-mark {
+      @apply w-8 h-8 rounded-lg bg-accent text-white grid place-items-center font-semibold text-sm;
+    }
+    .brand-text {
+      @apply font-semibold text-lg tracking-tight;
+    }
+    .brand-text .dim {
+      @apply text-txt-muted font-normal;
+    }
+    .avatar {
+      @apply w-8 h-8 rounded-full bg-accent text-white grid place-items-center font-medium text-xs cursor-pointer;
+    }
+    .page {
+      @apply max-w-[1080px] mx-auto px-7 pt-12 pb-32;
+    }
+    .hero {
+      @apply mb-16 border-b border-border-soft pb-12;
+    }
+    .hero-tag {
+      @apply inline-flex items-center gap-2 text-xs text-txt-muted mb-6 tracking-widest uppercase font-medium font-mono;
+    }
+    .hero-tag::before {
+      @apply content-[''] w-6 h-[1px] bg-accent;
+    }
+    .hero h1 {
+      @apply text-[64px] font-semibold mb-4 tracking-tight leading-none;
+    }
+    .hero h1 em {
+      @apply not-italic text-accent font-semibold;
+    }
+    .hero p {
+      @apply text-txt-dim text-lg max-w-[680px] leading-relaxed;
+    }
+    .section-h {
+      @apply text-[32px] font-semibold mt-20 mb-2 tracking-tight leading-tight;
+    }
+    .section-h .num {
+      @apply font-mono text-[11px] text-accent font-medium tracking-widest inline-flex items-center gap-2 mr-3.5 align-middle;
+    }
+    .section-sub {
+      @apply text-txt-dim text-[15px] mb-7 max-w-[680px] leading-relaxed;
+    }
+    .preview {
+      @apply bg-bg border border-border-soft rounded-xl p-8 mb-4;
+    }
+    .preview-label {
+      @apply text-[11px] text-txt-muted uppercase tracking-widest mb-5 font-semibold font-mono;
+    }
+    .swatch-row {
+      @apply grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-2.5;
+    }
+    .swatch {
+      @apply bg-bg border border-border rounded-xl overflow-hidden transition-colors hover:border-txt-muted;
+    }
+    .swatch .chip {
+      @apply h-[72px];
+    }
+    .swatch .meta {
+      @apply p-3.5;
+    }
+    .swatch .meta .name {
+      @apply font-medium text-[13px] tracking-tight;
+    }
+    .swatch .meta .hex {
+      @apply text-txt-muted text-[11px] font-mono mt-1;
+    }
+    
+    .btn {
+      @apply inline-flex items-center gap-2 font-sans text-sm font-medium px-4 h-10 rounded-full border border-transparent cursor-pointer transition-colors leading-none whitespace-nowrap outline-none focus-visible:ring-2 focus-visible:ring-accent-soft;
+    }
+    .btn-secondary {
+      @apply bg-bg text-txt border-border hover:bg-surface-2 hover:border-txt-muted;
+    }
+    .btn-dark {
+      @apply bg-txt text-bg hover:opacity-80;
+    }
+    .btn-sm {
+      @apply h-8 px-3 text-[13px] rounded-full;
+    }
+    .btn-lg {
+      @apply h-12 px-6 text-[15px] rounded-full;
+    }
+    .btn-icon {
+      @apply w-10 px-0 justify-center;
+    }
+    .btn-icon.btn-sm {
+      @apply w-8;
+    }
+    .kbd {
+      @apply inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 font-mono text-[11px] font-medium bg-surface-2 border border-border border-b-2 rounded text-txt-dim;
+    }
+    
+    .chip {
+      @apply inline-flex items-center gap-1.5 text-[10.5px] font-medium px-2.5 py-1 rounded-full bg-surface-2 text-txt-dim border border-border transition-colors uppercase tracking-widest font-mono hover:border-txt-muted;
+    }
+    .chip.active {
+      @apply bg-accent-soft text-accent border-transparent;
+    }
+    .chip.ab, .chip.biz, .chip.gray, .chip.data, .chip.wave {
+      @apply bg-surface-3 text-txt-dim border-transparent;
+    }
+    .chip.success {
+      @apply bg-[#ecfdf5] text-[#10b981] border-transparent;
+    }
+    .chip.warn {
+      @apply bg-[#fef3c7] text-[#d97706] border-transparent;
+    }
+    .chip.error {
+      @apply bg-[#fef2f2] text-[#ef4444] border-transparent;
+    }
+    .chip .dot {
+      @apply w-[5px] h-[5px] rounded-full bg-current;
+    }
+    
+    .field {
+      @apply flex flex-col gap-1.5 max-w-[380px];
+    }
+    .label {
+      @apply text-[13px] font-medium text-txt;
+    }
+    .input {
+      @apply h-10 px-3.5 rounded-xl border border-border bg-bg text-txt font-sans text-sm transition-colors outline-none hover:border-txt-muted focus:border-accent focus:ring-2 focus:ring-accent-soft;
+    }
+    .input::placeholder {
+      @apply text-txt-muted;
+    }
+    .search-box {
+      @apply relative max-w-[380px];
+    }
+    .search-box .input {
+      @apply pl-[38px] w-full;
+    }
+    .search-box .ico {
+      @apply absolute left-3 top-1/2 -translate-y-1/2 text-txt-muted text-sm pointer-events-none;
+    }
+    .search-box .kbd {
+      @apply absolute right-2 top-1/2 -translate-y-1/2;
+    }
+    
+    .card {
+      @apply bg-bg border border-border rounded-xl p-5 transition-colors hover:border-txt-muted;
+    }
+    
+    .start-grid {
+      @apply grid grid-cols-4 gap-3.5;
+    }
+    .paradigm-grid {
+      @apply grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-3.5;
+    }
+    .task-grid {
+      @apply grid grid-cols-5 gap-3.5;
+    }
+    
+    .sc-name {
+      @apply font-semibold text-[15px] mb-1 tracking-tight;
+    }
+    .sc-desc {
+      @apply text-txt-dim text-[12.5px] leading-relaxed;
+    }
+    .pc-name {
+      @apply font-semibold text-[15px] mb-1 tracking-tight mt-2;
+    }
+    .pc-desc {
+      @apply text-txt-dim text-[12.5px] leading-relaxed line-clamp-2;
+    }
+    .tc-name {
+      @apply font-semibold text-[15px] tracking-tight leading-snug;
+    }
+    .tc-meta {
+      @apply flex gap-2 items-center;
+    }
+    .tc-preview {
+      @apply text-txt-dim text-[12px] leading-relaxed line-clamp-2 mt-1;
+    }
+    .tc-foot {
+      @apply font-mono text-[10.5px] text-txt-muted mt-auto pt-2;
+    }
+    
+    .public-tabs {
+      @apply flex gap-1.5 mb-4 flex-wrap;
+    }
+    .public-grid {
+      @apply grid grid-cols-6 gap-3;
+    }
+    .ptc {
+      @apply bg-bg border border-border rounded-xl p-3.5 min-h-[96px] flex flex-col gap-1.5 cursor-pointer text-left text-txt transition-colors hover:bg-surface-2 hover:border-txt-muted;
+    }
+    .ptc-name {
+      @apply font-semibold text-[13.5px] leading-snug tracking-tight;
+    }
+    .ptc-meta {
+      @apply text-[11px] text-txt-muted leading-relaxed;
+    }
+    
+    .font-row {
+      @apply grid grid-cols-[140px_1fr_120px] gap-6 items-baseline py-4 border-b border-border-soft;
+    }
+    .font-row:last-child {
+      @apply border-none;
+    }
+    .font-row .name {
+      @apply text-[11px] uppercase tracking-widest text-txt-muted font-semibold font-mono;
+    }
+    .font-row .meta {
+      @apply text-txt-muted text-[11px] font-mono;
+    }
+    
+    .t-display {
+      @apply text-[64px] font-semibold tracking-tight leading-none;
+    }
+    .t-h1 {
+      @apply text-[40px] font-semibold tracking-tight leading-tight;
+    }
+    .t-h2 {
+      @apply text-[28px] font-semibold tracking-tight leading-snug;
+    }
+    .t-h3 {
+      @apply text-[20px] font-semibold tracking-tight leading-snug;
+    }
+    .t-body {
+      @apply text-[15px] leading-relaxed;
+    }
+    .t-small {
+      @apply text-[13px] text-txt-dim;
+    }
+    .t-micro {
+      @apply font-mono text-[11px] uppercase tracking-widest text-txt-muted font-medium;
+    }
+    .t-mono {
+      @apply font-mono text-[13px];
+    }
+    
+    .row {
+      @apply flex flex-wrap gap-2.5 items-center;
+    }
+    
+    .devices {
+      @apply grid grid-cols-[1fr_360px] gap-8 mt-2 items-start;
+    }
+    @media (max-width:1000px) {
+      .devices {
+        @apply grid-cols-1;
+      }
+    }
+    .phone {
+      @apply w-[340px] h-[680px] bg-[#0a0a0a] rounded-[42px] p-2 relative mx-auto border border-[#27272a];
+    }
+    .phone-screen {
+      @apply w-full h-full bg-bg rounded-[34px] overflow-hidden relative border border-border;
+    }
+    .phone-notch {
+      @apply absolute top-3.5 left-1/2 -translate-x-1/2 w-24 h-6 bg-[#0a0a0a] rounded-full z-10;
+    }
+    .phone-content {
+      @apply pt-[50px] px-4 pb-4 h-full overflow-y-auto;
+    }
+    .phone-h {
+      @apply text-[24px] font-semibold tracking-tight my-2;
+    }
+    
+    .notes {
+      @apply bg-surface-2 border border-border rounded-xl p-8 mt-12 text-[14px] leading-relaxed;
+    }
+    .notes h3 {
+      @apply text-[20px] font-semibold m-0 mb-3 tracking-tight;
+    }
+    .notes h3:not(:first-child) {
+      @apply mt-6;
+    }
+    .notes ul {
+      @apply pl-5 my-2;
+    }
+    .notes li {
+      @apply mb-1.5 list-disc;
+    }
+    .notes code {
+      @apply bg-surface-3 px-1.5 py-0.5 rounded text-[12px] font-mono text-txt border border-border;
+    }
+    .notes b {
+      @apply font-semibold;
+    }
+    
+    .code-frame {
+      @apply bg-[#0a0a0a] text-[#fafafa] rounded-xl p-4 font-mono text-[13px] leading-relaxed border border-[#27272a] mt-6 max-w-[540px];
+    }
+    .code-frame .prompt {
+      @apply text-accent;
+    }
+    .code-frame .out {
+      @apply text-[#a1a1aa];
+    }
+    .code-frame .num {
+      @apply text-[#71717a];
+    }
+  }
+
+    .nav-btn {
+      @apply inline-flex items-center gap-1.5 font-medium text-[13px] px-3.5 h-[34px] rounded-lg border border-transparent cursor-pointer transition-all leading-none whitespace-nowrap;
+    }
+    .btn-primary {
+      @apply bg-accent text-white hover:bg-accent-hover rounded-full;
+    }
+    .btn-ghost {
+      @apply bg-transparent text-txt-dim hover:bg-surface-2 hover:text-txt rounded-lg;
+    }
+    .icon-btn {
+      @apply w-[34px] h-[34px] rounded-lg grid place-items-center cursor-pointer text-txt-dim border-none bg-transparent text-sm hover:bg-surface-2 hover:text-txt transition-colors;
+    }
+
+    /* Cards - Moxt Style: rounded-xl (10-12px), thin borders, no shadow, hover gets surface-2 */
+    .start-card {
+      @apply flex items-center gap-3 bg-bg border border-border rounded-xl p-4 cursor-pointer text-left transition-colors relative text-txt hover:bg-surface-2;
+    }
+    .sc-icon {
+      @apply text-xl w-10 h-10 rounded-lg grid place-items-center bg-surface-3 flex-none text-txt-dim;
+    }
+    
+    .paradigm-card {
+      @apply bg-bg border border-border rounded-xl p-4 cursor-pointer flex flex-col items-center text-center transition-colors text-txt relative hover:bg-surface-2;
+    }
+    .pc-icon {
+      @apply w-10 h-10 rounded-lg grid place-items-center text-[20px] mx-auto mb-3 bg-surface-3 text-txt-dim;
+    }
+    
+    .task-card {
+      @apply bg-bg border border-border rounded-xl p-4 cursor-pointer flex flex-col gap-1.5 min-h-[120px] transition-colors text-left text-txt relative hover:bg-surface-2;
+    }
+    .tc-paradigm {
+      @apply text-[10px] px-2 py-0.5 rounded-full bg-surface-3 text-txt-dim font-medium;
+    }
+    
+    .public-tab {
+      @apply bg-transparent border-none rounded-lg px-3 py-1.5 text-[13px] cursor-pointer text-txt-dim inline-flex items-center gap-1.5 transition-colors hover:bg-surface-2 hover:text-txt;
+    }
+    .public-tab.active {
+      @apply bg-surface-3 text-txt font-medium;
+    }
+    .public-tab-count {
+      @apply bg-transparent text-txt-muted text-[11px] ml-0.5;
+    }
+  }
+</style>
+
+</head>
+<body>
+
+
+<header class="appbar">
+  <div class="brand">
+    <div class="brand-mark">i</div>
+    <span class="brand-text">ICE Workbench <span class="dim">· v5</span></span>
+  </div>
+  <div class="spacer"></div>
+  <div class="search-box" style="width:280px">
+    <span class="ico">🔍</span>
+    <input class="input" placeholder="搜索任务、Agent、文件…">
+    <span class="kbd">⌘K</span>
+  </div>
+  <button class="icon-btn" title="切换主题" onclick="toggleTheme()">
+    <span class="t-light">🌙</span><span class="t-dark" style="display:none">☀️</span>
+  </button>
+  <button class="icon-btn">🔔</button>
+  <div class="avatar">GY</div>
+</header>
+<script>
+function toggleTheme(){
+  var cur=document.documentElement.dataset.theme||'light';
+  var next=cur==='light'?'dark':'light';
+  document.documentElement.dataset.theme=next;
+  localStorage.setItem('ice-v5-theme',next);
+  document.querySelectorAll('.t-light').forEach(e=>e.style.display=next==='light'?'inline':'none');
+  document.querySelectorAll('.t-dark').forEach(e=>e.style.display=next==='dark'?'inline':'none');
+}
+(function(){if(document.documentElement.dataset.theme==='dark'){
+  document.querySelectorAll('.t-light').forEach(e=>e.style.display='none');
+  document.querySelectorAll('.t-dark').forEach(e=>e.style.display='inline');
+}})();
+</script>
+
+<div class="page">
+
+  <header class="hero">
+    <div class="hero-tag">Design v5 · 2026-05-26</div>
+    <h1 >为 ICE Workbench <em>重新</em><br/>谱写视觉语言。</h1>
+    <p>把工作台从「现代 SaaS」抬到「印刷品级阅读体验」：淡黄无感面底色、Inter 无衬线大标题、Moxt 铜橙 accent、极少圆角、克制阴影。基于真实页面布局，**视觉换皮，结构不动**。</p>
+    <div class="code-frame">
+      <span class="num">01</span> <span class="prompt">$</span> ice workbench<br/>
+      <span class="num">02</span> <span class="out">→ 142 tasks · 8 agents · serving on :8000</span><br/>
+      <span class="num">03</span> <span class="out">→ ready.</span>
+    </div>
+  </header>
+
+  <h2 class="section-h"><span class="num">01 / 06</span>颜色</h2>
+  <p class="section-sub">淡黄无感面 + 暖墨文字 + Moxt 铜橙 accent。范式 5 色统一在低饱和、暖底调，让分类有差异但不打架。点右上 🌙/☀️ 切主题对照。</p>
+
+  <div class="preview">
+    <div class="preview-label">Surface · 纸张层级</div>
+    <div class="swatch-row">
+      <div class="swatch"><div class="chip" style="background:var(--bg)"></div><div class="meta"><div class="name">bg · base</div><div class="hex">#ffffff</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--surface)"></div><div class="meta"><div class="name">surface</div><div class="hex">#ffffff</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--surface-2)"></div><div class="meta"><div class="name">surface-2</div><div class="hex">--surface-2</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--surface-3)"></div><div class="meta"><div class="name">surface-3</div><div class="hex">--surface-3</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--border)"></div><div class="meta"><div class="name">border</div><div class="hex">--border</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--text)"></div><div class="meta"><div class="name">text · primary</div><div class="hex">#18181b</div></div></div>
+    </div>
+  </div>
+
+  <div class="preview">
+    <div class="preview-label">Accent · Moxt 铜橙</div>
+    <div class="swatch-row">
+      <div class="swatch"><div class="chip" style="background:var(--accent)"></div><div class="meta"><div class="name">accent</div><div class="hex">#34d399</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--accent-hover)"></div><div class="meta"><div class="name">accent-hover</div><div class="hex">#10b981</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--accent-soft)"></div><div class="meta"><div class="name">accent-soft</div><div class="hex">#ecfdf5</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--accent-text)"></div><div class="meta"><div class="name">accent-text</div><div class="hex">#10b981</div></div></div>
+    </div>
+  </div>
+
+  <div class="preview">
+    <div class="preview-label">范式 · 5 色（暖调 / 低饱和）</div>
+    <div class="swatch-row">
+      <div class="swatch"><div class="chip" style="background:var(--p-ab)"></div><div class="meta"><div class="name">ab · slate</div><div class="hex">#64748b</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--p-biz)"></div><div class="meta"><div class="name">biz · slate</div><div class="hex">#64748b</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--p-gray)"></div><div class="meta"><div class="name">gray · slate</div><div class="hex">#64748b</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--p-data)"></div><div class="meta"><div class="name">data · slate</div><div class="hex">#64748b</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--p-wave)"></div><div class="meta"><div class="name">wave · slate</div><div class="hex">#64748b</div></div></div>
+    </div>
+    <div style="margin-top:18px" class="row">
+      <span class="chip ab"><span class="dot"></span>AB</span>
+      <span class="chip biz"><span class="dot"></span>BIZ</span>
+      <span class="chip gray"><span class="dot"></span>GRAY</span>
+      <span class="chip data"><span class="dot"></span>DATA</span>
+      <span class="chip wave"><span class="dot"></span>WAVE</span>
+    </div>
+  </div>
+
+  <h2 class="section-h"><span class="num">02 / 06</span>字体</h2>
+  <p class="section-sub">精简字体：<b>纯 Inter 无衬线</b>作为全局标准字，消除装饰性；<b>JetBrains Mono</b> 仅用于关键元数据及代码。中文兜底 PingFang SC。</p>
+  <div class="preview">
+    <div class="font-row"><span class="name">Display</span><span class="t-display">数据驱动决策</span><span class="meta">Inter<br/>64 / 500 / -.035em</span></div>
+    <div class="font-row"><span class="name">H1</span><span class="t-h1">为 ICE Workbench 重写视觉</span><span class="meta">Inter<br/>40 / 500 / -.025em</span></div>
+    <div class="font-row"><span class="name">H2</span><span class="t-h2">📋 我的任务</span><span class="meta">Inter<br/>28 / 500 / -.02em</span></div>
+    <div class="font-row"><span class="name">H3</span><span class="t-h3">最近的对话</span><span class="meta">Inter<br/>20 / 600 / -.015em</span></div>
+    <div class="font-row"><span class="name">Body</span><span class="t-body">数据驱动决策 — A complete reimagination of data analytics workflows. 让每一次实验都成为团队的新基准。</span><span class="meta">Inter<br/>15 / 400</span></div>
+    <div class="font-row"><span class="name">Small</span><span class="t-small">2026-05-26 · admin · 142 次调用 · P95 412ms</span><span class="meta">Inter<br/>13 / 400</span></div>
+    <div class="font-row"><span class="name">Micro</span><span class="t-micro">DASHBOARD · ALL SYSTEMS GREEN</span><span class="meta">Mono / Caps<br/>11 / 500 / +.08em</span></div>
+    <div class="font-row"><span class="name">Mono</span><span class="t-mono">SELECT user_id, COUNT(*) FROM events</span><span class="meta">JetBrains Mono<br/>13 / 400</span></div>
+    <div class="font-row"><span class="name">Tabular</span><span class="t-h2">1,234,567.89</span><span class="meta">Inter tnum</span></div>
+  </div>
+
+  <h2 class="section-h"><span class="num">03 / 06</span>按钮</h2>
+  <p class="section-sub">三档（primary 铜橙实色 / secondary 边框 / dark 黑底），三尺寸（sm 32 / md 40 / lg 48）。<b>不再用渐变</b>，圆角 6-8px。</p>
+  <div class="preview">
+    <div class="row" style="gap:14px;margin-bottom:18px">
+      <button class="btn btn-primary"><span class="ico">＋</span>新建任务</button>
+      <button class="btn btn-dark">立即试用</button>
+      <button class="btn btn-secondary">取消</button>
+      <button class="btn btn-ghost">了解更多</button>
+      <button class="btn btn-icon btn-secondary">⚙️</button>
+    </div>
+    <div class="row" style="gap:14px;margin-bottom:18px">
+      <button class="btn btn-sm btn-primary">小尺寸</button>
+      <button class="btn btn-primary">默认尺寸</button>
+      <button class="btn btn-lg btn-primary">大尺寸 →</button>
+    </div>
+    <div class="row" style="gap:12px">
+      <span class="t-small">键盘提示： <span class="kbd">⌘</span> <span class="kbd">K</span> 搜索 · <span class="kbd">G</span> <span class="kbd">D</span> 跳到 Dashboard</span>
+    </div>
+  </div>
+
+  <h2 class="section-h"><span class="num">04 / 06</span>输入 · Chip</h2>
+  <div class="preview">
+    <div class="row" style="gap:24px;align-items:flex-end;margin-bottom:24px">
+      <div class="field">
+        <label class="label">任务名称</label>
+        <input class="input" placeholder="例如：双十一 AB 实验复盘">
+      </div>
+      <div class="search-box" style="width:300px">
+        <span class="ico">🔍</span>
+        <input class="input" placeholder="搜索…">
+        <span class="kbd">⌘K</span>
+      </div>
+    </div>
+    <div class="row" style="gap:8px">
+      <span class="chip">默认</span>
+      <span class="chip active">激活</span>
+      <span class="chip success"><span class="dot"></span>已完成</span>
+      <span class="chip warn"><span class="dot"></span>审批中</span>
+      <span class="chip error"><span class="dot"></span>失败</span>
+      <span class="chip ab">AB</span>
+      <span class="chip biz">BIZ</span>
+      <span class="chip data">DATA</span>
+    </div>
+  </div>
+
+  <h2 class="section-h"><span class="num">05 / 06</span>真实组件 · 比照</h2>
+  <p class="section-sub">下面是 v5 视觉应用到 [DashboardPage.tsx](frontend/src/pages/dashboard/DashboardPage.tsx) 实际组件的样子 —— 尺寸 / 间距 / 结构完全沿用真实代码（start-card 高 ≈80 / paradigm-card 160 / task-card min-h 132）。</p>
+
+  <div class="preview">
+    <div class="preview-label">.start-card · 起点 4 卡（4 列等宽，padding 18×20，左 3px 彩色条边）</div>
+    <div class="start-grid">
+      <button class="start-card">
+        <div class="sc-icon">📝</div>
+        <div><div class="sc-name">新建任务</div><div class="sc-desc">选择范式 / Agent，开启一个新任务</div></div>
+      </button>
+      <button class="start-card s2">
+        <div class="sc-icon">⏱</div>
+        <div><div class="sc-name">定时任务</div><div class="sc-desc">按周期自动执行的任务列表</div></div>
+      </button>
+      <button class="start-card s3">
+        <div class="sc-icon">📖</div>
+        <div><div class="sc-name">使用指南</div><div class="sc-desc">上手教程与功能说明</div></div>
+      </button>
+      <button class="start-card s4">
+        <div class="sc-icon">🌐</div>
+        <div><div class="sc-name">公共任务</div><div class="sc-desc">参考团队已有任务</div></div>
+      </button>
+    </div>
+  </div>
+
+  <div class="preview">
+    <div class="preview-label">.paradigm-card · 范式卡（auto-fit minmax 180px，固定 height 160，icon 44×44 radius 11，border-top 3px 范式色）</div>
+    <div class="paradigm-grid">
+      <button class="paradigm-card pc-data">
+        <div class="pc-icon">📊</div>
+        <div class="pc-name">数据分析</div>
+        <div class="pc-desc">SQL 取数 · 可视化 · 自动报表，从问题到结论的最短路径。</div>
+      </button>
+      <button class="paradigm-card pc-ab">
+        <div class="pc-icon">🧪</div>
+        <div class="pc-name">AB 实验</div>
+        <div class="pc-desc">实验设计 · 显著性检验 · ARPU 复盘，全流程闭环。</div>
+      </button>
+      <button class="paradigm-card pc-biz">
+        <div class="pc-icon">💼</div>
+        <div class="pc-name">业务洞察</div>
+        <div class="pc-desc">指标拆解 · 异动归因 · 业务诊断报告。</div>
+      </button>
+      <button class="paradigm-card pc-gray">
+        <div class="pc-icon">🚀</div>
+        <div class="pc-name">灰度发布</div>
+        <div class="pc-desc">分桶 · 监控指标 · 决策建议。</div>
+      </button>
+      <button class="paradigm-card pc-wave">
+        <div class="pc-icon">🌊</div>
+        <div class="pc-name">浪潮归因</div>
+        <div class="pc-desc">渠道归因 · 增长拆解 · 投放复盘。</div>
+      </button>
+    </div>
+  </div>
+
+  <div class="preview">
+    <div class="preview-label">.task-card · 我的任务卡（responsive 5→4→3→2 列，min-height 132，标题用 Inter 无衬线）</div>
+    <div class="task-grid" style="grid-template-columns:repeat(4,minmax(0,1fr))">
+      <div class="task-card tc-ab">
+        <div class="tc-name">双十一 AB 实验复盘</div>
+        <div class="tc-meta"><span class="tc-paradigm">AB</span></div>
+        <div class="tc-preview">"主推礼盒装在 18-24 岁人群转化 +14.2%, 但 ARPU 持平…"</div>
+        <div class="tc-foot">⏱ 14:32 · 📄 8</div>
+      </div>
+      <div class="task-card tc-wave">
+        <div class="tc-name">上新增长归因</div>
+        <div class="tc-meta"><span class="tc-paradigm">WAVE</span></div>
+        <div class="tc-preview">"小红书素材 #3 贡献 37%，建议加投至每日 12k 元…"</div>
+        <div class="tc-foot">⏱ 昨天 · 📄 14</div>
+      </div>
+      <div class="task-card tc-data">
+        <div class="tc-name">付费转化漏斗 Q2 复盘</div>
+        <div class="tc-meta"><span class="tc-paradigm">DATA</span></div>
+        <div class="tc-preview">"查看 → 加购 → 付款，最大流失在加购到付款 67% 的环节…"</div>
+        <div class="tc-foot">⏱ 09:15 · 📄 6</div>
+      </div>
+      <div class="task-card tc-biz">
+        <div class="tc-name">DAU 异动归因 · 5/24</div>
+        <div class="tc-meta"><span class="tc-paradigm">BIZ</span></div>
+        <div class="tc-preview">"DAU 环比 -3.2% 主要来自上海地区 push 推送故障…"</div>
+        <div class="tc-foot">⏱ 2 天前 · 📄 3</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="preview">
+    <div class="preview-label">.public-tabs + .public-grid · 团队公共区（5 Tab / 6 列网格）</div>
+    <div class="public-tabs">
+      <button class="public-tab active">📋 公共任务<span class="public-tab-count">12</span></button>
+      <button class="public-tab">🤖 Agents<span class="public-tab-count">8</span></button>
+      <button class="public-tab">🧰 Skills<span class="public-tab-count">14</span></button>
+      <button class="public-tab">📁 公共文件<span class="public-tab-count">23</span></button>
+      <button class="public-tab">📚 知识库<span class="public-tab-count">5</span></button>
+    </div>
+    <div class="public-grid" style="grid-template-columns:repeat(4,minmax(0,1fr))">
+      <button class="ptc"><div class="ptc-name">双十一全量复盘 · 工作台</div><div class="ptc-meta">ab · 💬 已展开</div><div class="ptc-meta" style="margin-top:auto">👤 admin</div></button>
+      <button class="ptc"><div class="ptc-name">支付链路稳定性月报</div><div class="ptc-meta">data · 💬 已展开</div><div class="ptc-meta" style="margin-top:auto">👤 zhanghao</div></button>
+      <button class="ptc"><div class="ptc-name">App push 个性化效果评估</div><div class="ptc-meta">wave · 💬 已展开</div><div class="ptc-meta" style="margin-top:auto">👤 minghan</div></button>
+      <button class="ptc"><div class="ptc-name">运营活动归因模板</div><div class="ptc-meta">biz · 📭 空</div><div class="ptc-meta" style="margin-top:auto">👤 admin</div></button>
+    </div>
+  </div>
+
+  <h2 class="section-h"><span class="num">06 / 06</span>移动端</h2>
+  <p class="section-sub">所有 token 复用，移动端继承一切：触控 ≥44 / input ≥16px / 安全区 / FAB 浮动 / 底栏 4 Tab。</p>
+
+  <div class="devices">
+    <div class="card" style="padding:20px">
+      <div class="t-h3" style="margin:0 0 10px">移动端规则</div>
+      <ul style="margin:0;padding-left:20px;font-size:14px;line-height:1.85;color:var(--text-dim)">
+        <li>触控目标 <code>≥ 44 × 44 px</code></li>
+        <li>input <code>font-size ≥ 16px</code>（防 iOS Safari 自动 zoom）</li>
+        <li>底部 <code>env(safe-area-inset-bottom)</code></li>
+        <li>主操作 FAB 浮动右下，<code>--m-fab-size: 56px</code></li>
+        <li>底部 4 Tab：首页 / 任务 / Agent / 我的</li>
+        <li>paradigm/task grid 在 ≤720 → 2 列，≤340 → 1 列</li>
+        <li>start-card 切纵排：icon 上 + 文字下</li>
+      </ul>
+
+      <div class="t-h3" style="margin:24px 0 10px">断点</div>
+      <table style="width:100%;font-size:13px;font-family:'JetBrains Mono',monospace">
+        <tr><td style="color:var(--text-muted);padding:5px 0">≥ 1280</td><td>task-grid 5 列 / public-grid 6 列</td></tr>
+        <tr><td style="color:var(--text-muted);padding:5px 0">≥ 1024</td><td>task-grid 4 列 / public-grid 4 列</td></tr>
+        <tr><td style="color:var(--text-muted);padding:5px 0">≥ 720</td><td>task-grid 3 列 / public-grid 3 列</td></tr>
+        <tr><td style="color:var(--text-muted);padding:5px 0">< 720</td><td>2 列</td></tr>
+        <tr><td style="color:var(--text-muted);padding:5px 0">< 340</td><td>1 列</td></tr>
+      </table>
+    </div>
+
+    <div class="phone">
+      <div class="phone-notch"></div>
+      <div class="phone-screen">
+        <div class="phone-content">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+            <div class="brand-mark" style="width:24px;height:24px;font-size:11px">i</div>
+            <span style="font-family:'Inter',serif;font-weight:600;font-size:15px;letter-spacing:-.015em">ICE Workbench</span>
+            <div style="margin-left:auto"><div class="avatar" style="width:26px;height:26px;font-size:11px">GY</div></div>
+          </div>
+          <div class="phone-h">👋 你好，Yunhe</div>
+          <div class="t-small" style="margin-bottom:18px">选一个范式开始今天的工作</div>
+
+          <div class="t-micro" style="margin-bottom:10px">⚡ 快速开始</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:18px">
+            <button class="paradigm-card pc-data" style="height:auto;min-height:108px;padding:12px;border-radius:8px">
+              <div class="pc-icon" style="width:32px;height:32px;font-size:16px;border-radius:7px;margin-bottom:8px">📊</div>
+              <div class="pc-name" style="font-size:13px">数据分析</div>
+              <div class="pc-desc" style="font-size:11px">SQL · 可视化 · 报表</div>
+            </button>
+            <button class="paradigm-card pc-ab" style="height:auto;min-height:108px;padding:12px;border-radius:8px">
+              <div class="pc-icon" style="width:32px;height:32px;font-size:16px;border-radius:7px;margin-bottom:8px">🧪</div>
+              <div class="pc-name" style="font-size:13px">AB 实验</div>
+              <div class="pc-desc" style="font-size:11px">显著性 · ARPU</div>
+            </button>
+          </div>
+
+          <div class="t-micro" style="margin-bottom:10px">📋 我的任务</div>
+          <div class="task-card tc-ab" >
+            <div class="tc-name" style="font-size:13px">双十一 AB 复盘</div>
+            <div class="tc-foot">AB · ⏱ 14:32</div>
+          </div>
+          <div class="task-card tc-wave" >
+            <div class="tc-name" style="font-size:13px">上新增长归因</div>
+            <div class="tc-foot">WAVE · ⏱ 昨天</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="notes">
+    <h3 >设计决策</h3>
+    <ul>
+      <li><b>底色</b>：淡黄无感面 <code>#ffffff</code>（light）/ 深邃黑 <code>#0a0a0a</code>（dark）。<b>拥抱高对比度</b>，完全抛弃暖色调。</li>
+      <li><b>Accent</b>：Moxt 铜橙 <code>#34d399</code>。仅用于关键状态、Logo 点缀及主按钮。</li>
+      <li><b>字体</b>：纯 Inter 无衬线字体。没有衬线字，通过字重（600/500）和间距区分层级。JetBrains Mono 用于代码与数值。</li>
+      <li><b>形状</b>：大圆角（10-12px）主导卡片，按钮多用胶囊形 <code>999px</code>，图标按钮 8-10px。</li>
+      <li><b>阴影</b>：几乎无阴影。全靠极细边框（1px solid <code>#ececec</code>）与底色区分。</li>
+      <li><b>范式颜色</b>：大幅弱化，统一向中性灰蓝 <code>#64748b</code> 靠拢，或仅用极淡色块区分，不再喧宾夺主。</li>
+    </ul>
+
+    <h3 >版本风格转换 (Claude 暖纸 → Moxt 冷调)</h3>
+    <ul>
+      <li>底色：<code>#faf4ed</code>（暖米白） → <code>#ffffff</code>（淡黄）— 回归现代 SaaS 工具本色</li>
+      <li>Accent：<code>#cc785c</code>（铜橙） → <code>#34d399</code>（铜橙） — 科技感、中性化</li>
+      <li>字体：Fraunces 衬线 → 全局 Inter — 移除装饰感，专注信息密度</li>
+      <li>形状：小圆角 6px → 更加圆润的 10-12px — 更平易近人</li>
+      <li>阴影：暖色柔和投影 → 纯边框无阴影 — 极致扁平化</li>
+    </ul>
+
+    <h3 >文件清单</h3>
+    <ul style="font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.9">
+      <li><code>00_design_system.html</code> — 你正在看这页</li>
+      <li><code>01_dashboard.html</code> — Dashboard 桌面 + 手机双稿，严格按 [DashboardPage.tsx](../frontend/src/pages/dashboard/DashboardPage.tsx) 真实结构</li>
+      <li><code>02 → 12</code> — 待和你逐张对齐后继续（workspace / create_task / agent_detail / scheduled / login / introduce / guide / admin × N）</li>
+    </ul>
+  </div>
+</div>
+
+</body>
+</html>

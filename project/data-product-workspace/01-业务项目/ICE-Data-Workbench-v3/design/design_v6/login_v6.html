@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ICE Workbench v6 · 登录</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          bg: '#faf4ed', surface: '#ffffff', 'surface-2': '#f5efe4', border: '#e5dcc8', text: '#1a1612', 'text-dim': '#5b5246', 'text-muted': '#8a7e69', primary: '#cc785c', 'primary-hover': '#b8624a'
+        },
+        fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+        boxShadow: { 'card': '0 2px 8px rgba(26, 22, 18, 0.04), 0 1px 2px rgba(26, 22, 18, 0.02)', 'btn': '0 1px 2px rgba(26, 22, 18, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.5)' }
+      }
+    }
+  }
+</script>
+<style>body { background-color: theme('colors.bg'); color: theme('colors.text'); }</style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center font-sans p-4 relative overflow-hidden">
+  
+  <!-- 背景装饰 -->
+  <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl -z-10"></div>
+  <div class="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-blue-500/5 rounded-full blur-3xl -z-10"></div>
+
+  <div class="w-full max-w-[420px]">
+    <!-- Logo -->
+    <div class="flex justify-center mb-8">
+      <div class="flex items-center gap-2 text-text font-semibold text-xl">
+        <svg class="w-6 h-6 text-primary" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zm0 7.5l-10-5v10l10 5 10-5v-10l-10 5z"/></svg>
+        <span>ICE Workbench</span>
+      </div>
+    </div>
+
+    <!-- Login Card -->
+    <div class="bg-surface border border-border shadow-card rounded-2xl p-8">
+      <div class="text-center mb-8">
+        <h1 class="text-2xl font-semibold mb-2">欢迎回来</h1>
+        <p class="text-sm text-text-dim">请登录您的数据工作流工作台</p>
+      </div>
+
+      <!-- Feishu Login -->
+      <button class="w-full flex items-center justify-center gap-2 bg-gradient-to-br from-[#00D6B9] to-[#00A0ED] text-white px-4 py-2.5 rounded-xl font-medium shadow-btn hover:opacity-95 transition-opacity mb-4">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none"><path d="M11.666 4.334A2.333 2.333 0 0114 2h5.667A2.333 2.333 0 0122 4.333v5.667a2.333 2.333 0 01-2.333 2.333h-1.167v7.334A2.333 2.333 0 0116.167 22h-4.5A2.333 2.333 0 019.333 19.667v-3.5H4.333A2.333 2.333 0 012 13.833v-5.666A2.333 2.333 0 014.333 5.833h3.5v-1.5z" fill="currentColor"/></svg>
+        飞书一键登录
+      </button>
+
+      <div class="flex items-center gap-3 my-6">
+        <div class="h-px bg-border flex-1"></div>
+        <span class="text-xs text-text-muted uppercase font-medium">Or</span>
+        <div class="h-px bg-border flex-1"></div>
+      </div>
+
+      <!-- Password Login -->
+      <form class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-text-dim mb-1.5">邮箱 / 账号</label>
+          <input type="text" class="w-full bg-surface-2 border border-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" placeholder="admin@example.com">
+        </div>
+        <div>
+          <div class="flex justify-between items-center mb-1.5">
+            <label class="block text-sm font-medium text-text-dim">密码</label>
+            <a href="#" class="text-xs text-primary hover:text-primary-hover">忘记密码？</a>
+          </div>
+          <input type="password" class="w-full bg-surface-2 border border-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" placeholder="••••••••">
+        </div>
+        <button type="submit" class="w-full bg-surface-2 border border-border text-text px-4 py-2.5 rounded-xl font-medium hover:bg-[#e8e2d5] transition-colors mt-2">
+          账号密码登录
+        </button>
+      </form>
+    </div>
+
+    <div class="text-center mt-6 text-xs text-text-muted">
+      Powered by ICE Data Framework v6
+    </div>
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ICE Workbench v5 · Create Task (新建任务) (Moxt Style)</title>
+<script>(function(){var t=localStorage.getItem('ice-v5-theme')||'light';document.documentElement.dataset.theme=t;})();</script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root[data-theme="light"]{
+  --bg:#faf4ed;--surface:#ffffff;--surface-2:#f5efe4;--surface-3:#ece3d3;--paper-deep:#f0e9dc;
+  --border:#e5dcc8;--border-soft:#ede5d2;--border-strong:#d4c8ad;
+  --text:#1a1612;--text-dim:#5b5246;--text-muted:#8a7e69;--text-inv:#faf4ed;
+  --accent:#cc785c;--accent-hover:#b8624a;--accent-soft:#f5e8e2;--accent-text:#8a3a23;
+  --success:#5a7a4f;--success-soft:#e6ede0;
+  --warning:#b07d2a;--warning-soft:#f5ead0;
+  --error:#b54a3a;--error-soft:#f5dfd9;
+  --p-ab:#5e7d6a;--p-ab-soft:#e6ede6;
+  --p-biz:#b86b3a;--p-biz-soft:#f5e3d0;
+  --p-data:#4a7c8b;--p-data-soft:#d8e5ea;
+  --p-wave:#b04f5f;--p-wave-soft:#f0d8dc;
+  --p-gray:#7a6b8e;--p-gray-soft:#ebe5ee;
+  --accent-grad:var(--accent);
+  --accent-shadow:none;
+  --icon-emboss:none;
+  --icon-shadow:0 1px 2px rgba(26,22,18,.06);
+  --shadow-1:0 1px 0 rgba(26,22,18,.04);
+  --shadow-2:0 1px 2px rgba(26,22,18,.06),0 4px 16px rgba(26,22,18,.04);
+  --shadow-3:0 8px 32px rgba(26,22,18,.08);
+  --ring:0 0 0 3px rgba(204,120,92,.20);
+  --canvas:#f0e9dc;
+}
+:root[data-theme="dark"]{
+  --bg:#1f1d1a;--surface:#2a2723;--surface-2:#322e29;--surface-3:#3d3831;--paper-deep:#262320;
+  --border:#44403a;--border-soft:#322e29;--border-strong:#5a544c;
+  --text:#f5f0e6;--text-dim:#bdb19c;--text-muted:#8c8270;--text-inv:#1a1612;
+  --accent:#e89e83;--accent-hover:#f5b39a;--accent-soft:rgba(232,158,131,.16);--accent-text:#f0b59c;
+  --success:#8aa680;--success-soft:rgba(138,166,128,.14);
+  --warning:#d4a463;--warning-soft:rgba(212,164,99,.14);
+  --error:#d4756a;--error-soft:rgba(212,117,106,.14);
+  --p-ab:#8aa68f;--p-ab-soft:rgba(138,166,143,.14);
+  --p-biz:#d49070;--p-biz-soft:rgba(212,144,112,.14);
+  --p-data:#7aa5b3;--p-data-soft:rgba(122,165,179,.14);
+  --p-wave:#d4868f;--p-wave-soft:rgba(212,134,143,.14);
+  --p-gray:#a895b8;--p-gray-soft:rgba(168,149,184,.14);
+  --accent-grad:linear-gradient(135deg,#e89e83 0%,#f5b39a 100%);
+  --accent-shadow:0 1px 0 rgba(0,0,0,.45),0 4px 14px rgba(232,158,131,.22),inset 0 1px 0 rgba(255,255,255,.18);
+  --icon-emboss:inset 0 1px 0 rgba(255,255,255,.10),inset 0 -1px 0 rgba(0,0,0,.20);
+  --icon-shadow:0 1px 2px rgba(0,0,0,.30);
+  --shadow-1:0 1px 0 rgba(0,0,0,.3);
+  --shadow-2:0 4px 16px rgba(0,0,0,.4),0 1px 2px rgba(0,0,0,.4);
+  --shadow-3:0 16px 48px rgba(0,0,0,.5);
+  --ring:0 0 0 3px rgba(232,158,131,.30);
+  --canvas:#1a1815;
+}
+*{box-sizing:border-box}html,body{margin:0;padding:0}
+body{background:var(--canvas);color:var(--text);
+  font-family:'Inter','PingFang SC',-apple-system,system-ui,sans-serif;
+  font-size:14px;line-height:1.6;letter-spacing:-.003em;
+  -webkit-font-smoothing:antialiased;,'cv11';padding:32px 0}
+.serif{font-family:'Inter',sans-serif;}
+.tnum{font-variant-numeric:tabular-nums}
+
+.outer-bar{max-width:1900px;margin:0 auto 24px;padding:0 32px;display:flex;align-items:center;gap:14px}
+.outer-tag{display:inline-flex;align-items:center;gap:8px;padding:5px 12px;
+  background:var(--accent-soft);color:var(--accent-text);border-radius:12px;font-size:11px;font-weight:500;
+  font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.06em}
+.outer-tag .dot{width:6px;height:6px;border-radius:50%;background:var(--accent)}
+.outer-bar .spacer{flex:1}
+.outer-bar a{color:var(--text-dim);font-size:13px;text-decoration:none;padding:6px 12px;border-radius:12px}
+.outer-bar a:hover{background:var(--surface-2);color:var(--text)}
+.outer-bar button{background:var(--surface);border:1px solid var(--border);color:var(--text);
+  height:36px;padding:0 14px;border-radius:12px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:500;
+  display:inline-flex;align-items:center;gap:6px}
+
+.canvas{max-width:1900px;margin:0 auto;padding:0 32px;
+  display:grid;grid-template-columns:1fr 420px;gap:32px;align-items:flex-start}
+@media (max-width:1500px){.canvas{grid-template-columns:1fr}}
+
+/* browser frame */
+.browser{background:var(--surface);border:1px solid var(--border);border-radius:10px;
+  overflow:hidden;box-shadow:var(--shadow-3)}
+.browser-bar{height:36px;background:var(--surface-2);border-bottom:1px solid var(--border-soft);
+  display:flex;align-items:center;padding:0 14px;gap:8px}
+.browser-dots{display:flex;gap:6px}
+.browser-dots span{width:11px;height:11px;border-radius:50%}
+.browser-dots span:nth-child(1){background:#cc6c5e}
+.browser-dots span:nth-child(2){background:#c4a55a}
+.browser-dots span:nth-child(3){background:#7a9a6e}
+.browser-url{flex:1;text-align:center;font-family:'JetBrains Mono',monospace;font-size:11.5px;
+  color:var(--text-muted);background:var(--surface);padding:5px 12px;border-radius:12px;
+  margin:0 80px;border:1px solid var(--border-soft)}
+.viewport{height:1100px;background:var(--bg);overflow:hidden;display:flex;flex-direction:column}
+
+/* TopNav */
+.appbar{height:54px;background:var(--bg);border-bottom:1px solid var(--border-soft);
+  display:flex;align-items:center;padding:0 24px;gap:14px;flex-shrink:0}
+.appbar .brand-mark{width:28px;height:28px;border-radius:12px;background:var(--accent-grad);
+  display:grid;place-items:center;color:#faf4ed;font-weight:600;font-size:13px;
+  font-family:'Inter',sans-serif;
+  box-shadow:var(--accent-shadow)}
+.crumb{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--text-dim);font-weight:500}
+.crumb a{color:var(--text-dim);text-decoration:none}
+.crumb a:hover{color:var(--text)}
+.crumb .sep{color:var(--text-muted);font-family:'JetBrains Mono',monospace;font-size:12px}
+.crumb .current{color:var(--text)}
+.appbar .spacer{flex:1}
+.icon-btn{width:34px;height:34px;border-radius:12px;display:grid;place-items:center;cursor:pointer;
+  color:var(--text-dim);border:none;background:transparent;font-size:14px}
+.icon-btn:hover{background:var(--surface-2);color:var(--text)}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--accent-grad);
+  display:grid;place-items:center;color:#faf4ed;font-weight:500;font-size:12px;
+  font-family:'Inter',sans-serif;
+  box-shadow:var(--accent-shadow)}
+
+/* main */
+.ct-main{max-width:920px;margin:0 auto;padding:48px 24px 60px;width:100%;flex:1;overflow-y:auto}
+
+/* Hero */
+.ct-hero{margin-bottom:40px}
+.ct-tag{display:inline-flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;
+  font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;
+  font-weight:500;margin-bottom:18px}
+.ct-tag::before{content:"";width:24px;height:1px;background:var(--accent)}
+.ct-h1{font-family:'Inter',sans-serif;font-size:48px;font-weight:500;letter-spacing:-.03em;line-height:1.05;
+  margin:0 0 12px;font-variation-settings:'opsz' 144,'wght' 500}
+.ct-h1 em{font-style:italic;color:var(--accent);font-weight:500}
+.ct-lead{font-size:16px;color:var(--text-dim);margin:0;line-height:1.55;max-width:560px}
+
+/* Stepper · 印刷感横向 */
+.ct-stepper{display:flex;align-items:center;gap:12px;margin-bottom:36px;padding:18px 0;
+  border-top:1px solid var(--border-soft);border-bottom:1px solid var(--border-soft)}
+.ct-step{display:flex;align-items:center;gap:10px;cursor:pointer;flex:1;min-width:0}
+.ct-step-num{width:32px;height:32px;border-radius:50%;background:var(--surface);
+  border:1px solid var(--border);display:grid;place-items:center;font-family:'JetBrains Mono',monospace;
+  font-size:13px;font-weight:600;color:var(--text-muted);flex-shrink:0}
+.ct-step.active .ct-step-num{background:var(--accent-grad);color:#faf4ed;border-color:transparent;
+  box-shadow:var(--accent-shadow)}
+.ct-step.done .ct-step-num{background:var(--success-soft);color:var(--success);border-color:transparent}
+.ct-step-info{display:flex;flex-direction:column;gap:0;min-width:0}
+.ct-step-label{font-family:'Inter',sans-serif;font-size:14.5px;font-weight:600;letter-spacing:-.01em;line-height:1.2;
+  color:var(--text)}
+.ct-step.active .ct-step-label{color:var(--accent)}
+.ct-step:not(.active):not(.done) .ct-step-label{color:var(--text-dim)}
+.ct-step-meta{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-muted);
+  text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
+.ct-step-bar{flex:0 0 56px;height:1px;background:var(--border-soft);position:relative}
+.ct-step-bar.done::after{content:"";position:absolute;inset:0;background:var(--accent)}
+
+/* Section · 当前 step 内容 */
+.ct-section{display:flex;flex-direction:column;gap:18px}
+.ct-section-h{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:12px;
+  border-bottom:1px solid var(--border-soft);padding-bottom:14px}
+.ct-section-h h2{font-family:'Inter',sans-serif;font-size:24px;font-weight:500;letter-spacing:-.02em;
+  margin:0 0 4px;line-height:1.15}
+.ct-section-h .hint{font-size:13.5px;color:var(--text-dim);margin:0;line-height:1.5}
+.ct-section-h .help{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);
+  text-transform:uppercase;letter-spacing:.06em}
+
+/* Agent grid · 与 Dashboard 一致的卡片尺寸 */
+.ct-agent-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+.ct-agent-grid + .ct-agent-grid-soon{margin-top:14px}
+.ct-agent-card{position:relative;background:var(--surface);border:1px solid var(--border);
+  border-top:3px solid var(--accent);border-radius:10px;padding:18px;text-align:center;cursor:pointer;
+  transition:all .18s;height:170px;display:flex;flex-direction:column;align-items:center;color:var(--text);font-family:inherit}
+.ct-agent-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-2);border-color:var(--accent)}
+.ct-agent-card.selected{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent),var(--shadow-2)}
+.ct-agent-card.pa{border-top-color:var(--p-ab)}
+.ct-agent-card.pb{border-top-color:var(--p-biz)}
+.ct-agent-card.pg{border-top-color:var(--p-gray)}
+.ct-agent-card.pd{border-top-color:var(--p-data)}
+.ct-agent-card.pw{border-top-color:var(--p-wave)}
+.ct-agent-card.soon{opacity:.55;cursor:not-allowed}
+.ct-agent-icon{width:44px;height:44px;border-radius:11px;display:grid;place-items:center;font-size:22px;
+  margin:0 auto 12px;background:var(--accent-soft);color:var(--accent);
+  box-shadow:var(--icon-emboss),var(--icon-shadow)}
+.ct-agent-card.pa .ct-agent-icon{background:var(--p-ab-soft);color:var(--p-ab)}
+.ct-agent-card.pb .ct-agent-icon{background:var(--p-biz-soft);color:var(--p-biz)}
+.ct-agent-card.pg .ct-agent-icon{background:var(--p-gray-soft);color:var(--p-gray)}
+.ct-agent-card.pd .ct-agent-icon{background:var(--p-data-soft);color:var(--p-data)}
+.ct-agent-card.pw .ct-agent-icon{background:var(--p-wave-soft);color:var(--p-wave)}
+.ct-agent-name{font-family:'Inter',sans-serif;font-weight:600;font-size:15.5px;letter-spacing:-.01em;
+  margin-bottom:4px;font-variation-settings:'opsz' 144}
+.ct-agent-meta{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-muted);
+  text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.ct-agent-desc{color:var(--text-dim);font-size:12.5px;line-height:1.55;flex:1;
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.ct-agent-card.selected .ct-agent-checked{position:absolute;top:10px;right:10px;width:22px;height:22px;
+  border-radius:50%;background:var(--accent);color:#faf4ed;display:grid;place-items:center;
+  font-size:11px;font-weight:600;box-shadow:var(--accent-shadow)}
+.ct-agent-checked{display:none}
+.ct-agent-badge-soon{position:absolute;top:10px;right:10px;font-family:'JetBrains Mono',monospace;
+  font-size:9.5px;padding:2px 7px;border-radius:3px;background:var(--surface-2);color:var(--text-muted);
+  border:1px solid var(--border-soft);font-weight:500;text-transform:uppercase;letter-spacing:.06em}
+
+.ct-grid-h{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--text-muted);
+  font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin:24px 0 10px;
+  display:flex;align-items:center;gap:8px}
+.ct-grid-h::before{content:"";width:18px;height:1px;background:var(--accent)}
+
+/* Bottom action bar */
+.ct-actions{display:flex;justify-content:space-between;align-items:center;
+  margin-top:32px;padding-top:24px;border-top:1px solid var(--border-soft)}
+.ct-progress{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);
+  text-transform:uppercase;letter-spacing:.06em}
+.ct-progress b{color:var(--accent);font-weight:500}
+.ct-action-buttons{display:flex;gap:10px}
+.btn{display:inline-flex;align-items:center;gap:6px;font-family:inherit;font-size:14px;font-weight:500;
+  padding:0 18px;height:42px;border-radius:12px;border:1px solid transparent;cursor:pointer;
+  transition:all .15s;letter-spacing:-.005em;white-space:nowrap}
+.btn-primary{background:var(--accent-grad);color:#faf4ed;box-shadow:var(--accent-shadow)}
+.btn-primary:hover{background:linear-gradient(135deg,#b8624a 0%,#cc785c 100%)}
+.btn-secondary{background:var(--surface);color:var(--text);border-color:var(--border);box-shadow:var(--shadow-1)}
+.btn-secondary:hover{background:var(--surface-2);border-color:var(--border-strong)}
+.btn-ghost{background:transparent;color:var(--text-dim)}
+.btn-ghost:hover{background:var(--surface-2);color:var(--text)}
+
+/* ===== Phone preview ===== */
+.phone-wrap{background:var(--surface);border:1px solid var(--border);border-radius:10px;
+  box-shadow:var(--shadow-3);padding:32px 28px 36px;text-align:center;position:sticky;top:24px}
+.phone-tag{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;
+  background:var(--accent-soft);color:var(--accent-text);border-radius:12px;font-size:10.5px;font-weight:500;
+  letter-spacing:.06em;margin-bottom:8px;font-family:'JetBrains Mono',monospace;text-transform:uppercase}
+.phone-name{font-family:'Inter',sans-serif;font-size:18px;font-weight:600;letter-spacing:-.015em;margin-bottom:4px;
+  font-variation-settings:'opsz' 144}
+.phone-meta{font-size:12px;color:var(--text-muted);margin-bottom:18px;font-family:'JetBrains Mono',monospace}
+.phone{width:360px;height:760px;background:#1a1612;border-radius:42px;padding:10px;
+  box-shadow:0 24px 64px rgba(26,22,18,.3);position:relative;margin:0 auto}
+.phone-screen{width:100%;height:100%;background:var(--bg);border-radius:32px;overflow:hidden;
+  position:relative;display:flex;flex-direction:column}
+.phone-notch{position:absolute;top:14px;left:50%;transform:translateX(-50%);
+  width:104px;height:28px;background:#000;border-radius:99px;z-index:10}
+
+.p-top{padding:50px 14px 12px;display:flex;align-items:center;gap:8px;flex-shrink:0;
+  background:var(--bg);border-bottom:1px solid var(--border-soft)}
+.p-top .brand-mark{width:24px;height:24px;border-radius:12px;font-size:11px;
+  background:var(--accent-grad);display:grid;place-items:center;color:#faf4ed;font-weight:600;
+  font-family:'Inter',sans-serif;
+  box-shadow:var(--accent-shadow);flex-shrink:0}
+.p-crumb{flex:1;font-size:12.5px;color:var(--text-dim);font-weight:500;min-width:0}
+.p-crumb .current{color:var(--text)}
+
+.p-stepper{display:flex;gap:6px;padding:14px;background:var(--surface-2);
+  border-bottom:1px solid var(--border-soft);overflow-x:auto;scrollbar-width:none;flex-shrink:0}
+.p-stepper::-webkit-scrollbar{display:none}
+.p-step{flex-shrink:0;display:flex;align-items:center;gap:7px;background:var(--surface);
+  border:1px solid var(--border-soft);border-radius:999px;padding:5px 12px 5px 6px;
+  font-family:inherit;font-size:11.5px;font-weight:500;color:var(--text-dim)}
+.p-step .n{width:20px;height:20px;border-radius:50%;background:var(--surface-2);
+  display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;color:var(--text-muted)}
+.p-step.active{background:var(--accent-soft);color:var(--accent-text);border-color:transparent}
+.p-step.active .n{background:var(--accent);color:#faf4ed}
+.p-step.done .n{background:var(--success);color:#faf4ed}
+.p-step.done{color:var(--success)}
+
+.p-content{flex:1;overflow-y:auto;padding:18px 14px 80px}
+.p-h1{font-family:'Inter',sans-serif;font-size:24px;font-weight:500;letter-spacing:-.025em;line-height:1.1;margin:0 0 6px;
+  font-variation-settings:'opsz' 144}
+.p-lead{font-size:13px;color:var(--text-dim);margin:0 0 18px;line-height:1.55}
+
+.p-agent-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.p-agent-card{background:var(--surface);border:1px solid var(--border);border-top:3px solid var(--accent);
+  border-radius:12px;padding:12px;cursor:pointer;text-align:center;display:flex;flex-direction:column;align-items:center}
+.p-agent-card.pa{border-top-color:var(--p-ab)}
+.p-agent-card.pb{border-top-color:var(--p-biz)}
+.p-agent-card.pd{border-top-color:var(--p-data)}
+.p-agent-card.selected{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
+.p-agent-icon{width:30px;height:30px;border-radius:12px;background:var(--accent-soft);color:var(--accent);
+  display:grid;place-items:center;font-size:15px;margin:0 auto 7px;
+  box-shadow:var(--icon-emboss),var(--icon-shadow)}
+.p-agent-card.pa .p-agent-icon{background:var(--p-ab-soft);color:var(--p-ab)}
+.p-agent-card.pb .p-agent-icon{background:var(--p-biz-soft);color:var(--p-biz)}
+.p-agent-card.pd .p-agent-icon{background:var(--p-data-soft);color:var(--p-data)}
+.p-agent-name{font-family:'Inter',sans-serif;font-weight:600;font-size:12.5px;letter-spacing:-.005em;margin-bottom:2px;
+  font-variation-settings:'opsz' 144}
+.p-agent-desc{font-size:11px;color:var(--text-dim);line-height:1.4;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+
+.p-actions{position:sticky;bottom:0;display:flex;gap:8px;padding:12px 14px;
+  background:var(--bg);border-top:1px solid var(--border-soft);margin:0 -14px -80px}
+.p-actions .btn-secondary{flex:0 0 auto}
+.p-actions .btn-primary{flex:1}
+
+/* ===== State preview row (step 2 + step 3) ===== */
+.states{max-width:1900px;margin:32px auto 0;padding:0 32px}
+.states-h{font-family:'Inter',sans-serif;font-size:22px;font-weight:500;letter-spacing:-.02em;margin:0 0 14px;
+  font-variation-settings:'opsz' 144}
+.states-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.state-card{background:var(--surface);border:1px solid var(--border-soft);border-radius:10px;
+  overflow:hidden;box-shadow:var(--shadow-1)}
+.state-head{padding:14px 18px;border-bottom:1px solid var(--border-soft);
+  display:flex;align-items:center;justify-content:space-between}
+.state-name{font-family:'Inter',sans-serif;font-size:15px;font-weight:600;letter-spacing:-.01em;
+  font-variation-settings:'opsz' 144}
+.state-tag{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--text-muted);
+  text-transform:uppercase;letter-spacing:.06em}
+.state-body{padding:24px;background:var(--bg);min-height:400px}
+
+/* form fields (step 2) */
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field.full{grid-column:span 2}
+.field label{font-size:13px;font-weight:500;color:var(--text);letter-spacing:-.005em}
+.field input,.field select,.field textarea{height:40px;padding:0 14px;border:1px solid var(--border);
+  border-radius:12px;background:var(--surface);color:var(--text);font-family:inherit;font-size:13.5px;outline:none}
+.field textarea{height:auto;padding:10px 14px;resize:vertical;min-height:80px;line-height:1.55}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--accent);box-shadow:var(--ring)}
+.field .hint{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--text-muted);
+  text-transform:uppercase;letter-spacing:.06em}
+
+/* fold (step 3) */
+.fold{background:var(--surface);border:1px solid var(--border-soft);border-radius:12px;overflow:hidden}
+.fold + .fold{margin-top:8px}
+.fold-h{display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;
+  font-family:'Inter',sans-serif;font-size:14px;font-weight:600;letter-spacing:-.005em;
+  font-variation-settings:'opsz' 144}
+.fold-h .ico{font-size:13px}
+.fold-h .arrow{margin-left:auto;color:var(--text-muted);font-family:'JetBrains Mono',monospace;font-size:11px}
+.fold[open] .fold-h{border-bottom:1px solid var(--border-soft);background:var(--surface-2)}
+.fold-body{padding:14px 16px;display:flex;flex-direction:column;gap:12px;font-size:13px}
+.toggle{display:inline-flex;align-items:center;gap:8px;font-size:13px;cursor:pointer}
+.toggle input{accent-color:var(--accent)}
+.cron-presets{display:flex;flex-wrap:wrap;gap:6px}
+.cron-presets button{height:28px;padding:0 10px;border:1px solid var(--border);background:var(--surface);
+  border-radius:12px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-dim);cursor:pointer}
+.cron-presets button:hover{background:var(--surface-2);color:var(--text);border-color:var(--border-strong)}
+.radio-group{display:flex;flex-direction:column;gap:8px}
+.radio{display:inline-flex;align-items:center;gap:8px;font-size:13px;cursor:pointer}
+.radio input{accent-color:var(--accent)}
+
+/* spec footer */
+.spec{max-width:1900px;margin:32px auto 0;padding:0 32px}
+.spec-card{background:var(--surface);border:1px solid var(--border-soft);border-radius:10px;
+  padding:24px 28px;box-shadow:var(--shadow-1)}
+.spec-card h3{font-family:'Inter',sans-serif;font-size:18px;font-weight:600;margin:0 0 10px;letter-spacing:-.015em;
+  font-variation-settings:'opsz' 144}
+.spec-card ul{margin:0;padding-left:20px;font-size:13.5px;color:var(--text-dim);line-height:1.85}
+.spec-card code{background:var(--surface-2);padding:1px 6px;border-radius:12px;
+  font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--accent-text);
+  border:1px solid var(--border-soft)}
+.spec-card b{color:var(--text);font-weight:600}
+</style>
+</head>
+<body>
+
+<div class="outer-bar">
+  <span class="outer-tag"><span class="dot"></span>v5 · Create Task · 桌面 + 手机 + 状态</span>
+  <span style="color:var(--text-muted);font-size:13px;font-family:'JetBrains Mono',monospace">基于 [CreateTaskPage.tsx](../frontend/src/pages/create_task/CreateTaskPage.tsx)</span>
+  <div class="spacer"></div>
+  <a href="05_workspace_chat.html">← Workspace</a>
+  <a href="07_agent_detail.html">Agent →</a>
+  <button onclick="toggleTheme()">
+    <span class="t-light">🌙 暗夜</span><span class="t-dark" style="display:none">☀️ 日间</span>
+  </button>
+</div>
+
+<script>
+function toggleTheme(){
+  var cur=document.documentElement.dataset.theme||'light';
+  var next=cur==='light'?'dark':'light';
+  document.documentElement.dataset.theme=next;
+  localStorage.setItem('ice-v5-theme',next);
+  document.querySelectorAll('.t-light').forEach(e=>e.style.display=next==='light'?'inline':'none');
+  document.querySelectorAll('.t-dark').forEach(e=>e.style.display=next==='dark'?'inline':'none');
+}
+(function(){if(document.documentElement.dataset.theme==='dark'){
+  document.querySelectorAll('.t-light').forEach(e=>e.style.display='none');
+  document.querySelectorAll('.t-dark').forEach(e=>e.style.display='inline');
+}})();
+</script>
+
+<div class="canvas">
+
+  <!-- ===== Desktop ===== -->
+  <div class="browser">
+    <div class="browser-bar">
+      <div class="browser-dots"><span></span><span></span><span></span></div>
+      <div class="browser-url">ice.workbench.local / create-task</div>
+    </div>
+    <div class="viewport">
+
+      <header class="appbar">
+        <div class="brand-mark">i</div>
+        <div class="crumb">
+          <a href="#">Dashboard</a>
+          <span class="sep">/</span>
+          <span class="current">新建任务</span>
+        </div>
+        <div class="spacer"></div>
+        <button class="icon-btn" onclick="toggleTheme()" title="切换主题">
+          <span class="t-light">🌙</span><span class="t-dark" style="display:none">☀️</span>
+        </button>
+        <button class="icon-btn">🔔</button>
+        <div class="avatar">GY</div>
+      </header>
+
+      <main class="ct-main">
+
+        <!-- Hero -->
+        <div class="ct-hero">
+          <div class="ct-tag">CREATE A NEW TASK</div>
+          <h1 class="ct-h1 serif">从一个 <em>Agent</em> 起步。</h1>
+          <p class="ct-lead">选一个范式，描述你想分析的问题，Agent 会和你一起完成这次工作流。Skill 可以随时增减。</p>
+        </div>
+
+        <!-- Stepper · 印刷感 -->
+        <div class="ct-stepper">
+          <div class="ct-step active">
+            <div class="ct-step-num">1</div>
+            <div class="ct-step-info">
+              <div class="ct-step-label serif">选择起点</div>
+              <div class="ct-step-meta">PICK AGENT</div>
+            </div>
+          </div>
+          <div class="ct-step-bar"></div>
+          <div class="ct-step">
+            <div class="ct-step-num">2</div>
+            <div class="ct-step-info">
+              <div class="ct-step-label serif">任务基础</div>
+              <div class="ct-step-meta">NAME · PROMPT</div>
+            </div>
+          </div>
+          <div class="ct-step-bar"></div>
+          <div class="ct-step">
+            <div class="ct-step-num">3</div>
+            <div class="ct-step-info">
+              <div class="ct-step-label serif">高级配置</div>
+              <div class="ct-step-meta">CRON · VISIBILITY</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 1 · Agent 网格 -->
+        <section class="ct-section">
+          <div class="ct-section-h">
+            <div>
+              <h2 class="serif">选择一个 Agent 作为起点</h2>
+              <p class="hint">点击即进入下一步；后续在工作空间里仍可继续增减 Skill</p>
+            </div>
+            <span class="help">STEP 01 / 03</span>
+          </div>
+
+          <div class="ct-grid-h">已上线 · 6</div>
+          <div class="ct-agent-grid">
+            <button class="ct-agent-card pd selected">
+              <span class="ct-agent-checked">✓</span>
+              <div class="ct-agent-icon">📊</div>
+              <div class="ct-agent-name serif">数据分析</div>
+              <div class="ct-agent-meta">DATA · v2.1.0</div>
+              <div class="ct-agent-desc">SQL 取数 · 自动可视化 · markdown 报表，从问题到结论的最短路径。</div>
+            </button>
+            <button class="ct-agent-card pa">
+              <div class="ct-agent-icon">🧪</div>
+              <div class="ct-agent-name serif">AB 实验</div>
+              <div class="ct-agent-meta">AB · v1.4.2</div>
+              <div class="ct-agent-desc">实验设计 · 显著性检验 · ARPU 复盘，全流程闭环。</div>
+            </button>
+            <button class="ct-agent-card pg">
+              <div class="ct-agent-icon">🚀</div>
+              <div class="ct-agent-name serif">灰度发布</div>
+              <div class="ct-agent-meta">GRAY · v1.0.3</div>
+              <div class="ct-agent-desc">分桶规则 · 监控指标 · 决策建议一站式。</div>
+            </button>
+            <button class="ct-agent-card">
+              <div class="ct-agent-icon">💬</div>
+              <div class="ct-agent-name serif">通用 Agent</div>
+              <div class="ct-agent-meta">OPEN · v3.0.0</div>
+              <div class="ct-agent-desc">面对任意数据问题的通用工作助手，跨范式协作。</div>
+            </button>
+            <button class="ct-agent-card">
+              <div class="ct-agent-icon">📚</div>
+              <div class="ct-agent-name serif">Know</div>
+              <div class="ct-agent-meta">KNOW · v1.2.1</div>
+              <div class="ct-agent-desc">基于飞书 Wiki 的内部知识问答。</div>
+            </button>
+            <button class="ct-agent-card pa">
+              <div class="ct-agent-icon">🌋</div>
+              <div class="ct-agent-name serif">火山 ABTest</div>
+              <div class="ct-agent-meta">AB · v0.9.0</div>
+              <div class="ct-agent-desc">对接火山引擎 ABTest 平台，托管实验。</div>
+            </button>
+          </div>
+
+          <div class="ct-grid-h">即将上线 · 2</div>
+          <div class="ct-agent-grid ct-agent-grid-soon">
+            <button class="ct-agent-card pb soon">
+              <span class="ct-agent-badge-soon">SOON</span>
+              <div class="ct-agent-icon">💼</div>
+              <div class="ct-agent-name serif">业务洞察</div>
+              <div class="ct-agent-meta">BIZ · v0.5.0</div>
+              <div class="ct-agent-desc">指标拆解 · 异动归因 · 业务诊断报告。</div>
+            </button>
+            <button class="ct-agent-card pw soon">
+              <span class="ct-agent-badge-soon">SOON</span>
+              <div class="ct-agent-icon">🌊</div>
+              <div class="ct-agent-name serif">浪潮归因</div>
+              <div class="ct-agent-meta">WAVE · v0.4.0</div>
+              <div class="ct-agent-desc">渠道归因 · 增长拆解 · 投放复盘。</div>
+            </button>
+          </div>
+        </section>
+
+        <!-- Bottom action -->
+        <div class="ct-actions">
+          <span class="ct-progress">已选择 <b>📊 数据分析</b> · <b>1 / 3</b></span>
+          <div class="ct-action-buttons">
+            <button class="btn btn-ghost">取消</button>
+            <button class="btn btn-primary">下一步 →</button>
+          </div>
+        </div>
+
+      </main>
+
+    </div>
+  </div>
+
+  <!-- ===== Phone ===== -->
+  <div class="phone-wrap">
+    <div class="phone-tag"><span style="width:6px;height:6px;border-radius:50%;background:var(--accent)"></span>iPhone 14 Pro · 390 × 844</div>
+    <div class="phone-name">新建任务 · 移动版</div>
+    <div class="phone-meta">/ create-task</div>
+
+    <div class="phone">
+      <div class="phone-notch"></div>
+      <div class="phone-screen">
+
+        <div class="p-top">
+          <div class="brand-mark">i</div>
+          <div class="p-crumb"><span style="color:var(--text-muted)">/</span> <span class="current">新建任务</span></div>
+          <button class="icon-btn" style="width:30px;height:30px">×</button>
+        </div>
+
+        <!-- Stepper · pill 横滚 -->
+        <div class="p-stepper">
+          <div class="p-step active"><div class="n">1</div>选择起点</div>
+          <div class="p-step"><div class="n">2</div>任务基础</div>
+          <div class="p-step"><div class="n">3</div>高级配置</div>
+        </div>
+
+        <div class="p-content">
+          <h1 class="p-h1 serif">选择一个 Agent</h1>
+          <p class="p-lead">点击即进入下一步</p>
+
+          <div class="p-agent-grid">
+            <button class="p-agent-card pd selected">
+              <div class="p-agent-icon">📊</div>
+              <div class="p-agent-name serif">数据分析</div>
+              <div class="p-agent-desc">SQL · 可视化 · 报表</div>
+            </button>
+            <button class="p-agent-card pa">
+              <div class="p-agent-icon">🧪</div>
+              <div class="p-agent-name serif">AB 实验</div>
+              <div class="p-agent-desc">显著性 · ARPU 复盘</div>
+            </button>
+            <button class="p-agent-card">
+              <div class="p-agent-icon">🚀</div>
+              <div class="p-agent-name serif">灰度发布</div>
+              <div class="p-agent-desc">分桶 · 决策</div>
+            </button>
+            <button class="p-agent-card">
+              <div class="p-agent-icon">💬</div>
+              <div class="p-agent-name serif">通用 Agent</div>
+              <div class="p-agent-desc">通用工作助手</div>
+            </button>
+            <button class="p-agent-card">
+              <div class="p-agent-icon">📚</div>
+              <div class="p-agent-name serif">Know</div>
+              <div class="p-agent-desc">飞书 Wiki 问答</div>
+            </button>
+            <button class="p-agent-card pa">
+              <div class="p-agent-icon">🌋</div>
+              <div class="p-agent-name serif">火山 ABTest</div>
+              <div class="p-agent-desc">实验托管</div>
+            </button>
+          </div>
+        </div>
+
+        <div class="p-actions">
+          <button class="btn btn-secondary">取消</button>
+          <button class="btn btn-primary">下一步 →</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== Step 2 / 3 状态预览 ===== -->
+<div class="states">
+  <h2 class="states-h serif">Step 2 / 3 · 状态预览</h2>
+  <div class="states-grid">
+
+    <!-- Step 2 -->
+    <div class="state-card">
+      <div class="state-head">
+        <span class="state-name">Step 02 · 任务基础</span>
+        <span class="state-tag">NAME · PROMPT</span>
+      </div>
+      <div class="state-body">
+        <div class="ct-section-h" style="margin-bottom:18px">
+          <div>
+            <h2 class="serif" style="font-family:'Inter',sans-serif;font-size:22px;font-weight:500;letter-spacing:-.02em;margin:0 0 4px">配置任务的基础信息</h2>
+            <p class="hint">名字会显示在任务列表，初始 Prompt 会作为第一条对话发出</p>
+          </div>
+        </div>
+        <div class="fields">
+          <div class="field">
+            <label>任务名称</label>
+            <input type="text" value="Q2 经营复盘 · 渠道归因" placeholder="例如：双十一 AB 实验复盘">
+          </div>
+          <div class="field">
+            <label>范式</label>
+            <select>
+              <option>📊 数据分析</option>
+              <option>🧪 AB 实验</option>
+              <option>💼 业务洞察</option>
+            </select>
+          </div>
+          <div class="field full">
+            <label>描述 <span class="hint">· 可选</span></label>
+            <input type="text" value="" placeholder="一句话描述任务目标，方便团队成员理解上下文">
+          </div>
+          <div class="field full">
+            <label>💬 初始 Prompt</label>
+            <textarea>查询 Q2 各渠道的 ARPU + 同比环比，自动生成可视化报表，并把异动归因写成飞书文档发到周会群。</textarea>
+          </div>
+        </div>
+        <div style="margin-top:24px;display:flex;justify-content:space-between;align-items:center">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em">2 / 3 · 已填 <b style="color:var(--accent)">2</b> / 4 字段</span>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-secondary" style="height:36px;padding:0 14px;font-size:13px">← 上一步</button>
+            <button class="btn btn-primary" style="height:36px;padding:0 14px;font-size:13px">下一步 →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div class="state-card">
+      <div class="state-head">
+        <span class="state-name">Step 03 · 高级配置</span>
+        <span class="state-tag">CRON · VISIBILITY</span>
+      </div>
+      <div class="state-body">
+        <div class="ct-section-h" style="margin-bottom:18px">
+          <div>
+            <h2 class="serif" style="font-family:'Inter',sans-serif;font-size:22px;font-weight:500;letter-spacing:-.02em;margin:0 0 4px">高级配置（可选）</h2>
+            <p class="hint">cron 定时执行 + 团队可见性。所有项都可创建后再修改。</p>
+          </div>
+        </div>
+
+        <details class="fold" open>
+          <summary class="fold-h"><span class="ico">⏱</span><span>定时执行</span><span class="arrow">▾</span></summary>
+          <div class="fold-body">
+            <label class="toggle"><input type="checkbox" checked>启用定时执行</label>
+            <div class="field">
+              <label>cron 表达式</label>
+              <input type="text" value="0 9 * * 1-5">
+              <span class="hint">分=0 时=9 日=* 月=* 周=1-5 · 工作日早 9 点</span>
+            </div>
+            <div class="cron-presets">
+              <button>每天 09:00</button>
+              <button style="background:var(--accent-soft);color:var(--accent-text);border-color:transparent">工作日 09:00</button>
+              <button>每周一 09:00</button>
+              <button>每小时</button>
+            </div>
+          </div>
+        </details>
+
+        <details class="fold">
+          <summary class="fold-h"><span class="ico">🌐</span><span>可见性</span><span class="arrow">▸</span></summary>
+        </details>
+
+        <div style="margin-top:18px;padding:14px 16px;background:var(--surface-2);border-radius:12px;
+          display:flex;align-items:center;gap:8px;font-size:13px">
+          <input type="checkbox" checked style="accent-color:var(--accent)">
+          <span>创建后立即打开 Workspace</span>
+        </div>
+
+        <div style="margin-top:20px;display:flex;justify-content:space-between;align-items:center">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em">3 / 3 · <b style="color:var(--success)">就绪</b></span>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-secondary" style="height:36px;padding:0 14px;font-size:13px">← 上一步</button>
+            <button class="btn btn-primary" style="height:36px;padding:0 14px;font-size:13px">✓ 创建任务</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="spec">
+  <div class="spec-card">
+    <h3 class="serif">📐 这张稿的布局重设计</h3>
+    <ul>
+      <li><b>原版</b>：max-width 880 居中 + ct-stepper 横向（仅圆点 + 横线 + 文字标签 + active 主色）+ ct-section（白底卡 padding 24）+ 3 步切换。</li>
+      <li><b>v5</b>：max-width 920 + 增加<b>大 Hero 区</b>（Mono 大写 tag「CREATE A NEW TASK」+ 48px 衬线 H1「从一个 <em>Agent</em> 起步」+ 副标题）—— 让创建流程不再是冷冰冰的表单页</li>
+      <li><b>Stepper</b>：从「圆点 + 单行 label」 → <b>印刷感横向</b>（32px 数字圆 + Inter  step 名 + Mono 大写副标，中间 56px 短分隔线，已完成时填铜橙）—— 学 Stripe Dashboard 的 onboarding 步骤条</li>
+      <li><b>Section 头</b>：左 H2 衬线标题 + 副标题 / 右 Mono 大写 STEP 01 / 03 进度标识（border-bottom 分隔）</li>
+      <li><b>Step 1 · Agent 网格</b>：auto-fit minmax(200, 1fr) 卡片 height 170 + 3px 范式色 border-top + Mono 大写 meta（如 <code>DATA · v2.1.0</code>）+ 选中态 2px box-shadow ring + 右上角 ✓ 圆形勾选标识。<b>分组标题</b>用 Mono 大写「已上线 · 6 / 即将上线 · 2」+ 横线引导符</li>
+      <li><b>Step 2 · 表单</b>：grid 1fr 1fr，input height 40 + 8px 圆角 + focus 铜橙 ring，textarea 等高自适应，hint 用 Mono 小字</li>
+      <li><b>Step 3 · 折叠</b>：3 个 <code>&lt;details&gt;</code> 卡（⏱ 定时 / 🌐 可见性 / 等），summary 用 Inter 小标题 + 右侧 Mono ▾▸ 箭头，open 时上分隔线 + surface-2 头底</li>
+      <li><b>cron preset</b>：4 个 Mono 字按钮（每天 09:00 / 工作日 09:00 / 每周一 09:00 / 每小时），active 状态铜橙 soft</li>
+      <li><b>底部 action bar</b>：左 Mono 进度提示「已选择 <b>📊 数据分析</b> · <b>1 / 3</b>」/ 右 三按钮（取消 / 上一步 / 下一步），border-top 分隔</li>
+      <li><b>移动端</b>：单列。Stepper 改成<b>横滚 pill</b>（圆点 + 文字 inline，active 铜橙 soft），content 单列 agent grid 2 列，主操作 sticky 底部</li>
+    </ul>
+
+    <h3 class="serif" style="margin-top:24px">和 v4 / 当前实现的差异</h3>
+    <ul>
+      <li>布局：纯表单页 → <b>Hero + Stepper + Section</b>（增加叙事层）</li>
+      <li>Stepper：圆点 + 横线 + label → <b>32px 数字 + Inter  step 名 + Mono 副标 + 短分隔线</b></li>
+      <li>Agent 卡：保留尺寸（170 高 / 3px 边）→ 文字字体改 Inter / Mono，新增<b>选中态 ✓ 圆形角标</b></li>
+      <li>Section 头：单行 h3 → <b>左 H2 衬线 + 副标 / 右 STEP 01 / 03</b></li>
+      <li>cron preset：纯文字按钮 → <b>Mono 等宽字按钮</b></li>
+      <li>底部：right-aligned 按钮 → <b>左进度 + 右按钮</b>（带选择回显）</li>
+    </ul>
+  </div>
+</div>
+
+</body>
+</html>

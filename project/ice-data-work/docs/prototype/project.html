@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ICE-DATA-WORK · 项目空间</title>
+  <link rel="stylesheet" href="assets/app.css" />
+</head>
+<body data-page="project" data-title="项目空间">
+  <div class="app">
+    <aside id="side" class="sidebar"></aside>
+    <main class="main">
+      <div id="top"></div>
+
+      <div class="page-head">
+        <div>
+          <div class="crumb"><a href="team.html">增长数据团队</a> / 项目</div>
+          <div class="eyebrow">Project Space · p_growth</div>
+          <h1>增长分析项目</h1>
+          <p class="subtle">项目级共享空间：成员 + 共享文件 / 知识 / 产物（按项目隔离，D-07）。任务都归属于某个项目。</p>
+        </div>
+        <a class="btn primary" href="new-mission.html">在本项目新建任务</a>
+      </div>
+
+      <div class="grid cols-4">
+        <div class="stat"><b>6</b><span>项目成员</span></div>
+        <div class="stat"><b>9</b><span>进行中任务</span></div>
+        <div class="stat"><b>23</b><span>共享产物</span></div>
+        <div class="stat"><b>4</b><span>共享 Agent 经验</span></div>
+      </div>
+
+      <div class="grid cols-2 section-gap">
+        <div class="card"><div class="card-head"><h2>成员</h2><button class="btn sm">管理成员</button></div>
+          <div class="card-body list">
+            <div class="list-item compact"><div><strong>云鹤</strong><span>项目 member · Twin L3</span></div><span class="pill blue">我</span></div>
+            <div class="list-item compact"><div><strong>张敏</strong><span>项目 member · Twin L2</span></div><span class="pill slate">member</span></div>
+            <div class="list-item compact"><div><strong>李航</strong><span>项目 member · Twin L1</span></div><span class="pill slate">member</span></div>
+          </div>
+        </div>
+        <div class="card"><div class="card-head"><h2>项目看板</h2><a class="btn sm" href="board.html">打开看板</a></div>
+          <div class="card-body list">
+            <div class="list-item compact"><div><strong>进行中：DAU 下滑归因</strong><span>我 + Twin + Data Agent</span></div><a class="btn sm" href="workspace-data.html">进入</a></div>
+            <div class="list-item compact"><div><strong>待办：ANR 专项</strong><span>Data Agent</span></div><a class="btn sm" href="board.html">看板</a></div>
+          </div>
+        </div>
+        <div class="card"><div class="card-head"><h2>共享文件 / 知识</h2><button class="btn sm">上传</button></div>
+          <div class="card-body list">
+            <div class="list-item compact"><div><strong>口径定义：DAU / 留存.md</strong><span>项目共享 · 置顶</span></div><span class="pill blue">Doc</span></div>
+            <div class="list-item compact"><div><strong>渠道映射表.csv</strong><span>项目共享</span></div><span class="pill amber">Data</span></div>
+          </div>
+        </div>
+        <div class="card"><div class="card-head"><h2>共享产物</h2><a class="btn sm" href="knowledge.html">全部</a></div>
+          <div class="card-body grid cols-2">
+            <div class="artifact-card"><span class="pill green">Report</span><h3>DAU 归因报告</h3><p>项目级产物。</p><a class="btn sm" href="workspace-data.html">打开</a></div>
+            <div class="artifact-card"><span class="pill violet">Memory</span><h3>6.20 渠道A口径</h3><p>项目共享记忆。</p><button class="btn sm">查看</button></div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <aside id="dock" class="dock"></aside>
+  </div>
+  <script src="assets/shell.js"></script>
+</body>
+</html>

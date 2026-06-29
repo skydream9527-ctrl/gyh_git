@@ -1,0 +1,221 @@
+/* ====================================================================
+   Mobile Responsive Enhancements
+   Complete responsive rewrite for all breakpoints.
+   Import order: tokens.css → global.css → mobile.css
+   ==================================================================== */
+
+/* ---- Breakpoint system ----
+   xs: 0–479px   (small phones)
+   sm: 480–767px (large phones)
+   md: 768–1023px (tablets)
+   lg: 1024+     (desktop, handled by default styles)
+*/
+
+/* ============================================================
+   XS breakpoint: small phones (≤479px)
+   ============================================================ */
+@media (max-width: 479px) {
+  /* Dashboard: single column, tighter spacing */
+  .dash-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+    padding: 12px !important;
+  }
+  .dash-card {
+    padding: 14px !important;
+  }
+  .dash-hero {
+    padding: 20px 16px !important;
+  }
+  .dash-hero h1 {
+    font-size: 18px !important;
+  }
+
+  /* Create task: full-width steps */
+  .ct-step-bar {
+    gap: 4px !important;
+    padding: 12px !important;
+  }
+  .ct-step-label {
+    font-size: 10px !important;
+  }
+
+  /* Admin pages: stack tables vertically */
+  .admin-table th,
+  .admin-table td {
+    padding: 8px 10px !important;
+    font-size: 12px !important;
+  }
+
+  /* Workspace chat: maximize message area */
+  .ws-chat-head {
+    padding: 6px 10px !important;
+  }
+  .msg-list {
+    padding: 10px 10px !important;
+  }
+  .bubble {
+    max-width: calc(100vw - 40px) !important;
+  }
+  .chat-input {
+    padding: 8px 10px !important;
+  }
+  .chat-input textarea {
+    min-height: 48px !important;
+  }
+}
+
+/* ============================================================
+   SM breakpoint: large phones (480–767px)
+   ============================================================ */
+@media (min-width: 480px) and (max-width: 767px) {
+  .dash-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 14px !important;
+  }
+  .dash-hero h1 {
+    font-size: 20px !important;
+  }
+}
+
+/* ============================================================
+   MD breakpoint: tablets (768–1023px)
+   ============================================================ */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .dash-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  /* Workspace: show sidebar as narrow panel */
+  .ws-body {
+    grid-template-columns: 200px 1fr !important;
+  }
+  .ws-sidebar {
+    padding: 12px 10px !important;
+  }
+}
+
+/* ============================================================
+   Touch-friendly enhancements (all mobile)
+   ============================================================ */
+@media (max-width: 800px) {
+  /* Larger tap targets for interactive elements */
+  .ws-file-list li,
+  .ws-kb-row,
+  .ws-right-tabs button {
+    min-height: 44px;
+  }
+
+  /* Smooth momentum scrolling everywhere */
+  .msg-list,
+  .ws-sidebar,
+  .ws-right-body {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+
+  /* Prevent pull-to-refresh interference on chat scroll */
+  .msg-list {
+    overscroll-behavior-y: contain;
+  }
+
+  /* Full-width modals on mobile */
+  .modal-content,
+  .confirm-modal {
+    width: calc(100vw - 32px) !important;
+    max-width: none !important;
+    margin: 16px !important;
+    max-height: calc(100vh - 32px) !important;
+    border-radius: 12px !important;
+  }
+
+  /* Scheduled tasks: stack cards */
+  .sched-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Agent detail page */
+  .agent-detail-hero {
+    padding: 16px !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+  .agent-detail-actions {
+    width: 100% !important;
+    flex-wrap: wrap !important;
+  }
+}
+
+/* ============================================================
+   Virtual keyboard handling (chat input)
+   ============================================================ */
+@media (max-width: 800px) {
+  /* When the keyboard is open, the chat input should stay visible.
+     The visualViewport API (useVisualViewport hook) can set this
+     custom property on the .ws element to shift the input up. */
+  .ws[data-keyboard-height] .chat-input {
+    transition: transform 0.15s ease-out;
+  }
+
+  /* Ensure the chat input area doesn't get hidden behind keyboard.
+     Uses env(keyboard-inset-height) where supported (iOS 15+). */
+  @supports (padding-bottom: env(keyboard-inset-height)) {
+    .chat-input {
+      padding-bottom: max(
+        10px,
+        env(keyboard-inset-height, 0px)
+      );
+    }
+  }
+}
+
+/* ============================================================
+   Landscape mode on phones
+   ============================================================ */
+@media (max-height: 500px) and (orientation: landscape) {
+  /* Reduce top nav height */
+  .top-nav {
+    height: 40px !important;
+    min-height: 40px !important;
+  }
+  /* Smaller bottom bar */
+  .ws-mobile-segs {
+    padding-bottom: 4px !important;
+  }
+  .ws-mobile-segs button {
+    padding: 6px 4px 4px !important;
+    min-height: 36px !important;
+    font-size: 11px !important;
+  }
+  /* Hide bottom bar in landscape to maximize chat area */
+  .m-bottombar {
+    display: none !important;
+  }
+  .has-bottombar {
+    padding-bottom: 0 !important;
+  }
+}
+
+/* ============================================================
+   Dark mode adjustments for mobile (reduce contrast strain)
+   ============================================================ */
+@media (max-width: 800px) and (prefers-color-scheme: dark) {
+  .ws-mobile-segs {
+    background: var(--surface-2);
+  }
+  .m-bottombar {
+    background: var(--surface-2);
+    border-top-color: var(--border);
+  }
+}
+
+/* ============================================================
+   Print: hide mobile-only elements
+   ============================================================ */
+@media print {
+  .m-bottombar,
+  .ws-mobile-segs,
+  .m-fab,
+  .offline-banner {
+    display: none !important;
+  }
+}

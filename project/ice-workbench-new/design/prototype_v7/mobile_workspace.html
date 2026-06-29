@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Workspace（移动端）· ICE Workbench v7</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <link rel="stylesheet" href="_shared/tokens.css" />
+  <link rel="stylesheet" href="_shared/components.css" />
+  <style>
+    /* ===== 移动端 Workspace =====
+       核心设计决策：
+       1. 全屏聊天为默认视图（手机上对话是核心交互）
+       2. 左栏（文件/KB）和右栏（执行/工具）通过底部 Segment Tab 切换
+       3. TopNav 极简：返回 + 任务名（truncate）+ 更多按钮
+       4. ChatInput 贴底 + safe-area + 语音按钮
+       5. HITL 卡片全宽 banner，操作按钮竖排
+       6. 工具调用卡片简化（只展示状态 + 名称，点击展开详情）
+    */
+    html, body { height: 100%; overflow: hidden; }
+    body { background: var(--bg); }
+
+    .m-ws { display: flex; flex-direction: column; height: 100vh; height: 100svh; }
+
+    /* 顶栏 */
+    .m-ws-nav {
+      height: 48px; display: flex; align-items: center; gap: 8px;
+      padding: env(safe-area-inset-top, 0px) 12px 0;
+      padding-top: calc(env(safe-area-inset-top, 0px) + 4px);
+      background: rgba(250,244,237,.92); backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-soft);
+      flex: none; z-index: 20;
+    }
+    .m-ws-nav .back { width: 32px; height: 32px; border-radius: 8px; border: none; background: transparent; color: var(--text-dim); display: grid; place-items: center; font-size: 18px; cursor: pointer; }
+    .m-ws-nav .task-name { flex: 1; font-size: 14px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .m-ws-nav .status { font-size: 10px; padding: 2px 8px; border-radius: var(--r-pill); }
+    .m-ws-nav .more { width: 32px; height: 32px; border-radius: 8px; border: none; background: transparent; color: var(--text-dim); display: grid; place-items: center; font-size: 18px; cursor: pointer; }
+
+    /* 底部 Segment（文件/聊天/工具） */
+    .m-ws-segs {
+      display: flex; background: var(--surface); border-top: 1px solid var(--border-soft);
+      padding: 0 8px max(env(safe-area-inset-bottom, 0px), 8px);
+      flex: none;
+    }
+    .m-ws-segs button {
+      flex: 1; padding: 10px 6px 8px; border: none; background: transparent;
+      color: var(--text-muted); font-size: 12px; font-weight: 500;
+      cursor: pointer; border-top: 2px solid transparent; text-align: center;
+      font-family: inherit; min-height: 42px;
+    }
+    .m-ws-segs button.active { color: var(--accent-text); border-top-color: var(--accent); }
+
+    /* 聊天区 */
+    .m-ws-chat { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+    .m-chat-scroll { flex: 1; overflow-y: auto; padding: 14px 14px 8px; display: flex; flex-direction: column; gap: 16px; }
+
+    .m-msg { display: flex; gap: 8px; max-width: 100%; }
+    .m-msg.user { align-self: flex-end; flex-direction: row-reverse; }
+    .m-msg-ava { flex: none; width: 28px; height: 28px; border-radius: 7px; display: grid; place-items: center; font-size: 13px; }
+    .m-msg.user .m-msg-ava { background: var(--accent-grad); color: #fff; }
+    .m-msg.bot .m-msg-ava { background: var(--p-data-soft); color: var(--p-data); border: 1px solid var(--border-soft); }
+    .m-msg-bubble { padding: 10px 14px; border-radius: var(--r-lg); font-size: 14px; line-height: 1.6; max-width: calc(100vw - 80px); }
+    .m-msg.user .m-msg-bubble { background: var(--accent); color: #fff; border-bottom-right-radius: 4px; }
+    .m-msg.bot .m-msg-bubble { background: var(--surface); border: 1px solid var(--border-soft); color: var(--text); border-bottom-left-radius: 4px; box-shadow: var(--shadow-1); }
+    .m-msg-meta { font-size: 10px; color: var(--text-faint); padding: 2px 4px; font-family: var(--font-mono); }
+
+    /* 工具调用 chip（简化版） */
+    .m-tool-chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; background: var(--surface); border: 1px solid var(--border-soft); border-radius: var(--r-md); font-size: 11px; color: var(--text-dim); font-family: var(--font-mono); box-shadow: var(--shadow-1); }
+    .m-tool-chip .ok { color: var(--success); }
+
+    /* HITL 横幅 */
+    .m-hitl-banner {
+      margin: 0 14px 8px; padding: 12px 14px; border-radius: var(--r-lg);
+      background: var(--warning-soft); border: 1px solid rgba(176,125,42,.2);
+    }
+    .m-hitl-title { font-size: 13px; font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 6px; }
+    .m-hitl-body { font-size: 12px; color: var(--text-dim); margin: 6px 0 10px; line-height: 1.5; }
+    .m-hitl-actions { display: flex; flex-direction: column; gap: 8px; }
+    .m-hitl-actions .btn { width: 100%; justify-content: center; height: 38px; font-size: 13px; }
+
+    /* 输入区 */
+    .m-chat-input-wrap { padding: 8px 12px 0; flex: none; }
+    .m-chat-input {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-xl);
+      padding: 10px 12px; box-shadow: var(--shadow-2);
+      transition: border-color var(--transition);
+    }
+    .m-chat-input:focus-within { border-color: var(--accent); }
+    .m-chat-input textarea { width: 100%; border: none; outline: none; resize: none; font-size: 15px; line-height: 1.5; color: var(--text); background: transparent; min-height: 22px; }
+    .m-chat-bar { display: flex; align-items: center; gap: 4px; margin-top: 6px; }
+    .m-chat-bar .tool { width: 32px; height: 32px; border: none; background: transparent; color: var(--text-muted); border-radius: 8px; display: grid; place-items: center; font-size: 17px; cursor: pointer; }
+    .m-chat-bar .send { margin-left: auto; width: 34px; height: 34px; border-radius: 10px; border: none; background: var(--accent-grad); color: #fff; display: grid; place-items: center; font-size: 16px; cursor: pointer; box-shadow: var(--accent-shadow); }
+
+    /* 文件面板（segment=files 时显示） */
+    .m-ws-files { flex: 1; overflow-y: auto; padding: 14px; display: none; flex-direction: column; gap: 12px; }
+    .m-ws-files.visible { display: flex; }
+    .m-file-row { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: var(--surface); border-radius: var(--r-md); border: 1px solid var(--border-soft); }
+    .m-file-row .ico { font-size: 16px; color: var(--text-muted); }
+    .m-file-row .name { flex: 1; font-size: 13px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .m-file-row .size { font-size: 10px; color: var(--text-faint); font-family: var(--font-mono); }
+
+    /* 工具面板（segment=tools 时显示） */
+    .m-ws-tools { flex: 1; overflow-y: auto; padding: 14px; display: none; flex-direction: column; gap: 12px; }
+    .m-ws-tools.visible { display: flex; }
+    .m-todo { display: flex; gap: 10px; padding: 8px 10px; font-size: 13px; align-items: flex-start; }
+    .m-todo .tk { flex: none; width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center; font-size: 10px; border: 1.5px solid var(--border-strong); color: transparent; margin-top: 1px; }
+    .m-todo.done .tk { background: var(--success); border-color: var(--success); color: #fff; }
+    .m-todo.active .tk { border-color: var(--accent); color: var(--accent); }
+    .m-todo.done .tx { color: var(--text-muted); text-decoration: line-through; }
+    .m-todo.active .tx { color: var(--text); font-weight: 600; }
+    .m-todo .tx { color: var(--text-dim); line-height: 1.4; }
+  </style>
+</head>
+<body>
+  <div class="m-ws">
+    <!-- 顶栏 -->
+    <header class="m-ws-nav">
+      <button class="back" onclick="history.back()"><i class="ph ph-arrow-left"></i></button>
+      <span class="task-name">Q2 渠道留存归因分析</span>
+      <span class="status chip warn" style="font-size:9px">HITL</span>
+      <button class="more"><i class="ph ph-dots-three"></i></button>
+    </header>
+
+    <!-- 聊天区（默认可见） -->
+    <div class="m-ws-chat">
+      <div class="m-chat-scroll">
+        <div class="m-msg user">
+          <span class="m-msg-ava">龚</span>
+          <div>
+            <div class="m-msg-bubble">帮我把渠道按新老用户拆开，对比 v2.3 和 v2.2 的次日留存。</div>
+            <span class="m-msg-meta">14:02</span>
+          </div>
+        </div>
+
+        <div class="m-msg bot">
+          <span class="m-msg-ava"><i class="ph ph-chart-bar"></i></span>
+          <div>
+            <div class="m-msg-bubble">
+              <p>好的，我先确认数据来源。从 <code>dwd_user_retention</code> 取数，按 channel + user_type 分组：</p>
+            </div>
+            <div class="m-tool-chip"><i class="ph ph-database"></i> run_sql · retention_by_channel.sql <span class="ok"><i class="ph ph-check-circle"></i></span> 1.2s</div>
+            <div class="m-msg-bubble" style="margin-top:8px">
+              <p>查询返回 24 行。发现 <b>v2.3 的"自然流量"渠道口径</b>和 v2.2 不一致。需要你确认按哪种口径对齐 👇</p>
+            </div>
+            <span class="m-msg-meta">14:02 · Claude Sonnet 4.5</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- HITL 横幅 -->
+      <div class="m-hitl-banner">
+        <div class="m-hitl-title"><i class="ph ph-hand-palm"></i> 需要人工确认 · 渠道口径</div>
+        <div class="m-hitl-body">v2.3 将 ASO 从"自然流量"中拆出。请选择对比口径：</div>
+        <div class="m-hitl-actions">
+          <button class="btn btn-primary">按 v2.3 新口径对齐</button>
+          <button class="btn btn-secondary">合并 ASO 回自然流量</button>
+        </div>
+      </div>
+
+      <!-- 输入 -->
+      <div class="m-chat-input-wrap">
+        <div class="m-chat-input">
+          <textarea rows="1" placeholder="补充需求，或回复提问…"></textarea>
+          <div class="m-chat-bar">
+            <button class="tool"><i class="ph ph-paperclip"></i></button>
+            <button class="tool"><i class="ph ph-microphone"></i></button>
+            <button class="send"><i class="ph ph-paper-plane-tilt"></i></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 文件面板（切到"文件"时显示） -->
+    <div class="m-ws-files">
+      <div class="m-section-title" style="margin:0;font-size:12px">上下文文件 · 6 个</div>
+      <div class="m-file-row"><span class="ico"><i class="ph ph-file-sql"></i></span><span class="name">retention_by_channel.sql</span><span class="size">2.1KB</span></div>
+      <div class="m-file-row"><span class="ico"><i class="ph ph-file-sql"></i></span><span class="name">cohort_base.sql</span><span class="size">1.4KB</span></div>
+      <div class="m-file-row"><span class="ico"><i class="ph ph-file-csv"></i></span><span class="name">channel_retention.csv</span><span class="size">88KB</span></div>
+      <div class="m-file-row"><span class="ico"><i class="ph ph-chart-line"></i></span><span class="name">retention_curve.png</span><span class="size">144KB</span></div>
+      <div class="m-file-row"><span class="ico"><i class="ph ph-link-simple"></i></span><span class="name">渠道口径说明.docx</span><span class="size">—</span></div>
+      <div class="m-file-row"><span class="ico"><i class="ph ph-link-simple"></i></span><span class="name">PRD-v2.3 灰度方案</span><span class="size">—</span></div>
+    </div>
+
+    <!-- 工具/执行面板（切到"工具"时显示） -->
+    <div class="m-ws-tools">
+      <div class="m-section-title" style="margin:0;font-size:12px">任务计划 · TODO</div>
+      <div class="m-todo done"><span class="tk"><i class="ph ph-check"></i></span><span class="tx">确认数据表与字段口径</span></div>
+      <div class="m-todo done"><span class="tk"><i class="ph ph-check"></i></span><span class="tx">编写并执行留存查询 SQL</span></div>
+      <div class="m-todo done"><span class="tk"><i class="ph ph-check"></i></span><span class="tx">校验返回数据完整性</span></div>
+      <div class="m-todo active"><span class="tk"><i class="ph ph-arrow-right"></i></span><span class="tx">对齐渠道口径（等待人工确认）</span></div>
+      <div class="m-todo"><span class="tk"></span><span class="tx">绘制留存对比曲线</span></div>
+      <div class="m-todo"><span class="tk"></span><span class="tx">输出结论与归因摘要</span></div>
+
+      <div class="m-section-title" style="margin:12px 0 0;font-size:12px">运行事件</div>
+      <div style="font-size:11px;font-family:var(--font-mono);color:var(--text-dim);display:flex;flex-direction:column;gap:6px">
+        <div><span style="color:var(--success)">●</span> 14:02:03 run_sql 完成 (24行)</div>
+        <div><span style="color:var(--info)">●</span> 14:02:05 检测到口径差异</div>
+        <div><span style="color:var(--warning)">●</span> 14:02:05 raise_hitl 等待确认</div>
+      </div>
+    </div>
+
+    <!-- 底部 Segment -->
+    <nav class="m-ws-segs">
+      <button><i class="ph ph-folder-open"></i> 文件</button>
+      <button class="active"><i class="ph ph-chat-circle"></i> 聊天</button>
+      <button><i class="ph ph-gear-six"></i> 工具</button>
+    </nav>
+  </div>
+</body>
+</html>

@@ -1,0 +1,220 @@
+/* ============================================================
+   AppSideNav · v7 — 浅色纸张侧栏（主应用）
+   全程使用每主题变量（--surface*/--border*/--text*/--accent*），
+   light 得到米白纸张、dark 得到暖墨深底，29 套主题自动适配。
+   ============================================================ */
+
+.app-sidebar {
+  width: var(--sidenav-w, 220px);
+  flex: 0 0 var(--sidenav-w, 220px);
+  background: var(--surface-2);
+  color: var(--text-dim);
+  border-right: 1px solid var(--border-soft);
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: var(--topnav-h, 56px);
+  height: calc(100vh - var(--topnav-h, 56px));
+  overflow: hidden;
+  transition: width 0.18s ease, flex-basis 0.18s ease;
+  z-index: 20;
+}
+
+.app-sidebar.collapsed {
+  width: 64px;
+  flex-basis: 64px;
+}
+
+/* --- Logo --- */
+.app-sidebar-logo {
+  height: var(--topnav-h, 56px);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 18px;
+  border-bottom: 1px solid var(--border-soft);
+  flex-shrink: 0;
+  cursor: pointer;
+  user-select: none;
+}
+.app-sidebar.collapsed .app-sidebar-logo { justify-content: center; padding: 0; }
+.app-sidebar-logo-icon {
+  font-size: 22px;
+  color: var(--primary);
+  flex-shrink: 0;
+}
+.app-sidebar-logo-text {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  letter-spacing: -0.01em;
+}
+.app-sidebar-logo-accent { color: var(--accent-text); font-weight: 700; }
+
+/* --- Toggle button --- */
+.app-sidebar-toggle {
+  position: absolute;
+  top: 70px;
+  right: -11px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  z-index: 30;
+  box-shadow: var(--shadow-1);
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.app-sidebar-toggle:hover { background: var(--surface-2); color: var(--text); border-color: var(--border-strong); }
+
+/* --- Nav area --- */
+.app-sidebar-nav {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 16px 12px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  scrollbar-width: none;
+}
+.app-sidebar-nav::-webkit-scrollbar { display: none; }
+
+/* --- Group label --- */
+.app-sidebar-group {
+  font-size: var(--fs-kicker, 10px);
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-family: var(--font-mono);
+  padding: 0 12px;
+  margin-top: 18px;
+  margin-bottom: 6px;
+  min-height: 14px;
+  white-space: nowrap;
+}
+.app-sidebar-nav .app-sidebar-group:first-child { margin-top: 0; }
+
+/* --- Nav item --- */
+.app-sidebar-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: var(--radius-md, 8px);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-dim);
+  font-size: var(--fs-body, 13px);
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  position: relative;
+}
+.app-sidebar.collapsed .app-sidebar-item { justify-content: center; padding: 10px; }
+.app-sidebar-item:hover { background: var(--surface); color: var(--text); }
+.app-sidebar-item:hover .app-sidebar-icon { color: var(--text-dim); }
+.app-sidebar-item.active {
+  background: var(--surface);
+  color: var(--accent-text);
+  border-color: var(--border-soft);
+  font-weight: 600;
+  box-shadow: var(--shadow-1);
+}
+.app-sidebar-item.active .app-sidebar-icon { color: var(--accent); }
+
+/* --- Icon --- */
+.app-sidebar-icon {
+  font-size: 17px;
+  flex-shrink: 0;
+  width: 20px;
+  text-align: center;
+  color: var(--text-muted);
+  transition: color 0.15s;
+}
+
+/* --- Label --- */
+.app-sidebar-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* --- Badge --- */
+.app-sidebar-badge {
+  padding: 1px 6px;
+  border-radius: var(--radius-pill);
+  background: var(--accent);
+  color: var(--primary-on);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.5;
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+}
+.app-sidebar.collapsed .app-sidebar-badge { position: absolute; top: 6px; right: 6px; padding: 1px 5px; }
+
+/* --- Footer (admin entry) --- */
+.app-sidebar-footer {
+  padding: 12px;
+  border-top: 1px solid var(--border-soft);
+  flex-shrink: 0;
+}
+
+/* ============================================================
+   Mobile: horizontal scroll bar (≤ 860px)
+   ============================================================ */
+@media (max-width: 860px) {
+  .app-sidebar {
+    width: 100% !important;
+    flex: 0 0 auto;
+    flex-basis: auto !important;
+    height: auto;
+    position: sticky;
+    top: var(--topnav-h, 56px);
+    flex-direction: row;
+    align-items: center;
+    gap: 0;
+    padding: 0 8px;
+    border-right: none;
+    border-bottom: 1px solid var(--border-soft);
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+  }
+  .app-sidebar::-webkit-scrollbar { display: none; }
+  .app-sidebar-logo,
+  .app-sidebar-toggle,
+  .app-sidebar-group,
+  .app-sidebar-footer { display: none; }
+  .app-sidebar-nav { flex-direction: row; flex: 0 0 auto; padding: 8px 4px; gap: 4px; overflow: visible; }
+  .app-sidebar-item { flex-shrink: 0; width: auto; padding: 8px 14px; border-radius: var(--radius-pill); gap: 6px; font-size: 13px; }
+  .app-sidebar-item.active { box-shadow: none; }
+  .app-sidebar-label { display: inline; white-space: nowrap; }
+  .app-sidebar-badge { position: static; }
+  .app-sidebar.collapsed .app-sidebar-item { justify-content: flex-start; padding: 8px 14px; }
+  .app-sidebar.collapsed .app-sidebar-label { display: inline; }
+  .app-sidebar.collapsed .app-sidebar-badge { position: static; }
+}
+
+/* ============================================================
+   app-shell — Guide / Scheduled 等非 Dashboard 页面的
+   侧边栏 + 主内容区包裹容器
+   ============================================================ */
+.app-shell { display: flex; flex: 1; width: 100%; align-items: stretch; overflow: hidden; }
+.app-shell-main { flex: 1; min-width: 0; overflow-y: auto; height: calc(100vh - var(--topnav-h, 56px)); }
+@media (max-width: 860px) {
+  .app-shell { flex-direction: column; }
+  .app-shell-main { height: auto; overflow-y: visible; }
+}

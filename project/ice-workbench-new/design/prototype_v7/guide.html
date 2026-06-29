@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>使用指南 · ICE Workbench v7</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <link rel="stylesheet" href="_shared/tokens.css" />
+  <link rel="stylesheet" href="_shared/components.css" />
+  <link rel="stylesheet" href="_shared/shell.css" />
+  <style>
+    .guide-body { display: grid; grid-template-columns: 240px 1fr 200px; min-height: 0; flex: 1; }
+    .guide-toc { border-right: 1px solid var(--border-soft); background: var(--bg-tint); padding: var(--gap-6) var(--gap-4); position: sticky; top: var(--topnav-h); height: calc(100vh - var(--topnav-h)); overflow-y: auto; }
+    .toc-group { font-family: var(--font-mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--text-muted); font-weight: 600; padding: 16px 10px 6px; }
+    .toc-item { display: block; padding: 6px 10px; border-radius: var(--r-sm); font-size: var(--fs-sm); color: var(--text-dim); cursor: pointer; }
+    .toc-item:hover { background: var(--surface); color: var(--text); }
+    .toc-item.is-active { background: var(--surface); color: var(--accent-text); font-weight: 600; box-shadow: var(--shadow-1); }
+
+    .guide-content { padding: var(--gap-8) var(--gap-9); max-width: 760px; }
+    .guide-content h1 { font-family: var(--font-serif); font-size: 32px; font-weight: 500; color: var(--text); margin-bottom: 8px; }
+    .guide-lead { color: var(--text-dim); font-size: 15px; line-height: 1.7; margin-bottom: 32px; }
+    .guide-content h2 { font-family: var(--font-serif); font-size: 22px; font-weight: 500; color: var(--text); margin: 36px 0 14px; padding-top: 12px; }
+    .guide-content p { color: var(--text-2); line-height: 1.75; margin-bottom: 14px; font-size: 14px; }
+    .guide-content ul { margin: 0 0 16px; padding-left: 4px; }
+    .guide-content li { display: flex; gap: 10px; color: var(--text-2); line-height: 1.7; margin-bottom: 8px; font-size: 14px; }
+    .guide-content li i[class*="ph"] { color: var(--accent); margin-top: 4px; flex: none; }
+    .step-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 20px 0; }
+    .step-card { padding: 18px; border-radius: var(--r-lg); background: var(--surface); border: 1px solid var(--border-soft); }
+    .step-card .n { width: 26px; height: 26px; border-radius: 8px; background: var(--accent-soft); color: var(--accent-text); display: grid; place-items: center; font-weight: 700; font-family: var(--font-mono); margin-bottom: 10px; }
+    .step-card h4 { font-size: 14px; color: var(--text); margin-bottom: 4px; }
+    .step-card p { font-size: 12px; color: var(--text-muted); margin: 0; }
+    .callout { display: flex; gap: 12px; padding: 14px 16px; border-radius: var(--r-md); background: var(--accent-tint); border: 1px solid var(--accent-soft); margin: 18px 0; }
+    .callout .ico { color: var(--accent); font-size: 18px; flex: none; }
+    .callout p { margin: 0; font-size: 13px; color: var(--text-2); }
+    .onthispage { position: sticky; top: var(--topnav-h); height: calc(100vh - var(--topnav-h)); padding: var(--gap-7) var(--gap-4); font-size: var(--fs-xs); }
+    .onthispage .label { text-transform: uppercase; letter-spacing: .1em; color: var(--text-muted); font-family: var(--font-mono); font-size: 10px; margin-bottom: 10px; }
+    .onthispage a { display: block; padding: 5px 0; color: var(--text-muted); border-left: 2px solid var(--border); padding-left: 12px; }
+    .onthispage a.is-active { color: var(--accent-text); border-left-color: var(--accent); }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topnav">
+      <a class="topnav-brand" href="dashboard.html"><span class="logo-mark"><i class="ph-fill ph-hexagon"></i></span><span class="brand-name"><b>ICE</b> Workbench</span></a>
+      <div class="topnav-crumb" style="margin-left:8px"><a class="back" href="dashboard.html"><i class="ph ph-arrow-left"></i> 首页</a><span class="sep">/</span><span class="current">使用指南</span></div>
+      <div class="topnav-right"><input class="input" style="width:220px;height:32px" placeholder="搜索文档…" /></div>
+    </header>
+
+    <div class="guide-body">
+      <aside class="guide-toc">
+        <div class="toc-group">入门</div>
+        <a class="toc-item is-active">快速上手</a>
+        <a class="toc-item">核心概念</a>
+        <a class="toc-item">创建第一个任务</a>
+        <div class="toc-group">核心功能</div>
+        <a class="toc-item">Workspace 工作区</a>
+        <a class="toc-item">引用文件与知识库</a>
+        <a class="toc-item">Plan Mode 计划模式</a>
+        <a class="toc-item">多人协作</a>
+        <div class="toc-group">进阶</div>
+        <a class="toc-item">定时任务与日报</a>
+        <a class="toc-item">经验卡片沉淀</a>
+        <a class="toc-item">Agent &amp; Skill</a>
+      </aside>
+
+      <main class="guide-content">
+        <h1>快速上手</h1>
+        <p class="guide-lead">ICE Workbench 是一个基于 Agent 范式的智能数据工作台。本指南帮你在 5 分钟内完成第一个数据分析任务。</p>
+
+        <h2 id="s1">三步开始</h2>
+        <div class="step-cards">
+          <div class="step-card"><div class="n">1</div><h4>选择 Agent</h4><p>在首页选一个专业 Agent，或从范式新建。</p></div>
+          <div class="step-card"><div class="n">2</div><h4>描述需求</h4><p>用自然语言说清你想分析什么。</p></div>
+          <div class="step-card"><div class="n">3</div><h4>查看结论</h4><p>Agent 自动取数、计算并产出图表结论。</p></div>
+        </div>
+
+        <h2 id="s2">核心概念</h2>
+        <p>理解这几个概念，能让你更高效地使用工作台：</p>
+        <ul>
+          <li><i class="ph ph-circle-wavy-check"></i><span><b>范式（Paradigm）</b>：决定 Agent 的默认工具集与输出模版，如 data / ab / biz。</span></li>
+          <li><i class="ph ph-robot"></i><span><b>Agent</b>：在某个范式下、带专业 prompt 与知识库的智能体。</span></li>
+          <li><i class="ph ph-puzzle-piece"></i><span><b>Skill</b>：可复用的子流程，挂载到 Agent 上扩展能力。</span></li>
+          <li><i class="ph ph-folder"></i><span><b>任务（Task）</b>：一次完整的分析会话，包含对话、文件与产物。</span></li>
+        </ul>
+
+        <div class="callout">
+          <i class="ph-fill ph-lightbulb ico"></i>
+          <p><b>小技巧：</b>在对话框输入 <kbd>@</kbd> 可以快速引用已上传的文件，输入 <kbd>/</kbd> 唤起指令菜单。</p>
+        </div>
+
+        <h2 id="s3">创建第一个任务</h2>
+        <p>点击右上角「+ 新任务」，选择「数据分析」范式与「数据分析师」Agent，输入你的需求，例如「帮我统计上周各渠道的次日留存」。进入 Workspace 后，Agent 会先确认数据口径，再自动生成 SQL 并执行。整个过程在右侧执行台实时可见。</p>
+        <div style="display:flex;gap:10px;margin-top:24px">
+          <a class="btn btn-primary" href="create_task.html"><i class="ph ph-plus"></i> 创建任务</a>
+          <a class="btn btn-secondary" href="workspace.html">查看 Workspace 示例</a>
+        </div>
+      </main>
+
+      <aside class="onthispage">
+        <div class="label">本页目录</div>
+        <a class="is-active" href="#s1">三步开始</a>
+        <a href="#s2">核心概念</a>
+        <a href="#s3">创建第一个任务</a>
+      </aside>
+    </div>
+  </div>
+</body>
+</html>

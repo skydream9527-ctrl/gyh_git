@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>核心点｜ICE Data Workbench v3</title>
+    <meta name="description" content="ICE Data Workbench v3 核心点介绍：Agent Kernel、文件优先架构、LLM Gateway、错误恢复、记忆系统与部署安全。" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <nav class="nav-shell" aria-label="项目介绍导航">
+        <a class="brand" href="./index.html"><span class="brand-mark">✦</span><span>ICE Data Workbench</span></a>
+        <div class="nav-links">
+          <a href="./index.html">总览</a>
+          <a href="./features.html">核心功能</a>
+          <a class="active" href="./core.html">核心点</a>
+          <a href="./highlights.html">项目亮点</a>
+        </div>
+        <a class="nav-cta" href="./highlights.html">看亮点</a>
+      </nav>
+    </header>
+
+    <main class="page">
+      <section class="hero compact">
+        <div>
+          <span class="eyebrow">Core Mechanics</span>
+          <h1>真正的核心，是一套<span class="accent">可控的 Agent 工程系统</span>。</h1>
+        </div>
+        <p class="lead">
+          ICE 不是把聊天框套在数据工具上，而是围绕 Agent 执行、工具调用、上下文、记忆、权限和部署可运维性建立闭环。
+        </p>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <h2>Agent Kernel</h2>
+          <p class="section-intro">统一 Kernel 将 LLM 回复、工具调用、计划审批、子 Agent、后台任务和压缩策略纳入同一条运行链路。</p>
+        </div>
+        <div class="card-grid three">
+          <article class="point-card reveal" style="--glow: var(--amber-soft)">
+            <span class="card-number">Kernel 01</span>
+            <h3>有边界的 ReAct 循环</h3>
+            <p>工具调用轮次有默认上限与硬上限，避免无限循环；主对话、子 Agent、后台任务走统一协议。</p>
+            <ul>
+              <li>默认工具调用轮次可由后台配置</li>
+              <li>超时、取消和二次输入有明确保护</li>
+              <li>工具结果回灌 LLM 并保留审计轨迹</li>
+            </ul>
+          </article>
+          <article class="point-card reveal" style="--glow: var(--cyan-soft)">
+            <span class="card-number">Kernel 02</span>
+            <h3>Plan Mode 与人工介入</h3>
+            <p>复杂任务先进入只读规划，Agent 输出方案后等待用户审核；需要关键输入时可请求人工补充。</p>
+            <ul>
+              <li>降低误写文件和误发消息风险</li>
+              <li>适合需求不清晰或影响面较大的任务</li>
+              <li>计划、待办和执行进度可联动</li>
+            </ul>
+          </article>
+          <article class="point-card reveal" style="--glow: var(--rose-soft)">
+            <span class="card-number">Kernel 03</span>
+            <h3>子 Agent 与并行工具</h3>
+            <p>通用 Agent 可派单给专业 Agent，数据分析 Agent 也可派发波动、知识库等任务；并行机制用于缩短多命题分析耗时。</p>
+            <ul>
+              <li>按 task_id / conv_id 控制运行中状态</li>
+              <li>spawn_targets 描述可委派对象</li>
+              <li>并行工具和后台任务通过特性开关灰度</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <h2>文件优先架构</h2>
+          <p class="section-intro">G3 的关键价值是“可迁移、可热更新、可自托管”：核心数据以文件目录为真源，SQLite 作为索引和查询加速。</p>
+        </div>
+        <div class="split-panel">
+          <article class="large-panel reveal">
+            <span class="tag green">G3 File-first</span>
+            <h3>数据不是黑盒数据库资产</h3>
+            <p>用户、任务、文件、Agent、Skill、运行缓存都映射到清晰目录。部署升级时明确保护 users、tasks、files、agents、skills、.cache 与 .env。</p>
+            <div class="mini-list">
+              <div class="mini-card"><strong>任务可携带</strong><span>一个任务目录就包含对话、文件、产物、工具调用和日志。</span></div>
+              <div class="mini-card"><strong>写入可审计</strong><span>对话消息、工具调用、审计日志采用 append-heavy JSONL，避免大 JSON 锁竞争。</span></div>
+              <div class="mini-card"><strong>热更新友好</strong><span>打包和部署脚本默认不覆盖运行时用户数据和密钥。</span></div>
+            </div>
+          </article>
+          <article class="flow-panel reveal">
+            <div class="matrix">
+              <div class="matrix-row"><b>users/</b><p>用户资料、偏好和权限相关文件。</p></div>
+              <div class="matrix-row"><b>tasks/</b><p>任务上下文、会话、产物、工具日志。</p></div>
+              <div class="matrix-row"><b>files/</b><p>团队公共文件、指南、规范、方法论。</p></div>
+              <div class="matrix-row"><b>agents/</b><p>Agent 配置、Prompt、知识和默认 Skills。</p></div>
+              <div class="matrix-row"><b>skills/</b><p>Skill 元数据、说明、脚本和外部工具能力。</p></div>
+              <div class="matrix-row"><b>SQLite</b><p>列表、检索和索引缓存；内容仍以文件为准。</p></div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <h2>模型、工具与错误恢复</h2>
+          <p class="section-intro">项目把“模型不可控”和“工具可能失败”作为工程事实处理，而不是隐藏在 Prompt 里。</p>
+        </div>
+        <div class="card-grid three">
+          <article class="point-card reveal" style="--glow: var(--cyan-soft)">
+            <span class="tag cyan">LLM Gateway</span>
+            <h3>多协议统一事件流</h3>
+            <p>按模型 ID 前缀路由到不同协议适配器，对上游统一输出 text、tool_use_delta、message_done 等内部事件。</p>
+          </article>
+          <article class="point-card reveal" style="--glow: var(--amber-soft)">
+            <span class="tag">Tool Contract</span>
+            <h3>工具失败不崩服务</h3>
+            <p>Kyuubi、飞书、Mify 等外部 CLI 缺失时返回 NOT_CONFIGURED / NOT_INSTALLED，不阻塞系统启动。</p>
+          </article>
+          <article class="point-card reveal" style="--glow: var(--rose-soft)">
+            <span class="tag rose">Error Envelope</span>
+            <h3>错误结构化归一</h3>
+            <p>服务端用统一错误包，工具结果标记 success / error_code；后续可扩展 recoverable 与 suggested_action。</p>
+          </article>
+        </div>
+        <div class="matrix" style="margin-top: 18px">
+          <div class="matrix-row reveal"><b>超时控制</b><p>工具执行设置 timeout floor 与硬上限，子 Agent 和长任务不会无限占用资源。</p></div>
+          <div class="matrix-row reveal"><b>取消机制</b><p>WebSocket 断开不直接取消运行，显式 abort 才会触发 cancel event。</p></div>
+          <div class="matrix-row reveal"><b>参数校验</b><p>优化方向中规划工具调用前 JSON Schema 校验，减少 LLM 幻觉参数。</p></div>
+          <div class="matrix-row reveal"><b>链路追踪</b><p>路线图中规划 tool trace_id、工具成功率和错误类型统计，用于优化 Prompt 和工具设计。</p></div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <h2>记忆与知识进化</h2>
+          <p class="section-intro">ICE 将“这次分析得出的经验”变成下一次 Agent 能用的上下文，而不是只停留在聊天记录里。</p>
+        </div>
+        <div class="flow-panel reveal">
+          <div class="flow-line">
+            <div class="flow-step"><b>Capture</b><strong>沉淀经验</strong><span>用户对优秀回复点击 💡，补充标题、摘要和标签。</span></div>
+            <div class="flow-step"><b>Review</b><strong>管理员审核</strong><span>经验卡片进入后台审核队列，避免低质量知识污染。</span></div>
+            <div class="flow-step"><b>Inject</b><strong>注入 Agent</strong><span>批准后的经验卡进入 Agent 知识库，下次自动检索。</span></div>
+            <div class="flow-step"><b>Rank</b><strong>生命周期</strong><span>BM25、recency、confidence、使用次数共同影响召回。</span></div>
+            <div class="flow-step"><b>Evolve</b><strong>团队记忆</strong><span>个人记忆可晋升为团队知识，形成组织级复用资产。</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <h2>安全、权限与部署</h2>
+          <p class="section-intro">项目适合内部数据工作台场景，围绕登录、权限、沙箱、密钥和自托管做了明确约束。</p>
+        </div>
+        <div class="card-grid four">
+          <article class="point-card reveal"><span class="tag">Auth</span><h3>双认证链路</h3><p>支持 JWT 与 Aegis 代理头，Feishu 首次登录可自动建号或严格白名单。</p></article>
+          <article class="point-card reveal"><span class="tag cyan">Roles</span><h3>三层角色</h3><p>super_admin、admin、user 分层管理，super_admin 要求 Feishu OAuth。</p></article>
+          <article class="point-card reveal"><span class="tag rose">Sandbox</span><h3>Python 隔离</h3><p>分析代码运行在独立 venv，限制 CPU、内存、文件大小、网络和敏感环境变量。</p></article>
+          <article class="point-card reveal"><span class="tag green">Deploy</span><h3>自托管友好</h3><p>支持 deploy.sh、make pack、Docker Compose；.env 不随包扩散，密钥部署后补齐。</p></article>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">核心点 · ICE Data Workbench v3 · <span data-year></span></footer>
+    <script src="./app.js"></script>
+  </body>
+</html>

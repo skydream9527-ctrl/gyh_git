@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+html { background: #ffffff; }
+body {
+  width: 720pt; height: 405pt; margin: 0; padding: 0;
+  background: #1a1a1a;
+  font-family: Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+}
+.header {
+  background: #2d2d2d;
+  padding: 12pt 40pt;
+  border-bottom: 2pt solid #00d4ff;
+}
+.header h1 {
+  color: #00d4ff;
+  font-size: 26pt;
+  margin: 0;
+}
+.content {
+  padding: 15pt 40pt 30pt 40pt;
+  flex: 1;
+}
+.card {
+  background: #2d2d2d;
+  padding: 12pt;
+  margin-bottom: 10pt;
+  border-radius: 8pt;
+  border-left: 3pt solid #00d4ff;
+}
+.card h2 {
+  color: #00d4ff;
+  font-size: 14pt;
+  margin: 0 0 6pt 0;
+}
+.card p {
+  color: #ffffff;
+  font-size: 12pt;
+  margin: 3pt 0;
+}
+.highlight {
+  color: #10b981;
+  font-weight: bold;
+}
+.warning {
+  color: #f59e0b;
+  font-weight: bold;
+}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>📊 执行概览</h1>
+</div>
+<div class="content">
+  <div class="card">
+    <h2>任务完成情况</h2>
+    <p><span class="highlight">✅ SQL生成：</span>16个SQL文件</p>
+    <p><span class="highlight">✅ 数据查询：</span>5个模块成功</p>
+    <p><span class="highlight">✅ 分析报告：</span>已生成</p>
+  </div>
+  <div class="card">
+    <h2>关键数据</h2>
+    <p><span class="highlight">DAU提升：</span>6.47%</p>
+    <p><span class="highlight">留存率：</span>提升最高20%</p>
+    <p><span class="warning">⚠️ 数据完整性：</span>5/8模块</p>
+  </div>
+</div>
+</body>
+</html>

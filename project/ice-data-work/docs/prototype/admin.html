@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ICE-DATA-WORK · 管理后台</title>
+  <link rel="stylesheet" href="assets/app.css" />
+</head>
+<body data-page="admin" data-title="管理后台">
+  <div class="app">
+    <aside id="side" class="sidebar"></aside>
+    <main class="main">
+      <div id="top"></div>
+
+      <div class="page-head">
+        <div>
+          <div class="eyebrow">Admin · admin+</div>
+          <h1>管理后台：用户、Agent/Skill、团队项目、用量与系统设置。</h1>
+          <p class="subtle">沿用 ICE 后台能力，新增团队/项目管理。角色编辑限 super_admin。</p>
+        </div>
+        <button class="btn">系统诊断</button>
+      </div>
+
+      <div class="tabs">
+        <span class="tab active">概览</span><span class="tab">用户</span><span class="tab">Agent / Skill</span><span class="tab">团队 / 项目</span><span class="tab">用量与成本</span><span class="tab">审核中心</span><span class="tab">系统设置</span>
+      </div>
+
+      <div class="grid cols-4">
+        <div class="stat"><b>142</b><span>用户</span></div>
+        <div class="stat"><b>6</b><span>团队</span></div>
+        <div class="stat"><b>18</b><span>项目</span></div>
+        <div class="stat"><b>1.2M</b><span>本周 Token</span></div>
+      </div>
+
+      <div class="grid cols-2 section-gap">
+        <div class="card"><div class="card-head"><h2>用户管理</h2><button class="btn sm">新增用户</button></div>
+          <div class="table">
+            <div class="row header"><div>用户</div><div>平台角色</div><div>团队</div><div>Twin</div><div>操作</div></div>
+            <div class="row"><div><strong>云鹤</strong><span>yunhe@xiaomi</span></div><div>admin</div><div>增长数据</div><div><span class="pill blue">L3</span></div><button class="btn sm">编辑</button></div>
+            <div class="row"><div><strong>王工</strong><span>wang@xiaomi</span></div><div>super_admin</div><div>增长数据(owner)</div><div><span class="pill blue">L4</span></div><button class="btn sm">编辑</button></div>
+            <div class="row"><div><strong>张敏</strong><span>zhang@xiaomi</span></div><div>user</div><div>增长数据</div><div><span class="pill slate">L2</span></div><button class="btn sm">编辑</button></div>
+          </div>
+        </div>
+        <div class="card"><div class="card-head"><h2>团队 / 项目管理</h2><button class="btn sm">新建团队</button></div>
+          <div class="card-body list">
+            <div class="list-item compact"><div><strong>增长数据团队</strong><span>owner: 王工 · 3 项目 · 14 成员</span></div><a class="btn sm" href="team.html">管理</a></div>
+            <div class="list-item compact"><div><strong>风控数据团队</strong><span>owner: 刘工 · 2 项目 · 9 成员</span></div><button class="btn sm">管理</button></div>
+          </div>
+        </div>
+        <div class="card"><div class="card-head"><h2>Agent / Skill</h2><a class="btn sm" href="agents.html">Agent Hub</a></div>
+          <div class="card-body list">
+            <div class="list-item compact"><div><strong>Data Agent</strong><span>Prompt v7 · 4 Tab 编辑 · 沙盒</span></div><a class="btn sm" href="agent-detail.html">编辑</a></div>
+            <div class="list-item compact"><div><strong>kyuubi / nl-python skills</strong><span>JSON schema 校验 + test-run</span></div><button class="btn sm">管理</button></div>
+          </div>
+        </div>
+        <div class="card"><div class="card-head"><h2>审核中心</h2><span class="pill amber">5 待办</span></div>
+          <div class="card-body list">
+            <div class="list-item compact"><div><strong>团队经验晋升审核</strong><span>Data Agent by-team 新增 2 条。</span></div><button class="btn sm">审核</button></div>
+            <div class="list-item compact"><div><strong>公共任务 / 模板审核</strong><span>3 条待审。</span></div><button class="btn sm">审核</button></div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <aside id="dock" class="dock"></aside>
+  </div>
+  <script src="assets/shell.js"></script>
+</body>
+</html>

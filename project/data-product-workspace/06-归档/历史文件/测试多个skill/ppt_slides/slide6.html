@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+html { background: #ffffff; }
+body {
+  width: 720pt; height: 405pt; margin: 0; padding: 0;
+  background: #f7fafc;
+  font-family: Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+}
+.header {
+  background: #667eea;
+  padding: 15pt 40pt;
+}
+.header h1 {
+  color: #ffffff;
+  font-size: 28pt;
+  margin: 0;
+}
+.content {
+  padding: 20pt 40pt 30pt 40pt;
+  flex: 1;
+  display: flex;
+}
+.left {
+  flex: 1;
+  padding-right: 15pt;
+}
+.right {
+  flex: 1;
+}
+.highlight-box {
+  background: #ffffff;
+  padding: 15pt;
+  margin-bottom: 12pt;
+  border-radius: 8pt;
+  border-left: 3pt solid #48bb78;
+}
+.highlight-box h3 {
+  color: #2d3748;
+  font-size: 14pt;
+  margin: 0 0 8pt 0;
+}
+.highlight-box p {
+  color: #4a5568;
+  font-size: 12pt;
+  margin: 3pt 0;
+}
+.big-number {
+  color: #48bb78;
+  font-size: 32pt;
+  font-weight: bold;
+}
+.chart-placeholder {
+  background: #e2e8f0;
+  width: 100%;
+  height: 220pt;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8pt;
+}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>🔄 留存指标分析</h1>
+</div>
+<div class="content">
+  <div class="left">
+    <div class="highlight-box">
+      <h3>新用户留存率显著提升</h3>
+      <p>最高提升幅度：</p>
+      <p class="big-number">+20%</p>
+    </div>
+    <div class="highlight-box">
+      <h3>大盘用户</h3>
+      <p>留存率基本持平</p>
+    </div>
+    <div class="highlight-box">
+      <h3>老用户</h3>
+      <p>留存率稳定</p>
+    </div>
+  </div>
+  <div class="right">
+    <div id="chart" class="placeholder chart-placeholder" style="width: 300pt; height: 220pt;"></div>
+  </div>
+</div>
+</body>
+</html>

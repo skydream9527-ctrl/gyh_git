@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html><head><style>
+html { background: #0D1117; }
+body { width: 720pt; height: 405pt; margin: 0; padding: 0; font-family: Arial, sans-serif; display: flex; background-image: url('bg-dark.png'); background-size: cover; }
+.wrap { margin: 36pt 50pt; width: 620pt; }
+.row { display: flex; gap: 0; }
+.cell { padding: 10pt 14pt; border: 1pt solid #21262D; }
+.hdr-cell { background: #1F2937; }
+.demo { background: #1A1E26; }
+.prod { background: #0D1B2A; }
+</style></head><body>
+<div class="wrap">
+  <p style="color: #58A6FF; font-size: 11pt; margin: 0 0 6pt 0;">01 · 开场</p>
+  <h1 style="color: #FFFFFF; font-size: 24pt; margin: 0 0 16pt 0;">Demo 与生产的本质差异</h1>
+  <div style="border-radius: 6pt; overflow: hidden;">
+    <div class="row">
+      <div class="cell hdr-cell" style="width: 290pt;"><p style="color: #F85149; font-size: 13pt; font-weight: bold; margin: 0;">Demo 级别</p></div>
+      <div class="cell hdr-cell" style="width: 290pt;"><p style="color: #58A6FF; font-size: 13pt; font-weight: bold; margin: 0;">生产级别</p></div>
+    </div>
+    <div class="row">
+      <div class="cell demo" style="width: 290pt;"><p style="color: #C9D1D9; font-size: 11pt; margin: 0;">理想场景下跑通流程</p></div>
+      <div class="cell prod" style="width: 290pt;"><p style="color: #C9D1D9; font-size: 11pt; margin: 0;">应对真实业务的复杂场景</p></div>
+    </div>
+    <div class="row">
+      <div class="cell demo" style="width: 290pt;"><p style="color: #C9D1D9; font-size: 11pt; margin: 0;">容忍偶尔出错</p></div>
+      <div class="cell prod" style="width: 290pt;"><p style="color: #C9D1D9; font-size: 11pt; margin: 0;">必须可靠、可控、可观测</p></div>
+    </div>
+    <div class="row">
+      <div class="cell demo" style="width: 290pt;"><p style="color: #C9D1D9; font-size: 11pt; margin: 0;">手动干预即可</p></div>
+      <div class="cell prod" style="width: 290pt;"><p style="color: #C9D1D9; font-size: 11pt; margin: 0;">必须自主处理异常与故障</p></div>
+    </div>
+    <div class="row">
+      <div class="cell demo" style="width: 290pt;"><p style="color: #C9D1D9; font-size: 11pt; margin: 0;">一次性使用</p></div>
+      <div class="cell prod" style="width: 290pt;"><p style="color: #C9D1D9; font-size: 11pt; margin: 0;">持续迭代、安全合规</p></div>
+    </div>
+    <div class="row">
+      <div class="cell demo" style="width: 290pt;"><p style="color: #C9D1D9; font-size: 11pt; margin: 0;">关注"能不能做"</p></div>
+      <div class="cell prod" style="width: 290pt;"><p style="color: #C9D1D9; font-size: 11pt; margin: 0;">关注"做得稳不稳"</p></div>
+    </div>
+    <div class="row" style="border-top: 2pt solid #58A6FF;">
+      <div class="cell" style="width: 290pt; background: #1C1226;"><p style="color: #F85149; font-size: 12pt; font-weight: bold; margin: 0;">5% 工程 + 95% Prompt</p></div>
+      <div class="cell" style="width: 290pt; background: #0D1B2A;"><p style="color: #58A6FF; font-size: 12pt; font-weight: bold; margin: 0;">95% 工程 + 5% Prompt/LLM</p></div>
+    </div>
+  </div>
+</div>
+</body></html>

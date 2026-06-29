@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ICE-DATA-WORK · Agent 详情</title>
+  <link rel="stylesheet" href="assets/app.css" />
+</head>
+<body data-page="agents" data-title="Agent 详情">
+  <div class="app">
+    <aside id="side" class="sidebar"></aside>
+    <main class="main">
+      <div id="top"></div>
+
+      <div class="page-head">
+        <div>
+          <div class="crumb"><a href="agents.html">Agent Hub</a> / Data Agent</div>
+          <div class="eyebrow">Agent Card · data-analysis</div>
+          <h1>Data Agent</h1>
+          <div style="margin:8px 0 4px"><span class="pill blue">● 工作中</span> <span class="subtle" style="font-size:13px">正在：为「DAU 下滑归因」执行 kyuubi_query（2/3）</span></div>
+          <p class="subtle">SQL 查询、指标口径、归因分析、报告草稿。内置工具：kyuubi_query / nl-python / execute_python(沙盒)。</p>
+        </div>
+        <a class="btn primary" href="workspace-data.html">在任务中调用</a>
+      </div>
+
+      <div class="tabs">
+        <span class="tab active">能力</span>
+        <span class="tab">记忆分区</span>
+        <span class="tab">技能 Skills</span>
+        <span class="tab">权限边界</span>
+        <span class="tab">历史表现</span>
+      </div>
+
+      <div class="grid cols-2">
+        <div class="card pad">
+          <h3>能力 / 输入输出</h3>
+          <div class="kv" style="margin-top:10px">
+            <b>能力</b><span>sql_query · attribution · report_draft</span>
+            <b>Skills</b><span>kyuubi · nl-python · data.an</span>
+            <b>输入</b><span>goal + scope（口径/时间/维度）</span>
+            <b>输出</b><span>report(markdown) + findings[]</span>
+            <b>连接</b><span>Built-in（服务端运行时）</span>
+          </div>
+        </div>
+        <div class="card pad">
+          <h3>权限边界</h3>
+          <div class="kv" style="margin-top:10px">
+            <b>默认等级</b><span class="pill green" style="display:inline-flex">L2 只读查询</span>
+            <b>高风险</b><span>大范围导出 / 跨库联表需确认</span>
+            <b>禁止</b><span>写本机文件 / 发消息 / 付费调用</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card section-gap">
+        <div class="card-head"><h2>记忆分区（D-06：定义共享 · 情景记忆按用户分区）</h2><span class="pill violet">Memory</span></div>
+        <div class="card-body grid cols-2">
+          <div class="artifact-card"><span class="pill slate">by-user / 我（私有）</span><h3>我的使用经验</h3><p>「DAU 归因先查版本冷启动耗时，命中率高」「优先输出表格」。仅我可见，不泄漏给同事。</p><button class="btn sm">编辑</button></div>
+          <div class="artifact-card"><span class="pill green">by-team / 增长数据团队（共享）</span><h3>团队共享经验</h3><p>经"贡献给团队"审核后的口径与方法。团队成员调用本 Agent 时可受益。</p><button class="btn sm">查看晋升记录</button></div>
+        </div>
+      </div>
+
+      <div class="card section-gap">
+        <div class="card-head"><h2>技能 Skills（D-13：团队共享 + 我贡献的草稿）</h2><span class="pill green">Skills</span></div>
+        <div class="card-body list">
+          <div class="list-item"><div class="marker">SQL</div><div><strong>kyuubi_query · v3</strong><span>内置 · 团队共享 · 运行时 sql</span></div><div class="actions"><button class="btn sm">沙盒测试</button><button class="btn sm">回滚</button></div></div>
+          <div class="list-item"><div class="marker">PY</div><div><strong>nl-python · v2</strong><span>内置 · 团队共享 · 运行时 python(沙盒)</span></div><div class="actions"><button class="btn sm">沙盒测试</button></div></div>
+          <div class="list-item"><div class="marker">U</div><div><strong>XX 业务 DAU 查询 · v1</strong><span>我贡献的草稿（by-user）· 来源 t_DAU0620 · 入参 date_range/channel</span></div><div class="actions"><span class="pill slate">个人草稿</span><button class="btn sm">沙盒测试</button><button class="btn primary sm" data-modal="contribute-skill">贡献给团队</button></div></div>
+        </div>
+        <div class="card-body" style="border-top:1px solid var(--line)">
+          <strong style="font-size:13px">Agent knowledge（何时用哪个 Skill）</strong>
+          <p class="subtle" style="font-size:12px;margin-top:6px">· 查 XX 业务 DAU → 使用 Skill「XX 业务 DAU 查询」（个人绑定，version +1）<br>· 标准 DAU / 渠道 / 性能 → kyuubi_query</p>
+        </div>
+      </div>
+
+      <div class="card section-gap">
+        <div class="card-head"><h2>历史表现</h2><span class="pill blue">Audit</span></div>
+        <div class="card-body list">
+          <div class="list-item compact"><div><strong>DAU 下滑归因（t_DAU0620）</strong><span>kyuubi_query ×3，可解释占比 72%。</span></div><a class="btn sm" href="workspace-data.html">打开</a></div>
+          <div class="list-item compact"><div><strong>渠道 A 新增归因</strong><span>结论被采纳，沉淀 1 条团队经验。</span></div><span class="pill green">已采纳</span></div>
+        </div>
+      </div>
+    </main>
+    <aside id="dock" class="dock"></aside>
+  </div>
+  <script src="assets/shell.js"></script>
+</body>
+</html>

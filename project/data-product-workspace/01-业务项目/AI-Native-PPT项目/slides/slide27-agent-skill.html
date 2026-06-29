@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html><head><style>
+html { background: #0D1117; }
+body { width: 720pt; height: 405pt; margin: 0; padding: 0; font-family: Arial, sans-serif; display: flex; background-image: url('bg-dark.png'); background-size: cover; }
+.wrap { margin: 36pt 50pt; width: 620pt; }
+.row { display: flex; }
+.cell { padding: 10pt 14pt; border: 1pt solid #21262D; }
+.h-cell { background: #1F2937; }
+</style></head><body>
+<div class="wrap">
+  <p style="color: #58A6FF; font-size: 11pt; margin: 0 0 6pt 0;">04 · 行业前沿</p>
+  <h1 style="color: #FFFFFF; font-size: 22pt; margin: 0 0 6pt 0;">Agent Skill：渐进式披露架构</h1>
+  <p style="color: #8B949E; font-size: 11pt; margin: 0 0 14pt 0;">不是把所有知识塞进 Prompt，而是按需加载</p>
+  <div style="margin-bottom: 14pt;">
+    <div class="row">
+      <div class="cell h-cell" style="width: 80pt;"><p style="color: #8B949E; font-size: 10pt; font-weight: bold; margin: 0;">层级</p></div>
+      <div class="cell h-cell" style="width: 300pt;"><p style="color: #8B949E; font-size: 10pt; font-weight: bold; margin: 0;">加载内容</p></div>
+      <div class="cell h-cell" style="width: 200pt;"><p style="color: #8B949E; font-size: 10pt; font-weight: bold; margin: 0;">Token 消耗</p></div>
+    </div>
+    <div class="row">
+      <div class="cell" style="width: 80pt; background: #161B22;"><p style="color: #79C0FF; font-size: 10pt; margin: 0;">第一层</p></div>
+      <div class="cell" style="width: 300pt; background: #0D1B2A;"><p style="color: #C9D1D9; font-size: 10pt; margin: 0;">仅技能名称和描述</p></div>
+      <div class="cell" style="width: 200pt; background: #1A1E26;"><p style="color: #3FB950; font-size: 10pt; margin: 0;">约 20-50</p></div>
+    </div>
+    <div class="row">
+      <div class="cell" style="width: 80pt; background: #161B22;"><p style="color: #58A6FF; font-size: 10pt; margin: 0;">第二层</p></div>
+      <div class="cell" style="width: 300pt; background: #0D1B2A;"><p style="color: #C9D1D9; font-size: 10pt; margin: 0;">完整 SKILL.md 指令</p></div>
+      <div class="cell" style="width: 200pt; background: #1A1E26;"><p style="color: #F0883E; font-size: 10pt; margin: 0;">&lt; 5,000</p></div>
+    </div>
+    <div class="row">
+      <div class="cell" style="width: 80pt; background: #161B22;"><p style="color: #F0883E; font-size: 10pt; margin: 0;">第三层</p></div>
+      <div class="cell" style="width: 300pt; background: #0D1B2A;"><p style="color: #C9D1D9; font-size: 10pt; margin: 0;">关联的脚本、文档等资源</p></div>
+      <div class="cell" style="width: 200pt; background: #1A1E26;"><p style="color: #F85149; font-size: 10pt; margin: 0;">按需加载</p></div>
+    </div>
+  </div>
+  <div style="display: flex; gap: 14pt;">
+    <div style="flex: 1; background: #161B22; border-radius: 6pt; padding: 12pt; text-align: center;">
+      <p style="color: #3FB950; font-size: 20pt; font-weight: bold; margin: 0;">1000+</p>
+      <p style="color: #8B949E; font-size: 9pt; margin: 4pt 0 0 0;">可装备 Skill 数量</p>
+    </div>
+    <div style="flex: 1; background: #161B22; border-radius: 6pt; padding: 12pt; text-align: center;">
+      <p style="color: #3FB950; font-size: 20pt; font-weight: bold; margin: 0;">60-80%</p>
+      <p style="color: #8B949E; font-size: 9pt; margin: 4pt 0 0 0;">Token 消耗降低</p>
+    </div>
+    <div style="flex: 1; background: #161B22; border-radius: 6pt; padding: 12pt; text-align: center;">
+      <p style="color: #3FB950; font-size: 20pt; font-weight: bold; margin: 0;">按需</p>
+      <p style="color: #8B949E; font-size: 9pt; margin: 4pt 0 0 0;">任务触发时才加载</p>
+    </div>
+  </div>
+</div>
+</body></html>

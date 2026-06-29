@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ICE-DATA-WORK · 知识与产物</title>
+  <link rel="stylesheet" href="assets/app.css" />
+</head>
+<body data-page="knowledge" data-title="知识与产物">
+  <div class="app">
+    <aside id="side" class="sidebar"></aside>
+    <main class="main">
+      <div id="top"></div>
+
+      <div class="page-head">
+        <div>
+          <div class="eyebrow">Knowledge & Artifacts</div>
+          <h1>把过去工作的好文档、报告、总结、记忆候选统一沉淀。</h1>
+          <p class="subtle">分身长期成长的资产库。可按层级筛选：个人 / 项目 / 团队。</p>
+        </div>
+        <button class="btn primary">新增知识</button>
+      </div>
+
+      <div class="toolbar">
+        <span class="pill blue">全部</span>
+        <span class="pill slate">个人</span>
+        <span class="pill slate">项目 p_growth</span>
+        <span class="pill slate">团队</span>
+        <select style="max-width:180px;margin-left:auto"><option>全部类型</option><option>报告</option><option>文档</option><option>记忆</option><option>模板</option></select>
+      </div>
+
+      <div class="grid cols-3">
+        <div class="artifact-card"><span class="pill green">Report · 项目</span><h3>DAU 下滑归因报告</h3><p>数据分析工作台生成，待补查 ANR。</p><a class="btn sm" href="workspace-data.html">打开</a></div>
+        <div class="artifact-card"><span class="pill blue">Doc · 项目</span><h3>口径定义：DAU / 留存</h3><p>沉淀到 p_growth 共享知识。</p><a class="btn sm" href="project.html">打开</a></div>
+        <div class="artifact-card"><span class="pill amber">Memory · 个人</span><h3>偏好：表格优先</h3><p>候选记忆，需确认后进长期记忆。</p><a class="btn sm" href="approvals.html">确认记忆</a></div>
+        <div class="artifact-card"><span class="pill violet">Agent MD · 团队</span><h3>Data Agent 使用说明</h3><p>适用任务、输入格式、失败处理、历史表现。</p><a class="btn sm" href="agent-detail.html">查看</a></div>
+        <div class="artifact-card"><span class="pill blue">Summary · 个人</span><h3>本周工作总结</h3><p>分身基于任务和文档生成的周复盘。</p><button class="btn sm">打开</button></div>
+        <div class="artifact-card"><span class="pill green">Template · 团队</span><h3>AB 实验复盘模板</h3><p>标准化实验复盘工作流。</p><button class="btn sm">复用</button></div>
+      </div>
+    </main>
+    <aside id="dock" class="dock"></aside>
+  </div>
+  <script src="assets/shell.js"></script>
+</body>
+</html>

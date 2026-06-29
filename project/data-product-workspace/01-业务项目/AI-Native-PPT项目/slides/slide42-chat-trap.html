@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html><head><style>
+html { background: #0D1117; }
+body { width: 720pt; height: 405pt; margin: 0; padding: 0; font-family: Arial, sans-serif; display: flex; background-image: url('bg-dark.png'); background-size: cover; }
+.wrap { margin: 32pt 50pt; width: 620pt; }
+.cols { display: flex; gap: 20pt; margin-top: 14pt; }
+.col { flex: 1; }
+.box { background: #161B22; border: 1pt solid #21262D; border-radius: 8pt; padding: 14pt 16pt; }
+.chat-bubble { background: #21262D; border-radius: 6pt; padding: 8pt 12pt; margin-bottom: 8pt; }
+</style></head><body>
+<div class="wrap">
+  <h1 style="color: #FFFFFF; font-size: 22pt; margin: 0 0 4pt 0;">对话式交互 → 提示词的陷阱</h1>
+  <p style="color: #8B949E; font-size: 11pt; margin: 0;">看似丝滑的体验，背后隐藏着巨大的认知差距</p>
+  <div class="cols">
+    <div class="col">
+      <div class="box" style="border-top: 3pt solid #3FB950;">
+        <p style="color: #3FB950; font-size: 14pt; font-weight: bold; margin: 0 0 10pt 0;">场景 A：询问旅游攻略</p>
+        <div class="chat-bubble"><p style="color: #C9D1D9; font-size: 10pt; margin: 0;">"帮我规划一个 5 天的日本旅行攻略"</p></div>
+        <p style="color: #79C0FF; font-size: 16pt; text-align: center; margin: 6pt 0;">↓</p>
+        <div class="chat-bubble"><p style="color: #C9D1D9; font-size: 10pt; margin: 0;">AI 给出详细的行程安排、景点推荐...</p></div>
+        <div style="background: #0B1F0B; border-radius: 4pt; padding: 6pt 10pt; margin-top: 8pt;">
+          <p style="color: #3FB950; font-size: 10pt; margin: 0; text-align: center;">看似非常丝滑 ✓</p>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="box" style="border-top: 3pt solid #F85149;">
+        <p style="color: #F85149; font-size: 14pt; font-weight: bold; margin: 0 0 10pt 0;">场景 B：产品分析（指标变化）</p>
+        <div class="chat-bubble"><p style="color: #C9D1D9; font-size: 10pt; margin: 0;">"帮我分析一下最近 DAU 为什么下降了"</p></div>
+        <p style="color: #79C0FF; font-size: 16pt; text-align: center; margin: 6pt 0;">↓</p>
+        <div class="chat-bubble"><p style="color: #C9D1D9; font-size: 10pt; margin: 0;">AI 给出一堆看似合理的原因分析...</p></div>
+        <div style="background: #1F0B0B; border-radius: 4pt; padding: 6pt 10pt; margin-top: 8pt;">
+          <p style="color: #F85149; font-size: 10pt; margin: 0; text-align: center;">实则有巨大的陷阱 ✗</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div style="display: flex; gap: 10pt; margin-top: 12pt; justify-content: center;">
+    <div style="background: #1F0B0B; border: 1pt solid #F85149; border-radius: 6pt; padding: 6pt 14pt;">
+      <p style="color: #F85149; font-size: 10pt; margin: 0;">无真实数据支撑</p>
+    </div>
+    <div style="background: #1F0B0B; border: 1pt solid #F85149; border-radius: 6pt; padding: 6pt 14pt;">
+      <p style="color: #F85149; font-size: 10pt; margin: 0;">需求理解有歧义</p>
+    </div>
+    <div style="background: #1F0B0B; border: 1pt solid #F85149; border-radius: 6pt; padding: 6pt 14pt;">
+      <p style="color: #F85149; font-size: 10pt; margin: 0;">分析逻辑难验证</p>
+    </div>
+  </div>
+</div>
+</body></html>

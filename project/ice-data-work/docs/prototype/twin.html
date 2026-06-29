@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ICE-DATA-WORK · 数字分身管理</title>
+  <link rel="stylesheet" href="assets/app.css" />
+</head>
+<body data-page="twin" data-title="数字分身管理">
+  <div class="app">
+    <aside id="side" class="sidebar"></aside>
+    <main class="main">
+      <div id="top"></div>
+
+      <div class="page-head">
+        <div>
+          <div class="eyebrow">Twin Manager</div>
+          <h1>管理我的数字分身：画像、记忆、Agent 经验、成本与权限。</h1>
+          <p class="subtle">这里不做具体任务，只管分身如何理解我、如何调用工具、能花多少。Twin = 用户私有 Agent + 特权。</p>
+        </div>
+        <button class="btn danger">暂停我的 Twin</button>
+      </div>
+
+      <div class="grid cols-2">
+        <div class="card"><div class="card-head"><h2>分身画像</h2><span class="pill blue">Maturity 42%</span></div>
+          <div class="card-body list">
+            <div class="list-item compact"><div><strong>工作风格</strong><span>先结论后细节；表格优先；避免炫酷大屏。</span></div><button class="btn sm">编辑</button></div>
+            <div class="list-item compact"><div><strong>当前目标</strong><span>推进 DAU 归因，沉淀可复用分析口径。</span></div><button class="btn sm">编辑</button></div>
+            <div class="list-item compact"><div><strong>不可越权边界</strong><span>不替我最终确认：写文件 / 发消息 / 付费 / 固化记忆。</span></div><button class="btn sm">配置</button></div>
+          </div>
+        </div>
+        <div class="card"><div class="card-head"><h2>权限策略 · L0–L5</h2><span class="pill amber">当前 L3</span></div>
+          <div class="card-body list">
+            <div class="list-item compact"><div><strong>L3 Request Execution</strong><span>可请求调用工具/本地 Agent；写动作仍需我确认。</span></div><span class="pill blue">当前</span></div>
+            <div class="list-item compact"><div><strong>L4 Bounded Autopilot</strong><span>在我设定边界内自动执行低风险任务。</span></div><button class="btn sm">提升</button></div>
+            <div class="list-item compact"><div><strong>高风险例外</strong><span>跨空间读取、固化记忆始终需确认。</span></div><span class="pill amber">锁定</span></div>
+          </div>
+        </div>
+        <div class="card"><div class="card-head"><h2>记忆文件</h2><span class="pill violet">18 条</span></div>
+          <div class="card-body list">
+            <div class="list-item compact"><div><strong>preferences.memory.md</strong><span>表达/输出偏好。</span></div><button class="btn sm">查看</button></div>
+            <div class="list-item compact"><div><strong>decisions.memory.md</strong><span>关键决策（D-01~D-11）。</span></div><button class="btn sm">查看</button></div>
+            <div class="list-item compact"><div><strong>project-context.memory.md</strong><span>增长分析项目上下文。</span></div><button class="btn sm">查看</button></div>
+            <div class="list-item compact"><div><strong>pending（候选）</strong><span>待确认 1 条。</span></div><a class="btn sm" href="approvals.html">去确认</a></div>
+          </div>
+        </div>
+        <div class="card"><div class="card-head"><h2>我对各 Agent 的使用经验</h2><span class="pill slate">by-user 私有</span></div>
+          <div class="card-body list">
+            <div class="list-item compact"><div><strong>Data Agent</strong><span>归因先查冷启动耗时（我的私有经验）。</span></div><a class="btn sm" href="agent-detail.html">查看</a></div>
+            <div class="list-item compact"><div><strong>Codex</strong><span>写文件前务必给 diff 预览。</span></div><button class="btn sm">查看</button></div>
+          </div>
+        </div>
+        <div class="card"><div class="card-head"><h2>Token 与成本</h2><span class="pill amber">本周预算 70%</span></div>
+          <div class="card-body list">
+            <div class="list-item compact"><div><strong>Data Agent</strong><span>本周 38k tokens · 查询 4 次。</span></div><span class="pill green">正常</span></div>
+            <div class="list-item compact"><div><strong>Twin 编排</strong><span>本周 21k tokens。</span></div><span class="pill green">正常</span></div>
+            <div class="list-item compact"><div><strong>Codex（二期）</strong><span>未连接本机 Runtime。</span></div><span class="pill amber">待连接</span></div>
+          </div>
+        </div>
+        <div class="card"><div class="card-head"><h2>成熟度成长</h2><span class="pill blue">42%</span></div>
+          <div class="card-body"><p class="subtle">随任务与记忆累积，分身越来越懂你。当前已学习 18 条记忆、协作 9 个任务。可逐步从 L3 放权到 L4。</p>
+            <div class="chart" style="height:120px;grid-template-columns:repeat(8,1fr)"><div class="bar" style="height:30%"></div><div class="bar" style="height:38%"></div><div class="bar" style="height:42%"></div><div class="bar" style="height:50%"></div><div class="bar" style="height:55%"></div><div class="bar" style="height:62%"></div><div class="bar" style="height:68%"></div><div class="bar" style="height:72%"></div></div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <aside id="dock" class="dock"></aside>
+  </div>
+  <script src="assets/shell.js"></script>
+</body>
+</html>

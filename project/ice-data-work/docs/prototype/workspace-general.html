@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ICE-DATA-WORK · 通用工作台</title>
+  <link rel="stylesheet" href="assets/app.css" />
+</head>
+<body data-page="workspace-general" data-title="通用工作台">
+  <div class="app">
+    <aside id="side" class="sidebar"></aside>
+    <main class="main">
+      <div id="top"></div>
+
+      <div class="page-head">
+        <div>
+          <div class="crumb"><a href="board.html">任务看板</a> / 通用工作台 · p_growth</div>
+          <div class="eyebrow">General Workspace</div>
+          <h1>ICE-DATA-WORK PRD 与原型工作台</h1>
+          <p class="subtle">核心 = 文档 + 多方对话。适合产品方案、代码方案、资料整理等非分析任务。</p>
+        </div>
+        <a class="btn primary" href="knowledge.html">保存为核心产物</a>
+      </div>
+
+      <div class="toolbar">
+        <span class="participants">
+          <span class="chip"><span class="ava me">我</span>云鹤 <small>owner</small></span>
+          <span class="chip"><span class="ava twin">TW</span>我的 Twin <small>L3</small></span>
+          <span class="chip"><span class="ava agent">CX</span>Codex <small>L3 请求</small></span>
+          <button class="btn sm" data-modal="invite-twin">+ 邀请</button>
+        </span>
+        <span style="flex:1"></span>
+        <button class="btn sm" data-drawer="status">任务状态</button>
+        <button class="btn sm" data-drawer="files">文件 / 文档</button>
+        <button class="btn sm" data-drawer="conversations">对话列表</button>
+        <button class="btn sm" data-drawer="timeline">执行记录</button>
+      </div>
+
+      <div class="workspace-shell">
+        <section class="panel">
+          <div class="panel-head"><h2>工作产出物 · PRD 文档</h2><span class="pill green">v1</span></div>
+          <div class="panel-body">
+            <div class="doc-block"><strong>1. 产品定位</strong><p>ICE-DATA-WORK 是人与 AI Agent 共享数据/工作任务看板的团队工作台。每用户拥有一等公民数字分身（Twin）。</p></div>
+            <div class="doc-block"><strong>2. 页面层级</strong>
+              <ul>
+                <li>Workbench：运行任务 / 待确认 / 最近 / 核心产物。</li>
+                <li>数据分析 / 通用 Workspace：产出物 + 多方对话。</li>
+                <li>Twin Manager：画像 / 记忆 / Agent 经验 / Token / 权限。</li>
+              </ul>
+            </div>
+            <div class="doc-block"><strong>3. 空间与记忆</strong><p>四层空间：任务 / Agent / 用户 / 团队项目。Agent 情景记忆按用户分区，显式"贡献给团队"才共享。</p></div>
+            <div class="doc-block"><strong>4. 权限</strong><p>三条正交轴：平台角色 × 成员角色 × Twin L0-L5；高风险动作必须用户确认。</p></div>
+            <div class="actions" style="margin-top:12px"><button class="btn primary">保存为产物…</button><span class="pill slate">最后编辑：刚刚 · 由 Codex</span></div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head"><h2>对话窗口 · 我 + Twin + Codex</h2><span class="pill blue">文档协作</span></div>
+          <div class="panel-body">
+            <div class="chat-stream">
+              <div class="turn"><div class="avatar">我</div><div class="bubble"><strong>User <span class="role">· 我</span></strong><p>把产品 PRD 整理完整，并按实际页面重新设计 HTML。</p></div></div>
+              <div class="turn"><div class="avatar twin">T</div><div class="bubble"><strong>Wisdom Twin <span class="role">· 我的分身</span></strong><p>我会坚持四层空间与三栏 + 常驻分身的结构，并把高风险写文件交给你确认。</p></div></div>
+              <div class="turn"><div class="avatar agent">C</div><div class="bubble"><strong>Codex <span class="role">· 工具 Agent · L3</span></strong><p>已生成 PRD v1 与原型页面。是否写入项目目录？</p><div class="tool-card warn">request_approval · write_file ×16（本机项目目录）· 待确认</div></div></div>
+              <div class="turn"><div class="avatar warn">!</div><div class="bubble"><strong>HITL 确认 <span class="role">· 待你决定</span></strong><p>允许 Codex 写入 16 个文件到项目目录？</p><div class="actions"><a class="btn primary sm" href="approvals.html">确认</a><button class="btn sm">仅预览 diff</button><button class="btn danger sm">拒绝</button></div></div></div>
+            </div>
+          </div>
+          <div class="composer"><textarea placeholder="继续修改 PRD，或 @Codex 调整实现…"></textarea><button class="btn primary">发送</button></div>
+        </section>
+      </div>
+    </main>
+    <aside id="dock" class="dock"></aside>
+  </div>
+  <script src="assets/shell.js"></script>
+</body>
+</html>

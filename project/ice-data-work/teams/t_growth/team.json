@@ -1,0 +1,10 @@
+{
+  "id": "t_growth",
+  "name": "增长数据团队",
+  "members": [
+    {
+      "user_id": "admin",
+      "role": "owner"
+    }
+  ]
+}

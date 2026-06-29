@@ -1,0 +1,22 @@
+# 凭证（必须屏蔽）
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+id_rsa*
+secrets.json
+credentials*.json
+*.token
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# macOS
+.DS_Store
+
+# 编辑器
+*.swp
+.vscode/

@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>项目亮点｜ICE Data Workbench v3</title>
+    <meta name="description" content="ICE Data Workbench v3 项目亮点介绍：业务场景深度、端到端数据分析、团队知识闭环、自托管与未来路线图。" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <nav class="nav-shell" aria-label="项目介绍导航">
+        <a class="brand" href="./index.html"><span class="brand-mark">✦</span><span>ICE Data Workbench</span></a>
+        <div class="nav-links">
+          <a href="./index.html">总览</a>
+          <a href="./features.html">核心功能</a>
+          <a href="./core.html">核心点</a>
+          <a class="active" href="./highlights.html">项目亮点</a>
+        </div>
+        <a class="nav-cta" href="./index.html">回到总览</a>
+      </nav>
+    </header>
+
+    <main class="page">
+      <section class="hero compact">
+        <div>
+          <span class="eyebrow">Project Highlights</span>
+          <h1>亮点不只是功能多，而是<span class="accent">离业务工作流足够近</span>。</h1>
+        </div>
+        <p class="lead">
+          ICE 的价值在于把 Agent 能力、数据工具、知识治理和部署运维收拢成一套团队级产品，而不是一次性的 AI Demo。
+        </p>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <h2>五个最值得讲的亮点</h2>
+          <p class="section-intro">这些亮点适合在项目汇报中作为主线：业务贴合度、端到端链路、可治理、可演进、可部署。</p>
+        </div>
+        <div class="card-grid two">
+          <article class="highlight-card reveal" style="--glow: var(--amber-soft)">
+            <span class="card-number">Highlight 01</span>
+            <h3>任务优先，而不是 Notebook 优先</h3>
+            <p>系统的原子单位是任务。一个任务自然包含需求、文件、对话、工具调用、产物、配置、协作者和审计记录，更贴近真实数据工作交付。</p>
+            <ul>
+              <li>对业务用户来说入口是“我要完成什么”</li>
+              <li>对研发来说 task_id / task_dir 让数据边界更清晰</li>
+              <li>对团队来说公共任务和模板能复用成功路径</li>
+            </ul>
+          </article>
+          <article class="highlight-card reveal" style="--glow: var(--cyan-soft)">
+            <span class="card-number">Highlight 02</span>
+            <h3>Agent 是业务角色，不是抽象机器人</h3>
+            <p>数据分析、AB 实验、灰度版本、知识库、日报推送、数据监控、火山实验等 Agent 都带有明确用例、开场问题、输出类型和工具集。</p>
+            <ul>
+              <li>用户可以按场景选 Agent，而非研究工具列表</li>
+              <li>通用 Agent 可作为入口自动派单</li>
+              <li>专业 Agent 能沉淀 SOP 和领域知识</li>
+            </ul>
+          </article>
+          <article class="highlight-card reveal" style="--glow: var(--rose-soft)">
+            <span class="card-number">Highlight 03</span>
+            <h3>自然语言到数据报告的闭环</h3>
+            <p>用户从“帮我看最近 7 天 DAU”开始，系统可串起 SQL 查询、Python 统计、图表生成、文件产出和飞书发布。</p>
+            <ul>
+              <li>降低 SQL、统计和报告撰写的切换成本</li>
+              <li>中间结果和最终报告保存在任务目录</li>
+              <li>工具调用卡片让执行过程可解释</li>
+            </ul>
+          </article>
+          <article class="highlight-card reveal" style="--glow: var(--green-soft)">
+            <span class="card-number">Highlight 04</span>
+            <h3>经验能审核后进入下一次回答</h3>
+            <p>💡 沉淀为经验、admin 审核、经验卡注入 Agent、记忆检索复用，形成了从个体分析到团队知识的进化闭环。</p>
+            <ul>
+              <li>避免同一类问题每次从零分析</li>
+              <li>审核机制控制知识质量</li>
+              <li>记忆生命周期让旧知识逐步降权</li>
+            </ul>
+          </article>
+        </div>
+        <div class="highlight-card reveal" style="margin-top: 18px; --glow: var(--cyan-soft)">
+          <span class="card-number">Highlight 05</span>
+          <h3>面向真实部署，而不只是本地演示</h3>
+          <p>
+            项目提供 deploy.sh、Makefile、Docker Compose、自托管文档、热更新数据保护、.env 安全策略、健康检查、systemd 示例和 Admin 运维入口。
+            这意味着它可以从本地开发逐步走向团队内部生产使用。
+          </p>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <h2>和普通 AI 数据助手的差异</h2>
+          <p class="section-intro">ICE 的亮点来自产品化取舍：可控、可复用、可解释、可自托管。</p>
+        </div>
+        <div class="matrix">
+          <div class="matrix-row reveal"><b>不是单轮问答</b><p>Workspace 支持文件、会话分支、待办、配置和产物，适合长任务推进。</p></div>
+          <div class="matrix-row reveal"><b>不是单工具封装</b><p>Agent 可调度 SQL、Python、飞书、文件、记忆、子 Agent 和后台任务。</p></div>
+          <div class="matrix-row reveal"><b>不是纯 Prompt</b><p>运行时有工具超时、错误码、inflight guard、沙箱和权限边界。</p></div>
+          <div class="matrix-row reveal"><b>不是黑盒 SaaS</b><p>文件优先、自托管、密钥不打包、运行时数据可迁移，符合内部数据安全诉求。</p></div>
+          <div class="matrix-row reveal"><b>不是固定能力</b><p>Agents、Skills、公共文件、模板、经验卡和系统开关都可持续维护。</p></div>
+          <div class="matrix-row reveal"><b>不是孤岛知识</b><p>对话结果可沉淀为经验、公共任务和模板，形成团队资产复利。</p></div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <h2>近期更新中体现的产品方向</h2>
+          <p class="section-intro">根据优化草稿，项目接下来会重点从 Agent 可信度、对话体验、记忆检索和工程可观测性继续增强。</p>
+        </div>
+        <div class="timeline">
+          <article class="timeline-item reveal">
+            <div class="timeline-date">P0 · 1-2 月</div>
+            <div>
+              <h3>基础体验与可信度修复</h3>
+              <p>修复 Agent 详情页假数据，真实渲染拓扑和工具列表；补充空状态引导、示例问题、Agent 能力说明和工具结果展示。</p>
+            </div>
+          </article>
+          <article class="timeline-item reveal">
+            <div class="timeline-date">P1 · 2-4 月</div>
+            <div>
+              <h3>Agent 能力增强</h3>
+              <p>加强子 Agent 路由、工具注册、错误恢复、向量记忆、SQL 结果表格化展示、API 集成测试和核心组件测试。</p>
+            </div>
+          </article>
+          <article class="timeline-item reveal">
+            <div class="timeline-date">P2 · 4-6 月</div>
+            <div>
+              <h3>协作、生态与连接广度</h3>
+              <p>推进对话分享、飞书文档导出、更多数据源、BI 集成、插件系统、MCP 兼容和更完整的移动端/PWA 体验。</p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <h2>适合汇报时强调的结论</h2>
+          <p class="section-intro">如果要把项目价值压缩成几句话，可以围绕这四个判断展开。</p>
+        </div>
+        <div class="card-grid four">
+          <article class="highlight-card reveal"><span class="tag">Product</span><h3>场景清晰</h3><p>围绕数据团队高频任务设计，而不是泛化办公助手。</p></article>
+          <article class="highlight-card reveal"><span class="tag cyan">Engineering</span><h3>边界清晰</h3><p>Agent 执行、工具、错误、沙箱、权限和数据目录都有工程约束。</p></article>
+          <article class="highlight-card reveal"><span class="tag rose">Team</span><h3>资产清晰</h3><p>公共任务、模板、文件、经验卡让个人产出沉淀为团队复用能力。</p></article>
+          <article class="highlight-card reveal"><span class="tag green">Future</span><h3>路线清晰</h3><p>从体验补齐到 Kernel 增强，再到插件生态和多数据源扩展。</p></article>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">项目亮点 · ICE Data Workbench v3 · <span data-year></span></footer>
+    <script src="./app.js"></script>
+  </body>
+</html>

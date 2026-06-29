@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>定时任务 · ICE Workbench v7</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <link rel="stylesheet" href="_shared/tokens.css" />
+  <link rel="stylesheet" href="_shared/components.css" />
+  <link rel="stylesheet" href="_shared/shell.css" />
+  <style>
+    .sched-list { display: flex; flex-direction: column; gap: var(--gap-4); }
+    .sched-card { display: grid; grid-template-columns: auto 1fr auto auto; align-items: center; gap: var(--gap-5); padding: 16px 20px; }
+    .sched-toggle { width: 40px; height: 22px; border-radius: var(--r-pill); background: var(--success); position: relative; cursor: pointer; flex: none; transition: background var(--transition); }
+    .sched-toggle::after { content: ""; position: absolute; top: 2px; left: 20px; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: var(--shadow-1); transition: left var(--transition); }
+    .sched-toggle.off { background: var(--surface-3); }
+    .sched-toggle.off::after { left: 2px; }
+    .sched-name { font-size: 14px; font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 8px; }
+    .sched-cron { font-family: var(--font-mono); font-size: 11px; color: var(--accent-text); background: var(--accent-soft); padding: 2px 8px; border-radius: var(--r-sm); }
+    .sched-meta { font-size: var(--fs-xs); color: var(--text-muted); margin-top: 5px; display: flex; gap: 12px; }
+    .sched-next { text-align: right; }
+    .sched-next .label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .06em; }
+    .sched-next .time { font-size: var(--fs-body); font-weight: 600; color: var(--text); font-family: var(--font-mono); }
+    .sched-acts { display: flex; gap: 4px; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topnav">
+      <a class="topnav-brand" href="dashboard.html"><span class="logo-mark"><i class="ph-fill ph-hexagon"></i></span><span class="brand-name"><b>ICE</b> Workbench</span></a>
+      <div class="topnav-crumb" style="margin-left:8px"><a class="back" href="dashboard.html"><i class="ph ph-arrow-left"></i> 首页</a><span class="sep">/</span><span class="current">定时任务</span></div>
+      <div class="topnav-right">
+        <button class="btn btn-primary btn-sm"><i class="ph ph-plus"></i> 新建调度</button>
+        <button class="user-pill"><span class="avatar">龚</span><span>龚云鹤</span></button>
+      </div>
+    </header>
+
+    <div class="app-body">
+      <aside class="sidenav">
+        <div class="sidenav-group">工作区</div>
+        <a class="sidenav-item" href="dashboard.html"><i class="ph ph-lightning"></i> 快速开始</a>
+        <a class="sidenav-item" href="dashboard.html"><i class="ph ph-clipboard-text"></i> 我的任务</a>
+        <a class="sidenav-item" href="dashboard.html"><i class="ph ph-globe"></i> 团队公共区</a>
+        <div class="sidenav-group">资源</div>
+        <button class="sidenav-item is-active"><i class="ph ph-timer"></i> 定时任务 <span class="badge">2</span></button>
+        <a class="sidenav-item" href="guide.html"><i class="ph ph-book-open"></i> 使用指南</a>
+      </aside>
+
+      <main class="main">
+        <div class="page-head">
+          <div class="page-head-left">
+            <span class="kicker">Automation</span>
+            <h1>定时任务</h1>
+            <p>按 Cron 周期自动触发任务执行，结果可推送到飞书。共 2 个调度，1 个已启用。</p>
+          </div>
+          <div class="page-head-actions">
+            <div class="segmented"><button class="is-active">全部</button><button>已启用</button><button>已停用</button></div>
+            <button class="btn btn-primary"><i class="ph ph-plus"></i> 新建调度</button>
+          </div>
+        </div>
+
+        <div class="sched-list">
+          <div class="card card-hover sched-card">
+            <div class="sched-toggle"></div>
+            <div>
+              <div class="sched-name">每日 DAU / 留存监控 <span class="chip data">data</span></div>
+              <div class="sched-meta">
+                <span class="sched-cron">0 9 * * *</span>
+                <span><i class="ph ph-arrow-bend-down-right"></i> 拉取昨日核心指标并推送飞书群</span>
+              </div>
+            </div>
+            <div class="sched-next">
+              <div class="label">下次触发</div>
+              <div class="time">明天 09:00</div>
+            </div>
+            <div class="sched-acts">
+              <button class="icon-btn" title="立即运行"><i class="ph ph-play"></i></button>
+              <button class="icon-btn" title="编辑"><i class="ph ph-pencil-simple"></i></button>
+              <button class="icon-btn" title="历史"><i class="ph ph-clock-counter-clockwise"></i></button>
+              <button class="icon-btn" title="删除"><i class="ph ph-trash"></i></button>
+            </div>
+          </div>
+
+          <div class="card sched-card" style="opacity:.72">
+            <div class="sched-toggle off"></div>
+            <div>
+              <div class="sched-name">周度经营复盘日报 <span class="chip biz">biz</span></div>
+              <div class="sched-meta">
+                <span class="sched-cron">0 10 * * 1</span>
+                <span><i class="ph ph-arrow-bend-down-right"></i> 每周一汇总上周 GMV / ARPU 复盘</span>
+              </div>
+            </div>
+            <div class="sched-next">
+              <div class="label">状态</div>
+              <div class="time" style="color:var(--text-muted)">已停用</div>
+            </div>
+            <div class="sched-acts">
+              <button class="icon-btn" title="启用"><i class="ph ph-play"></i></button>
+              <button class="icon-btn" title="编辑"><i class="ph ph-pencil-simple"></i></button>
+              <button class="icon-btn" title="历史"><i class="ph ph-clock-counter-clockwise"></i></button>
+              <button class="icon-btn" title="删除"><i class="ph ph-trash"></i></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 运行历史 -->
+        <section style="margin-top:var(--gap-6)">
+          <div class="section-head"><div><h2>最近运行</h2><div class="desc">每日 DAU / 留存监控</div></div></div>
+          <div class="card" style="overflow:hidden">
+            <div style="display:grid;grid-template-columns:auto 1fr auto auto;gap:16px;padding:12px 20px;border-bottom:1px solid var(--border-soft);font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);font-family:var(--font-mono)">
+              <span>状态</span><span>触发时间</span><span>耗时</span><span>产物</span>
+            </div>
+            <div style="display:grid;grid-template-columns:auto 1fr auto auto;gap:16px;padding:14px 20px;border-bottom:1px solid var(--border-soft);align-items:center;font-size:var(--fs-sm)">
+              <span class="status-pill done"><span class="dot"></span> 成功</span>
+              <span class="mono" style="color:var(--text-dim)">今天 09:00:02</span>
+              <span class="mono" style="color:var(--text-muted)">38s</span>
+              <a href="workspace.html"><i class="ph ph-file"></i> 3 文件</a>
+            </div>
+            <div style="display:grid;grid-template-columns:auto 1fr auto auto;gap:16px;padding:14px 20px;border-bottom:1px solid var(--border-soft);align-items:center;font-size:var(--fs-sm)">
+              <span class="status-pill done"><span class="dot"></span> 成功</span>
+              <span class="mono" style="color:var(--text-dim)">昨天 09:00:01</span>
+              <span class="mono" style="color:var(--text-muted)">41s</span>
+              <a href="workspace.html"><i class="ph ph-file"></i> 3 文件</a>
+            </div>
+            <div style="display:grid;grid-template-columns:auto 1fr auto auto;gap:16px;padding:14px 20px;align-items:center;font-size:var(--fs-sm)">
+              <span class="status-pill error"><span class="dot"></span> 失败</span>
+              <span class="mono" style="color:var(--text-dim)">前天 09:00:03</span>
+              <span class="mono" style="color:var(--text-muted)">12s</span>
+              <a href="#" style="color:var(--error)"><i class="ph ph-warning"></i> 数据源超时</a>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+</body>
+</html>

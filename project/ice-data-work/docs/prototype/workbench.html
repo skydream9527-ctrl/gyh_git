@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ICE-DATA-WORK · Workbench</title>
+  <link rel="stylesheet" href="assets/app.css" />
+</head>
+<body data-page="workbench" data-title="Workbench">
+  <div class="app">
+    <aside id="side" class="sidebar"></aside>
+    <main class="main">
+      <div id="top"></div>
+
+      <div class="page-head">
+        <div>
+          <div class="eyebrow">Main Workbench</div>
+          <h1>你的团队 AI 工作台：看见正在运行的任务、待确认的事和下一步。</h1>
+          <p class="subtle">Workbench 是最外层主页，不是具体工作台。它把定时任务、当前对话任务、最近任务、核心产物聚合成可点击入口。</p>
+        </div>
+        <a class="btn primary" href="new-mission.html">新建 Mission</a>
+      </div>
+
+      <div class="hero">
+        <span class="pill blue">User → Wisdom Twin → Agents</span>
+        <h1>今天有 4 类内容值得继续推进</h1>
+        <p>当前项目 <b>p_growth · 增长分析</b>。Twin 已把运行任务、当前对话派生任务、历史产出和核心文档整理为入口。点任务进入数据分析或通用工作台。</p>
+        <div class="hero-actions">
+          <a class="btn primary" href="workspace-data.html">进入数据分析工作台</a>
+          <a class="btn" href="workspace-general.html">进入通用工作台</a>
+          <a class="btn" href="approvals.html">查看待确认（2）</a>
+        </div>
+        <div class="stat-line">
+          <div class="stat"><b>3</b><span>运行中任务</span></div>
+          <div class="stat"><b>2</b><span>待我确认</span></div>
+          <div class="stat"><b>7</b><span>本周核心产物</span></div>
+          <div class="stat"><b>L3</b><span>当前 Twin 权限</span></div>
+        </div>
+      </div>
+
+      <div class="grid cols-2 section-gap">
+        <div class="card"><div class="card-head"><h2>定时任务</h2><span class="pill amber">Autopilot · 二期</span></div>
+          <div class="card-body list">
+            <div class="list-item"><div class="marker">D</div><div><strong>每日 DAU 波动巡检</strong><span>每天 10:00 自动查询核心指标；异常时请求确认。</span></div><a class="btn sm" href="workspace-data.html">打开</a></div>
+            <div class="list-item"><div class="marker">W</div><div><strong>每周知识沉淀</strong><span>整理一周任务产物，生成总结与 Memory Candidate。</span></div><a class="btn sm" href="knowledge.html">打开</a></div>
+          </div>
+        </div>
+        <div class="card"><div class="card-head"><h2>当前一次对话的任务</h2><span class="pill blue">Current</span></div>
+          <div class="card-body list">
+            <div class="list-item"><div class="marker">A</div><div><strong>浏览器 6.20 DAU 下滑归因 <span class="pill blue">执行中</span></strong><span>现在：Data Agent 执行 kyuubi_query（2/3）</span></div><div class="actions"><button class="btn sm" data-drawer="artifacts">产物 ▸ 3</button><a class="btn primary sm" href="workspace-data.html">进入</a></div></div>
+            <div class="list-item"><div class="marker">P</div><div><strong>ICE-DATA-WORK PRD 与原型 <span class="pill amber">待确认</span></strong><span>待确认：是否允许 Codex 写入 16 个文件</span></div><div class="actions"><button class="btn sm" data-drawer="artifacts">产物 ▸ 2</button><a class="btn sm" href="workspace-general.html">进入</a></div></div>
+          </div>
+        </div>
+        <div class="card"><div class="card-head"><h2>最近任务</h2><span class="pill green">Recent</span></div>
+          <div class="card-body list">
+            <div class="list-item compact"><div><strong>渠道 A 新增归因</strong><span>已生成结论，待沉淀口径记忆。</span></div><a class="btn sm" href="board.html">看板</a></div>
+            <div class="list-item compact"><div><strong>留存分层分析</strong><span>低端机型次留显著回落。</span></div><a class="btn sm" href="workspace-data.html">打开</a></div>
+            <div class="list-item compact"><div><strong>AB 实验复盘模板</strong><span>沉淀为团队可复用工作流。</span></div><a class="btn sm" href="knowledge.html">打开</a></div>
+          </div>
+        </div>
+        <div class="card"><div class="card-head"><h2>核心产物</h2><span class="pill violet">Artifacts</span></div>
+          <div class="card-body grid cols-2">
+            <div class="artifact-card"><div class="actions"><span class="pill green">Report</span><span class="pill amber">草稿</span></div><h3>DAU 下滑归因报告</h3><p>数据分析工作台产出，可继续补查 ANR。</p><a class="btn sm" href="workspace-data.html">进入工作台</a></div>
+            <div class="artifact-card"><div class="actions"><span class="pill blue">Doc</span><span class="pill blue">已发布</span></div><h3>口径定义：DAU/留存</h3><p>已沉淀到项目空间共享知识。</p><a class="btn sm" href="project.html">打开</a></div>
+          </div>
+        </div>
+        <div class="card"><div class="card-head"><h2>在工作的 Agent</h2><span class="pill green">Working</span></div>
+          <div class="card-body list">
+            <div class="list-item"><div class="marker">DA</div><div><strong>Data Agent <span class="pill blue">工作中</span></strong><span>核心能力：SQL 查询与归因 · 正在：执行 kyuubi_query（2/3）</span></div><a class="btn sm" href="agent-detail.html">查看</a></div>
+            <div class="list-item"><div class="marker">TW</div><div><strong>我的 Twin <span class="pill blue">工作中</span></strong><span>核心能力：编排协调 · 正在：汇总结果并请求确认</span></div><a class="btn sm" href="twin.html">查看</a></div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <aside id="dock" class="dock"></aside>
+  </div>
+  <script src="assets/shell.js"></script>
+</body>
+</html>

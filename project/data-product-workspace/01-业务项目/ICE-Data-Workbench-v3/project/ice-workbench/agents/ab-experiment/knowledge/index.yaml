@@ -1,0 +1,49 @@
+version: "2.4"
+description: AB实验分析知识库全局索引（信息流业务 V2.4）
+
+directories:
+  - name: rules
+    description: 分析规则与决策逻辑
+    load_strategy: required
+    files:
+      - aa_rules.yaml           # AA时长、波动阈值、免AA条件
+      - decision_matrix.yaml    # 指标组合→决策映射
+      - rollout_phases.yaml     # 各阶段流量/DAU/时长/跳过规则
+
+  - name: metrics
+    description: 指标定义、数据字典与SQL查询模板
+    load_strategy: required
+    files:
+      - core_metrics.yaml       # 核心指标定义（含 sql_ref 引用）
+      - data_dictionary.yaml    # 表别名、唯一用户ID、实验字段、DAU/新老用户/消费标记
+      - sql_templates/index.yaml  # SQL模板总索引 + 下钻维度汇总
+    on_demand:
+      - tag_id_scene_mapping.yaml      # 收入指标按场景拆分时的 tag_id→产品场景映射
+      - sql_templates/browser_main.yaml    # 浏览器主端指标SQL
+      - sql_templates/browser_feed.yaml    # 浏览器信息流指标SQL
+      - sql_templates/content_center.yaml  # 内容中心指标SQL
+      - sql_templates/common.yaml          # SRM校验等通用SQL、公共表名
+
+  - name: event_tracking
+    description: 埋点事件知识库（SQLite + 索引YAML）
+    load_strategy: on_demand
+    query_method: sqlite3
+    files:
+      - event_tracking.yaml           # 内容中心埋点库 schema + 实验ID字段 + 查询示例
+      - event_tracking.db             # 内容中心埋点 SQLite
+      - browser_event_tracking.yaml   # 浏览器埋点库 schema + 实验ID字段 + 查询示例
+      - browser_event_tracking.db     # 浏览器埋点 SQLite
+
+  - name: analysis
+    description: 分析方法论与历史经验
+    load_strategy: required
+    files:
+      - drill_knowledge.yaml     # 场景模式→假设→下钻维度
+      - cases_and_lessons.yaml   # 历史案例、经验教训（good_cases / bad_cases）
+
+  - name: product_model
+    description: 产品结构模型与报告规范
+    load_strategy: required
+    files:
+      - page_structure.yaml      # 页面元素、卡片、流转关系
+      - report_template.md       # 报告结构、角色自适应规则（Markdown）

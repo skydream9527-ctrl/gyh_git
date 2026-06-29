@@ -1,0 +1,775 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TokenWisdom · Product Pages v2</title>
+  <style>
+    :root {
+      --bg: #f6f4ef;
+      --surface: #ffffff;
+      --surface-soft: #fbfaf7;
+      --ink: #1d252c;
+      --muted: #6f7b84;
+      --faint: #9aa4ab;
+      --line: #e5e1d8;
+      --line-strong: #d5d0c6;
+      --blue: #1f6feb;
+      --blue-soft: #e8f1ff;
+      --green: #168a5a;
+      --green-soft: #e7f6ef;
+      --amber: #a76712;
+      --amber-soft: #fff2d9;
+      --red: #b42318;
+      --red-soft: #ffe8e5;
+      --violet: #6e56cf;
+      --violet-soft: #f0edff;
+      --shadow: 0 18px 50px rgba(29, 37, 44, 0.08);
+      --radius-lg: 24px;
+      --radius: 16px;
+      --radius-sm: 10px;
+      --body: "Avenir Next", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      --mono: "SF Mono", "JetBrains Mono", "Menlo", monospace;
+      --serif: "Songti SC", "STSong", "Noto Serif CJK SC", Georgia, serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 0% 0%, rgba(31, 111, 235, 0.08), transparent 30%),
+        linear-gradient(180deg, #faf9f6 0%, var(--bg) 100%);
+      color: var(--ink);
+      font-family: var(--body);
+    }
+
+    button, input, textarea, select { font: inherit; }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 248px minmax(0, 1fr);
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      padding: 20px 14px;
+      background: rgba(255, 255, 255, 0.82);
+      border-right: 1px solid var(--line);
+      backdrop-filter: blur(18px);
+      overflow: auto;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 10px 18px;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 14px;
+    }
+
+    .logo {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-weight: 800;
+      background: linear-gradient(135deg, #1d252c, #1f6feb);
+      box-shadow: 0 10px 24px rgba(31, 111, 235, 0.20);
+    }
+
+    .brand strong { display: block; font-size: 16px; }
+    .brand span { display: block; color: var(--muted); font-size: 12px; margin-top: 2px; }
+
+    .nav-group { margin: 18px 0; }
+    .nav-label {
+      padding: 0 10px 8px;
+      color: var(--faint);
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .nav-btn {
+      width: 100%;
+      border: 0;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px;
+      margin: 3px 0;
+      color: var(--muted);
+      background: transparent;
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .nav-btn .left { display: flex; align-items: center; gap: 10px; }
+    .nav-btn .icon { width: 22px; text-align: center; }
+    .nav-btn small { color: var(--faint); font-family: var(--mono); font-size: 10px; }
+    .nav-btn:hover { color: var(--ink); background: #f1eee8; }
+    .nav-btn.active { color: var(--ink); background: var(--blue-soft); }
+    .nav-btn.active small { color: var(--blue); }
+
+    .runtime-card {
+      margin: 18px 8px 0;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--surface-soft);
+    }
+
+    .runtime-card .status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--green);
+      box-shadow: 0 0 0 4px rgba(22, 138, 90, 0.12);
+    }
+
+    .runtime-card p { margin: 8px 0 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
+
+    .main {
+      min-width: 0;
+      padding: 20px 26px 40px;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 14px;
+      align-items: center;
+      padding: 10px 0 18px;
+      background: linear-gradient(180deg, rgba(246, 244, 239, 0.98) 0%, rgba(246, 244, 239, 0.82) 80%, transparent 100%);
+      backdrop-filter: blur(12px);
+    }
+
+    .command {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-height: 48px;
+      padding: 0 14px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--surface);
+      box-shadow: 0 8px 28px rgba(29, 37, 44, 0.04);
+    }
+
+    .command kbd {
+      padding: 5px 7px;
+      border-radius: 7px;
+      color: var(--muted);
+      background: #f0ede7;
+      font-family: var(--mono);
+      font-size: 11px;
+    }
+
+    .command span { color: var(--faint); font-size: 14px; }
+
+    .top-actions { display: flex; align-items: center; gap: 8px; }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 32px;
+      padding: 0 10px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--muted);
+      background: var(--surface);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .pill.blue { color: var(--blue); background: var(--blue-soft); border-color: #cbdfff; }
+    .pill.green { color: var(--green); background: var(--green-soft); border-color: #c5ead9; }
+    .pill.amber { color: var(--amber); background: var(--amber-soft); border-color: #f0d29f; }
+    .pill.red { color: var(--red); background: var(--red-soft); border-color: #ffc8c1; }
+
+    .btn {
+      border: 1px solid var(--line-strong);
+      border-radius: 12px;
+      min-height: 38px;
+      padding: 0 13px;
+      background: var(--surface);
+      color: var(--ink);
+      cursor: pointer;
+      font-weight: 650;
+    }
+
+    .btn.primary { border-color: var(--blue); background: var(--blue); color: #fff; }
+    .btn.danger { border-color: #ffcbc4; background: var(--red-soft); color: var(--red); }
+    .btn:hover { transform: translateY(-1px); box-shadow: 0 10px 24px rgba(29, 37, 44, 0.08); }
+
+    .page { display: none; animation: fade 180ms ease; }
+    .page.active { display: block; }
+
+    .page-header {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 18px;
+      align-items: end;
+      margin: 8px 0 20px;
+    }
+
+    .eyebrow {
+      color: var(--blue);
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    h1, h2, h3 { margin: 0; }
+    h1 {
+      font-family: var(--serif);
+      font-size: clamp(30px, 4vw, 48px);
+      line-height: 1.08;
+      letter-spacing: -0.04em;
+    }
+    h2 { font-size: 22px; letter-spacing: -0.02em; }
+    h3 { font-size: 16px; letter-spacing: -0.01em; }
+
+    .subtle { color: var(--muted); line-height: 1.7; font-size: 14px; }
+    .muted { color: var(--muted); }
+    .mono { font-family: var(--mono); }
+
+    .grid { display: grid; gap: 16px; }
+    .grid.cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid.cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .grid.cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .grid.main-side { grid-template-columns: minmax(0, 1fr) 360px; }
+    .grid.room { grid-template-columns: 300px minmax(0, 1fr) 340px; align-items: start; }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: 0 1px 0 rgba(255, 255, 255, 0.9), 0 12px 32px rgba(29, 37, 44, 0.045);
+    }
+
+    .card.pad { padding: 18px; }
+    .card.soft { background: var(--surface-soft); }
+    .card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--line);
+    }
+    .card-body { padding: 18px; }
+
+    .stat {
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--surface);
+    }
+    .stat b { display: block; font-size: 28px; letter-spacing: -0.04em; }
+    .stat span { color: var(--muted); font-size: 13px; }
+
+    .focus-list, .item-list { display: grid; gap: 10px; }
+    .focus-item, .list-item {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--surface);
+    }
+    .list-item.compact { grid-template-columns: minmax(0, 1fr) auto; }
+    .focus-item .marker {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      background: var(--blue-soft);
+      color: var(--blue);
+      font-weight: 800;
+    }
+    .focus-item strong, .list-item strong { display: block; font-size: 14px; }
+    .focus-item span, .list-item span { display: block; margin-top: 3px; color: var(--muted); font-size: 12px; line-height: 1.45; }
+
+    .table { width: 100%; border-collapse: collapse; }
+    .table th, .table td { padding: 13px 12px; border-bottom: 1px solid var(--line); text-align: left; font-size: 13px; }
+    .table th { color: var(--muted); font-weight: 650; background: var(--surface-soft); }
+    .table tr:last-child td { border-bottom: 0; }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 650;
+      white-space: nowrap;
+    }
+    .status::before { content: ""; width: 7px; height: 7px; border-radius: 999px; background: currentColor; }
+    .status.running { color: var(--green); background: var(--green-soft); }
+    .status.waiting { color: var(--amber); background: var(--amber-soft); }
+    .status.blocked { color: var(--red); background: var(--red-soft); }
+    .status.done { color: var(--blue); background: var(--blue-soft); }
+
+    .hub-card {
+      display: grid;
+      gap: 14px;
+      padding: 18px;
+      min-height: 190px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: var(--surface);
+    }
+    .hub-card .hub-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 13px;
+      display: grid;
+      place-items: center;
+      background: var(--soft);
+      color: var(--color);
+      font-weight: 800;
+    }
+    .hub-card p { margin: 0; color: var(--muted); line-height: 1.6; font-size: 13px; }
+    .hub-meta { display: flex; justify-content: space-between; margin-top: auto; color: var(--faint); font-size: 12px; }
+
+    .tree {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      font-size: 13px;
+    }
+    .tree li { padding: 7px 0 7px 18px; border-left: 1px solid var(--line); position: relative; }
+    .tree li::before { content: ""; position: absolute; left: -1px; top: 18px; width: 12px; height: 1px; background: var(--line); }
+    .tree > li { border-left: 0; padding-left: 0; }
+    .tree > li::before { display: none; }
+    .tree ul { margin: 6px 0 0 0; padding: 0 0 0 14px; list-style: none; }
+
+    .chat {
+      display: grid;
+      gap: 10px;
+    }
+    .bubble {
+      width: fit-content;
+      max-width: 82%;
+      padding: 11px 13px;
+      border-radius: 14px;
+      background: #f1eee8;
+      color: var(--ink);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    .bubble.me { margin-left: auto; background: var(--blue); color: #fff; }
+    .bubble.twin { background: var(--green-soft); color: #0d5d3c; }
+    .bubble.agent { background: var(--violet-soft); color: #49369b; }
+
+    .plan-step {
+      display: grid;
+      grid-template-columns: 28px minmax(0, 1fr);
+      gap: 10px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .plan-step:last-child { border-bottom: 0; }
+    .step-no {
+      width: 28px;
+      height: 28px;
+      border-radius: 9px;
+      display: grid;
+      place-items: center;
+      background: var(--blue-soft);
+      color: var(--blue);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .agent-card {
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--surface);
+      display: grid;
+      gap: 12px;
+    }
+    .agent-card header { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .agent-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      background: var(--soft);
+      color: var(--color);
+      font-weight: 800;
+    }
+    .agent-title { display: flex; align-items: center; gap: 10px; }
+    .agent-card p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.55; }
+    .agent-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .agent-stats span { padding: 8px; border-radius: 10px; background: var(--surface-soft); color: var(--muted); font-size: 12px; }
+
+    .file-row {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+      padding: 11px 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .file-row:last-child { border-bottom: 0; }
+    .file-icon { width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center; background: var(--surface-soft); }
+
+    .approval-card {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--surface);
+    }
+    .approval-actions { display: flex; align-items: center; gap: 8px; }
+
+    .log-line {
+      display: grid;
+      grid-template-columns: 92px 120px minmax(0, 1fr) auto;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--line);
+      font-size: 13px;
+    }
+    .log-line:last-child { border-bottom: 0; }
+    .log-line time, .log-line code { color: var(--muted); font-family: var(--mono); font-size: 12px; }
+
+    .note {
+      padding: 14px;
+      border: 1px solid #d9e7ff;
+      border-radius: 14px;
+      background: var(--blue-soft);
+      color: #174d96;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+    @media (max-width: 1180px) {
+      .app { grid-template-columns: 1fr; }
+      .sidebar { position: relative; height: auto; }
+      .main { padding: 16px; }
+      .grid.cols-4, .grid.cols-3, .grid.cols-2, .grid.main-side, .grid.room { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 720px) {
+      .topbar, .page-header { grid-template-columns: 1fr; }
+      .top-actions { flex-wrap: wrap; }
+      .focus-item, .approval-card, .log-line { grid-template-columns: 1fr; }
+      .table { display: block; overflow-x: auto; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="logo">T</div>
+        <div>
+          <strong>TokenWisdom</strong>
+          <span>AI Twin Workspace</span>
+        </div>
+      </div>
+
+      <div class="nav-group">
+        <div class="nav-label">Pages</div>
+        <button class="nav-btn active" data-page="home"><span class="left"><span class="icon">⌂</span>Home</span><small>01</small></button>
+        <button class="nav-btn" data-page="sitemap"><span class="left"><span class="icon">☷</span>页面层级</span><small>MD</small></button>
+        <button class="nav-btn" data-page="missions"><span class="left"><span class="icon">◎</span>Missions</span><small>12</small></button>
+        <button class="nav-btn" data-page="room"><span class="left"><span class="icon">◫</span>Mission Room</span><small>Live</small></button>
+        <button class="nav-btn" data-page="agents"><span class="left"><span class="icon">✦</span>Agents</span><small>9</small></button>
+        <button class="nav-btn" data-page="knowledge"><span class="left"><span class="icon">□</span>Knowledge</span><small>126</small></button>
+        <button class="nav-btn" data-page="approvals"><span class="left"><span class="icon">✓</span>Approvals</span><small>3</small></button>
+        <button class="nav-btn" data-page="runtime"><span class="left"><span class="icon">⌘</span>Runtime</span><small>Mac</small></button>
+        <button class="nav-btn" data-page="audit"><span class="left"><span class="icon">≣</span>Audit & Settings</span><small>Log</small></button>
+      </div>
+
+      <div class="runtime-card">
+        <div class="status"><span class="live-dot"></span>Local Runtime 在线</div>
+        <p>Mac、浏览器插件、Android 审批端已接入。当前模式：L3 草拟执行。</p>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <div class="command"><kbd>⌘ K</kbd><span>Ask or assign to your Twin…</span></div>
+        <div class="top-actions">
+          <span class="pill blue">Safe Mode</span>
+          <span class="pill green">Mac Online</span>
+          <button class="btn danger">Kill Switch</button>
+        </div>
+      </div>
+
+      <section class="page active" id="page-home">
+        <div class="page-header">
+          <div>
+            <div class="eyebrow">Home / Twin Overview</div>
+            <h1>清楚地看到：分身懂你多少，正在做什么，下一步需要你确认什么。</h1>
+            <p class="subtle">主页面只做总览和分流，不承载所有细节。复杂动作进入对应子页面处理。</p>
+          </div>
+          <button class="btn primary">创建 Mission</button>
+        </div>
+
+        <div class="grid cols-4">
+          <div class="stat"><b>74%</b><span>分身成熟度</span></div>
+          <div class="stat"><b>9</b><span>已连接 Agent</span></div>
+          <div class="stat"><b>3</b><span>待审批动作</span></div>
+          <div class="stat"><b>L3</b><span>当前授权等级</span></div>
+        </div>
+
+        <div class="grid main-side" style="margin-top:16px">
+          <div class="card">
+            <div class="card-head"><h2>Today Focus</h2><span class="pill amber">需要注意 3 项</span></div>
+            <div class="card-body focus-list">
+              <div class="focus-item"><div class="marker">1</div><div><strong>TokenWisdom 原型 IA 拆分</strong><span>分身已基于 ICE Workbench 生成页面层级，建议进入页面层级确认。</span></div><span class="status running">Running</span></div>
+              <div class="focus-item"><div class="marker">2</div><div><strong>Codex Connector 能力卡</strong><span>已完成冷启动访谈，等待你确认默认权限策略。</span></div><span class="status waiting">Waiting</span></div>
+              <div class="focus-item"><div class="marker">3</div><div><strong>本地文件夹学习</strong><span>准备索引 `Desktop/ice_workbench_new`，默认只上传摘要。</span></div><span class="status waiting">Approval</span></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><h2>Quick Start</h2></div>
+            <div class="card-body item-list">
+              <button class="btn primary" data-go="missions">新建或查看 Mission</button>
+              <button class="btn" data-go="agents">添加专业执行 Agent</button>
+              <button class="btn" data-go="knowledge">连接文件 / 知识库</button>
+              <button class="btn" data-go="runtime">检查本地 Runtime</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:16px">
+          <div class="card-head"><h2>Four Hubs Preview</h2><span class="pill">各子页面承接具体能力</span></div>
+          <div class="card-body grid cols-4">
+            <div class="hub-card" style="--soft:var(--blue-soft);--color:var(--blue)"><div class="hub-icon">Dev</div><h3>Dev Agent Hub</h3><p>Claude Code、Codex、Cursor、本地 repo、测试和代码变更审计。</p><div class="hub-meta"><span>4 agents</span><span>2 active</span></div></div>
+            <div class="hub-card" style="--soft:var(--green-soft);--color:var(--green)"><div class="hub-icon">Know</div><h3>Knowledge Hub</h3><p>文件、项目资料、用户记忆、待确认记忆和知识来源。</p><div class="hub-meta"><span>126 files</span><span>18 memories</span></div></div>
+            <div class="hub-card" style="--soft:var(--violet-soft);--color:var(--violet)"><div class="hub-icon">AI</div><h3>AI Tool Hub</h3><p>网页 Agent、MCP、API、工具能力卡和组合工作流。</p><div class="hub-meta"><span>7 tools</span><span>3 tests</span></div></div>
+            <div class="hub-card" style="--soft:var(--amber-soft);--color:var(--amber)"><div class="hub-icon">Ops</div><h3>Life Ops Hub</h3><p>邮件、日程、待办、提醒、日报，第一版默认偏建议与草稿。</p><div class="hub-meta"><span>L1 safe</span><span>draft only</span></div></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="page-sitemap">
+        <div class="page-header">
+          <div>
+            <div class="eyebrow">Markdown / Page Hierarchy</div>
+            <h1>页面层级：主页面负责总览，子页面负责承接。</h1>
+            <p class="subtle">这部分对应 Markdown 文件 `2026-06-27-TokenWisdom-页面层级-v2.md`。</p>
+          </div>
+        </div>
+        <div class="grid cols-2">
+          <div class="card pad">
+            <h2>主导航结构</h2>
+            <ul class="tree">
+              <li><strong>TokenWisdom App Shell</strong>
+                <ul>
+                  <li>Home / Twin Overview</li>
+                  <li>Missions / 任务队列</li>
+                  <li>Mission Room / 单任务工作空间</li>
+                  <li>Agents / Agent Hub</li>
+                  <li>Knowledge / 文件与记忆</li>
+                  <li>Approvals / 审批中心</li>
+                  <li>Runtime / 本地执行</li>
+                  <li>Audit & Settings / 审计与设置</li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+          <div class="card pad">
+            <h2>页面职责边界</h2>
+            <ul class="tree">
+              <li><strong>Home</strong><ul><li>分身状态</li><li>今日重点</li><li>快速入口</li></ul></li>
+              <li><strong>Mission Room</strong><ul><li>对话</li><li>上下文</li><li>执行计划</li><li>时间线</li></ul></li>
+              <li><strong>Agents</strong><ul><li>能力卡</li><li>连接器</li><li>冷启动测试</li></ul></li>
+              <li><strong>Knowledge</strong><ul><li>文件</li><li>记忆</li><li>确认队列</li></ul></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="page-missions">
+        <div class="page-header">
+          <div>
+            <div class="eyebrow">Missions / Queue</div>
+            <h1>所有工作都先变成 Mission，再进入对应 Room。</h1>
+            <p class="subtle">用户需要清楚看见每个任务的目标、状态、风险、参与 Agent 和下一步动作。</p>
+          </div>
+          <button class="btn primary">New Mission</button>
+        </div>
+        <div class="card">
+          <div class="card-head"><h2>Mission List</h2><span class="pill">Dev / Knowledge / AI Tools / Life Ops</span></div>
+          <table class="table">
+            <thead><tr><th>Mission</th><th>工作域</th><th>参与 Agent</th><th>状态</th><th>风险</th><th>下一步</th></tr></thead>
+            <tbody>
+              <tr><td><strong>设计 TokenWisdom 页面 IA</strong><br><span class="muted">拆主页面和子页面</span></td><td>Product</td><td>Twin</td><td><span class="status running">Running</span></td><td>Low</td><td>确认层级</td></tr>
+              <tr><td><strong>调用 Codex 生成前端原型</strong><br><span class="muted">基于 HTML 设计实现</span></td><td>Dev</td><td>Codex</td><td><span class="status waiting">Waiting</span></td><td>Medium</td><td>审批写文件</td></tr>
+              <tr><td><strong>学习 ICE Workbench 目录</strong><br><span class="muted">提取可复用资产</span></td><td>Knowledge</td><td>File Agent</td><td><span class="status done">Done</span></td><td>Low</td><td>沉淀记忆</td></tr>
+              <tr><td><strong>邮件代理权限策略</strong><br><span class="muted">Life Ops 风险边界</span></td><td>Life Ops</td><td>Twin</td><td><span class="status blocked">Blocked</span></td><td>High</td><td>用户决策</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="page" id="page-room">
+        <div class="page-header">
+          <div>
+            <div class="eyebrow">Mission Room / Workspace</div>
+            <h1>一个任务一个房间：上下文、对话、计划、执行、审计都在这里。</h1>
+          </div>
+          <span class="pill green">Live Room</span>
+        </div>
+        <div class="grid room">
+          <div class="card">
+            <div class="card-head"><h2>Context</h2></div>
+            <div class="card-body item-list">
+              <div class="list-item compact"><div><strong>目标</strong><span>设计简洁高效的 TokenWisdom 多页面原型。</span></div></div>
+              <div class="list-item compact"><div><strong>相关文件</strong><span>产品方案、ICE Workbench 整合分析、页面层级 v2。</span></div></div>
+              <div class="list-item compact"><div><strong>参与 Agent</strong><span>TokenWisdom Twin、Codex、File Agent。</span></div></div>
+              <div class="list-item compact"><div><strong>约束</strong><span>单 HTML 文件；清晰、干净、有效率。</span></div></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-head"><h2>Conversation</h2><span class="pill">4 participants</span></div>
+            <div class="card-body chat">
+              <div class="bubble me">这个页面还是不行，我希望它清晰、高效、干净，有多个子页面承接。</div>
+              <div class="bubble twin">我会先拆页面层级，再把每个页面做成同一个 HTML 文件里的可切换页面。</div>
+              <div class="bubble agent">Codex Connector：建议用 App Shell + 左侧导航 + 子页面路由模拟。</div>
+              <div class="bubble twin">已完成层级，正在生成 v2 原型。</div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-head"><h2>Execution Plan</h2></div>
+            <div class="card-body">
+              <div class="plan-step"><div class="step-no">1</div><div><strong>定义 IA</strong><div class="subtle">主页面 + 7 个子页面。</div></div></div>
+              <div class="plan-step"><div class="step-no">2</div><div><strong>实现页面壳</strong><div class="subtle">左侧导航、顶部命令栏、状态区。</div></div></div>
+              <div class="plan-step"><div class="step-no">3</div><div><strong>逐页填充内容</strong><div class="subtle">Missions、Room、Agents、Knowledge、Approvals、Runtime、Audit。</div></div></div>
+              <div class="plan-step"><div class="step-no">4</div><div><strong>归档与校验</strong><div class="subtle">同步到项目目录和文档归档。</div></div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="page-agents">
+        <div class="page-header">
+          <div><div class="eyebrow">Agents / Agent Hub</div><h1>把外部专业执行 Agent 变成可配置、可观察、可评估的能力卡。</h1></div>
+          <button class="btn primary">Add Agent</button>
+        </div>
+        <div class="grid cols-3">
+          <div class="agent-card" style="--soft:var(--blue-soft);--color:var(--blue)"><header><div class="agent-title"><div class="agent-avatar">C</div><div><strong>Codex</strong><div class="muted">CLI Connector</div></div></div><span class="status running">Ready</span></header><p>适合代码修改、测试、重构、仓库理解。默认写文件需审批。</p><div class="agent-stats"><span>成功率 82%</span><span>风险 M</span><span>成本 $$</span></div></div>
+          <div class="agent-card" style="--soft:var(--green-soft);--color:var(--green)"><header><div class="agent-title"><div class="agent-avatar">CC</div><div><strong>Claude Code</strong><div class="muted">Local CLI</div></div></div><span class="status waiting">Pairing</span></header><p>适合长任务代码理解、规划和多文件改动。需要本地 Runtime 授权。</p><div class="agent-stats"><span>成功率 --</span><span>风险 H</span><span>成本 $$$</span></div></div>
+          <div class="agent-card" style="--soft:var(--violet-soft);--color:var(--violet)"><header><div class="agent-title"><div class="agent-avatar">Cu</div><div><strong>Cursor</strong><div class="muted">IDE Connector</div></div></div><span class="status waiting">Setup</span></header><p>适合 IDE 内编辑和上下文协作。第一版可做任务包投递和结果回收。</p><div class="agent-stats"><span>成功率 --</span><span>风险 M</span><span>成本 $$</span></div></div>
+        </div>
+        <div class="card" style="margin-top:16px"><div class="card-head"><h2>Agent Card 字段</h2></div><div class="card-body grid cols-3"><div class="note">能力：擅长什么、不擅长什么、输入要求、输出格式。</div><div class="note">连接：CLI / Browser / API / MCP / Manual。</div><div class="note">治理：风险等级、权限策略、历史表现、失败模式。</div></div></div>
+      </section>
+
+      <section class="page" id="page-knowledge">
+        <div class="page-header">
+          <div><div class="eyebrow">Knowledge / Files & Memory</div><h1>文件不是附件，而是分身理解你的长期知识资产。</h1></div>
+          <button class="btn primary">Connect Folder</button>
+        </div>
+        <div class="grid main-side">
+          <div class="card"><div class="card-head"><h2>Files</h2><span class="pill">本地优先</span></div><div class="card-body">
+            <div class="file-row"><div class="file-icon">MD</div><div><strong>TokenWisdom 产品方案讨论记录</strong><span class="muted">项目定位、对象模型、Sovereign Mode</span></div><span class="pill green">indexed</span></div>
+            <div class="file-row"><div class="file-icon">MD</div><div><strong>ICE Workbench 整合分析</strong><span class="muted">可复用工作台、任务、Agent、Skill、HITL</span></div><span class="pill green">indexed</span></div>
+            <div class="file-row"><div class="file-icon">DIR</div><div><strong>Desktop / ice_workbench_new</strong><span class="muted">等待用户允许读取目录摘要</span></div><span class="pill amber">pending</span></div>
+          </div></div>
+          <div class="card"><div class="card-head"><h2>Memory Review</h2></div><div class="card-body item-list">
+            <div class="list-item compact"><div><strong>偏好：页面要清晰干净</strong><span>来源：本轮反馈；建议固化到产品设计偏好。</span></div><span class="pill amber">待确认</span></div>
+            <div class="list-item compact"><div><strong>定位：个人 AI 分身</strong><span>来源：多轮讨论；已确认。</span></div><span class="pill green">已确认</span></div>
+            <div class="list-item compact"><div><strong>首批 Agent：专业执行型</strong><span>Codex / Claude Code / Cursor。</span></div><span class="pill green">已确认</span></div>
+          </div></div>
+        </div>
+      </section>
+
+      <section class="page" id="page-approvals">
+        <div class="page-header"><div><div class="eyebrow">Approvals / Human in the Loop</div><h1>所有高风险动作都要说清楚：做什么、为什么、影响哪里。</h1></div></div>
+        <div class="grid">
+          <div class="approval-card"><div><strong>允许 Codex 写入 HTML 原型文件？</strong><p class="subtle">影响：`01-业务项目/TokenWisdom/design/`。原因：生成 v2 单文件多页面原型。</p><span class="pill amber">WRITE_FILE · Medium Risk</span></div><div class="approval-actions"><button class="btn">修改范围</button><button class="btn">拒绝</button><button class="btn primary">允许</button></div></div>
+          <div class="approval-card"><div><strong>固化记忆：用户偏好简洁高效页面</strong><p class="subtle">作用域：全局产品设计偏好。后续页面设计默认优先清晰和效率。</p><span class="pill blue">MEMORY · Low Risk</span></div><div class="approval-actions"><button class="btn">稍后</button><button class="btn primary">确认</button></div></div>
+          <div class="approval-card"><div><strong>连接 Claude Code 本地运行时</strong><p class="subtle">影响：读取本机工具版本和可用性，不执行任务。</p><span class="pill amber">LOCAL_RUNTIME · Medium Risk</span></div><div class="approval-actions"><button class="btn">查看详情</button><button class="btn primary">连接</button></div></div>
+        </div>
+      </section>
+
+      <section class="page" id="page-runtime">
+        <div class="page-header"><div><div class="eyebrow">Runtime / Local Execution</div><h1>本地执行页面要让用户知道：哪些设备在线，哪些权限开放，哪些连接器可用。</h1></div></div>
+        <div class="grid cols-3">
+          <div class="card pad"><h2>Mac App</h2><p class="subtle">在线，心跳 5s。可访问用户授权目录。</p><span class="status running">Online</span></div>
+          <div class="card pad"><h2>Browser Extension</h2><p class="subtle">已安装。可保存 AI 对话和工具能力线索。</p><span class="status running">Online</span></div>
+          <div class="card pad"><h2>Android</h2><p class="subtle">待接入。第一版负责移动审批和日报。</p><span class="status waiting">Planned</span></div>
+        </div>
+        <div class="card" style="margin-top:16px"><div class="card-head"><h2>Connectors</h2></div><table class="table"><thead><tr><th>Connector</th><th>类型</th><th>状态</th><th>默认权限</th><th>说明</th></tr></thead><tbody><tr><td>Codex</td><td>CLI</td><td><span class="status running">Ready</span></td><td>写入需确认</td><td>用于代码任务执行</td></tr><tr><td>Claude Code</td><td>CLI</td><td><span class="status waiting">Pairing</span></td><td>任务级授权</td><td>适合长任务代码改动</td></tr><tr><td>Cursor</td><td>IDE</td><td><span class="status waiting">Setup</span></td><td>投递任务包</td><td>先做轻集成</td></tr></tbody></table></div>
+      </section>
+
+      <section class="page" id="page-audit">
+        <div class="page-header"><div><div class="eyebrow">Audit & Settings</div><h1>审计页的目标不是吓人，而是让用户放心授权。</h1></div></div>
+        <div class="grid main-side">
+          <div class="card"><div class="card-head"><h2>Action Audit</h2></div><div class="card-body">
+            <div class="log-line"><time>09:41</time><code>READ_FILE</code><span>读取 TokenWisdom 产品方案讨论记录</span><span class="pill green">allowed</span></div>
+            <div class="log-line"><time>09:52</time><code>WRITE_FILE</code><span>生成页面层级 Markdown</span><span class="pill green">allowed</span></div>
+            <div class="log-line"><time>10:03</time><code>CALL_AGENT</code><span>准备 Codex HTML 原型任务包</span><span class="pill amber">pending</span></div>
+            <div class="log-line"><time>10:14</time><code>MEMORY</code><span>提议固化用户设计偏好</span><span class="pill amber">pending</span></div>
+          </div></div>
+          <div class="card"><div class="card-head"><h2>Permission Policies</h2></div><div class="card-body item-list">
+            <div class="list-item compact"><div><strong>Safe Mode</strong><span>默认只观察、建议、草拟执行。</span></div><span class="pill blue">default</span></div>
+            <div class="list-item compact"><div><strong>Sovereign Mode</strong><span>全本机代理权限，高风险动作强制确认。</span></div><span class="pill amber">advanced</span></div>
+            <div class="list-item compact"><div><strong>Secret Boundary</strong><span>默认不读 `.env`、密钥、证书。</span></div><span class="pill green">on</span></div>
+          </div></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const buttons = Array.from(document.querySelectorAll('[data-page]'));
+    const pages = Array.from(document.querySelectorAll('.page'));
+
+    function showPage(name) {
+      pages.forEach((page) => page.classList.toggle('active', page.id === `page-${name}`));
+      buttons.forEach((button) => button.classList.toggle('active', button.dataset.page === name));
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    buttons.forEach((button) => button.addEventListener('click', () => showPage(button.dataset.page)));
+    document.querySelectorAll('[data-go]').forEach((button) => {
+      button.addEventListener('click', () => showPage(button.dataset.go));
+    });
+  </script>
+</body>
+</html>

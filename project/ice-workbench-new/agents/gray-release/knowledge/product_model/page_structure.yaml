@@ -1,0 +1,233 @@
+# page_structure.yaml - 页面结构知识库
+#
+# 定义产品各页面的功能元素、内容区域、交互组件
+# 用于AI下钻时细化具体的分析维度
+#
+# 使用方式：Phase 0 信息收集 / Phase 3 Step 4 下钻分析
+
+pages:
+  # ═══════════════════════════════════════
+  # 首页
+  # ═══════════════════════════════════════
+  - name: 首页
+    aliases:
+      - home
+      - homepage
+      - 主页
+      - 第一屏
+    description: "APP启动后的第一个页面，用户流量的核心入口"
+    
+    elements:
+      entries:  # 功能入口
+        - name: 搜索框
+          type: interaction
+          location: 顶部
+          importance: high
+          metrics_impacted: [搜索率, 搜索次数]
+          
+        - name: 导航栏
+          type: navigation
+          location: 顶部/底部
+          importance: medium
+          metrics_impacted: [各Tab点击率, 页面跳转]
+          
+        - name: 推荐流
+          type: content_area
+          location: 中部主体
+          importance: critical
+          metrics_impacted: [人均VV, 停留时长, CTR, 消费时长]
+          
+        - name: 热点区
+          type: content_area
+          location: 上部
+          importance: high
+          metrics_impacted: [热点点击率, 热点消费]
+          
+        - name: Banner轮播
+          type: promotional
+          location: 顶部
+          importance: medium
+          metrics_impacted: [Banner CTR, 点击分布]
+          
+        - name: 功能入口矩阵
+          type: entry_grid
+          location: 中下部
+          importance: high
+          metrics_impacted: [各入口渗透率, 入口点击率]
+          
+      interactions:
+        - name: 下拉刷新
+          type: gesture
+          metrics_impacted: [刷新频率, 内容新鲜度]
+          
+        - name: 左右滑动切换Tab
+          type: gesture
+          metrics_impacted: [Tab使用分布]
+          
+      content_areas:
+        - name: 信息流列表
+          type: feed_list
+          components: [视频卡片, 图文卡片, 广告卡片]
+          metrics_impacted: [曝光量, 点击率, 完播率]
+
+  # ═══════════════════════════════════════
+  # 信息流详情页
+  # ═══════════════════════════════════════
+  - name: 信息流详情页
+    aliases:
+      - detail
+      - video_detail
+      - 播放页
+      - 内容详情
+    description: "用户点击信息流卡片后进入的详情/播放页面"
+    
+    elements:
+      entries:
+        - name: 视频/内容播放区
+          type: media_player
+          location: 主体
+          importance: critical
+          metrics_impacted: [完播率, 播放时长, 暂停率]
+          
+        - name: 互动按钮栏
+          type: interaction_bar
+          location: 右侧/底部
+          importance: high
+          metrics_impacted: [点赞率, 评论率, 分享率, 收藏率]
+          
+        - name: 作者信息区
+          type: info_area
+          location: 标题下方
+          importance: medium
+          metrics_impacted: [关注率, 作者主页访问]
+          
+        - name: 相关推荐
+          type: recommendation
+          location: 底部
+          importance: high
+          metrics_impacted: [相关推荐CTR, 继续消费率]
+          
+        - name: 广告位
+          type: ad_slot
+          location: 信息流中/底部
+          importance: medium
+          metrics_impacted: [广告CTR, ICPM]
+          
+      interactions:
+        - name: 全屏播放
+          type: gesture
+          metrics_impacted: [全屏率, 全屏观看时长]
+          
+        - name: 倍速播放
+          type: control
+          metrics_impacted: [倍速使用率, 有效观看时长]
+
+  # ═══════════════════════════════════════
+  # 搜索结果页
+  # ═══════════════════════════════════════
+  - name: 搜索结果页
+    aliases:
+      - search_result
+      - search
+    description: "用户搜索后展示的结果列表页面"
+    
+    elements:
+      entries:
+        - name: 搜索框
+          type: input
+          location: 顶部
+          importance: critical
+          metrics_impacted: [搜索词输入, 修改搜索词率]
+          
+        - name: 筛选器
+          type: filter
+          location: 搜索框下方
+          importance: medium
+          metrics_impacted: [筛选使用率, 筛选维度分布]
+          
+        - name: 结果列表
+          type: list
+          location: 主体
+          importance: critical
+          metrics_impacted: [结果CTR, 搜索满意度]
+          
+        - name: 相关搜索推荐
+          type: suggestion
+          location: 底部
+          importance: low
+          metrics_impacted: [相关搜索点击率]
+
+  # ═══════════════════════════════════════
+  # 个人中心
+  # ═══════════════════════════════════════
+  - name: 个人中心
+    aliases:
+      - profile
+      - mine
+      - 我的
+      - user_center
+    description: "用户个人信息和历史管理页面"
+    
+    elements:
+      entries:
+        - name: 用户头像和信息
+          type: info_display
+          location: 顶部
+          importance: medium
+          
+        - name: 功能菜单列表
+          type: menu
+          location: 主体
+          importance: high
+          metrics_impacted: [各功能入口点击率]
+          
+        - name: 历史记录
+          type: list
+          location: 中部
+          importance: high
+          metrics_impacted: [历史回看率, 重复消费率]
+
+  # ═══════════════════════════════════════
+  # 内容中心（如适用）
+  # ═══════════════════════════════════════
+  - name: 内容中心
+    aliases:
+      - content_center
+      - discover
+      - 发现
+    description: "内容发现和浏览的聚合页面"
+    
+    elements:
+      entries:
+        - name: 分类导航
+          type: navigation
+          location: 顶部/侧边
+          importance: high
+          metrics_impacted: [分类使用分布]
+          
+        - name: 内容瀑布流
+          type: content_feed
+          location: 主体
+          importance: critical
+          metrics_impacted: [浏览深度, 点击分布, 消费时长]
+
+# 通用元素库（跨页面复用）
+common_elements:
+  - name: 广告位（信息流内）
+    type: ad_insertion
+    standard_metrics: [曝光量, CTR, eCPM, 填充率]
+    
+  - name: 底部导航栏
+    type: bottom_navigation
+    standard_metrics: [各Tab点击率, 切换频率]
+    
+  - name: 浮动按钮（FAB）
+    type: floating_action_button
+    standard_metrics: [曝光量, 点击率]
+
+# 使用说明
+usage_notes:
+  - 当用户提供"变量所在页面"时，自动匹配此知识库补全元素
+  - 在下钻分析时，将通用维度细化为具体页面元素
+  - 可根据产品迭代持续更新页面结构
+  - 元素的metrics_impacted用于关联指标分析

@@ -1,0 +1,13 @@
+{
+  "id": "p_personal_test",
+  "team_id": "personal_test",
+  "name": "个人项目",
+  "type": "personal",
+  "members": [
+    {
+      "user_id": "test",
+      "role": "owner"
+    }
+  ],
+  "created_at": "2026-06-27T00:00:00+00:00"
+}

@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>登录 · ICE Workbench v7</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <link rel="stylesheet" href="_shared/tokens.css" />
+  <link rel="stylesheet" href="_shared/components.css" />
+  <style>
+    .login-wrap { min-height: 100vh; display: grid; grid-template-columns: 1.1fr 0.9fr; }
+    .login-aside { position: relative; overflow: hidden; background: linear-gradient(155deg, #1a1612 0%, #2a211b 60%, #3a2a20 100%); color: #f0e9dc; padding: 56px; display: flex; flex-direction: column; }
+    .login-aside::before { content: ""; position: absolute; top: -20%; right: -10%; width: 480px; height: 480px; border-radius: 50%; background: radial-gradient(circle, rgba(204,120,92,.4), transparent 65%); filter: blur(20px); }
+    .la-brand { display: flex; align-items: center; gap: 12px; position: relative; }
+    .la-brand .mark { width: 36px; height: 36px; border-radius: 10px; background: var(--accent-grad); display: grid; place-items: center; font-size: 19px; color: #fff; box-shadow: var(--accent-shadow); }
+    .la-brand .name { font-size: 16px; font-weight: 600; letter-spacing: .02em; }
+    .la-headline { font-family: var(--font-serif); font-size: 40px; line-height: 1.2; font-weight: 500; margin-top: auto; position: relative; }
+    .la-headline .accent { color: #e89e83; }
+    .la-sub { color: #b3a78f; font-size: 14px; line-height: 1.7; margin-top: 20px; max-width: 400px; position: relative; }
+    .la-points { display: flex; flex-direction: column; gap: 14px; margin-top: 32px; position: relative; }
+    .la-point { display: flex; align-items: center; gap: 12px; font-size: 13px; color: #d8cfbe; }
+    .la-point .ico { width: 30px; height: 30px; border-radius: 8px; background: rgba(240,233,220,.08); border: 1px solid rgba(240,233,220,.12); display: grid; place-items: center; color: #e89e83; font-size: 15px; flex: none; }
+    .la-foot { position: relative; margin-top: auto; padding-top: 40px; font-size: 11px; color: #8a7e69; font-family: var(--font-mono); }
+
+    .login-main { display: grid; place-items: center; padding: 40px; }
+    .login-card { width: 100%; max-width: 380px; display: flex; flex-direction: column; gap: var(--gap-6); }
+    .login-card h1 { font-family: var(--font-serif); font-size: 26px; font-weight: 500; color: var(--text); }
+    .login-card .lead { color: var(--text-dim); font-size: var(--fs-sm); margin-top: 4px; }
+    .feishu-btn { display: flex; align-items: center; justify-content: center; gap: 10px; height: 48px; border-radius: var(--r-md); background: #1a1612; color: #fff; border: none; font-size: 14px; font-weight: 500; cursor: pointer; transition: filter var(--transition), transform var(--transition); }
+    .feishu-btn:hover { filter: brightness(1.15); transform: translateY(-1px); }
+    .feishu-btn .fl { width: 22px; height: 22px; border-radius: 5px; background: #3370ff; display: grid; place-items: center; font-size: 12px; }
+    .or { display: flex; align-items: center; gap: 12px; color: var(--text-faint); font-size: var(--fs-xs); }
+    .or::before, .or::after { content: ""; flex: 1; height: 1px; background: var(--divider); }
+    .exp-code { display: flex; gap: 8px; }
+    .login-terms { font-size: var(--fs-xs); color: var(--text-muted); text-align: center; line-height: 1.6; }
+  </style>
+</head>
+<body>
+  <div class="login-wrap">
+    <aside class="login-aside">
+      <div class="la-brand"><span class="mark"><i class="ph-fill ph-hexagon"></i></span><span class="name">ICE Workbench</span></div>
+      <h2 class="la-headline">让每位同学都拥有<br /><span class="accent">一支 AI 数据团队</span></h2>
+      <p class="la-sub">基于 Agent 范式的智能数据工作台。从取数、实验到经营复盘，用自然语言驱动专业分析流程。</p>
+      <div class="la-points">
+        <div class="la-point"><span class="ico"><i class="ph ph-chart-bar"></i></span> 自然语言转 SQL，自动清洗与可视化</div>
+        <div class="la-point"><span class="ico"><i class="ph ph-flask"></i></span> AB 实验显著性一站式评估</div>
+        <div class="la-point"><span class="ico"><i class="ph ph-timer"></i></span> 定时调度，日报自动推送飞书</div>
+      </div>
+      <div class="la-foot">© 2026 ICE Workbench · Internal Tool</div>
+    </aside>
+
+    <main class="login-main">
+      <div class="login-card">
+        <div>
+          <h1>欢迎回来</h1>
+          <p class="lead">使用飞书账号登录，开启你的智能工作区</p>
+        </div>
+        <button class="feishu-btn"><span class="fl"><i class="ph-fill ph-chat-circle"></i></span> 使用飞书登录</button>
+        <div class="or">或使用体验码</div>
+        <div class="field">
+          <div class="exp-code">
+            <input class="input" placeholder="输入 8 位体验码" />
+            <button class="btn btn-secondary">验证</button>
+          </div>
+          <span class="field-hint">体验码由管理员在「体验卡管理」中发放</span>
+        </div>
+        <a class="btn btn-primary btn-lg" href="dashboard.html" style="justify-content:center">进入工作台 <i class="ph ph-arrow-right"></i></a>
+        <p class="login-terms">登录即代表同意 <a href="#">服务条款</a> 与 <a href="#">隐私政策</a></p>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

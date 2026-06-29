@@ -1,0 +1,173 @@
+dimensions:
+  - name: 浏览器主端
+  - name: 浏览器信息流
+  - name: 内容中心
+
+categories:
+  - name: 规模指标
+    metrics:
+      - name: 浏览器DAU/日活
+        type: continuous
+        description: 日活跃用户数
+        dimension: 浏览器主端
+        sql_ref: browser_main.yaml#规模指标.浏览器DAU/日活
+      - name: 浏览器信息流DAU/日活
+        type: continuous
+        description: 信息流有曝光行为的用户数
+        dimension: 浏览器信息流
+        sql_ref: browser_feed.yaml#规模指标.浏览器信息流DAU/日活
+      - name: 浏览器信息流消费DAU/日活
+        type: continuous
+        description: 信息流有实际内容消费的用户数
+        dimension: 浏览器信息流
+        sql_ref: browser_feed.yaml#规模指标.浏览器信息流消费DAU/日活
+      - name: 浏览器信息流次日留存率
+        type: ratio
+        description: 信息流用户次日回访比例
+        dimension: 浏览器信息流
+        sql_ref: browser_feed.yaml#留存与LT指标.浏览器信息流次日留存率
+
+  - name: 消费指标
+    metrics:
+      - name: 浏览器信息流人均时长
+        type: continuous
+        description: 信息流用户平均停留时长（分钟）
+        dimension: 浏览器信息流
+        sql_ref: browser_feed.yaml#消费指标.浏览器信息流人均时长
+      - name: 浏览器信息流人均消费时长
+        type: continuous
+        description: 信息流用户平均内容消费时长（分钟）
+        dimension: 浏览器信息流
+        sql_ref: browser_feed.yaml#消费指标.浏览器信息流人均消费时长
+      - name: 浏览器信息流人均VV
+        type: continuous
+        description: 信息流用户人均视频播放次数
+        dimension: 浏览器信息流
+        sql_ref: browser_feed.yaml#消费指标.浏览器信息流人均VV
+
+  - name: 收入指标
+    metrics:
+      - name: 浏览器ARPU
+        type: continuous
+        description: 浏览器整体DID维度人均广告收入（元）
+        dimension: 浏览器主端
+        sql_ref: browser_main.yaml#收入指标.浏览器ARPU
+      - name: 浏览器分启动方式ARPU
+        type: continuous
+        description: 按启动方式拆分的浏览器DID人均广告收入（元）
+        dimension: 浏览器主端
+        sql_ref: browser_main.yaml#收入指标.浏览器分启动方式ARPU
+      - name: 浏览器分场景收入
+        type: continuous
+        description: 按产品场景拆分的浏览器广告收入（元）
+        dimension: 浏览器主端
+        sql_ref: browser_main.yaml#收入指标.浏览器分场景收入
+      - name: 浏览器信息流ARPU
+        type: continuous
+        description: 信息流DID维度人均广告收入（元）
+        dimension: 浏览器信息流
+        sql_ref: browser_feed.yaml#收入指标.浏览器信息流ARPU
+      - name: 浏览器信息流消费用户ARPU
+        type: continuous
+        description: 信息流消费用户DID维度人均广告收入（元）
+        dimension: 浏览器信息流
+        sql_ref: browser_feed.yaml#收入指标.浏览器信息流消费用户ARPU
+      - name: 浏览器信息流分广告位收入
+        type: continuous
+        description: 按信息流内广告位场景拆分的广告收入（元）
+        dimension: 浏览器信息流
+        sql_ref: browser_feed.yaml#收入指标.浏览器信息流分广告位收入
+      - name: 浏览器信息流分启动方式收入
+        type: continuous
+        description: 按启动方式拆分的信息流广告收入（元）
+        dimension: 浏览器信息流
+        sql_ref: browser_feed.yaml#收入指标.浏览器信息流分启动方式收入
+      - name: 内容中心ARPU
+        type: continuous
+        description: 内容中心DID维度人均广告收入（元）
+        dimension: 内容中心
+        sql_ref: content_center.yaml#收入指标.内容中心ARPU
+      - name: 内容中心分广告位收入
+        type: continuous
+        description: 按内容中心广告位场景拆分的广告收入（元）
+        dimension: 内容中心
+        sql_ref: content_center.yaml#收入指标.内容中心分广告位收入
+      - name: 浏览器IPU
+        type: continuous
+        description: 浏览器整体DID维度人均广告展示次数
+        dimension: 浏览器主端
+        sql_ref: browser_main.yaml#收入指标.浏览器IPU
+      - name: 浏览器eCPM
+        type: continuous
+        description: 浏览器整体千次展示收入（元）
+        dimension: 浏览器主端
+        sql_ref: browser_main.yaml#收入指标.浏览器eCPM
+      - name: 浏览器信息流IPU
+        type: continuous
+        description: 信息流DID维度人均广告展示次数
+        dimension: 浏览器信息流
+        sql_ref: browser_feed.yaml#收入指标.浏览器信息流IPU
+      - name: 浏览器信息流eCPM
+        type: continuous
+        description: 信息流千次展示收入（元）
+        dimension: 浏览器信息流
+        sql_ref: browser_feed.yaml#收入指标.浏览器信息流eCPM
+      - name: 内容中心IPU
+        type: continuous
+        description: 内容中心DID维度人均广告展示次数
+        dimension: 内容中心
+        sql_ref: content_center.yaml#收入指标.内容中心IPU
+      - name: 内容中心eCPM
+        type: continuous
+        description: 内容中心千次展示收入（元）
+        dimension: 内容中心
+        sql_ref: content_center.yaml#收入指标.内容中心eCPM
+
+  - name: 待补充指标
+    metrics:
+      - name: 信息流有效用户
+        type: continuous
+        description: 信息流有效消费用户数（独立概念，与消费用户不合并）
+        dimension: 浏览器信息流
+        sql_ref: null
+        note: 当前SQL模板无对应查询，需后续补SQL
+    note: 概念已定义但SQL模板尚未覆盖的指标
+
+rules:
+  allow_directions:
+    - 正向
+    - 平稳
+  tradeoff_requires_human: true
+  tradeoff_evaluation_dimensions:
+    - 下降指标的严重程度
+    - 提升指标的业务价值
+    - 长期影响
+  significance_is_reference_only: true
+  significance_level: 0.05
+
+changelog:
+  - date: "2026-04-26"
+    author: AI
+    action: create
+    description: 初始创建，基于SOP定义核心指标集合（规模5项+消费3项+收入6项）
+  - date: "2026-05-07"
+    author: AI
+    action: major_update
+    description: |
+      与sql_templates对齐重构：
+      - 维度拆分：浏览器→浏览器主端+浏览器信息流+内容中心
+      - 指标名统一：以sql_templates唯一名称为准（7条映射）
+      - 新增sql_ref字段：指向SQL模板文件+类别+指标名
+      - 新增dimension字段：标注指标所属维度
+      - 收入指标置空：暂无SQL模板，后续补充
+      - 信息流有效用户保留定义但标记sql_ref=null
+  - date: "2026-05-12"
+    author: AI
+    action: major_update
+    description: |
+      补全收入指标（9项）：
+      - 数据源：dwm_micd_effect_ad_1d（real_fee/100000转元）
+      - 浏览器主端：ARPU、分启动方式ARPU、分场景收入
+      - 浏览器信息流：ARPU、消费用户ARPU、分广告位收入、分启动方式收入
+      - 内容中心：ARPU、分广告位收入
+      - 新增tag_id_scene_mapping.yaml场景映射配置
