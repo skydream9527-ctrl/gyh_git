@@ -4,19 +4,28 @@
 
 ## 当前重点
 
-<!-- AI 从最近对话中自动提取，每次对话结束时刷新。保持 3-5 条，过时的移除。 -->
+- 建设 Wisdom&Decide 个人决策中心，系统化决策流程
+- ICE Data Workbench v3 迭代与功能完善
+- ice-data-work（新数据工作台）设计与开发
+- AI Agent / Skill / MCP 能力边界探索与建设
 
 ## 关键决策
 
-<!-- AI 自动追加格式：- YYYY-MM-DD：决策摘要 → decisions/xxx.md -->
-<!-- 按月归档，超过 30 天的旧决策折叠到「历史归档」 -->
+- 2026-06-29：创建 Wisdom&Decide 目录作为个人决策中心 → Wisdom&Decide/README.md
+- 2026-06-29：整合 ICE-DATA-WORK、ice_workbench_new、data-product 三个目录到 project/ 下
 
 ## 我的偏好
 
-<!-- AI 从对话中学习，自动去重。格式：- {偏好描述} -->
-<!-- 例：先结论后细节、竞品分析带对比表格、PRD 必须覆盖异常流程 -->
+- 先结论后细节
+- 竞品分析、方案对比带对比表格，不要大段文字
+- PRD 必须包含异常流程和边界条件
+- 周报用结构化格式，先总后分
+- 引用数据必须标注来源和时间，无数据标注「推断」
+- AI 做执行，我专注于决策和判断
 
 ## 近期记忆
 
-<!-- AI 每次对话结束追加，保留最近 10 条，超出的归档到 memory/ -->
-<!-- 格式：- MM-DD：一句话摘要 → memory/YYYY-MM-DD.md -->
+- 06-29：创建 Wisdom&Decide 决策中心，梳理项目全景，输出决策SOP → Wisdom&Decide/
+- 06-29：将三个桌面目录整合进 project/ 并同步到GitLab
+- 06-26：更新 agent-llm 记忆系统文档和参考资料并同步Git
+- 06-25：添加决策框架、LLM思维、AI基础设施知识等29个文件并同步Git
