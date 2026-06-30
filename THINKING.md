@@ -67,8 +67,9 @@ ICE Workbench 的开发正本在 `https://git.n.xiaomi.com/gongyunhe/ice-workben
 | 空 `memory/`（与 MEMORY.md 重叠）、空 `your-domain/`（未填模板） | ✅ 已删 |
 | `Wisdom&Decide/feishu-part5~8.md` → [Wisdom&Decide/notes/](Wisdom&Decide/notes/) | ✅ 已归位 |
 | 工程副本去重（3 份 + 混入 → 保留 1 份 ice-workbench-new） | ✅ 已完成 |
-| [knowledge-base/](knowledge-base/) vs `project/` 知识类主题重叠 | ⏳ 待整理：长期合并到 `project/` 对应领域，先靠 [01-我的项目全景导航.md](Wisdom&Decide/01-我的项目全景导航.md) 串联 |
-| `project/data-product-workspace/` 自带 AGENTS.md / MEMORY.md 与根目录重叠 | ⏳ 待整理：后续统一 |
+| [knowledge-base/](knowledge-base/) 与 `project/` 分工 | ✅ 已澄清：knowledge-base=实践记录/调优日志，project/=系统性原理，**互补不合并** → [knowledge-base/README.md](knowledge-base/README.md) |
+| 根 [USER.md](USER.md) 画像 | ✅ 已用 data-product-workspace/MEMORY.md 补全（姓名/部门/核心项目/工具/偏好） |
+| `project/data-product-workspace/` 自带 AGENTS/MEMORY/WORK-PLAN | ℹ️ 保留：子工作区自洽配置，不与根目录合并 |
 
 ---
 
