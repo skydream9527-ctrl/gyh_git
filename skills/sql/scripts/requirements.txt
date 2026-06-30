@@ -1,4 +1,0 @@
-pyhive
-pandas
-thrift == 0.21.0
-python-dotenv

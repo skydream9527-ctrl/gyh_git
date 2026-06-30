@@ -1,9 +1,0 @@
-{
-  "id": "volcano-abtest",
-  "name": "火山实验分析",
-  "paradigm": "ab",
-  "icon": "🌋",
-  "color": "#e76f51",
-  "description": "火山引擎 ABtest · 浏览器 / 桌面内容中心实验数据查询与涨跌报告",
-  "publish_status": "published"
-}

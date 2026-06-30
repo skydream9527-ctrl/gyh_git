@@ -1,9 +1,0 @@
-{
-  "id": "know",
-  "name": "知识库 Agent",
-  "paradigm": "knowledge",
-  "icon": "📚",
-  "color": "#b6a07c",
-  "description": "对接飞书知识空间「内容生态数据产品知识库」，对话式管理 / 使用 / 维护",
-  "publish_status": "published"
-}

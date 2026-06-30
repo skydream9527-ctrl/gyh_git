@@ -1,8 +1,0 @@
-/* base styles live in global.css (.m-bottombar / .m-bottombar-tab);
-   this file only patches Link-rendered tabs. */
-.m-bottombar-tab {
-  text-decoration: none;
-}
-.m-bottombar-tab:active {
-  background: var(--surface-2);
-}
