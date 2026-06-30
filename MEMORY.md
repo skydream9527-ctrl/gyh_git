@@ -11,6 +11,8 @@
 
 ## 关键决策
 
+- 2026-06-30：项目定位为「思考与探索空间」，思考记录是主体，工程代码是参考副本 → THINKING.md
+- 2026-06-30：工程副本去重，只保留 project/ice-workbench-new/ 一份参考；开发正本在 git.n.xiaomi.com/gongyunhe/ice-workbench，不在本仓库改代码
 - 2026-06-29：创建 Wisdom&Decide 目录作为个人决策中心 → Wisdom&Decide/README.md
 - 2026-06-29：整合 ICE-DATA-WORK、ice_workbench_new、data-product 三个目录到 project/ 下
 
@@ -25,6 +27,7 @@
 
 ## 近期记忆
 
+- 06-30：项目结构梳理与整理 → THINKING.md。新建思考空间总入口；工程去重删 ~6900 文件（保留 ice-workbench-new）；decisions→references、feishu-part→notes/、删空 memory/your-domain、reference→engineering-ref；重写 README/CLAUDE 为思考空间入口
 - 06-29：创建 Wisdom&Decide 决策中心，梳理项目全景，输出决策SOP → Wisdom&Decide/
 - 06-29：将三个桌面目录整合进 project/ 并同步到GitLab
 - 06-26：更新 agent-llm 记忆系统文档和参考资料并同步Git
