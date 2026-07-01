@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>浏览器信息流流量地图现状摸底 · v1.0</title>
+<style>
+:root {
+  --ink: #151515;
+  --text: #252525;
+  --muted: #646464;
+  --quiet: #8a8a8a;
+  --line: #3a3a3a;
+  --line-muted: #777;
+  --line-soft: #deddd9;
+  --paper: #f7f6f2;
+  --panel: #fffefa;
+  --panel-soft: #f0efeb;
+  --panel-deep: #e2e1dd;
+  --accent: #2a2a2a;
+  --highlight: #fef3c7;
+  --shadow: 0 10px 24px rgba(0, 0, 0, 0.045);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: "Avenir Next", "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", "Source Han Sans SC", sans-serif;
+  background: var(--paper);
+  color: var(--text);
+  line-height: 1.62;
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+}
+
+.page {
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 54px 34px 86px;
+}
+
+h1, h2, h3, h4 {
+  font-family: "Songti SC", "Noto Serif CJK SC", "Source Han Serif SC", serif;
+  color: var(--ink);
+  letter-spacing: 0;
+}
+
+/* ===== 头部 ===== */
+.header {
+  margin-bottom: 48px;
+  padding-bottom: 28px;
+  border-bottom: 1.25px solid var(--line);
+}
+
+.eyebrow {
+  font-family: "Avenir Next", sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  color: var(--quiet);
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  font-weight: 600;
+}
+
+.eyebrow .ver {
+  display: inline-block;
+  padding: 2px 9px;
+  border: 1px solid var(--line-muted);
+  border-radius: 3px;
+  margin-left: 8px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+h1 {
+  font-size: 48px;
+  font-weight: 800;
+  line-height: 1.1;
+  margin-bottom: 12px;
+}
+
+.subtitle {
+  font-size: 17px;
+  color: var(--muted);
+  font-weight: 400;
+  margin-bottom: 20px;
+}
+
+.meta-row {
+  display: flex;
+  gap: 28px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.meta-row span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.meta-row span::before {
+  content: "";
+  width: 4px;
+  height: 4px;
+  background: var(--line-muted);
+  border-radius: 50%;
+}
+
+/* ===== Section 通用 ===== */
+section {
+  background: var(--panel);
+  border: 1.25px solid var(--line-soft);
+  border-radius: 6px;
+  padding: 36px 40px;
+  margin-bottom: 28px;
+  box-shadow: var(--shadow);
+}
+
+.section-head {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin-bottom: 28px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.section-num {
+  font-family: "Songti SC", serif;
+  font-size: 13px;
+  color: var(--quiet);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+h2 {
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.section-desc {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--quiet);
+  font-family: "Avenir Next", sans-serif;
+}
+
+/* ===== 核心结论 ===== */
+.headline-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.headline-card {
+  background: var(--panel-soft);
+  border-left: 3px solid var(--ink);
+  border-radius: 0 5px 5px 0;
+  padding: 18px 22px;
+  transition: background 180ms ease;
+}
+
+.headline-card:hover { background: var(--panel-deep); }
+
+.headline-card .hl-tag {
+  font-family: "Avenir Next", sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--quiet);
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.headline-card .hl-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.4;
+  margin-bottom: 6px;
+}
+
+.headline-card .hl-desc {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.headline-card .hl-desc strong {
+  color: var(--ink);
+  font-weight: 700;
+  background: var(--highlight);
+  padding: 0 3px;
+}
+
+/* ===== 四象限矩阵 ===== */
+.quadrant-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 0;
+  border: 1.25px solid var(--line);
+  border-radius: 6px;
+  overflow: hidden;
+  margin-top: 8px;
+}
+
+.quadrant {
+  padding: 22px 26px;
+  position: relative;
+  min-height: 200px;
+}
+
+.quadrant.q-tl { background: var(--ink); color: var(--panel); border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.quadrant.q-tr { background: var(--panel-soft); border-bottom: 1px solid var(--line); }
+.quadrant.q-bl { background: var(--panel-soft); border-right: 1px solid var(--line); }
+.quadrant.q-br { background: var(--panel); }
+
+.quadrant-axes {
+  position: relative;
+}
+
+.axis-label {
+  position: absolute;
+  font-family: "Avenir Next", sans-serif;
+  font-size: 10px;
+  color: var(--quiet);
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.axis-x { bottom: -36px; left: 50%; transform: translateX(-50%); }
+.axis-y { top: 50%; left: -36px; transform: translateY(-50%) rotate(-90deg); transform-origin: center; }
+
+.q-label {
+  font-family: "Avenir Next", sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  opacity: 0.7;
+}
+
+.q-tl .q-label { color: var(--panel-soft); }
+.q-tr .q-label, .q-bl .q-label, .q-br .q-label { color: var(--quiet); }
+
+.q-title {
+  font-family: "Songti SC", serif;
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  line-height: 1.3;
+}
+
+.q-tl .q-title { color: var(--panel); }
+.q-tr .q-title, .q-bl .q-title, .q-br .q-title { color: var(--ink); }
+
+.q-items {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.q-item {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.q-tl .q-item { color: var(--panel-soft); }
+.q-tr .q-item, .q-bl .q-item, .q-br .q-item { color: var(--text); }
+
+.q-item .q-name {
+  font-weight: 700;
+  min-width: 60px;
+}
+
+.q-tl .q-item .q-name { color: var(--panel); }
+.q-tr .q-item .q-name, .q-bl .q-item .q-name, .q-br .q-item .q-name { color: var(--ink); }
+
+.q-item .q-stats {
+  font-family: "Avenir Next", sans-serif;
+  font-size: 12px;
+  color: var(--quiet);
+}
+
+.q-strategy {
+  font-size: 12px;
+  line-height: 1.55;
+  padding-top: 10px;
+  border-top: 1px solid;
+  border-color: rgba(255,255,255,0.15);
+}
+
+.q-tl .q-strategy { color: var(--panel-soft); border-color: rgba(255,255,255,0.2); }
+.q-tr .q-strategy, .q-bl .q-strategy, .q-br .q-strategy { color: var(--muted); border-color: var(--line-soft); }
+
+.q-strategy strong {
+  color: inherit;
+  font-weight: 700;
+}
+
+/* ===== 数据表格 ===== */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.data-table th {
+  text-align: left;
+  font-size: 11px;
+  color: var(--quiet);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  padding: 10px 12px;
+  border-bottom: 1.25px solid var(--line);
+  text-transform: uppercase;
+}
+
+.data-table th.num { text-align: right; }
+.data-table th.bar-col { text-align: center; }
+
+.data-table td {
+  padding: 11px 12px;
+  border-bottom: 1px solid var(--line-soft);
+  vertical-align: middle;
+}
+
+.data-table td.num {
+  text-align: right;
+  font-family: "Avenir Next", sans-serif;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.data-table td.name {
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.data-table td.name .sub {
+  font-size: 11px;
+  color: var(--quiet);
+  font-weight: 400;
+  margin-left: 6px;
+}
+
+.data-table tr:hover td { background: var(--panel-soft); }
+
+.data-table .col-bar { width: 200px; }
+
+.bar-wrap {
+  height: 6px;
+  background: var(--panel-soft);
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+}
+
+.bar-fill {
+  height: 100%;
+  background: var(--ink);
+  border-radius: 3px;
+  transition: width 240ms ease;
+}
+
+.bar-fill.muted { background: var(--line-muted); }
+.bar-fill.accent { background: var(--ink); }
+
+.cell-strong {
+  font-family: "Avenir Next", sans-serif;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.cell-warn {
+  color: var(--ink);
+  background: var(--highlight);
+  padding: 1px 4px;
+  border-radius: 2px;
+  font-weight: 600;
+}
+
+/* ===== 留存对比 ===== */
+.retain-compare {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-top: 8px;
+}
+
+.retain-card {
+  background: var(--panel-soft);
+  border: 1px solid var(--line-soft);
+  border-radius: 5px;
+  padding: 18px 22px;
+}
+
+.retain-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.retain-card-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.retain-card-meta {
+  font-size: 11px;
+  color: var(--quiet);
+  font-family: "Avenir Next", sans-serif;
+}
+
+.retain-row {
+  display: grid;
+  grid-template-columns: 70px 1fr 60px;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  font-size: 12px;
+}
+
+.retain-row .r-name {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.retain-row .r-bar {
+  height: 18px;
+  background: var(--panel);
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+}
+
+.retain-row .r-fill {
+  height: 100%;
+  background: var(--ink);
+  border-radius: 2px;
+  transition: width 240ms ease;
+}
+
+.retain-row .r-fill.muted { background: var(--line-muted); }
+
+.retain-row .r-value {
+  font-family: "Avenir Next", sans-serif;
+  font-weight: 700;
+  text-align: right;
+  color: var(--ink);
+}
+
+/* ===== 行动建议 ===== */
+.action-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.action-item {
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  gap: 18px;
+  padding: 16px 20px;
+  background: var(--panel-soft);
+  border-radius: 5px;
+  border-left: 3px solid var(--line-muted);
+}
+
+.action-item.p0 { border-left-color: var(--ink); background: var(--panel-deep); }
+.action-item.p1 { border-left-color: var(--line); }
+
+.action-priority {
+  font-family: "Avenir Next", sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: 0.06em;
+  align-self: start;
+  padding-top: 2px;
+}
+
+.action-content {
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.55;
+}
+
+.action-content .a-title {
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 4px;
+  font-size: 15px;
+}
+
+.action-content .a-desc {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.action-content .a-desc strong {
+  color: var(--ink);
+  font-weight: 700;
+  background: var(--highlight);
+  padding: 0 3px;
+}
+
+/* ===== 三栏对比 ===== */
+.triple-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.triple-card {
+  background: var(--panel-soft);
+  border: 1px solid var(--line-soft);
+  border-radius: 5px;
+  padding: 18px 20px;
+}
+
+.triple-card .tc-head {
+  font-family: "Avenir Next", sans-serif;
+  font-size: 11px;
+  color: var(--quiet);
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.triple-card .tc-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.triple-card .tc-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.triple-card .tc-rank {
+  font-family: "Avenir Next", sans-serif;
+  color: var(--quiet);
+  font-weight: 700;
+  font-size: 12px;
+  margin-right: 8px;
+}
+
+.triple-card .tc-name {
+  font-weight: 600;
+  color: var(--ink);
+  flex: 1;
+}
+
+.triple-card .tc-val {
+  font-family: "Avenir Next", sans-serif;
+  font-weight: 700;
+  color: var(--text);
+  font-size: 13px;
+}
+
+.triple-card .tc-val .unit {
+  color: var(--quiet);
+  font-weight: 400;
+  font-size: 11px;
+  margin-left: 2px;
+}
+
+/* ===== 数据附录 ===== */
+.appendix-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  font-family: "Avenir Next", "PingFang SC", sans-serif;
+}
+
+.appendix-table th {
+  text-align: left;
+  font-size: 10px;
+  color: var(--quiet);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  padding: 8px 10px;
+  border-bottom: 1.25px solid var(--line);
+  text-transform: uppercase;
+  background: var(--panel-soft);
+}
+
+.appendix-table td {
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--line-soft);
+  color: var(--text);
+}
+
+.appendix-table td.num {
+  text-align: right;
+  font-family: "Avenir Next", sans-serif;
+  font-weight: 600;
+}
+
+.appendix-note {
+  margin-top: 18px;
+  padding: 14px 18px;
+  background: var(--panel-soft);
+  border-left: 2px solid var(--ink);
+  border-radius: 0 4px 4px 0;
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.appendix-note strong { color: var(--ink); font-weight: 700; }
+
+/* ===== 响应式 ===== */
+@media (max-width: 980px) {
+  .headline-grid { grid-template-columns: 1fr; }
+  .triple-grid { grid-template-columns: 1fr; }
+  .retain-compare { grid-template-columns: 1fr; }
+  .quadrant-grid { grid-template-columns: 1fr; grid-template-rows: auto; }
+  .quadrant { border-right: none !important; border-bottom: 1px solid var(--line) !important; }
+  .quadrant:last-child { border-bottom: none !important; }
+}
+
+@media (max-width: 760px) {
+  .page { padding: 24px 14px 52px; }
+  h1 { font-size: 32px; line-height: 1.15; }
+  section { padding: 22px 18px; }
+  h2 { font-size: 22px; }
+  .data-table { font-size: 12px; }
+  .data-table .col-bar { display: none; }
+  .meta-row { gap: 14px; }
+}
+
+/* 动画 */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+section {
+  animation: fadeIn 320ms ease-out backwards;
+}
+
+section:nth-child(2) { animation-delay: 60ms; }
+section:nth-child(3) { animation-delay: 120ms; }
+section:nth-child(4) { animation-delay: 180ms; }
+section:nth-child(5) { animation-delay: 240ms; }
+section:nth-child(6) { animation-delay: 300ms; }
+section:nth-child(7) { animation-delay: 360ms; }
+section:nth-child(8) { animation-delay: 420ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  section { animation: none; }
+  .bar-fill, .r-fill { transition: none; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- 头部 -->
+  <header class="header">
+    <div class="eyebrow">信息流流量地图 · Browser Feed Traffic Map<span class="ver">v1.0</span></div>
+    <h1>浏览器信息流流量地图现状摸底</h1>
+    <div class="subtitle">页面 / 频道 UV·时长·次日留存 全景分析</div>
+    <div class="meta-row">
+      <span>数据周期 2026-06-22 ~ 06-28（7天）</span>
+      <span>数据源 dwm_browser_event_aggregation_label_di</span>
+      <span>口径 日均 UV / 时长（7天 ÷ 7）</span>
+      <span>留存 6天平均次日留存</span>
+      <span>仅浏览器数据（不含内容中心）</span>
+    </div>
+  </header>
+
+  <!-- 一、核心结论 -->
+  <section>
+    <div class="section-head">
+      <span class="section-num">01</span>
+      <h2>核心结论</h2>
+      <span class="section-desc">5 KEY FINDINGS</span>
+    </div>
+    <div class="headline-grid">
+      <div class="headline-card">
+        <div class="hl-tag">FINDING 01 · 基本盘</div>
+        <div class="hl-title">推荐频道是信息流绝对核心</div>
+        <div class="hl-desc">日均UV <strong>1032万</strong>，日均时长 <strong>2.29亿分钟</strong>（占信息流70%+），人均22.2分钟，频道次日留存 <strong>41.25%</strong>（最高）</div>
+      </div>
+      <div class="headline-card">
+        <div class="hl-tag">FINDING 02 · 机会点</div>
+        <div class="hl-title">热点留存与推荐相当，但消费深度差距5倍</div>
+        <div class="hl-desc">热点日均UV 917万（推荐89%），留存 <strong>41.11%</strong>（与推荐持平），但人均时长仅 <strong>4.86分钟</strong>（推荐22%），详情页转化是关键瓶颈</div>
+      </div>
+      <div class="headline-card">
+        <div class="hl-tag">FINDING 03 · 高价值用户</div>
+        <div class="hl-title">push用户消费深度极高，但自然回访弱</div>
+        <div class="hl-desc">push频道人均时长 <strong>21.2分钟</strong>（与推荐相当），但频道次日留存仅 <strong>29.1%</strong>，依赖push触达，自然回访待提升</div>
+      </div>
+      <div class="headline-card">
+        <div class="hl-tag">FINDING 04 · 深度场景</div>
+        <div class="hl-title">文章详情页是时长核心场景</div>
+        <div class="hl-desc">日均UV仅 <strong>247万</strong>，但人均时长 <strong>21.2分钟</strong>（最高），日均时长 <strong>5246万分钟</strong>，是信息流时长贡献第二大页面</div>
+      </div>
+      <div class="headline-card" style="grid-column: span 2;">
+        <div class="hl-tag">FINDING 05 · 收束机会</div>
+        <div class="hl-title">热榜/小视频类频道留存断崖，可整合收束</div>
+        <div class="hl-desc">热榜（留存15%）、小视频（12%）、视频底tab（8%）频道留存断崖式下降，频道的工具/偶发属性强，可考虑整合到热点或个性化分发，减少入口分散</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 二、频道四象限 -->
+  <section>
+    <div class="section-head">
+      <span class="section-num">02</span>
+      <h2>频道四象限矩阵</h2>
+      <span class="section-desc">次日留存 × 人均时长</span>
+    </div>
+    <div class="quadrant-grid">
+      <!-- 左上：高留存高时长 -->
+      <div class="quadrant q-tl">
+        <div class="q-label">高留存 · 高时长</div>
+        <div class="q-title">核心基本盘</div>
+        <div class="q-items">
+          <div class="q-item">
+            <span class="q-name">推荐</span>
+            <span class="q-stats">留存 41.25% · 人均 22.2min</span>
+          </div>
+        </div>
+        <div class="q-strategy"><strong>策略</strong>：保障推荐质量，持续优化算法，巩固基本盘</div>
+      </div>
+      <!-- 右上：高留存低时长 -->
+      <div class="quadrant q-tr">
+        <div class="q-label">高留存 · 低时长</div>
+        <div class="q-title">回访好·消费浅</div>
+        <div class="q-items">
+          <div class="q-item">
+            <span class="q-name">热点</span>
+            <span class="q-stats">留存 41.11% · 人均 4.86min</span>
+          </div>
+          <div class="q-item">
+            <span class="q-name">视频</span>
+            <span class="q-stats">留存 36.64% · 人均 1.71min</span>
+          </div>
+        </div>
+        <div class="q-strategy"><strong>策略</strong>：热点优化内容质量提升详情页转化；视频增强信息流内消费引导</div>
+      </div>
+      <!-- 左下：低留存高时长 -->
+      <div class="quadrant q-bl">
+        <div class="q-label">低留存 · 高时长</div>
+        <div class="q-title">高价值·召回弱</div>
+        <div class="q-items">
+          <div class="q-item">
+            <span class="q-name">push</span>
+            <span class="q-stats">留存 29.10% · 人均 21.2min</span>
+          </div>
+        </div>
+        <div class="q-strategy"><strong>策略</strong>：优化push频次和内容匹配，配合首页/信息流入口提升自然回访</div>
+      </div>
+      <!-- 右下：低留存低时长 -->
+      <div class="quadrant q-br">
+        <div class="q-label">低留存 · 低时长</div>
+        <div class="q-title">偶发访问·可收束</div>
+        <div class="q-items">
+          <div class="q-item">
+            <span class="q-name">热榜</span>
+            <span class="q-stats">留存 14.86% · 人均 1.0min</span>
+          </div>
+          <div class="q-item">
+            <span class="q-name">小视频</span>
+            <span class="q-stats">留存 11.76% · 人均 1.67min</span>
+          </div>
+          <div class="q-item">
+            <span class="q-name">视频底tab</span>
+            <span class="q-stats">留存 8.46% · 人均 7.1min</span>
+          </div>
+        </div>
+        <div class="q-strategy"><strong>策略</strong>：热榜整合到热点；小视频类入口收束，避免资源分散</div>
+      </div>
+    </div>
+    <div style="margin-top: 28px; padding: 14px 18px; background: var(--highlight); border-left: 3px solid var(--ink); border-radius: 0 4px 4px 0; font-size: 13px; color: var(--ink); line-height: 1.6;">
+      <strong>核心洞察</strong>：推荐和热点频道留存旗鼓相当（41%），但消费深度差距5倍（22min vs 5min）。若热点频道能达到推荐频道一半的人均时长（11分钟），预计可日均新增约 <strong>5000万分钟</strong> 信息流时长。
+    </div>
+  </section>
+
+  <!-- 三、信息流页面 UV/时长 -->
+  <section>
+    <div class="section-head">
+      <span class="section-num">03</span>
+      <h2>信息流页面 UV / 时长</h2>
+      <span class="section-desc">日均 · TOP 8</span>
+    </div>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>页面</th>
+          <th class="num">日均UV</th>
+          <th class="num">日均PV</th>
+          <th class="num">PV/用户</th>
+          <th class="num">人均时长</th>
+          <th class="num">日均时长</th>
+          <th class="bar-col">时长占比</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="name">feed_content_detail <span class="sub">文章详情页</span></td>
+          <td class="num">2,474,780</td>
+          <td class="num">12,981,294</td>
+          <td class="num">5.25</td>
+          <td class="num cell-strong">21.20</td>
+          <td class="num">52,464,812</td>
+          <td class="col-bar"><div class="bar-wrap"><div class="bar-fill" style="width: 100%"></div></div></td>
+        </tr>
+        <tr>
+          <td class="name">feed_info_rec <span class="sub">推荐页</span></td>
+          <td class="num">9,490,922</td>
+          <td class="num">177,808,572</td>
+          <td class="num">18.73</td>
+          <td class="num">4.44</td>
+          <td class="num">42,113,819</td>
+          <td class="col-bar"><div class="bar-wrap"><div class="bar-fill" style="width: 80.3%"></div></div></td>
+        </tr>
+        <tr>
+          <td class="name">feed_info_topnews <span class="sub">热点页</span></td>
+          <td class="num">6,787,621</td>
+          <td class="num">25,230,788</td>
+          <td class="num">3.72</td>
+          <td class="num">0.53</td>
+          <td class="num">3,619,473</td>
+          <td class="col-bar"><div class="bar-wrap"><div class="bar-fill muted" style="width: 6.9%"></div></div></td>
+        </tr>
+        <tr>
+          <td class="name">feed_minivideo_continuously <span class="sub">小视频流</span></td>
+          <td class="num">929,168</td>
+          <td class="num">1,156,189</td>
+          <td class="num">1.24</td>
+          <td class="num">3.36</td>
+          <td class="num">3,121,823</td>
+          <td class="col-bar"><div class="bar-wrap"><div class="bar-fill muted" style="width: 6.0%"></div></div></td>
+        </tr>
+        <tr>
+          <td class="name">feed_info_hotList <span class="sub">热榜页</span></td>
+          <td class="num">1,338,504</td>
+          <td class="num">1,048,096</td>
+          <td class="num">0.78</td>
+          <td class="num">0.10</td>
+          <td class="num">134,853</td>
+          <td class="col-bar"><div class="bar-wrap"><div class="bar-fill muted" style="width: 0.3%"></div></div></td>
+        </tr>
+        <tr>
+          <td class="name">feed_info_videos <span class="sub">视频页</span></td>
+          <td class="num">1,181,125</td>
+          <td class="num">966,845</td>
+          <td class="num">0.82</td>
+          <td class="num">0.13</td>
+          <td class="num">148,495</td>
+          <td class="col-bar"><div class="bar-wrap"><div class="bar-fill muted" style="width: 0.3%"></div></div></td>
+        </tr>
+        <tr>
+          <td class="name">immersion_news_detail <span class="sub">沉浸式新闻</span></td>
+          <td class="num">2,317,439</td>
+          <td class="num">0</td>
+          <td class="num">0.00</td>
+          <td class="num cell-warn">埋点缺失</td>
+          <td class="num">0</td>
+          <td class="col-bar"><div class="bar-wrap"><div class="bar-fill muted" style="width: 0%"></div></div></td>
+        </tr>
+        <tr>
+          <td class="name">feed_info_shortVideo <span class="sub">短视频页</span></td>
+          <td class="num">240,940</td>
+          <td class="num">214,605</td>
+          <td class="num">0.89</td>
+          <td class="num">—</td>
+          <td class="num">—</td>
+          <td class="col-bar"><div class="bar-wrap"><div class="bar-fill muted" style="width: 0%"></div></div></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 四、信息流频道 UV/时长 -->
+  <section>
+    <div class="section-head">
+      <span class="section-num">04</span>
+      <h2>信息流频道 UV / 时长</h2>
+      <span class="section-desc">日均 · TOP 10</span>
+    </div>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>频道</th>
+          <th class="num">日均UV</th>
+          <th class="num">日均PV</th>
+          <th class="num">PV/用户</th>
+          <th class="num">人均时长</th>
+          <th class="num">日均时长</th>
+          <th class="bar-col">时长占比</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="name">推荐</td>
+          <td class="num">10,320,482</td>
+          <td class="num">187,677,819</td>
+          <td class="num">18.18</td>
+          <td class="num cell-strong">22.20</td>
+          <td class="num">229,066,628</td>
+          <td class="col-bar"><div class="bar-wrap"><div class="bar-fill" style="width: 100%"></div></div></td>
+        </tr>
+        <tr>
+          <td class="name">push</td>
+          <td class="num">2,490,292</td>
+          <td class="num">16,876,063</td>
+          <td class="num">6.78</td>
+          <td class="num cell-strong">21.20</td>
+          <td class="num">52,785,676</td>
+          <td class="col-bar"><div class="bar-wrap"><div class="bar-fill" style="width: 23.0%"></div></div></td>
+        </tr>
+        <tr>
+          <td class="name">热点</td>
+          <td class="num">9,168,888</td>
+          <td class="num">32,805,933</td>
+          <td class="num">3.58</td>
+          <td class="num">4.86</td>
+          <td class="num">44,519,812</td>
+          <td class="col-bar"><div class="bar-wrap"><div class="bar-fill muted" style="width: 19.4%"></div></div></td>
+        </tr>
+        <tr>
+          <td class="name">未知</td>
+          <td class="num">632,663</td>
+          <td class="num">9,794,998</td>
+          <td class="num">15.48</td>
+          <td class="num">8.54</td>
+          <td class="num">5,400,528</td>
+          <td class="col-bar"><div class="bar-wrap"><div class="bar-fill muted" style="width: 2.4%"></div></div></td>
+        </tr>
+        <tr>
+          <td class="name">视频</td>
+          <td class="num">1,654,715</td>
+          <td class="num">1,779,946</td>
+          <td class="num">1.08</td>
+          <td class="num">1.71</td>
+          <td class="num">2,829,196</td>
+          <td class="col-bar"><div class="bar-wrap"><div class="bar-fill muted" style="width: 1.2%"></div></div></td>
+        </tr>
+        <tr>
+          <td class="name">发现</td>
+          <td class="num">1,352,842</td>
+          <td class="num">3,796,839</td>
+          <td class="num">2.81</td>
+          <td class="num">2.13</td>
+          <td class="num">2,876,957</td>
+          <td class="col-bar"><div class="bar-wrap"><div class="bar-fill muted" style="width: 1.3%"></div></div></td>
+        </tr>
+        <tr>
+          <td class="name">视频底tab小视频</td>
+          <td class="num">212,516</td>
+          <td class="num">915,667</td>
+          <td class="num">4.31</td>
+          <td class="num">7.10</td>
+          <td class="num">1,508,036</td>
+          <td class="col-bar"><div class="bar-wrap"><div class="bar-fill muted" style="width: 0.7%"></div></div></td>
+        </tr>
+        <tr>
+          <td class="name">文章详情页相关推荐</td>
+          <td class="num">1,110,259</td>
+          <td class="num">1,199,639</td>
+          <td class="num">1.08</td>
+          <td class="num">0.74</td>
+          <td class="num">817,862</td>
+          <td class="col-bar"><div class="bar-wrap"><div class="bar-fill muted" style="width: 0.4%"></div></div></td>
+        </tr>
+        <tr>
+          <td class="name">小视频</td>
+          <td class="num">250,351</td>
+          <td class="num">370,153</td>
+          <td class="num">1.48</td>
+          <td class="num">1.67</td>
+          <td class="num">419,313</td>
+          <td class="col-bar"><div class="bar-wrap"><div class="bar-fill muted" style="width: 0.2%"></div></div></td>
+        </tr>
+        <tr>
+          <td class="name">热榜</td>
+          <td class="num">1,963,460</td>
+          <td class="num">1,380,587</td>
+          <td class="num">0.70</td>
+          <td class="num">1.00</td>
+          <td class="num">1,962,702</td>
+          <td class="col-bar"><div class="bar-wrap"><div class="bar-fill muted" style="width: 0.9%"></div></div></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="triple-grid" style="margin-top: 28px;">
+      <div class="triple-card">
+        <div class="tc-head">日均时长 TOP 3</div>
+        <div class="tc-list">
+          <div class="tc-row"><span class="tc-rank">01</span><span class="tc-name">推荐</span><span class="tc-val">2.29亿<span class="unit">min (70.2%)</span></span></div>
+          <div class="tc-row"><span class="tc-rank">02</span><span class="tc-name">push</span><span class="tc-val">5279万<span class="unit">min (16.2%)</span></span></div>
+          <div class="tc-row"><span class="tc-rank">03</span><span class="tc-name">热点</span><span class="tc-val">4452万<span class="unit">min (13.6%)</span></span></div>
+        </div>
+      </div>
+      <div class="triple-card">
+        <div class="tc-head">人均时长 TOP 3</div>
+        <div class="tc-list">
+          <div class="tc-row"><span class="tc-rank">01</span><span class="tc-name">推荐</span><span class="tc-val">22.20<span class="unit">min</span></span></div>
+          <div class="tc-row"><span class="tc-rank">02</span><span class="tc-name">push</span><span class="tc-val">21.20<span class="unit">min</span></span></div>
+          <div class="tc-row"><span class="tc-rank">03</span><span class="tc-name">未知</span><span class="tc-val">8.54<span class="unit">min</span></span></div>
+        </div>
+      </div>
+      <div class="triple-card">
+        <div class="tc-head">日均UV TOP 3</div>
+        <div class="tc-list">
+          <div class="tc-row"><span class="tc-rank">01</span><span class="tc-name">推荐</span><span class="tc-val">1032万</span></div>
+          <div class="tc-row"><span class="tc-rank">02</span><span class="tc-name">热点</span><span class="tc-val">917万</span></div>
+          <div class="tc-row"><span class="tc-rank">03</span><span class="tc-name">push</span><span class="tc-val">249万</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 五、频道次日留存 -->
+  <section>
+    <div class="section-head">
+      <span class="section-num">05</span>
+      <h2>信息流频道次日留存</h2>
+      <span class="section-desc">6天平均 · 日均UV ≥ 50万</span>
+    </div>
+
+    <div class="retain-compare">
+      <!-- APP次日留存 -->
+      <div class="retain-card">
+        <div class="retain-card-head">
+          <div class="retain-card-title">APP 次日留存</div>
+          <div class="retain-card-meta">访问该频道用户次日是否回访APP</div>
+        </div>
+        <div class="retain-row"><span class="r-name">世界杯</span><div class="r-bar"><div class="r-fill muted" style="width: 100%"></div></div><span class="r-value">65.45%</span></div>
+        <div class="retain-row"><span class="r-name">相关推荐</span><div class="r-bar"><div class="r-fill muted" style="width: 90%"></div></div><span class="r-value">58.85%</span></div>
+        <div class="retain-row"><span class="r-name">未知</span><div class="r-bar"><div class="r-fill muted" style="width: 86%"></div></div><span class="r-value">56.30%</span></div>
+        <div class="retain-row"><span class="r-name">视频底tab</span><div class="r-bar"><div class="r-fill muted" style="width: 87%"></div></div><span class="r-value">57.31%</span></div>
+        <div class="retain-row"><span class="r-name">发现</span><div class="r-bar"><div class="r-fill muted" style="width: 79%"></div></div><span class="r-value">51.80%</span></div>
+        <div class="retain-row"><span class="r-name">push</span><div class="r-bar"><div class="r-fill muted" style="width: 70%"></div></div><span class="r-value">45.77%</span></div>
+        <div class="retain-row"><span class="r-name">热点</span><div class="r-bar"><div class="r-fill" style="width: 68%"></div></div><span class="r-value">44.75%</span></div>
+        <div class="retain-row"><span class="r-name">热榜</span><div class="r-bar"><div class="r-fill" style="width: 68%"></div></div><span class="r-value">44.50%</span></div>
+        <div class="retain-row"><span class="r-name">推荐</span><div class="r-bar"><div class="r-fill" style="width: 67%"></div></div><span class="r-value">43.99%</span></div>
+        <div class="retain-row"><span class="r-name">视频</span><div class="r-bar"><div class="r-fill" style="width: 66%"></div></div><span class="r-value">43.27%</span></div>
+        <div class="retain-row"><span class="r-name">小视频</span><div class="r-bar"><div class="r-fill" style="width: 66%"></div></div><span class="r-value">43.46%</span></div>
+      </div>
+
+      <!-- 频道次日留存 -->
+      <div class="retain-card">
+        <div class="retain-card-head">
+          <div class="retain-card-title">频道次日留存</div>
+          <div class="retain-card-meta">访问该频道用户次日是否再访问该频道</div>
+        </div>
+        <div class="retain-row"><span class="r-name">推荐</span><div class="r-bar"><div class="r-fill" style="width: 100%"></div></div><span class="r-value">41.25%</span></div>
+        <div class="retain-row"><span class="r-name">热点</span><div class="r-bar"><div class="r-fill" style="width: 100%"></div></div><span class="r-value">41.11%</span></div>
+        <div class="retain-row"><span class="r-name">视频</span><div class="r-bar"><div class="r-fill" style="width: 89%"></div></div><span class="r-value">36.64%</span></div>
+        <div class="retain-row"><span class="r-name">未知</span><div class="r-bar"><div class="r-fill muted" style="width: 78%"></div></div><span class="r-value">32.35%</span></div>
+        <div class="retain-row"><span class="r-name">发现</span><div class="r-bar"><div class="r-fill muted" style="width: 73%"></div></div><span class="r-value">30.22%</span></div>
+        <div class="retain-row"><span class="r-name">push</span><div class="r-bar"><div class="r-fill muted" style="width: 71%"></div></div><span class="r-value">29.10%</span></div>
+        <div class="retain-row"><span class="r-name">相关推荐</span><div class="r-bar"><div class="r-fill muted" style="width: 59%"></div></div><span class="r-value">24.16%</span></div>
+        <div class="retain-row"><span class="r-name">热榜</span><div class="r-bar"><div class="r-fill muted" style="width: 36%"></div></div><span class="r-value">14.86%</span></div>
+        <div class="retain-row"><span class="r-name">世界杯</span><div class="r-bar"><div class="r-fill muted" style="width: 30%"></div></div><span class="r-value">12.21%</span></div>
+        <div class="retain-row"><span class="r-name">小视频</span><div class="r-bar"><div class="r-fill muted" style="width: 29%"></div></div><span class="r-value">11.76%</span></div>
+        <div class="retain-row"><span class="r-name">视频底tab</span><div class="r-bar"><div class="r-fill muted" style="width: 21%"></div></div><span class="r-value">8.46%</span></div>
+      </div>
+    </div>
+
+    <div style="margin-top: 24px; padding: 14px 18px; background: var(--panel-soft); border-left: 2px solid var(--ink); border-radius: 0 4px 4px 0; font-size: 13px; color: var(--muted); line-height: 1.6;">
+      <strong style="color: var(--ink);">规律</strong>：高频内容频道（推荐/热点）用户已形成每日浏览习惯，频道留存最高（41%）；push频道消费深度好但依赖外部触达，自然回访弱（29%）；热榜/小视频等偶发性消费频道，留存断崖式下降（15%/12%）。
+    </div>
+  </section>
+
+  <!-- 六、行动建议 -->
+  <section>
+    <div class="section-head">
+      <span class="section-num">06</span>
+      <h2>行动建议</h2>
+      <span class="section-desc">P0 / P1 / P2 优先级</span>
+    </div>
+    <div class="action-list">
+      <div class="action-item p0">
+        <div class="action-priority">P0</div>
+        <div class="action-content">
+          <div class="a-title">热点频道详情页转化优化</div>
+          <div class="a-desc">UV大但消费浅，优化内容质量和详情页引导，目标提升人均时长至 <strong>8-10分钟</strong></div>
+        </div>
+      </div>
+      <div class="action-item p0">
+        <div class="action-priority">P0</div>
+        <div class="action-content">
+          <div class="a-title">push频道自然回访提升</div>
+          <div class="a-desc">高价值用户群体，优化push频次和内容匹配，配合首页/信息流入口提升自然回访</div>
+        </div>
+      </div>
+      <div class="action-item p1">
+        <div class="action-priority">P1</div>
+        <div class="action-content">
+          <div class="a-title">频道收束重构</div>
+          <div class="a-desc">热榜（留存15%）、小视频类（留存12%/8%）等低留存频道可整合到热点或个性化分发，减少入口分散</div>
+        </div>
+      </div>
+      <div class="action-item p1">
+        <div class="action-priority">P1</div>
+        <div class="action-content">
+          <div class="a-title">沉浸式新闻详情页埋点补齐</div>
+          <div class="a-desc">日均UV <strong>232万</strong> 但时长为0，埋点缺失影响分析，需推动补齐</div>
+        </div>
+      </div>
+      <div class="action-item">
+        <div class="action-priority">P2</div>
+        <div class="action-content">
+          <div class="a-title">世界杯等赛事型频道流量承接</div>
+          <div class="a-desc">APP留存高（65%）但频道留存低（12%），赛事结束后需承接这部分流量</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 七、数据附录 -->
+  <section>
+    <div class="section-head">
+      <span class="section-num">07</span>
+      <h2>数据附录</h2>
+      <span class="section-desc">有效用户口径 · 分天趋势</span>
+    </div>
+
+    <h3 style="font-size: 16px; margin-bottom: 14px; color: var(--ink);">信息流有效用户（官方口径）</h3>
+    <table class="appendix-table" style="margin-bottom: 24px;">
+      <thead>
+        <tr>
+          <th>指标</th>
+          <th style="text-align: right;">值</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>日均有效DAU</td><td class="num">3,722,454</td></tr>
+        <tr><td>日均有效时长</td><td class="num">12,922 万分钟</td></tr>
+        <tr><td>人均时长/天</td><td class="num">34.71 分钟</td></tr>
+        <tr><td>有效用户APP次日留存</td><td class="num">49.39%</td></tr>
+        <tr><td>有效用户次日仍是有效用户</td><td class="num">29.89%</td></tr>
+      </tbody>
+    </table>
+
+    <h3 style="font-size: 16px; margin-bottom: 14px; color: var(--ink);">分天趋势（信息流有效消费）</h3>
+    <table class="appendix-table">
+      <thead>
+        <tr>
+          <th>日期</th>
+          <th style="text-align: right;">有效DAU</th>
+          <th style="text-align: right;">有效时长(分钟)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>2026-06-22</td><td class="num">7,482,015</td><td class="num">132,719,819</td></tr>
+        <tr><td>2026-06-23</td><td class="num">7,354,408</td><td class="num">130,685,223</td></tr>
+        <tr><td>2026-06-24</td><td class="num">7,194,636</td><td class="num">124,188,587</td></tr>
+        <tr><td>2026-06-25</td><td class="num">7,565,589</td><td class="num">130,943,241</td></tr>
+        <tr><td>2026-06-26</td><td class="num">7,200,385</td><td class="num">124,062,500</td></tr>
+        <tr><td>2026-06-27</td><td class="num">7,345,099</td><td class="num">129,146,306</td></tr>
+        <tr><td>2026-06-28</td><td class="num">7,559,994</td><td class="num">132,805,193</td></tr>
+      </tbody>
+    </table>
+
+    <div class="appendix-note">
+      <strong>数据说明</strong><br>
+      • 数据来源：<code>iceberg_zjyprc_hadoop.browser.dwm_browser_event_aggregation_label_di</code><br>
+      • 时间范围：2026-06-22 ~ 2026-06-28（7天）<br>
+      • 日均口径：7天汇总值 ÷ 7（留存数据为6天平均，本身即为日均概念）<br>
+      • 留存计算：首日 06-22~06-27（6天），次日 06-23~06-28，6天平均<br>
+      • 频道口径：直接使用 <code>feed_channel</code> 字段，未做二次映射<br>
+      • 时长口径：<code>feed_dura</code>（列表页）+ <code>consum_dura</code>（详情页），单位分钟<br>
+      • 有效用户口径：参考 <a href="https://mi.feishu.cn/wiki/C0J0w7MksizOJWkYQ3vcrWarn4g" style="color: var(--ink);">飞书文档</a><br>
+      • 实验组过滤：novel/shortstory 保持官方原样口径，仅浏览器数据，不含内容中心
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

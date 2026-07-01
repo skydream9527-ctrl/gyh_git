@@ -1,0 +1,38 @@
+{
+  "columns": [
+    {
+      "name": "browser_feed_valid_dura_min_7d",
+      "type": "double",
+      "comment": ""
+    },
+    {
+      "name": "browser_feed_valid_dau_7d",
+      "type": "bigint",
+      "comment": ""
+    },
+    {
+      "name": "dura_min_daily_avg",
+      "type": "decimal(38, 18)",
+      "comment": ""
+    },
+    {
+      "name": "dau_daily_avg",
+      "type": "decimal(27, 6)",
+      "comment": ""
+    },
+    {
+      "name": "dura_per_user_min",
+      "type": "decimal(38, 18)",
+      "comment": ""
+    }
+  ],
+  "rows": [
+    [
+      904550870.01165,
+      26057178,
+      "129221552.860000000000000000",
+      "3722454.000000",
+      "34.710000000000000000"
+    ]
+  ]
+}

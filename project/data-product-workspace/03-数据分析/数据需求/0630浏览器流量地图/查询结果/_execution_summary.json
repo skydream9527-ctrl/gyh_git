@@ -1,0 +1,151 @@
+{
+  "total": 18,
+  "ok": 14,
+  "fail": 4,
+  "details": [
+    {
+      "label": "01-一级模块大盘-PV-UV-时长_q1",
+      "status": "OK",
+      "elapsed": 169.91576218605042,
+      "rows": 9,
+      "cols": 7,
+      "error": ""
+    },
+    {
+      "label": "01-一级模块大盘-PV-UV-时长_q2",
+      "status": "OK",
+      "elapsed": 72.48624897003174,
+      "rows": 63,
+      "cols": 7,
+      "error": ""
+    },
+    {
+      "label": "02-启动方式拆分-6类_q1",
+      "status": "OK",
+      "elapsed": 51.72905707359314,
+      "rows": 6,
+      "cols": 4,
+      "error": ""
+    },
+    {
+      "label": "02-启动方式拆分-6类_q2",
+      "status": "OK",
+      "elapsed": 133.89949202537537,
+      "rows": 42,
+      "cols": 4,
+      "error": ""
+    },
+    {
+      "label": "03-模块x启动方式交叉矩阵_q1",
+      "status": "FAIL",
+      "elapsed": 1.0242700576782227,
+      "rows": 0,
+      "cols": 0,
+      "error": "SQL execution failed: Query submission failed: HTTP 400 - {\"meta\":{\"errCode\":4007499,\"errMsg\":\"http presto execute sql error, QueryError{message=line 55:55: \\nTrino error: line 55:72: mismatched input '点'. Expecting: ',', 'EXCEPT', 'FETCH', 'FROM', 'GROUP', 'HAVING', 'INTERSECT', 'LIMIT', 'OFFSET', "
+    },
+    {
+      "label": "03-模块x启动方式交叉矩阵_q2",
+      "status": "OK",
+      "elapsed": 161.3121771812439,
+      "rows": 54,
+      "cols": 4,
+      "error": ""
+    },
+    {
+      "label": "04-信息流页面细分-UV-PV-时长_q1",
+      "status": "OK",
+      "elapsed": 335.40599608421326,
+      "rows": 66,
+      "cols": 8,
+      "error": ""
+    },
+    {
+      "label": "04-信息流页面细分-UV-PV-时长_q2",
+      "status": "OK",
+      "elapsed": 124.34016728401184,
+      "rows": 413,
+      "cols": 5,
+      "error": ""
+    },
+    {
+      "label": "05-信息流频道细分-UV-PV-时长_q1",
+      "status": "OK",
+      "elapsed": 120.53976678848267,
+      "rows": 454,
+      "cols": 8,
+      "error": ""
+    },
+    {
+      "label": "05-信息流频道细分-UV-PV-时长_q2",
+      "status": "OK",
+      "elapsed": 154.9753110408783,
+      "rows": 2824,
+      "cols": 5,
+      "error": ""
+    },
+    {
+      "label": "06-信息流page×channel双层下钻_q1",
+      "status": "OK",
+      "elapsed": 114.41170620918274,
+      "rows": 2800,
+      "cols": 9,
+      "error": ""
+    },
+    {
+      "label": "06-信息流page×channel双层下钻_q2",
+      "status": "FAIL",
+      "elapsed": 0.6714620590209961,
+      "rows": 0,
+      "cols": 0,
+      "error": "SQL execution failed: Query submission failed: HTTP 400 - {\"meta\":{\"errCode\":4007499,\"errMsg\":\"http presto execute sql error, QueryError{message=line 4:4: \\nTrino error: line 4:70: mismatched input '推'. Expecting: ',', 'EXCEPT', 'FETCH', 'FROM', 'GROUP', 'HAVING', 'INTERSECT', 'LIMIT', 'OFFSET', 'OR"
+    },
+    {
+      "label": "06-信息流page×channel双层下钻_q3",
+      "status": "FAIL",
+      "elapsed": 0.7257370948791504,
+      "rows": 0,
+      "cols": 0,
+      "error": "SQL execution failed: Query submission failed: HTTP 400 - {\"meta\":{\"errCode\":4007499,\"errMsg\":\"http presto execute sql error, QueryError{message=line 10:10: \\nTrino error: line 10:185: mismatched input '其'. Expecting: ',', 'EXCEPT', 'FETCH', 'FROM', 'GROUP', 'HAVING', 'INTERSECT', 'LIMIT', 'OFFSET',"
+    },
+    {
+      "label": "07-信息流有效消费-官方口径_q1",
+      "status": "OK",
+      "elapsed": 228.9018189907074,
+      "rows": 7,
+      "cols": 3,
+      "error": ""
+    },
+    {
+      "label": "07-信息流有效消费-官方口径_q2",
+      "status": "OK",
+      "elapsed": 208.80465984344482,
+      "rows": 1,
+      "cols": 5,
+      "error": ""
+    },
+    {
+      "label": "08-进入页→离开页流转矩阵_q1",
+      "status": "OK",
+      "elapsed": 245.0967948436737,
+      "rows": 72,
+      "cols": 3,
+      "error": ""
+    },
+    {
+      "label": "09-核心模块次日留存_q1",
+      "status": "OK",
+      "elapsed": 272.9543688297272,
+      "rows": 9,
+      "cols": 6,
+      "error": ""
+    },
+    {
+      "label": "09-核心模块次日留存_q2",
+      "status": "FAIL",
+      "elapsed": 263.5334038734436,
+      "rows": 0,
+      "cols": 0,
+      "error": "SQL execution failed: Failed to get query status: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response')) "
+    }
+  ]
+}

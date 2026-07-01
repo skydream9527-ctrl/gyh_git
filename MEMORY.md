@@ -27,6 +27,7 @@
 
 ## 近期记忆
 
+- 07-01：完整整合 ~/Desktop/trae-cn/data-product 目录到 project/data-product-workspace/，包含：00-知识库（7大知识域+归档/操作手册）、01-业务项目、02-Skill开发、03-数据分析、04-会议纪要、05-个人成长（每日/每周/季度复盘+绩效素材）、06-归档、07-定时任务、入口文件（AGENTS/CURRENT/DECISIONS/MEMORY/USER/WORK-PLAN/WORKFLOWS/TEMPLATES）
 - 06-30：项目结构梳理与整理 → THINKING.md。新建思考空间总入口；工程去重删 ~6900 文件（保留 ice-workbench-new）；decisions→references、feishu-part→notes/、删空 memory/your-domain、reference→engineering-ref；重写 README/CLAUDE 为思考空间入口
 - 06-29：创建 Wisdom&Decide 决策中心，梳理项目全景，输出决策SOP → Wisdom&Decide/
 - 06-29：将三个桌面目录整合进 project/ 并同步到GitLab

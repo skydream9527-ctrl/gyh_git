@@ -1,0 +1,44 @@
+{
+  "columns": [
+    {
+      "name": "module",
+      "type": "varchar(7)",
+      "comment": ""
+    },
+    {
+      "name": "first_day_uv",
+      "type": "bigint",
+      "comment": ""
+    },
+    {
+      "name": "next_day_app_uv",
+      "type": "bigint",
+      "comment": ""
+    },
+    {
+      "name": "app_next_day_retain_rate",
+      "type": "decimal(38, 16)",
+      "comment": ""
+    },
+    {
+      "name": "next_day_feed_valid_uv",
+      "type": "bigint",
+      "comment": ""
+    },
+    {
+      "name": "feed_valid_next_day_retain_rate",
+      "type": "decimal(38, 16)",
+      "comment": ""
+    }
+  ],
+  "rows": [
+    [
+      "信息流有效用户",
+      23776355,
+      11743049,
+      "49.3900000000000000",
+      7107264,
+      "29.8900000000000000"
+    ]
+  ]
+}

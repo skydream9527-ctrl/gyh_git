@@ -48,6 +48,22 @@
 
 | 日期 | 文档主题 | 类型 | 链接/位置 | 关键词 |
 |------|----------|------|-----------|--------|
+| 2026-07-01 | 龚云荷工作全景与AI可替代性分析（2026 H1） | 工作分析 | [飞书文档](https://feishu.cn/wiki/JdzLwjnARi6vfwkrvYrc1SlHnhd) / [本地Markdown](Markdown文件/2026-07-01-龚云荷工作全景与AI可替代性分析.md) | 工作分类,AI可替代性,取数,人群包,nl-sql,埋点方案,工作画像 |
+| 2026-07-01 | 每日工作回顾：浏览器流量地图与信息流有效DAU | 工作回顾 | [主文档](../../05-个人成长/每日记录/2026-07-01-每日工作回顾.md) / [归档副本](Markdown文件/2026-07-01-每日工作回顾.md) | 每日回顾,nl-sql,浏览器流量地图,信息流有效DAU,Kyuubi,绩效素材 |
+| 2026-06-30 | 数据产品Q3 OKR V2（对齐团队OKR正式版） | OKR规划 | [飞书文档](https://feishu.cn/wiki/D1rpwY200iX6QekK39McZaAtnve) / [本地Markdown](季度规划复盘/2026-Q3-OKR-V2.md) | Q3 OKR,AI Native,nl-sql,聚焦原则,5个KA,团队对齐 |
+| 2026-06-30 | 每日待办跟踪 | 工作管理 | [工作文档](../../05-个人成长/每日记录/DAILY-TODO.md) / [归档副本](Markdown文件/2026-06-30-每日待办跟踪.md) | 每日待办,ToDo,周会任务,P0,P1,滚动跟进 |
+| 2026-06-29 | 浏览器核心分析报告综合总结（7份飞书报告提炼） | 业务分析 | [知识库案例](../../00-知识库/data-analysis/案例库/2026-06-29-浏览器核心分析报告综合总结.md) / [归档副本](Markdown文件/2026-06-29-浏览器核心分析报告综合总结.md) | 浏览器,用户画像,内容运营,PUSH,DAU,竞品分析,决策建议 |
+| 2026-06-29 | 1021 浏览器用户画像分析 | 飞书文档 | [飞书链接](https://mi.feishu.cn/docx/QSdZdlp3moBiQ7xnWsQcicGGnyd) | 用户画像,年龄性别,城市等级,行为偏好 |
+| 2026-06-29 | 1021 超级小爱在桌面增加ICON对浏览器影响 | 飞书文档 | [飞书链接](https://mi.feishu.cn/docx/Bhxnd2J80oeAoixAEShcXA4inth) | OS3,超级小爱,竞品分析,日活率 |
+| 2026-06-29 | 1021 国庆节后浏览器DAU趋势监控版 | 飞书表格 | [飞书链接](https://mi.feishu.cn/sheets/JYYPsj4GshJhsQt6lSKcLm3DnYd) | DAU监控,趋势分析,基准线 |
+| 2026-06-29 | 内容时效性数据分析报告（0413→0501） | 飞书文档 | [飞书链接](https://mi.feishu.cn/wiki/LXKLw1s7kiF9DnkqNJacZLvAndd) | 内容时效性,CTR,衰减曲线,品类效率 |
+| 2026-06-29 | 搜索用户画像分析 | 飞书文档 | [飞书链接](https://mi.feishu.cn/wiki/A8B4wiL2FiuW03k0OWkcbj7Anpc) | 搜索画像,留存,搜索入口,意图分布 |
+| 2026-06-29 | 1009 浏览器假期消费趋势分析 | 飞书文档 | [飞书链接](https://mi.feishu.cn/docx/Oo9IdXBAioz06Zx3RIJcXu6anJe) | 国庆假期,DAU,PUSH运营,竞品对比 |
+| 2026-06-29 | 1031 天气对浏览器DAU影响分析 | 飞书文档 | [飞书链接](https://mi.feishu.cn/docx/TVtydKv0lod7COxG7V5cAyqQnPS) | DAU归因,天气影响,省份数据 |
+| 2026-06-29 | WORKFLOWS 工作Agent运行手册 | 工作流规则 | [根目录](../../WORKFLOWS.md) / [归档副本](Markdown文件/2026-06-29-WORKFLOWS-工作Agent运行手册.md) | 工作Agent,运行手册,记录工作,辅助规划,辅助决策,归档流程 |
+| 2026-06-29 | DECISIONS 决策记录 | 决策记录 | [根目录](../../DECISIONS.md) / [归档副本](Markdown文件/2026-06-29-DECISIONS-决策记录.md) | 决策记录,ADR,回看事项,Q3聚焦,nl-sql |
+| 2026-06-29 | CURRENT 当前工作状态 | 工作管理 | [根目录](../../CURRENT.md) / [归档副本](Markdown文件/2026-06-29-CURRENT-当前工作状态.md) | 当前重点,P0,P1,明确不做,工作Agent,nl-sql |
+| 2026-06-29 | USER 个人上下文 | 上下文入口 | [根目录](../../USER.md) / [归档副本](Markdown文件/2026-06-29-USER-个人上下文.md) | 个人上下文,角色,偏好,工具链,决策风格 |
 | 2026-06-28 | ICE DataWork新平台设计 | 产品设计 | [飞书文档](https://mi.feishu.cn/docx/ZOREdrAPtoFD8PxruFqchNYSnbh) | ICE DataWork,平台设计,产品架构,nl-sql,AI工作台 |
 | 2026-06-27 | TokenWisdom 产品页面 v11 HTML 原型 | HTML网页 | [项目文档](../../01-业务项目/TokenWisdom/design/2026-06-27-tokenwisdom-product-prd-pages-v11.html) / [归档副本](HTML文件/2026-06-27-TokenWisdom-产品页面-v11.html) | TokenWisdom,Workstation,Workspace,Agent-to-Agent,数字分身,PRD页面 |
 | 2026-06-27 | TokenWisdom 产品 PRD v1 | 产品PRD | [项目文档](../../01-业务项目/TokenWisdom/2026-06-27-TokenWisdom-产品PRD-v1.md) / [归档副本](Markdown文件/2026-06-27-TokenWisdom-产品PRD-v1.md) | TokenWisdom,产品PRD,AI分身,Workstation,Agent协作,权限模型 |

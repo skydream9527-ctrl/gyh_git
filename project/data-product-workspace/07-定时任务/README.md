@@ -16,7 +16,7 @@
 | 任务名称 | 脚本 | 调度时间 | 说明 |
 |----------|------|----------|------|
 | 每日核心指标监控 | `scripts/daily_metrics_report.py` | 每天9:00 | 查询核心指标，对比昨日/上周，推送飞书 |
-| 每日工作回顾 | `scripts/daily_work_review.py` | 每天23:00 | 扫描当日文件变更+Git提交，生成工作总结草稿，三处备份 |
+| 每日工作回顾 | `scripts/daily_work_review.py` | 每天23:00 | 扫描当日文件变更+Git提交，生成工作总结草稿，自动抽取计划更新建议、绩效素材、决策记录，三处备份 |
 | 每周工作总结 | `scripts/weekly_work_review.py` | 每周日22:00 | 汇总一周每日回顾，生成周总结草稿，自动统计完成任务/文件数 |
 
 ## 使用说明
@@ -44,6 +44,17 @@ crontab -e
 cd /Users/mi/Desktop/trae-cn/data-product/07-定时任务
 python3 scripts/daily_metrics_report.py
 ```
+
+每日工作回顾可手动运行：
+```bash
+cd /Users/mi/Desktop/trae-cn/data-product
+python3 07-定时任务/scripts/daily_work_review.py
+```
+
+生成的日报会自动填充三类待确认内容：
+- `WORK-PLAN.md` 更新建议：根据文件路径、提交信息、待办/阻塞/P0/P1 等关键词抽取
+- 绩效素材：按项目产出、数据分析、知识库、自动化脚本、Agent/Skill 建设分类抽取
+- `DECISIONS.md` 决策记录：根据关键决策、取舍、风险、明确不做、回看等关键词抽取
 
 ## 飞书机器人配置
 1. 在飞书群中添加「自定义机器人」

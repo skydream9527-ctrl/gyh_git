@@ -1,0 +1,40 @@
+.DS_Store
+Thumbs.db
+
+# Local editor and agent runtime state
+.claude/settings.local.json
+.micode/
+.playwright-cli/
+.trae/
+.vscode/
+.idea/
+
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+07-定时任务/config/*
+!07-定时任务/config/*.example.*
+
+# Dependencies and generated artifacts
+node_modules/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.cache/
+dist/
+build/
+*.egg-info/
+
+# Logs, reports, and temporary files
+*.log
+07-定时任务/logs/
+07-定时任务/reports/
+99-临时文件/
+
+# Archives and nested Git metadata
+*.zip
+.git/
+**/.git/
