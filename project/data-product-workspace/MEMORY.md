@@ -1,5 +1,7 @@
 # 工作记忆
 
+> 本文件是外层 [pm-workspace-starter/MEMORY.md](../../MEMORY.md) 的工作区扩展，记录日常工作记忆；长期记忆索引以外层为准。
+
 ## 用户基本信息
 - 姓名：gongyunhe（龚云荷）
 - 邮箱：gongyunhe@xiaomi.com
