@@ -252,8 +252,8 @@ Agent:          User → ┌─────────────────�
 - **knowledge-base/AI-SKILL/**（[../../knowledge-base/AI-SKILL/](../../knowledge-base/AI-SKILL/)）：AI 工程技巧
 - **references/**：[agentic-design-patterns.md](../../references/agentic-design-patterns.md)、[rag-agent-scenario-analysis.md](../../references/rag-agent-scenario-analysis.md)
 - **project/ice-workbench/**：现成的 agents/ 代码库可参照
-- **project/understand-anything/**（[../understand-anything/](../understand-anything/)）：把 codebase / 知识库变成知识图谱——多 Agent pipeline 的开源样本
-- **project/multica/**（[../multica/](../multica/)）：把 agent 当队友的协作管理层——Multi-Agent + Squad 的生产实现
+- **references/tools/understand-anything.md**（[../../references/tools/understand-anything.md](../../references/tools/understand-anything.md)）：把 codebase / 知识库变成知识图谱——多 Agent pipeline 的开源样本
+- **references/tools/multica.md**（[../../references/tools/multica.md](../../references/tools/multica.md)）：把 agent 当队友的协作管理层——Multi-Agent + Squad 的生产实现
 - **AB 测试 + 因果推断**：LLM 产品的离线/在线评测、增量价值估计——见 [../ab-testing/](../ab-testing/)、[../causal-inference/](../causal-inference/)
 
 ---
