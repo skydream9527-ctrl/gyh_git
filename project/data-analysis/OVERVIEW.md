@@ -19,7 +19,7 @@
 | 路径分析 | 用户行为轨迹挖掘、导航优化、异常路径发现 | [path-analysis.md](methods/path-analysis.md) |
 | 留存分析 | 用户粘性评估、产品价值验证、召回策略 | [retention-analysis.md](methods/retention-analysis.md) |
 | 同期群分析(Cohort) | 新用户质量评估、版本迭代效果、生命周期分层 | [cohort-analysis.md](methods/cohort-analysis.md) |
-| 会话分析(Session) | 单次访问行为模式、时长/深度评估 | [session-analysis.md](methods/session-analysis.md) |
+| 会话分析(Session) | 单次访问行为模式、时长/深度评估 | session-analysis.md（待补） |
 
 ### 2. 用户价值分析类
 | 方法 | 适用场景 | 文件 |
@@ -42,15 +42,15 @@
 |------|----------|------|
 | 指标异动分析 | 核心指标突然涨跌、问题根因定位 | [metric-anomaly-analysis.md](methods/metric-anomaly-analysis.md) |
 | 趋势分析 | 长期走势判断、拐点识别、预测预警 | [trend-analysis.md](methods/trend-analysis.md) |
-| 健康度评估 | 业务整体状况诊断、北极星指标拆解 | [health-score.md](methods/health-score.md) |
+| 健康度评估 | 业务整体状况诊断、北极星指标拆解 | health-score.md（待补） |
 
 ### 5. 业务专项类
 | 方法 | 适用场景 | 文件 |
 |------|----------|------|
-| 营销活动分析 | 活动效果评估、ROI计算、经验沉淀 | [campaign-analysis.md](methods/campaign-analysis.md) |
-| 商品/内容分析 | 选品/内容策略、爆款识别、推荐优化 | [content-analysis.md](methods/content-analysis.md) |
-| 渠道分析 | 获客质量评估、渠道投放优化、反作弊 | [channel-analysis.md](methods/channel-analysis.md) |
-| 付费转化分析 | 付费链路优化、定价策略、客单价提升 | [monetization-analysis.md](methods/monetization-analysis.md) |
+| 营销活动分析 | 活动效果评估、ROI计算、经验沉淀 | campaign-analysis.md（待补） |
+| 商品/内容分析 | 选品/内容策略、爆款识别、推荐优化 | content-analysis.md（待补） |
+| 渠道分析 | 获客质量评估、渠道投放优化、反作弊 | channel-analysis.md（待补） |
+| 付费转化分析 | 付费链路优化、定价策略、客单价提升 | monetization-analysis.md（待补） |
 | 流失分析 | 流失用户画像、流失原因定位、召回策略 | [churn-analysis.md](methods/churn-analysis.md) |
 
 ## 通用分析流程
