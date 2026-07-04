@@ -54,11 +54,12 @@ ab-testing/
 ├── methods/                      ← 方法论深入
 │   ├── cuped.md
 │   ├── sequential-testing.md
-│   ├── switchback.md
+│   ├── msprt.md
+│   ├── did-experiment.md
 │   └── ...
 ├── pitfalls/                     ← 陷阱案例库
-│   ├── srm.md
-│   ├── simpson-paradox.md
+│   ├── peeking.md
+│   ├── common-mistakes.md
 │   └── ...
 ├── industry/                     ← 业界实践拆解
 │   ├── microsoft-exp.md

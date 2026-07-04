@@ -140,7 +140,7 @@
 3. [templates/decision-record.md](./templates/decision-record.md) 开始写ADR记录决策
 
 ### 进阶（1-2个月）
-4. [methods/个人决策工作流SOP.md](./methods/个人决策工作流SOP.md) 建立个人决策系统
+4. [methods/personal-decision-sop.md](./methods/personal-decision-sop.md) 建立个人决策系统
 5. [tools/premortem-analysis.md](./tools/premortem-analysis.md) + [templates/risk-assessment.md](./templates/risk-assessment.md) 给重要决策买保险
 6. [frameworks/ooda-loop.md](./frameworks/ooda-loop.md) 建立快速迭代的决策循环
 
