@@ -3,9 +3,9 @@
 > 在 AI 产品（尤其 Coding Agent、助手类产品）的设计中，**CLI、Agent、Skill、MCP** 经常被并列提及，也经常被混用。本文用最短篇幅讲清四者**各自负责什么、各自的优劣势、以及产品经理在选型时该怎么决策**。
 >
 > 配套阅读：
-> - [../agent-llm/agents/skills-vs-tools.md](../agent-llm/agents/skills-vs-tools.md)（Skill vs Tool）
-> - [../agent-llm/tools-protocols/mcp.md](../agent-llm/tools-protocols/mcp.md)（MCP 详解）
-> - [../agent-llm/agents/skills-system-design.md](../agent-llm/agents/skills-system-design.md)（Skill 实现）
+> - [../agents/skills-vs-tools.md](../agents/skills-vs-tools.md)（Skill vs Tool）
+> - [../tools-protocols/mcp.md](../tools-protocols/mcp.md)（MCP 详解）
+> - [../agents/skills-system-design.md](../agents/skills-system-design.md)（Skill 实现）
 
 ---
 

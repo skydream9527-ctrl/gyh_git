@@ -11,6 +11,7 @@
 
 ## 关键决策
 
+- 2026-07-05：pm-workspace-starter 知识体系重构完成（5 阶段，2038→1279 md，-37%）：三层知识库去重（删 116 重复）+ dpw 瘦身（删 ICE v3 副本 629md）+ data-analysis 整合（handbook 拆分 + 补 10 stub）+ 导航更新；commit a891e09~904e455
 - 2026-07-04：项目整体结构 review；家目录 /Users/mi 是 12GB git 仓库（跟踪 1446 文件、无 .gitignore），是 gitlab/ 下 git 噪音根源；pm 知识体系发现三层知识库重叠等 6 个结构问题；两项均决定暂不处理，仅记录现状 → Wisdom&Decide/notes/2026-07-04-项目结构review与家目录git诊断.md
 - 2026-06-30：项目定位为「思考与探索空间」，思考记录是主体，工程代码是参考副本 → THINKING.md
 - 2026-06-30：工程副本去重，只保留 project/ice-workbench-new/ 一份参考；开发正本在 git.n.xiaomi.com/gongyunhe/ice-workbench，不在本仓库改代码
@@ -28,6 +29,7 @@
 
 ## 近期记忆
 
+- 07-05：完成 pm-workspace-starter 5 阶段重构（commit a891e09~904e455）：删 116 重复 + 629 ICE 副本 + 22 占位，迁 7 独有方法论，补 10 stub，handbook 拆分瘦身，导航更新
 - 07-04：整体 review gitlab 仓库（ice-data-work 工程正本 + pm-workspace-starter 思考空间）；诊断家目录 git 噪音根源（~/ 是 12GB git 仓库、无 .gitignore）；梳理 pm 13 领域知识体系，发现三层知识库重叠（project/ vs knowledge-base/ vs data-product-workspace/00-知识库/）等 6 个结构问题，给出 8 条重组建议；用户决定暂不执行重组 → Wisdom&Decide/notes/2026-07-04-项目结构review与家目录git诊断.md
 - 07-01：完整整合 ~/Desktop/trae-cn/data-product 目录到 project/data-product-workspace/，包含：00-知识库（7大知识域+归档/操作手册）、01-业务项目、02-Skill开发、03-数据分析、04-会议纪要、05-个人成长（每日/每周/季度复盘+绩效素材）、06-归档、07-定时任务、入口文件（AGENTS/CURRENT/DECISIONS/MEMORY/USER/WORK-PLAN/WORKFLOWS/TEMPLATES）
 - 06-30：项目结构梳理与整理 → THINKING.md。新建思考空间总入口；工程去重删 ~6900 文件（保留 ice-workbench-new）；decisions→references、feishu-part→notes/、删空 memory/your-domain、reference→engineering-ref；重写 README/CLAUDE 为思考空间入口

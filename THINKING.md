@@ -33,7 +33,7 @@ pm-workspace-starter/
 ├── 📚 project/            # 知识沉淀（13 个领域目录，全 .md）+ 产品项目 + 工作区
 │   └── ice-workbench-new/ # ICE Workbench 工程参考副本（唯一）
 ├── 📚 knowledge-base/     # 结构化知识库
-├── 📄 prompts/ references/ engineering-ref/  # 模板 / 阅读参考 / 工程路由映射
+├── 📄 prompts/ references/  # 模板 / 阅读参考 / 工具调研（engineering-ref 已归入 ice-workbench-new/）
 ├── 📄 USER.md MEMORY.md AGENTS.md CLAUDE.md  # AI 协作配置
 └── 📄 THINKING.md         # 本文件（思考空间总入口）
 ```
@@ -63,7 +63,8 @@ ICE Workbench 的开发正本在 `https://git.n.xiaomi.com/gongyunhe/ice-workben
 | 项 | 状态 |
 |---|---|
 | 根 `decisions/` 3 个研究参考文件 → [references/](references/) | ✅ 已归并，空目录已删 |
-| `reference/` → [engineering-ref/](engineering-ref/)（区分阅读参考 vs 工程路由映射） | ✅ 已改名 |
+| `reference/` → engineering-ref/（区分阅读参考 vs 工程路由映射） | ✅ 已改名，后归入 [project/ice-workbench-new/engineering-ref/](project/ice-workbench-new/engineering-ref/) |
+| 2026-07-05 知识体系重构（5 阶段，2038→1279 md，-37%） | ✅ 三层去重 + dpw 瘦身 + data-analysis 整合 + 导航更新 → [notes/2026-07-04-项目结构review](Wisdom&Decide/notes/2026-07-04-项目结构review与家目录git诊断.md) |
 | 空 `memory/`（与 MEMORY.md 重叠）、空 `your-domain/`（未填模板） | ✅ 已删 |
 | `Wisdom&Decide/feishu-part5~8.md` → [Wisdom&Decide/notes/](Wisdom&Decide/notes/) | ✅ 已归位 |
 | 工程副本去重（3 份 + 混入 → 保留 1 份 ice-workbench-new） | ✅ 已完成 |

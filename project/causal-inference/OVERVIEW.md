@@ -189,7 +189,7 @@ SCM 关心：能不能估、应该控制谁
 
 - **AB 测试**（[../ab-testing/](../ab-testing/)）：实验是因果推断的最强方法。两者读法是"先实验、后观察"。
 - **Agent + LLM**（[../agent-llm/](../agent-llm/)）：Agent 决策评估、LLM 推荐的增量价值估计、个性化策略——本质都是因果问题。
-- **knowledge-base 数据治理 / 数据埋点**（[../../knowledge-base/数据治理/](../../knowledge-base/数据治理/)）：因果分析的数据质量地基。
+- **knowledge-base 数据治理 / 数据埋点**（[../../knowledge-base/feishu-source-links.md](../../knowledge-base/feishu-source-links.md)）：因果分析的数据质量地基。
 - **decisions/**：每次因果分析的最终结论（包括"放弃这条因果路径"这种结论）建议沉淀。
 
 ---

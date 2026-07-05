@@ -158,7 +158,7 @@
 - **因果推断**（[../causal-inference/](../causal-inference/)）：不能做实验时，因果方法帮你从观察数据里找靠谱结论
 - **Agent + LLM**（[../agent-llm/](../agent-llm/)）：AI辅助决策的技术基础，怎么让Agent帮你做决策分析
 - **数据分析**（[../data-analysis/](../data-analysis/)）：决策的输入是数据，分析质量决定决策质量
-- **产品方法论**（[../product/](../product/)）：产品场景下的决策落地，需求、优先级、增长的具体方法
+- **产品方法论**（[../agent-llm/concepts/](../agent-llm/concepts/)）：产品场景下的决策落地，需求、优先级、增长的具体方法
 - `DECISIONS.md`：重要决策必须沉淀到这里，包含结论/依据/风险/回看时间
 
 ---

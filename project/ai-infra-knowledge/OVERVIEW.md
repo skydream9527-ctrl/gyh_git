@@ -175,7 +175,7 @@ AI基础设施所有决策本质上都是这三者的权衡，没有银弹：
 5. [03-inference-serving.md](./03-inference-serving.md) 推理服务架构
 6. [04-inference-optimization.md](./04-inference-optimization.md) 推理优化方法
 7. [05-mlops-platform.md](./05-mlops-platform.md) MLOps平台设计
-8. 动手搭一个简单的RAG：[rag/Linux_RAG知识库搭建指南.md](./rag/Linux_RAG知识库搭建指南.md)
+8. 动手搭一个简单的RAG：[Linux_RAG知识库搭建指南.md](../data-product-workspace/00-知识库/ai-infra/methods/rag/Linux_RAG知识库搭建指南.md)
 
 ### 高阶（按需，AI基础设施工程师）
 9. [01-distributed-training.md](./01-distributed-training.md) 分布式训练原理
@@ -188,7 +188,7 @@ AI基础设施所有决策本质上都是这三者的权衡，没有银弹：
 ## 八、和本工作区其他模块的关联
 
 - **Agent + LLM**（[../agent-llm/](../agent-llm/)）：上层应用和Agent架构，AI基础设施是底座
-- **产品方法论**（[../product/](../product/)）：产品决策必须基于成本/延迟/效果的技术可行性
+- **产品方法论**（[../agent-llm/concepts/](../agent-llm/concepts/)）：产品决策必须基于成本/延迟/效果的技术可行性
 - **决策框架**（[../decision-frameworks/](../decision-frameworks/)）：技术选型、架构决策需要用决策框架权衡
 - `02-Skill开发/`：开发AI Skill需要用到推理服务、模型网关等基础设施
 - `.micode/skills/`、`.trae/skills/`：实际Skill开发时的MCP配置和接入

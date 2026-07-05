@@ -177,9 +177,9 @@ multica setup self-host
 
 | 模块 | 角色 |
 |---|---|
-| [`agent-llm/`](../agent-llm/) | Agent 的**原理**（ReAct、ToT、Memory） |
-| [`ice-workbench/`](../ice-workbench/) | 一个**单工作台、对话式**的 Agent 应用 |
-| [`understand-anything/`](../understand-anything/) | 把 codebase 变知识图谱（**理解**层） |
+| [`agent-llm/`](../../project/agent-llm/) | Agent 的**原理**（ReAct、ToT、Memory） |
+| [`ice-workbench/`](../../project/ice-workbench-new/) | 一个**单工作台、对话式**的 Agent 应用 |
+| [`understand-anything/`](./understand-anything.md) | 把 codebase 变知识图谱（**理解**层） |
 | **本目录（multica）** | 把 agent 当**队友**的**协作管理**层（**生产**层） |
 
 ice-workbench 解决的是"**单个用户**和 **N 个 Agent** 一起工作"；Multica 解决的是"**整个团队**（人 + N 个 Agent）一起工作，**任务级别可追踪**"。
@@ -190,14 +190,14 @@ ice-workbench 解决的是"**单个用户**和 **N 个 Agent** 一起工作"；M
 
 #### 用法 A — Multica 调度 ice-workbench Agent
 
-把 ice-workbench 的 [`agents/`](../ice-workbench/agents/)（data-analysis / biz-insight 等）封装成 Multica 的一种"provider"：
+把 ice-workbench 的 [`agents/`](../../project/ice-workbench-new/agents/)（data-analysis / biz-insight 等）封装成 Multica 的一种"provider"：
 
 ```
 Multica daemon 检测到本机有 ice-workbench → 注册成可用 agent
 ↓
 团队在 Multica 看板上 assign issue 给 "data-analysis-agent"
 ↓
-Multica 调用 ice-workbench 的 [`bg_task_svc.py`](../ice-workbench/backend/app/services/bg_task_svc.py) 跑后台任务
+Multica 调用 ice-workbench 的 [`bg_task_svc.py`](../../project/ice-workbench-new/backend/app/services/bg_task_svc.py) 跑后台任务
 ↓
 完成后 ice-workbench 把结果（文件 / 报告）回写 Multica issue
 ```
@@ -206,7 +206,7 @@ Multica 调用 ice-workbench 的 [`bg_task_svc.py`](../ice-workbench/backend/app
 
 #### 用法 B — ice-workbench 复用 Multica 的 Skill 概念
 
-Multica 的 "Reusable Skills" 和 ice-workbench 的 [`skills/`](../ice-workbench/skills/) 在概念上几乎一致——都是"沉淀解决方案给全队复用"。可以做到 **schema 兼容**：
+Multica 的 "Reusable Skills" 和 ice-workbench 的 [`skills/`](../../project/ice-workbench-new/skills/) 在概念上几乎一致——都是"沉淀解决方案给全队复用"。可以做到 **schema 兼容**：
 
 ```
 ice-workbench skill (JSON schema + sandbox)
@@ -216,15 +216,15 @@ Multica skill registry
 
 #### 用法 C — Autopilot 替代 ice-workbench scheduler
 
-ice-workbench 自己有 scheduler（[`backend/app/services/scheduler_svc.py`](../ice-workbench/backend/app/services/scheduler_svc.py)，每 20s 扫一次）。如果团队级别要做"日报 / 周报 / 定期审计"，Multica 的 Autopilot 是更合适的层——issue 化、可追踪、可看板上看到状态。
+ice-workbench 自己有 scheduler（[`backend/app/services/scheduler_svc.py`](../../project/ice-workbench-new/backend/app/services/scheduler_svc.py)，每 20s 扫一次）。如果团队级别要做"日报 / 周报 / 定期审计"，Multica 的 Autopilot 是更合适的层——issue 化、可追踪、可看板上看到状态。
 
-### 8.3 和 [`agent-llm/agents/`](../agent-llm/agents/) 对应
+### 8.3 和 [`agent-llm/agents/`](../../project/agent-llm/agents/) 对应
 
-Multica 把 [`agent-llm/agents/react-and-variants.md`](../agent-llm/agents/react-and-variants.md) 里一个被反复提及但没人讲清楚的话题落地：
+Multica 把 [`agent-llm/agents/react-and-variants.md`](../../project/agent-llm/agents/react-and-variants.md) 里一个被反复提及但没人讲清楚的话题落地：
 
 > **"多 Agent 不是更高级的单 Agent，而是用模拟分工解决单 Agent 难解的问题"**
 
-Multica 的 **Squad + Leader** 模式正是 [`react-and-variants.md §8`](../agent-llm/agents/react-and-variants.md) 描述的"角色明确切开"的实现：
+Multica 的 **Squad + Leader** 模式正是 [`react-and-variants.md §8`](../../project/agent-llm/agents/react-and-variants.md) 描述的"角色明确切开"的实现：
 
 ```
 Manager / Planner / Researcher / Coder / Critic / Tester
@@ -280,6 +280,6 @@ Multica Squad：每个 agent 一个 profile + provider，leader 路由
 
 ### 在本工作区的衔接
 
-- 多 Agent 协作范式：[`../agent-llm/agents/react-and-variants.md`](../agent-llm/agents/react-and-variants.md)
-- 单工作台对照：[`../ice-workbench/`](../ice-workbench/)
-- 代码理解层（互补）：[`../understand-anything/`](../understand-anything/)
+- 多 Agent 协作范式：[`../../project/agent-llm/agents/react-and-variants.md`](../../project/agent-llm/agents/react-and-variants.md)
+- 单工作台对照：[`../../project/ice-workbench-new/`](../../project/ice-workbench-new/)
+- 代码理解层（互补）：[`./understand-anything.md`](./understand-anything.md)

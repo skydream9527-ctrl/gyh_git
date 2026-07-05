@@ -154,10 +154,10 @@ copilot plugin install Lum1104/Understand-Anything:understand-anything-plugin
 
 | 模块 | 用途 |
 |---|---|
-| [`agent-llm/`](../agent-llm/) | Agent / LLM 原理与范式（ReAct、ToT、Memory） |
-| [`agent-llm/agents/openviking-vs-hindsight.md`](../agent-llm/agents/openviking-vs-hindsight.md) | 长期**记忆** Provider 对比（语义召回） |
+| [`agent-llm/`](../../project/agent-llm/) | Agent / LLM 原理与范式（ReAct、ToT、Memory） |
+| [`agent-llm/agents/openviking-vs-hindsight.md`](../../project/agent-llm/agents/openviking-vs-hindsight.md) | 长期**记忆** Provider 对比（语义召回） |
 | **本目录（understand-anything）** | 长期**知识图谱** Provider（结构 + 语义） |
-| [`ice-workbench/`](../ice-workbench/) | AI 数据工作流工作台（生产级 Agent 应用） |
+| [`ice-workbench/`](../../project/ice-workbench-new/) | AI 数据工作流工作台（生产级 Agent 应用） |
 
 **Understand Anything 在四件事上独特**：
 1. 是**结构性的**：节点和边来自 tree-sitter，不像向量库可能"召回不可控"
@@ -165,7 +165,7 @@ copilot plugin install Lum1104/Understand-Anything:understand-anything-plugin
 3. 是**可视化的**：dashboard 比对话窗口更适合理解一个项目的整体形状
 4. 是**多 Agent pipeline 的范本**：5 个 Agent 协作的开源实现，可以拆开学
 
-### 6.2 在 [`ice-workbench/`](../ice-workbench/) 里怎么用
+### 6.2 在 [`ice-workbench/`](../../project/ice-workbench-new/) 里怎么用
 
 #### 用法 A — 给 ice-workbench 自身造图
 
@@ -175,13 +175,13 @@ cd pm-workspace-starter/project/ice-workbench
 /understand-dashboard
 ```
 
-→ 一份给 PM / 新加入工程师的"导览"，比读 [`design_decisions.md`](../ice-workbench/design_decisions.md)（133 决策）更直观。
+→ 一份给 PM / 新加入工程师的"导览"，比读 [`design_decisions.md`](../../project/ice-workbench-new/design_decisions.md)（133 决策）更直观。
 
-ice-workbench 的 [`backend/app/services/`](../ice-workbench/backend/app/services/) 有 30+ service 文件，前端 [`frontend/src/pages/`](../ice-workbench/frontend/src/) 24 路由——**典型靠人读读不完**的规模。Understand Anything 的 Guided Tour 按依赖顺序排，恰好覆盖这种学习场景。
+ice-workbench 的 [`backend/app/services/`](../../project/ice-workbench-new/backend/app/services/) 有 30+ service 文件，前端 [`frontend/src/pages/`](../../project/ice-workbench-new/frontend/src/) 24 路由——**典型靠人读读不完**的规模。Understand Anything 的 Guided Tour 按依赖顺序排，恰好覆盖这种学习场景。
 
 #### 用法 B — 给 ice-workbench 的 Agent 接入"代码库知识"
 
-ice-workbench 当前的知识来源是飞书 wiki（[`backend/app/services/kb_svc.py`](../ice-workbench/backend/app/services/kb_svc.py)）。Understand Anything 产出的 `knowledge-graph.json` 也可以作为知识源：
+ice-workbench 当前的知识来源是飞书 wiki（[`backend/app/services/kb_svc.py`](../../project/ice-workbench-new/backend/app/services/kb_svc.py)）。Understand Anything 产出的 `knowledge-graph.json` 也可以作为知识源：
 
 ```python
 # backend/app/services/codebase_kb_svc.py（新增）
@@ -202,9 +202,9 @@ def search_nodes(query: str) -> list: ...
 
 `/understand-diff` 输出的"涟漪范围"可以直接喂给 ice-workbench 的 [`pr-feedback-loop`](../../CLAUDE.md) 流程，让 review 之前先看到"这次改动**理论上**影响哪些下游"。
 
-### 6.3 和 Agent 范式的对应（[`agent-llm/`](../agent-llm/)）
+### 6.3 和 Agent 范式的对应（[`agent-llm/`](../../project/agent-llm/)）
 
-Understand Anything 是 [`react-and-variants.md`](../agent-llm/agents/react-and-variants.md) 里 **"Multi-Agent + Plan-and-Execute" 的混合实例**：
+Understand Anything 是 [`react-and-variants.md`](../../project/agent-llm/agents/react-and-variants.md) 里 **"Multi-Agent + Plan-and-Execute" 的混合实例**：
 
 ```
 Plan-and-Execute 外层：
@@ -220,7 +220,7 @@ Multi-Agent 内层：
   tour-builder + graph-reviewer
 ```
 
-这是把 [react-and-variants.md §10 "把这些范式拼起来用"](../agent-llm/agents/react-and-variants.md) 落到一个具体可读源码的范例——值得拆开看每个 Agent 的 prompt 怎么写、每个 Agent 怎么协作。
+这是把 [react-and-variants.md §10 "把这些范式拼起来用"](../../project/agent-llm/agents/react-and-variants.md) 落到一个具体可读源码的范例——值得拆开看每个 Agent 的 prompt 怎么写、每个 Agent 怎么协作。
 
 ---
 
@@ -250,6 +250,6 @@ Multi-Agent 内层：
 
 ### 在本工作区的衔接
 
-- 多 Agent 范式：[`../agent-llm/agents/react-and-variants.md`](../agent-llm/agents/react-and-variants.md)
-- 知识检索 vs 知识图谱：[`../agent-llm/agents/openviking-vs-hindsight.md`](../agent-llm/agents/openviking-vs-hindsight.md)
-- 应用对象：[`../ice-workbench/`](../ice-workbench/)
+- 多 Agent 范式：[`../../project/agent-llm/agents/react-and-variants.md`](../../project/agent-llm/agents/react-and-variants.md)
+- 知识检索 vs 知识图谱：[`../../project/agent-llm/agents/openviking-vs-hindsight.md`](../../project/agent-llm/agents/openviking-vs-hindsight.md)
+- 应用对象：[`../../project/ice-workbench-new/`](../../project/ice-workbench-new/)
