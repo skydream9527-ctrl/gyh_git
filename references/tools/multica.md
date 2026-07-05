@@ -197,7 +197,7 @@ Multica daemon 检测到本机有 ice-workbench → 注册成可用 agent
 ↓
 团队在 Multica 看板上 assign issue 给 "data-analysis-agent"
 ↓
-Multica 调用 ice-workbench 的 [`bg_task_svc.py`](../../project/ice-workbench-new/backend/app/services/bg_task_svc.py) 跑后台任务
+Multica 调用 ice-workbench 的 [`bg_task_svc.py`](../../project/ice-workbench-new/backend/app/services/task/bg_task_svc.py) 跑后台任务
 ↓
 完成后 ice-workbench 把结果（文件 / 报告）回写 Multica issue
 ```
@@ -216,7 +216,7 @@ Multica skill registry
 
 #### 用法 C — Autopilot 替代 ice-workbench scheduler
 
-ice-workbench 自己有 scheduler（[`backend/app/services/scheduler_svc.py`](../../project/ice-workbench-new/backend/app/services/scheduler_svc.py)，每 20s 扫一次）。如果团队级别要做"日报 / 周报 / 定期审计"，Multica 的 Autopilot 是更合适的层——issue 化、可追踪、可看板上看到状态。
+ice-workbench 自己有 scheduler（[`backend/app/services/storage/scheduler_svc.py`](../../project/ice-workbench-new/backend/app/services/storage/scheduler_svc.py)，每 20s 扫一次）。如果团队级别要做"日报 / 周报 / 定期审计"，Multica 的 Autopilot 是更合适的层——issue 化、可追踪、可看板上看到状态。
 
 ### 8.3 和 [`agent-llm/agents/`](../../project/agent-llm/agents/) 对应
 

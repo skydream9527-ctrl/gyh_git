@@ -181,7 +181,7 @@ ice-workbench 的 [`backend/app/services/`](../../project/ice-workbench-new/back
 
 #### 用法 B — 给 ice-workbench 的 Agent 接入"代码库知识"
 
-ice-workbench 当前的知识来源是飞书 wiki（[`backend/app/services/kb_svc.py`](../../project/ice-workbench-new/backend/app/services/kb_svc.py)）。Understand Anything 产出的 `knowledge-graph.json` 也可以作为知识源：
+ice-workbench 当前的知识来源是飞书 wiki（[`backend/app/services/integration/kb_svc.py`](../../project/ice-workbench-new/backend/app/services/integration/kb_svc.py)）。Understand Anything 产出的 `knowledge-graph.json` 也可以作为知识源：
 
 ```python
 # backend/app/services/codebase_kb_svc.py（新增）
