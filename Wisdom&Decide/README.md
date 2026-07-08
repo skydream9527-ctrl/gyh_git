@@ -63,4 +63,4 @@ Wisdom&Decide/
 | 埋点设计 | `../project/event-tracking/` |
 | 控制论 | `../project/cybernetics/` |
 
-**主产品代码在根目录**：`backend/` + `frontend/` + `agents/` + `skills/`
+**工程参考副本**：`../project/ice-workbench-new/`（开发正本在 GitLab）

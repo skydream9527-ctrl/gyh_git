@@ -31,6 +31,9 @@
 - 会议纪要 → prompts/meeting-notes.md
 - 周报生成 → prompts/weekly-report.md
 - 数据分析 → prompts/data-analysis.md
+- 数据异常诊断 → prompts/metric-anomaly.md
+- OKR/季度规划 → prompts/okr-planning.md
+- 技术方案评审 → prompts/tech-review.md
 
 ## 踩坑记录
 

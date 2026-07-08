@@ -33,13 +33,14 @@ pm-workspace-starter/
 ├── 📚 project/            # 知识沉淀（13 个领域目录，全 .md）+ 产品项目 + 工作区
 │   └── ice-workbench-new/ # ICE Workbench 工程参考副本（唯一）
 ├── 📚 knowledge-base/     # 结构化知识库
-├── 📄 prompts/ references/  # 模板 / 阅读参考 / 工具调研（engineering-ref 已归入 ice-workbench-new/）
+├── 📄 prompts/ references/  # 模板 / 阅读参考
+├── 📄 files/              # 公共参考文档（指标口径、分析方法论等）
 ├── 📄 USER.md MEMORY.md AGENTS.md CLAUDE.md  # AI 协作配置
 └── 📄 THINKING.md         # 本文件（思考空间总入口）
 ```
 
 1. **🧠 思考中心**：[Wisdom&Decide/](Wisdom&Decide/) — `00-我是谁与我的决策地图` / `01-我的项目全景导航` / `02-决策工作流SOP` 是核心三件套
-2. **📚 知识沉淀**：[project/](project/) 下 13 个领域目录（ab-testing / agent-llm / ai-infra-knowledge / causal-inference / cybernetics / data-analysis / decision-frameworks / event-tracking / LLM_thinking / management-work / multica / product / understand-anything），全部 .md
+2. **📚 知识沉淀**：[project/](project/) 下 14 个领域目录（ab-testing / agent-llm / ai-infra-knowledge / causal-inference / cybernetics / data-analysis / decision-frameworks / event-tracking / LLM_thinking / management-work / multica / nl-sql / product / understand-anything），全部 .md
 3. **💻 工程参考**：[project/ice-workbench-new/](project/ice-workbench-new/) — ICE Workbench 唯一参考副本，**开发正本在 GitLab**，这里不改代码
 
 ---

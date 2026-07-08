@@ -9,7 +9,7 @@
 |---|---|
 | 记录日常思考/心得 | [Wisdom&Decide/insights/](Wisdom&Decide/insights/) · 命名 `YYYY-MM-DD-主题.md` |
 | 做决策 | [Wisdom&Decide/](Wisdom&Decide/) · 决策地图 + SOP + decisions/ |
-| 查领域知识 | [project/](project/) · 13 个领域目录（ab-testing / agent-llm / decision-frameworks / …） |
+| 查领域知识 | [project/](project/) · 14 个领域目录（ab-testing / agent-llm / nl-sql / product / …） |
 | 查工程实现 | [project/ice-workbench-new/](project/ice-workbench-new/) · ICE Workbench 参考副本 |
 
 ## 仓库结构
@@ -22,8 +22,7 @@ pm-workspace-starter/
 ├── 📚 knowledge-base/       # 结构化知识库
 ├── 📄 prompts/              # Prompt 模板
 ├── 📄 references/           # 阅读参考资料
-├── 📄 engineering-ref/      # 工程路由映射（api-map / route-map）
-├── 📄 docs/ meetings/ files/# 文档 / 纪要 / 公共文件
+├── 📄 files/               # 公共参考文档（指标口径、分析方法论等）
 └── USER.md MEMORY.md AGENTS.md CLAUDE.md THINKING.md  # AI 协作配置
 ```
 
