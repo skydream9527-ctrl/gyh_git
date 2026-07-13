@@ -20,6 +20,7 @@
 | 目录 | 内容 |
 |---|---|
 | [AI-Agent/](AI-Agent/) | Agent 智能体层规划、配置与编排文档 |
+| [AI-Native产品开发教程/](AI-Native产品开发教程/) | AI Native 产品开发全流程教程合集（需求产出/项目管理/设计协作/Skills架构/原型设计/工具链） |
 | [AI-SKILL/](AI-SKILL/) | Skill 使用案例库（Confidence-Detection / Data-Tracking-Plan / Feed-Release-AB / NL-SQL / NL-Billboard 等）+ 开发规范 + 文档库 |
 | [RAG/](RAG/) | RAG 知识库层规划、rag-web-ui 教程、对接 mify 平台 |
 | [数据埋点/](数据埋点/) | v10.4 内容中心图文沉浸式场景埋点方案（业务特定） |

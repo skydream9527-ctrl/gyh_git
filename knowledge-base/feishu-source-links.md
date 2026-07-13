@@ -38,3 +38,22 @@
 
 ## standalone
 - [信息流参数知识库](https://mi.feishu.cn/wiki/JWsYwAr6SiyAUZk47E5c5UAjnEh)（飞书电子表格，无法导出 Markdown，请直接访问链接）
+
+## AI-Native产品开发教程
+> 已全部同步到本地：[AI-Native产品开发教程](./AI-Native产品开发教程/README.md)
+- [「产品篇」AI Native 需求迭代教程（目录页）](https://mi.feishu.cn/wiki/EF9Zwgh5iiYkZQkEbUmcZSqTnff)
+- [AI Native需求产出逐步教程记录（产品篇）](https://mi.feishu.cn/wiki/PQ24dpMGhokWdRx3kG0cHTAdnNf)
+- [AI Tutor Meego项目管理教程](https://mi.feishu.cn/wiki/RmaSdh7RdosjzhxWyB2cNllAn3d)
+- [Multiview-spec使用说明书](https://mi.feishu.cn/wiki/DAv2deoq9otWuGxNyKUcDis2nTh)
+- [把项目知识库 KBS 加入 Handoff 项目预览](https://mi.feishu.cn/wiki/R2C3dRutMoER8oxXZryc9Qvtn8f)
+- [为 Handoff Preview 准备 GitLab 只读 Token](https://mi.feishu.cn/wiki/TJiSd53Rso5CrBxvEdRcC9o0nWc)
+- [复杂落地项目的Skills设计架构（产品篇）](https://mi.feishu.cn/wiki/ALWTdGGEcorOyBxXuTccjtZbnzc)
+- [Handoff Preview 与 Figma 本地同步使用教程](https://mi.feishu.cn/wiki/HAUVdRxUpoSzJcxwBuZcCzjTnsf)
+- [高品质产品原型的落地：Design Token构造](https://mi.feishu.cn/wiki/G9kodVzTJoupO0xdSJzc2Yqinrc)
+- [给产品小白的最短教程：Git使用](https://mi.feishu.cn/wiki/PO2HdZXz8o4FcdxTzRvckAQQnef)
+- [用可视化编辑器做HTML原型精细调优](https://mi.feishu.cn/wiki/XwiOd9nkDoJd1WxnTSOcbsfYnBd)
+- [真机HTML预览工具使用教程](https://mi.feishu.cn/wiki/SgwTdeq4RoIK5TxGjegckb0Gnrh)
+- [必备的MCP、插件、平台工具](https://mi.feishu.cn/wiki/MG24dGue9oGFZ0xOn2dcz3yqnhh)
+- [Skills 同步脚本使用指南](https://mi.feishu.cn/wiki/W7dtd1fsYoEuHExehdpco7gmnHd)
+- [AI教育AI Native落地经验分享汇总](https://mi.feishu.cn/wiki/MumPdnySVobZhPxxprMcGaUEn3b)
+- [Handoff产研协同协议介绍与示例](https://mi.feishu.cn/wiki/EJ1ZdKSfNoOD2BxQxHfcBe3vnGd)
