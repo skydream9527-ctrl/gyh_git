@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第1课时 · 数据地图与埋点基础入门</title>
+<style>
+:root {
+  --ink: #151515;
+  --text: #252525;
+  --muted: #646464;
+  --quiet: #8a8a8a;
+  --line: #3a3a3a;
+  --line-muted: #777;
+  --line-soft: #deddd9;
+  --paper: #f7f6f2;
+  --panel: #fffefa;
+  --panel-soft: #f0efeb;
+  --panel-deep: #e2e1dd;
+  --accent: #2a2a2a;
+  --highlight: #fef3c7;
+  --blue: #1e40af;
+  --green: #15803d;
+  --orange: #c2410c;
+  --red: #b91c1c;
+  --shadow: 0 10px 24px rgba(0, 0, 0, 0.045);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: "Avenir Next", "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+  background: var(--paper);
+  color: var(--text);
+  line-height: 1.62;
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+}
+.page { max-width: 1100px; margin: 0 auto; padding: 54px 34px 86px; }
+h1, h2, h3, h4 {
+  font-family: "Songti SC", "Noto Serif CJK SC", serif;
+  color: var(--ink); font-weight: 700;
+}
+.header { margin-bottom: 48px; padding-bottom: 28px; border-bottom: 1.25px solid var(--line); }
+.eyebrow { font-family: "Avenir Next"; font-size: 12px; letter-spacing: 0.12em; color: var(--quiet); text-transform: uppercase; margin-bottom: 14px; font-weight: 600; }
+h1 { font-size: 36px; line-height: 1.1; margin-bottom: 12px; }
+.subtitle { font-size: 17px; color: var(--muted); font-weight: 400; margin-bottom: 20px; }
+.meta-row { display: flex; gap: 28px; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin-bottom: 24px; }
+.meta-item { display: flex; align-items: center; gap: 6px; }
+.section { margin-bottom: 48px; }
+.section-title { font-size: 24px; margin-bottom: 6px; padding-bottom: 12px; border-bottom: 0.75px solid var(--line-soft); display: flex; align-items: center; gap: 10px; }
+.section-num { font-family: "Avenir Next"; font-size: 14px; font-weight: 600; color: var(--quiet); }
+h3 { font-size: 18px; margin-top: 24px; margin-bottom: 12px; }
+p { margin-bottom: 12px; }
+.caliber-note { background: var(--panel); border-left: 3px solid var(--line); padding: 16px 20px; font-size: 14px; margin-bottom: 20px; color: var(--muted); border-radius: 0 4px 4px 0; }
+.caliber-note strong { color: var(--text); }
+.warning-note { background: #fef2f2; border-left: 3px solid var(--red); padding: 16px 20px; font-size: 14px; margin-bottom: 20px; color: #991b1b; border-radius: 0 4px 4px 0; }
+.tip-note { background: #f0fdf4; border-left: 3px solid var(--green); padding: 16px 20px; font-size: 14px; margin-bottom: 20px; color: #166534; border-radius: 0 4px 4px 0; }
+.table-wrap { background: var(--panel); border: 1px solid var(--line-soft); box-shadow: var(--shadow); overflow-x: auto; margin-bottom: 20px; border-radius: 6px; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+thead { background: var(--panel-soft); }
+th { font-family: "Avenir Next"; font-weight: 600; font-size: 12px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--line-soft); }
+td { padding: 12px 14px; border-bottom: 0.5px solid var(--line-soft); vertical-align: top; color: var(--text); line-height: 1.6; }
+td:first-child { font-weight: 500; }
+tbody tr:hover { background: var(--panel-soft); }
+tbody tr:last-child td { border-bottom: none; }
+ul, ol { margin-left: 24px; margin-bottom: 16px; }
+li { margin-bottom: 8px; }
+code { background: var(--panel-soft); padding: 2px 6px; border-radius: 3px; font-family: "SF Mono", "Menlo", monospace; font-size: 13px; color: var(--ink); }
+pre { background: #1e1e1e; color: #d4d4d4; padding: 16px 20px; border-radius: 6px; overflow-x: auto; margin-bottom: 20px; font-family: "SF Mono", "Menlo", monospace; font-size: 13px; line-height: 1.6; }
+pre code { background: transparent; padding: 0; color: inherit; }
+.conclusion-card { background: var(--panel); border: 1px solid var(--line-soft); padding: 20px 24px; border-radius: 6px; margin-bottom: 16px; box-shadow: var(--shadow); }
+.conclusion-card .num { font-family: "Avenir Next"; font-weight: 700; color: var(--orange); font-size: 14px; margin-bottom: 6px; }
+.nav-links { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 40px; justify-content: space-between; }
+.nav-group { display: flex; gap: 12px; }
+.nav-link { background: var(--panel); border: 1px solid var(--line-soft); padding: 10px 18px; border-radius: 6px; text-decoration: none; color: var(--text); font-size: 14px; font-family: "Avenir Next"; transition: all 0.2s; }
+.nav-link:hover { border-color: var(--line); background: var(--panel-soft); }
+.field-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin-bottom: 20px; }
+.field-item { background: var(--panel); border: 1px solid var(--line-soft); padding: 12px 16px; border-radius: 4px; font-size: 13px; }
+.field-item code { font-weight: 600; color: var(--blue); }
+.field-item .desc { color: var(--muted); margin-top: 4px; font-size: 12px; }
+.footer { margin-top: 64px; padding-top: 24px; border-top: 0.75px solid var(--line-soft); font-size: 12px; color: var(--quiet); font-family: "Avenir Next"; display: flex; justify-content: space-between; }
+@media (max-width: 768px) {
+  .page { padding: 30px 18px 50px; }
+  h1 { font-size: 28px; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+<div class="header">
+  <div class="eyebrow">LESSON 01 · DATA BASICS</div>
+  <h1>第1课时：数据地图与埋点基础入门</h1>
+  <p class="subtitle">找数据不求人：理解数据价值 · 掌握数据地图使用 · 熟悉业务核心表</p>
+  <div class="meta-row">
+    <div class="meta-item">⏱️ 课时：1.5小时</div>
+    <div class="meta-item">🎯 目标：独立找到需要的表和字段</div>
+  </div>
+</div>
+
+<div class="section">
+  <h2 class="section-title"><span class="section-num">01</span> 为什么产品经理要懂数据？</h2>
+  
+  <h3>讨论一个问题</h3>
+  <div class="caliber-note">
+    在浏览器信息流的各种分发场景下，某条时政类图文内容A和某条娱乐类短视频内容B，该怎么评估谁更好，更受用户喜欢，更值得被推广给更多用户？
+    <br><br>
+    <strong>答案：用用户行为数据说话，而不是靠主观判断。</strong>
+  </div>
+
+  <h3>为什么要看数据？</h3>
+  <ol>
+    <li><strong>用户行为代表真实意图</strong><br>
+    "不要看他说了什么，要看他做了什么"。用户调研/访谈会有表述偏差，但点击/停留/消费行为不会说谎。</li>
+    <li><strong>行为数据比语言更精准，噪声更小</strong><br>
+    "在汽车出现之前，用户不会说出他想要一辆汽车，只会说他想要一辆更快的马车"。数据能发现用户自己都没意识到的真实偏好。</li>
+    <li><strong>产品迭代闭环的核心</strong><br>
+    需求→上线→效果验证→下一轮迭代，数据是唯一的效果评判标准。</li>
+  </ol>
+</div>
+
+<div class="section">
+  <h2 class="section-title"><span class="section-num">02</span> 数据埋点是什么？</h2>
+  
+  <h3>基本概念</h3>
+  <p><strong>数据埋点是用户行为的记录：</strong></p>
+  <pre><code>用户操作（点击/滑动/停留/关闭）→ 触发埋点 → 客户端&服务端交互 → 数据采集上报 → 落表存储</code></pre>
+
+  <p>埋点记录的核心信息：</p>
+  <ul>
+    <li><strong>谁</strong>：用户ID（did/uid）、设备信息、版本、渠道</li>
+    <li><strong>在什么时候</strong>：时间戳、日期分区</li>
+    <li><strong>做了什么</strong>：行为事件（曝光/点击/播放/停留）、行为对象（内容ID、按钮位置）</li>
+    <li><strong>结果如何</strong>：停留时长、是否看完、后续行为</li>
+  </ul>
+
+  <h3>常见埋点类型</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>埋点类型</th><th>说明</th><th>产品关心指标</th></tr></thead>
+      <tbody>
+        <tr><td>页面埋点</td><td>页面打开/关闭</td><td>PV、UV、页面停留时长</td></tr>
+        <tr><td>点击埋点</td><td>按钮/链接点击</td><td>CTR、点击分布、路径转化</td></tr>
+        <tr><td>曝光埋点</td><td>内容/卡片出现在屏幕</td><td>曝光量、有效曝光</td></tr>
+        <tr><td>播放埋点</td><td>视频/音频播放</td><td>播放时长、完播率、跳出率</td></tr>
+        <tr><td>自定义事件</td><td>业务特定行为</td><td>PUSH到达、下载完成、支付成功</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="section">
+  <h2 class="section-title"><span class="section-num">03</span> 公司数据体系分层</h2>
+  <p>我们的数仓按照ODS→DWD→DWM→ADS四层架构建设，不同层用途不同：</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>层级</th><th>全称</th><th>说明</th><th>产品常用</th></tr></thead>
+      <tbody>
+        <tr><td><strong>ODS</strong></td><td>操作数据层</td><td>原始数据，直接从埋点/日志同步，未清洗</td><td>❌ 基本不用</td></tr>
+        <tr><td><strong>DWD</strong></td><td>明细数据层</td><td>清洗后的明细数据，单条行为记录</td><td>⚠️ 复杂分析用，数据量大</td></tr>
+        <tr><td><strong>DWM</strong></td><td>中间汇总层</td><td>按用户+日期聚合的轻度汇总表</td><td>✅ <strong>日常取数首选</strong></td></tr>
+        <tr><td><strong>ADS</strong></td><td>应用数据层</td><td>高度汇总结果表，用于报表/看板</td><td>✅ 固定指标可用，灵活性差</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="tip-note">
+    <strong>💡 产品同学取数原则：</strong>优先用DWM层聚合表，性能是DWD层的10~100倍，不需要自己写复杂逻辑去重聚合。
+  </div>
+</div>
+
+<div class="section">
+  <h2 class="section-title"><span class="section-num">04</span> 数据地图使用方法</h2>
+  
+  <h3>数据地图是什么</h3>
+  <p>数据地图是公司内部的数据资产目录，相当于"数据的字典"，可以查：</p>
+  <ul>
+    <li>表的基本信息、负责人</li>
+    <li>字段含义、类型、枚举值</li>
+    <li>分区规则、更新频率</li>
+    <li>表血缘（这个表从哪来、被哪些表用）</li>
+    <li>样例数据预览</li>
+  </ul>
+
+  <h3>核心操作步骤</h3>
+  <ol>
+    <li><strong>搜索表</strong>：通过关键词（业务线、功能、表名）搜索</li>
+    <li><strong>看分区</strong>：确认按什么分区（绝大多数按<code>date</code>日期分区，格式yyyyMMdd）</li>
+    <li><strong>看字段</strong>：理解维度字段和指标字段</li>
+    <li><strong>看样例</strong>：预览样例数据，确认字段值符合预期</li>
+    <li><strong>查血缘</strong>：如果这个表的口径不满足需求，可以向上游找更明细的表</li>
+  </ol>
+
+  <h3>找表小技巧</h3>
+  <ul>
+    <li>优先找名字带<code>_di</code>（日分区）的聚合表，最适合日常分析</li>
+    <li>浏览器业务线表都在<code>iceberg_zjyprc_hadoop.browser.</code>库下</li>
+    <li>不确定表名时，先在群里问数据同学，或者看历史SQL用了什么表</li>
+  </ul>
+</div>
+
+<div class="section">
+  <h2 class="section-title"><span class="section-num">05</span> 内容生态业务线核心常用表（重点！）</h2>
+  
+  <h3>浏览器&信息流核心两表</h3>
+  <p>这两张表是日常取数用得最多的，几乎覆盖80%的分析需求：</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>表名</th><th>粒度</th><th>核心用途</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><code>dwm_browser_event_aggregation_miui_di</code></td>
+          <td>did+date<br>（每个用户每天一行）</td>
+          <td>APP启动、版本、启动方式、整体使用时长、基础行为数据</td>
+        </tr>
+        <tr>
+          <td><code>dwm_browser_event_aggregation_label_di</code></td>
+          <td>did+date<br>（每个用户每天一行）</td>
+          <td>信息流曝光/点击/播放、消费时长、内容标签、用户标签</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <p><strong>两表关联方式：</strong>通过 <code>date</code> + <code>did</code> 字段做JOIN。</p>
+
+  <h3>核心字段快速上手</h3>
+  <p><strong>miui_di表（APP整体行为）：</strong></p>
+  <div class="field-list">
+    <div class="field-item">
+      <code>did</code>
+      <div class="desc">设备ID，计算DAU用COUNT(DISTINCT did)</div>
+    </div>
+    <div class="field-item">
+      <code>date</code>
+      <div class="desc">日期分区，格式yyyyMMdd，查询必须加！</div>
+    </div>
+    <div class="field-item">
+      <code>is_app_dau_2024</code>
+      <div class="desc">=1 表示当日是APP活跃用户，务必加</div>
+    </div>
+    <div class="field-item">
+      <code>app_launch_way</code>
+      <div class="desc">启动方式：icon/第三方/push/搜等</div>
+    </div>
+    <div class="field-item">
+      <code>app_open_cnt</code>
+      <div class="desc">APP打开次数</div>
+    </div>
+    <div class="field-item">
+      <code>app_dura</code>
+      <div class="desc">APP总使用时长，单位是毫秒，转分钟除以60000</div>
+    </div>
+  </div>
+
+  <p><strong>label_di表（信息流消费）：</strong></p>
+  <div class="field-list">
+    <div class="field-item">
+      <code>is_dau_feed_dapan_2024</code>
+      <div class="desc">=1 表示当日是信息流活跃用户</div>
+    </div>
+    <div class="field-item">
+      <code>feed_channel</code>
+      <div class="desc">信息流频道</div>
+    </div>
+    <div class="field-item">
+      <code>is_top</code>
+      <div class="desc">是否置顶内容，自然信息流要过滤is_top=0</div>
+    </div>
+    <div class="field-item">
+      <code>expos_cnt/click_cnt</code>
+      <div class="desc">曝光/点击次数</div>
+    </div>
+    <div class="field-item">
+      <code>news_vv_cnt/short_vv_cnt</code>
+      <div class="desc">图文/短视频VV</div>
+    </div>
+    <div class="field-item">
+      <code>feed_dura</code>
+      <div class="desc">信息流消费时长（毫秒）</div>
+    </div>
+  </div>
+
+  <h3>常用过滤条件（避坑！）</h3>
+  <pre><code>-- 1. 分区过滤：必须加！否则扫全表，慢到跑不出来
+WHERE date BETWEEN 20260601 AND 20260630
+-- 2. 过滤有效活跃用户
+AND is_app_dau_2024 = 1
+-- 3. 过滤空did
+AND COALESCE(did, '') != ''
+-- 4. 自然信息流过滤置顶内容
+AND is_top = 0</code></pre>
+
+  <div class="warning-note">
+    <strong>⚠️ 常见坑：忘记加分区过滤</strong> → 后果：查询跑几个小时出不来，甚至把集群搞挂，被数据同学找。
+  </div>
+</div>
+
+<div class="section">
+  <h2 class="section-title"><span class="section-num">06</span> 数据权限申请流程</h2>
+  <ol>
+    <li>打开数据权限申请页面（数据地图页面右上角有权限申请入口）</li>
+    <li>搜索需要的表名，申请查询权限</li>
+    <li>填写申请理由："产品日常取数分析，XX业务需求使用"</li>
+    <li>提交后等待表负责人审批（一般半天内通过）</li>
+    <li>审批通过后，在Kyuubi查询页面就可以访问了</li>
+  </ol>
+  <div class="tip-note">
+    <strong>💡 建议：</strong>一次性申请常用表权限，避免每次取数都等审批。
+  </div>
+</div>
+
+<div class="section">
+  <h2 class="section-title"><span class="section-num">07</span> 本节课小结</h2>
+  <div class="conclusion-card">
+    <div class="num">✅ 要点1</div>
+    产品懂数据才能不被"忽悠"，用用户真实行为做决策。
+  </div>
+  <div class="conclusion-card">
+    <div class="num">✅ 要点2</div>
+    埋点记录的是「谁在什么时间做了什么，结果如何」。
+  </div>
+  <div class="conclusion-card">
+    <div class="num">✅ 要点3</div>
+    日常取数优先用DWM层聚合表，性能最好。
+  </div>
+  <div class="conclusion-card">
+    <div class="num">✅ 要点4</div>
+    数据地图是找表查字段的必备工具。
+  </div>
+  <div class="conclusion-card">
+    <div class="num">✅ 要点5</div>
+    内容生态业务线最核心两张表：miui_di（APP整体）+ label_di（信息流），通过date+did关联。
+  </div>
+  <div class="conclusion-card">
+    <div class="num">✅ 要点6</div>
+    查询必须加分区过滤！必须加is_app_dau_2024=1过滤有效用户。
+  </div>
+</div>
+
+<div class="nav-links">
+  <div class="nav-group">
+    <a href="./00-课程大纲与课表.html" class="nav-link">← 返回课表</a>
+  </div>
+  <div class="nav-group">
+    <a href="./02-第2课时-SQL基础上.html" class="nav-link">第2课时：SQL基础（上）→</a>
+  </div>
+</div>
+
+<div class="footer">
+  <span>数据分析通识培训 · 第1课时</span>
+  <span>2026年7月</span>
+</div>
+
+</div>
+</body>
+</html>

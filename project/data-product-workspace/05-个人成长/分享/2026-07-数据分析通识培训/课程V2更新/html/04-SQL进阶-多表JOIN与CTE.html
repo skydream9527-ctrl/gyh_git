@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>模块4 · SQL 进阶：JOIN、CTE 与执行调优</title>
+<link rel="stylesheet" href="./assets/deck.css">
+</head>
+<body>
+<div id="prog"></div>
+<a class="home" href="./index.html">☰ 课程目录</a>
+<div id="deck">
+
+<section class="slide center">
+  <p class="lead">数据分析通识培训 · 模块4（进阶）</p>
+  <h1 class="display">SQL 进阶：<span class="cyan">JOIN、CTE</span> 与执行调优</h1>
+  <div class="rule"></div>
+  <p class="sub">多表拼查 · 执行原理（MapReduce / Shuffle）· 语法调优</p>
+  <div class="meta"><span>⏱️ 1.5 小时</span><span>🎯 JOIN/CTE 销售运营了解，原理调优产品重点</span></div>
+</section>
+
+<section class="slide" data-kicker="开场">
+  <h1>单表不够用的时候</h1>
+  <p class="mist">有些问题一张表答不了，要跨表看：APP 启动 + 信息流消费、PUSH 点击 + 后续行为、用户标签 + 行为。</p>
+  <div class="hl fragment" style="margin-top:20px">JOIN = 用共同的"钥匙"（如 <code>date + did</code>）把多张表<b class="cyan">拼起来</b>。</div>
+</section>
+
+<section class="slide" data-kicker="一 · JOIN">
+  <h1>最常用两种 JOIN（99% 场景）</h1>
+  <table class="tbl fragment">
+    <tbody>
+    <tr><th>类型</th><th>逻辑</th><th>比喻</th></tr>
+    <tr><td><b class="cyan">INNER JOIN</b></td><td>只保留两表都匹配上的</td><td>数学语文都考了的学生</td></tr>
+    <tr><td><b class="green">LEFT JOIN</b></td><td>左表全留，右表没匹配填 NULL</td><td>所有考数学的，语文缺考记 NULL</td></tr>
+    </tbody>
+  </table>
+  <div class="hl warn fragment" style="margin-top:20px">⚠️ LEFT JOIN 后右表 NULL，要用 <code>COALESCE(x, 0)</code> 补 0，否则 SUM/AVG 异常。</div>
+</section>
+
+<section class="slide" data-kicker="一 · JOIN">
+  <h1>案例：PUSH 用户的信息流消费</h1>
+  <div class="codeblk fragment"><span class="k">SELECT</span> <span class="k">COUNT</span>(<span class="k">DISTINCT</span> a.did) <span class="k">AS</span> push_user,
+  <span class="k">ROUND</span>(<span class="k">SUM</span>(<span class="k">COALESCE</span>(b.feed_dura,0))/<span class="k">COUNT</span>(<span class="k">DISTINCT</span> a.did)/60000,2) <span class="k">AS</span> avg_min
+<span class="k">FROM</span> ( <span class="c">/* 先过滤 PUSH 启动用户 */</span> ) a
+<span class="k">LEFT JOIN</span> ( <span class="c">/* 信息流消费 */</span> ) b
+  <span class="k">ON</span> a.date=b.date <span class="k">AND</span> a.did=b.did;</div>
+  <p class="hl bad fragment" style="margin-top:16px">避坑：① 必写 <code>ON</code>（漏写=笛卡尔积爆炸）② 先过滤再 JOIN ③ 小表放左边。</p>
+  <p class="mist fragment" style="font-size:18px;margin-top:10px">🧨 真实案例：<b>100 万条危险网址 × 千万级用户行为</b>，漏了 ON 就是笛卡尔积，直接把集群跑挂。</p>
+</section>
+
+<section class="slide" data-kicker="二 · CTE">
+  <h1>CTE（WITH）：像搭积木一样写 SQL</h1>
+  <div class="codeblk fragment"><span class="k">WITH</span>
+临时表1 <span class="k">AS</span> ( <span class="k">SELECT</span> … <span class="k">FROM</span> … <span class="k">WHERE</span> … ),
+临时表2 <span class="k">AS</span> ( <span class="k">SELECT</span> … <span class="k">FROM</span> 临时表1 <span class="k">JOIN</span> … )
+<span class="k">SELECT</span> … <span class="k">FROM</span> 临时表2;</div>
+  <p class="hl fragment" style="margin-top:20px">复杂需求拆成多步，每步清晰不易错，<b class="cyan">也让 AI 生成拆分后的 SQL 更准</b>。</p>
+  <p class="mist fragment" style="font-size:18px;margin-top:10px">🧩 现场案例：<b>PUSH 价值量分析</b>就是拆成"先圈用户 → 再关联行为 → 再算价值量"多步 WITH 完成的。</p>
+</section>
+
+<section class="slide" data-kicker="三 · 避坑">
+  <h1>多表常见坑</h1>
+  <ul class="clean tight" style="font-size:21px">
+    <li class="fragment">忘加 <code>date</code> → 扫全表</li>
+    <li class="fragment">JOIN 漏 <code>ON</code> → 笛卡尔积爆炸</li>
+    <li class="fragment">多表直接 SUM → 数据重复、指标翻倍</li>
+    <li class="fragment">AVG 算人均 → 排除 NULL 用户，偏高</li>
+    <li class="fragment">没 <code>COALESCE</code> → 结果变 NULL</li>
+  </ul>
+</section>
+
+<section class="slide" data-kicker="三 · 翻车现场">
+  <h1>四个坑的真实后果<span class="tag">带数字</span></h1>
+  <table class="tbl fragment">
+    <tbody>
+    <tr><th>坑</th><th>翻车现场</th></tr>
+    <tr><td>JOIN 漏 ON</td><td>100万 × 80万 = <b class="red">8000 亿行</b>，集群跑挂</td></tr>
+    <tr><td>多表直接 SUM</td><td>时长被复制 3 份 → 30 分钟算成 <b class="red">90 分钟</b></td></tr>
+    <tr><td>忘加 date</td><td>读 400 个分区，耗时 <b class="red">×400</b></td></tr>
+    <tr><td>AVG 人均</td><td>100/5=20（跳过 NULL）· 正确 100/10=<b class="green">10</b></td></tr>
+    </tbody>
+  </table>
+  <p class="hl bad fragment" style="margin-top:14px">一个 ON、一个 date 的差别，结果可能差百万倍。</p>
+</section>
+
+<section class="slide" data-kicker="四 · 执行原理">
+  <h1>SQL 怎么执行：MapReduce 三阶段</h1>
+  <div class="flow">
+    <div class="step fragment" data-n="M"><p class="t">Map · 分</p><p class="d">切块并行：读数据、过滤、按 key 打标</p></div>
+    <div class="step fragment" data-n="S"><p class="t">Shuffle · 搬</p><p class="d">按 key 跨机器重新分发，同 key 汇一起</p></div>
+    <div class="step fragment" data-n="R"><p class="t">Reduce · 合</p><p class="d">对同 key 数据聚合/关联</p></div>
+  </div>
+  <p class="hl fragment" style="margin-top:18px">类比人口普查：<b>各村统计（Map）→ 汇总到省中心（Shuffle）→ 算省总数（Reduce）</b>。</p>
+  <p class="hl warn fragment" style="margin-top:12px">🎯 <code>SELECT/WHERE</code> 在 Map（快）；<code>GROUP BY/JOIN/DISTINCT/ORDER BY</code> 触发 Shuffle（慢，是瓶颈）。</p>
+</section>
+
+<section class="slide" data-kicker="四 · 案例">
+  <h1>案例：GROUP BY app_launch_way 走三阶段</h1>
+  <div class="codeblk fragment"><span class="c"># ① Map（3 台各读一批、按启动方式打标）</span>
+机器1: d1→icon  d2→push    机器2: d3→icon  d4→icon    机器3: d5→push  d6→icon
+<span class="c"># ② Shuffle（按 启动方式=key 重新分发）</span>
+icon → 机器A: d1,d3,d4,d6      push → 机器B: d2,d5
+<span class="c"># ③ Reduce（各算 DISTINCT did）</span>
+机器A: icon = 4 人             机器B: push = 2 人</div>
+  <p class="hl fragment" style="margin-top:16px">💡 <b class="cyan">GROUP BY 的字段就是 shuffle 的 key</b>；同 key 必须先"搬"到一起才能算——这一步最慢。JOIN 同理，key 换成 <code>did</code>。</p>
+</section>
+
+<section class="slide" data-kicker="五 · Shuffle">
+  <h1>Shuffle：性能瓶颈的根源</h1>
+  <p class="mist fragment">把数据<b class="cyan">跨机器按 key 重新分发</b>，涉及网络传输 + 磁盘读写 + 排序，是最贵的操作。</p>
+  <div class="grid2" style="align-items:start;margin-top:10px">
+    <div class="fragment"><p class="lead" style="margin-bottom:8px">谁触发 shuffle</p><ul class="clean tight" style="font-size:18px"><li>GROUP BY</li><li>JOIN</li><li>DISTINCT</li><li>ORDER BY（全局排序）</li><li>窗口 PARTITION BY</li></ul></div>
+    <div class="fragment"><p class="lead" style="margin-bottom:8px">怎么减少代价</p><ul class="clean tight" style="font-size:18px"><li>先过滤（数据先变少）</li><li>只带需要的列</li><li>先聚合再 JOIN</li><li>能不排就不排（Top N 用 LIMIT）</li></ul></div>
+  </div>
+  <p class="hl fragment" style="margin-top:14px">💡 调优的本质：<b class="cyan">少 shuffle、shuffle 时少搬数据</b>。</p>
+</section>
+
+<section class="slide" data-kicker="五 · 案例">
+  <h1>案例：先聚合再 JOIN，shuffle 降 6 倍</h1>
+  <p class="mist fragment">label_di 明细当天 5000 万行，要 JOIN 算 PUSH 用户人均时长。</p>
+  <table class="tbl fragment" style="margin-top:6px">
+    <tbody>
+    <tr><th>写法</th><th>进 shuffle 的数据量</th></tr>
+    <tr><td>❌ 直接拿 5000 万行明细去 JOIN</td><td><b class="red">5000 万行</b>，慢 + 易倾斜</td></tr>
+    <tr><td>✅ 先按 did 聚合成 800 万行再 JOIN</td><td><b class="green">800 万行</b>，降 ~6 倍</td></tr>
+    </tbody>
+  </table>
+  <div class="codeblk fragment" style="margin-top:12px"><span class="k">LEFT JOIN</span> ( <span class="k">SELECT</span> date,did,<span class="k">SUM</span>(feed_dura) feed_dura
+            <span class="k">FROM</span> …label_di <span class="k">WHERE</span> date=20260628 <span class="k">AND</span> is_top=0
+            <span class="k">GROUP BY</span> date,did ) b  <span class="c">-- 先压小再关联</span></div>
+</section>
+
+<section class="slide" data-kicker="六 · 数据倾斜">
+  <h1>数据倾斜：99% 卡在最后 1%</h1>
+  <p class="mist fragment">某个 key 数据特别大，shuffle 后全汇到一台机器，它一个人干了别人几百倍的活 → 个别 task 卡死甚至 OOM。</p>
+  <div class="cards" style="margin-top:10px">
+    <div class="card fragment"><div class="ic">🔍</div><p class="t">最常见元凶</p><p class="d"><b>did 为空 / 默认值 / 测试 id</b>，大量空值全挤一起</p></div>
+    <div class="card fragment"><div class="ic">🛠️</div><p class="t">怎么解</p><p class="d">先过滤脏 key（解 80%）· 小表广播 · 加盐打散 · 提前聚合</p></div>
+  </div>
+  <p class="hl bad fragment" style="margin-top:14px">🔴 卡在 99%？第一反应查有没有<b>空值/默认值 key</b>。</p>
+</section>
+
+<section class="slide" data-kicker="六 · 案例">
+  <h1>案例：一个空 did 拖垮整个任务</h1>
+  <div class="codeblk fragment"><span class="c"># 两表按 did JOIN，3000 万行 did 为空（脏数据）</span>
+空 did("")  → 全部 3000 万行 <span class="k">汇到同一台机器</span>！
+正常 did     → 均匀分到上千台，每台几万行</div>
+  <div class="grid2 fragment" style="margin-top:12px">
+    <div class="card"><div class="ic">🐢</div><p class="d">正常 task 各 <b>30 秒</b>；空 did 那个 task <b class="red">跑 40 分钟 / OOM</b>，卡在 99%</p></div>
+    <div class="card"><div class="ic">✅</div><p class="d"><code>WHERE COALESCE(did,'')!=''</code> 过滤空值 → <b class="green">40 分钟变 40 秒</b></p></div>
+  </div>
+</section>
+
+<section class="slide" data-kicker="七 · 调优">
+  <h1>写 SQL 就能做的调优</h1>
+  <table class="tbl fragment">
+    <tbody>
+    <tr><th>手段</th><th>收益</th></tr>
+    <tr><td>分区裁剪(WHERE 带 date)</td><td>只扫需要分区，<b class="green">最有效</b></td></tr>
+    <tr><td>列裁剪(别 SELECT *)</td><td>少读少传</td></tr>
+    <tr><td>谓词下推(过滤尽量早)</td><td>尽早减少数据量</td></tr>
+    <tr><td>先聚合再 JOIN</td><td>大幅减少 shuffle 数据</td></tr>
+    <tr><td>小表广播 broadcast join</td><td>免 shuffle，提速明显</td></tr>
+    <tr><td>避免笛卡尔积、控 ORDER BY</td><td>防爆炸、减 shuffle</td></tr>
+    </tbody>
+  </table>
+  <p class="hl fragment" style="margin-top:12px">💡 <b>AQE</b>（自适应查询执行）会自动优化 shuffle 分区、处理部分倾斜——但好习惯还得自己养。</p>
+</section>
+
+<section class="slide" data-kicker="八 · 引擎">
+  <h1>Hive vs Spark：我们用哪个</h1>
+  <table class="tbl fragment">
+    <tbody>
+    <tr><th>维度</th><th>Hive（MapReduce）</th><th>Spark SQL</th></tr>
+    <tr><td>计算</td><td>每步落磁盘</td><td>内存 + DAG</td></tr>
+    <tr><td>速度</td><td>慢、稳</td><td><b class="green">快，主流</b></td></tr>
+    <tr><td>适合</td><td>超大批处理</td><td>交互式、日常取数</td></tr>
+    </tbody>
+  </table>
+  <p class="hl fragment" style="margin-top:16px">Kyuubi 连的就是 <b class="cyan">Spark SQL</b>，日常主要用它；语法 90% 通用。</p>
+</section>
+
+<section class="slide" data-kicker="九 · 排查">
+  <h1>EXPLAIN 看计划 & 慢查询排查</h1>
+  <p class="fragment"><code>EXPLAIN SELECT …</code> 重点看：有没有全表扫描、有没有大 Shuffle、JOIN 是否走 Broadcast。</p>
+  <table class="tbl fragment" style="margin-top:10px">
+    <tbody>
+    <tr><th>先看</th><th>对策</th></tr>
+    <tr><td>加 date 分区了吗</td><td>漏了=全表，先补</td></tr>
+    <tr><td>JOIN 漏 ON 吗</td><td>补 ON、查关联键</td></tr>
+    <tr><td>Shuffle 太大吗</td><td>先过滤、先聚合、只带需要列</td></tr>
+    <tr><td>数据倾斜吗</td><td>查空值/默认值 key</td></tr>
+    </tbody>
+  </table>
+  <p class="hl fragment" style="margin-top:12px">🎯 先查 1 天验证逻辑，再放大时间范围。</p>
+</section>
+
+<section class="slide" data-kicker="十 · AI 辅助">
+  <h1>AI 辅助复杂 SQL</h1>
+  <ul class="clean">
+    <li class="fragment"><b>复杂需求拆成步骤喂给 AI</b>（用什么表、输出什么字段），别一次丢大需求</li>
+    <li class="fragment"><b>AI 常见坑修复</b>：幻觉字段、漏 date、没处理 NULL、口径错、人均用 AVG、大表直接关联（改 WITH 先聚合）</li>
+    <li class="fragment"><b>让 AI 解释执行计划</b>：贴 EXPLAIN，让它指出大 shuffle / 能否改 broadcast</li>
+  </ul>
+  <p class="hl fragment" style="margin-top:18px">🎯 越复杂越要"拆步骤 + 人校验"。</p>
+</section>
+
+<section class="slide center">
+  <p class="lead">模块4 · 完</p>
+  <h1 class="display">下一课：<span class="cyan">数据分析方法</span></h1>
+  <div class="rule"></div>
+  <p class="sub">从"取数"升级到"给结论"</p>
+  <p class="mist" style="margin-top:26px;font-size:20px">← → 翻页 · 空格逐条展开 · <a href="./index.html" style="color:var(--cyan)">返回目录</a></p>
+</section>
+
+</div>
+<button class="navbtn" id="prev">‹</button>
+<button class="navbtn" id="next">›</button>
+<div class="hint">← → 翻页 · 空格下一步 · F 全屏 · P 打印/导出 PDF · Home/End 首末页</div>
+<script src="./assets/deck.js"></script>
+</body></html>

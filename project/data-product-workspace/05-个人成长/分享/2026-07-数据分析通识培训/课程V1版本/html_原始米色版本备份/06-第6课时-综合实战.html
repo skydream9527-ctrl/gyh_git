@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第6课时 · 综合实战与答疑</title>
+<style>
+:root {
+  --ink: #151515;
+  --text: #252525;
+  --muted: #646464;
+  --quiet: #8a8a8a;
+  --line: #3a3a3a;
+  --line-muted: #777;
+  --line-soft: #deddd9;
+  --paper: #f7f6f2;
+  --panel: #fffefa;
+  --panel-soft: #f0efeb;
+  --panel-deep: #e2e1dd;
+  --accent: #2a2a2a;
+  --highlight: #fef3c7;
+  --blue: #1e40af;
+  --green: #15803d;
+  --orange: #c2410c;
+  --red: #b91c1c;
+  --purple: #7c3aed;
+  --shadow: 0 10px 24px rgba(0, 0, 0, 0.045);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: "Avenir Next", "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+  background: var(--paper);
+  color: var(--text);
+  line-height: 1.62;
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+}
+.page { max-width: 1100px; margin: 0 auto; padding: 54px 34px 86px; }
+h1, h2, h3, h4 {
+  font-family: "Songti SC", "Noto Serif CJK SC", serif;
+  color: var(--ink); font-weight: 700;
+}
+.header { margin-bottom: 48px; padding-bottom: 28px; border-bottom: 1.25px solid var(--line); }
+.eyebrow { font-family: "Avenir Next"; font-size: 12px; letter-spacing: 0.12em; color: var(--quiet); text-transform: uppercase; margin-bottom: 14px; font-weight: 600; }
+h1 { font-size: 36px; line-height: 1.1; margin-bottom: 12px; }
+.subtitle { font-size: 17px; color: var(--muted); font-weight: 400; margin-bottom: 20px; }
+.meta-row { display: flex; gap: 28px; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin-bottom: 24px; }
+.meta-item { display: flex; align-items: center; gap: 6px; }
+.section { margin-bottom: 48px; }
+.section-title { font-size: 24px; margin-bottom: 6px; padding-bottom: 12px; border-bottom: 0.75px solid var(--line-soft); display: flex; align-items: center; gap: 10px; }
+.section-num { font-family: "Avenir Next"; font-size: 14px; font-weight: 600; color: var(--quiet); }
+h3 { font-size: 18px; margin-top: 24px; margin-bottom: 12px; }
+p { margin-bottom: 12px; }
+.caliber-note { background: var(--panel); border-left: 3px solid var(--line); padding: 16px 20px; font-size: 14px; margin-bottom: 20px; color: var(--muted); border-radius: 0 4px 4px 0; }
+.caliber-note strong { color: var(--text); }
+.warning-note { background: #fef2f2; border-left: 3px solid var(--red); padding: 16px 20px; font-size: 14px; margin-bottom: 20px; color: #991b1b; border-radius: 0 4px 4px 0; }
+.tip-note { background: #f0fdf4; border-left: 3px solid var(--green); padding: 16px 20px; font-size: 14px; margin-bottom: 20px; color: #166534; border-radius: 0 4px 4px 0; }
+.case-step { background: var(--panel); border: 1px solid var(--line-soft); border-radius: 6px; padding: 24px; margin-bottom: 16px; box-shadow: var(--shadow); }
+.case-step .step-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.case-step .step-badge { font-family: "Avenir Next"; font-weight: 700; color: var(--blue); font-size: 13px; background: #eff6ff; padding: 4px 10px; border-radius: 4px; }
+.case-step .step-ttl { font-weight: 600; font-size: 17px; color: var(--ink); }
+.case-step .step-content { font-size: 14px; line-height: 1.7; }
+.findings-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 16px 0; }
+.finding-card { background: var(--panel-soft); padding: 12px; border-radius: 4px; font-size: 13px; }
+.finding-card .label { font-weight: 600; margin-bottom: 4px; color: var(--ink); }
+.finding-card.red { background: #fef2f2; }
+.finding-card.green { background: #f0fdf4; }
+.conclusion-box { background: var(--panel); border: 2px solid var(--line); border-radius: 6px; padding: 24px; margin: 20px 0; }
+.conclusion-box .con-ttl { font-weight: 700; font-size: 17px; margin-bottom: 12px; color: var(--ink); }
+.qa-item { background: var(--panel); border: 1px solid var(--line-soft); border-radius: 6px; padding: 20px; margin-bottom: 12px; box-shadow: var(--shadow); }
+.qa-q { font-weight: 600; font-size: 15px; color: var(--ink); margin-bottom: 10px; display: flex; align-items: flex-start; gap: 8px; }
+.qa-q .q-icon { color: var(--blue); font-weight: 700; flex-shrink: 0; }
+.qa-a { font-size: 14px; color: var(--muted); line-height: 1.7; padding-left: 24px; }
+.qa-a ol, .qa-a ul { margin-left: 20px; }
+.resource-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin: 20px 0; }
+.resource-card { background: var(--panel); border: 1px solid var(--line-soft); padding: 18px; border-radius: 6px; box-shadow: var(--shadow); }
+.resource-card .res-num { font-family: "Avenir Next"; font-weight: 700; color: var(--green); font-size: 13px; margin-bottom: 6px; }
+.resource-card .res-ttl { font-weight: 600; margin-bottom: 6px; }
+.resource-card .res-desc { font-size: 13px; color: var(--muted); }
+.learning-path { position: relative; padding-left: 30px; margin: 20px 0; }
+.path-item { position: relative; margin-bottom: 24px; padding-left: 20px; }
+.path-item::before { content: ''; position: absolute; left: -30px; top: 4px; width: 14px; height: 14px; border-radius: 50%; background: var(--blue); border: 3px solid var(--paper); z-index: 2; }
+.path-item:not(:last-child)::after { content: ''; position: absolute; left: -24px; top: 18px; width: 2px; height: calc(100% + 10px); background: var(--line-soft); }
+.path-item .stage { font-weight: 700; font-size: 16px; margin-bottom: 6px; color: var(--ink); }
+.path-item .time { font-size: 13px; color: var(--orange); font-weight: 500; margin-bottom: 6px; }
+.path-item .desc { font-size: 14px; color: var(--muted); line-height: 1.6; }
+.table-wrap { background: var(--panel); border: 1px solid var(--line-soft); box-shadow: var(--shadow); overflow-x: auto; margin-bottom: 20px; border-radius: 6px; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+thead { background: var(--panel-soft); }
+th { font-family: "Avenir Next"; font-weight: 600; font-size: 12px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--line-soft); }
+td { padding: 12px 14px; border-bottom: 0.5px solid var(--line-soft); vertical-align: top; color: var(--text); line-height: 1.6; }
+td:first-child { font-weight: 500; }
+tbody tr:hover { background: var(--panel-soft); }
+tbody tr:last-child td { border-bottom: none; }
+ul, ol { margin-left: 24px; margin-bottom: 16px; }
+li { margin-bottom: 8px; }
+code { background: var(--panel-soft); padding: 2px 6px; border-radius: 3px; font-family: "SF Mono", "Menlo", monospace; font-size: 13px; color: var(--ink); }
+.nav-links { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 40px; justify-content: space-between; }
+.nav-group { display: flex; gap: 12px; }
+.nav-link { background: var(--panel); border: 1px solid var(--line-soft); padding: 10px 18px; border-radius: 6px; text-decoration: none; color: var(--text); font-size: 14px; font-family: "Avenir Next"; transition: all 0.2s; }
+.nav-link:hover { border-color: var(--line); background: var(--panel-soft); }
+.footer { margin-top: 64px; padding-top: 24px; border-top: 0.75px solid var(--line-soft); font-size: 12px; color: var(--quiet); font-family: "Avenir Next"; display: flex; justify-content: space-between; }
+.congrats { text-align: center; padding: 40px 20px; background: var(--panel); border: 1px solid var(--line-soft); border-radius: 8px; margin: 30px 0; }
+.congrats .emoji { font-size: 48px; margin-bottom: 16px; }
+.congrats .ttl { font-family: "Songti SC", serif; font-size: 24px; font-weight: 700; margin-bottom: 10px; }
+.congrats .desc { color: var(--muted); }
+@media (max-width: 768px) {
+  .page { padding: 30px 18px 50px; }
+  h1 { font-size: 28px; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+<div class="header">
+  <div class="eyebrow">LESSON 06 · PRACTICE & Q&A</div>
+  <h1>第6课时：综合实战与答疑</h1>
+  <p class="subtitle">完整案例：PUSH CTR波动分析全流程 · 常见问题解答 · 学习路径</p>
+  <div class="meta-row">
+    <div class="meta-item">⏱️ 课时：1.5小时</div>
+    <div class="meta-item">🎯 目标：串联前5节课内容，掌握完整分析流程</div>
+  </div>
+</div>
+
+<div class="section">
+  <h2 class="section-title"><span class="section-num">01</span> 综合实战案例：PUSH CTR突然下降怎么办？</h2>
+  <p>我们用一个完整的真实场景，把前5节课学的内容串起来，走完从问题发现到结论输出的全流程。</p>
+
+  <div class="case-step">
+    <div class="step-header">
+      <span class="step-badge">STEP 1</span>
+      <span class="step-ttl">明确问题</span>
+    </div>
+    <div class="step-content">
+      <p><strong>场景：</strong>你周一早上看数据，发现周日PUSH整体CTR从平时的8%降到了6%，下降了2个百分点，老板让你查一下原因，看看是不是上周四上线的新个性化推送策略有问题，要不要回滚。</p>
+      <p><strong>明确分析目标：</strong></p>
+      <ul>
+        <li>定位CTR下降的原因</li>
+        <li>判断是不是新策略导致的</li>
+        <li>给出决策建议：回滚/优化/继续观察</li>
+      </ul>
+      <p><strong>分析范围：</strong>时间范围上周四到周日，对比上周同期；核心指标PUSH CTR = 点击/到达；拆分维度：时间、PUSH类型、用户分群、漏斗环节、版本/渠道。</p>
+    </div>
+  </div>
+
+  <div class="case-step">
+    <div class="step-header">
+      <span class="step-badge">STEP 2</span>
+      <span class="step-ttl">数据校验（先确认数据没问题）</span>
+    </div>
+    <div class="step-content">
+      <p>首先排除数据本身的问题，不要上来就分析：</p>
+      <ol>
+        <li>检查数据是不是更新延迟？用不同查询方式重新跑一遍，确认数据准确</li>
+        <li>检查埋点上报有没有问题？点击/到达埋点有没有丢失？</li>
+        <li>检查口径有没有变化？CTR公式是不是被改了？</li>
+      </ol>
+      <p>→ 确认数据没问题，CTR确实是降了2个点。</p>
+    </div>
+  </div>
+
+  <div class="case-step">
+    <div class="step-header">
+      <span class="step-badge">STEP 3</span>
+      <span class="step-ttl">对比分析，确认异常范围</span>
+    </div>
+    <div class="step-content">
+      <p>先做对比，搞清楚是整体降了还是局部降了：</p>
+      <div class="findings-grid">
+        <div class="finding-card">
+          <div class="label">📅 时间对比</div>
+          周四新策略上线8.3%（略涨），周五8%，周六7.2%，周日6%，<strong>逐步下降</strong>；周日凌晨2-4点特别低。
+        </div>
+        <div class="finding-card red">
+          <div class="label">📰 PUSH类型对比</div>
+          新上线的<strong>热点推送类</strong>周日发送量很大，CTR只有3%，其他类型基本不变，<strong>贡献了80%的下降</strong>。
+        </div>
+        <div class="finding-card red">
+          <div class="label">👥 用户分群对比</div>
+          老用户降0.5pct基本正常；<strong>新用户（7天内）从7%降到3.5%</strong>，降了3.5个点，是重灾区。
+        </div>
+        <div class="finding-card">
+          <div class="label">🔻 漏斗拆解</div>
+          到达率、展示率基本没变，<strong>展示→点击环节掉了2.5pct</strong>，问题出在点击环节。
+        </div>
+      </div>
+      <div class="tip-note">
+        <strong>🎯 问题初步定位：</strong>新上线的热点推送类PUSH，周日凌晨给新用户发了一大批，这批PUSH点击率特别低（只有3%），拉低了整体CTR，其他类型和老用户基本正常。
+      </div>
+    </div>
+  </div>
+
+  <div class="case-step">
+    <div class="step-header">
+      <span class="step-badge">STEP 4</span>
+      <span class="step-ttl">深入分析原因</span>
+    </div>
+    <div class="step-content">
+      <p>为什么热点类PUSH对新用户点击率这么低？</p>
+      <ol>
+        <li>看这批PUSH的内容：都是比较深度的时政社会新闻，标题比较严肃</li>
+        <li>看新用户特征：刚安装APP的新用户，之前看的都是娱乐、生活类内容，对时政新闻兴趣低</li>
+        <li>看发送时间：周日凌晨2点发送，大部分用户在睡觉，早上起来看到一堆推送，直接划走了</li>
+        <li>对比小流量测试数据：上线前小流量灰度只测了老用户，没有测新用户，灰度时CTR是提升的，全量后加了新用户就崩了</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="case-step">
+    <div class="step-header">
+      <span class="step-badge">STEP 5</span>
+      <span class="step-ttl">结论与建议</span>
+    </div>
+    <div class="step-content">
+      <div class="conclusion-box">
+        <div class="con-ttl">📝 结论（结论先行）</div>
+        <ol>
+          <li>周日PUSH CTR下降2个百分点，<strong>80%的原因是新上线的热点推送全量后，给新用户在凌晨批量推送了不匹配的时政内容</strong>，这批PUSH点击率仅3%，拉低了整体指标</li>
+          <li>新策略本身对老用户是正向的（CTR略涨0.3pct），但对新用户有严重负向，不是完全不能用，是需要优化</li>
+          <li>不需要全量回滚，但需要立刻调整</li>
+        </ol>
+      </div>
+      <p><strong>行动建议：</strong></p>
+      <ol>
+        <li>立刻调整热点推送策略：新用户注册前7天不发时政类热点推送，只发泛娱乐内容，预计CTR能恢复到7.5%以上</li>
+        <li>优化推送时间：凌晨0点到早8点不批量发推送，避免用户早上起来被一堆推送打扰</li>
+        <li>后续新策略灰度测试必须包含新用户群体，不能只测老用户，小流量观察3天没问题再全量</li>
+        <li>建立PUSH分人群内容池，不同用户匹配不同类型内容</li>
+      </ol>
+      <p><strong>用到的知识点：</strong>SQL分群聚合+AI辅助、对比分析/漏斗分析/分群分析、灰度测试人群覆盖原则。</p>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h2 class="section-title"><span class="section-num">02</span> 常见问题答疑Q&A</h2>
+
+  <div class="qa-item">
+    <div class="qa-q"><span class="q-icon">Q1</span>我自己写SQL跑出来的数据和看板不一样，怎么办？</div>
+    <div class="qa-a">
+      按这个顺序排查：
+      <ol>
+        <li>先看口径：你用的过滤条件和看板是不是一样？有没有加<code>is_app_dau_2024=1</code>？有没有过滤<code>is_top=0</code>？时间范围是不是一致？</li>
+        <li>看表：看板是不是用的ADS层汇总表，你用的是DWM层？口径可能不一样，找数据同学确认看板口径</li>
+        <li>看去重：是不是<code>COUNT(DISTINCT did)</code>？有没有重复计算？</li>
+        <li>看更新时间：看板数据是不是延迟更新了？</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="qa-item">
+    <div class="qa-q"><span class="q-icon">Q2</span>SQL跑了很久没出来怎么办？</div>
+    <div class="qa-a">
+      <ol>
+        <li><strong>先检查是不是没加date分区过滤！</strong>90%的慢查询都是这个原因</li>
+        <li>先查1天的数据验证逻辑对不对，再扩大时间范围</li>
+        <li>不要<code>SELECT *</code>，只查需要的字段</li>
+        <li>先在子查询里过滤好数据再JOIN，不要关联全表</li>
+        <li>查3个月以上大数据量，建议拆成按月跑，或者找数据同学优化</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="qa-item">
+    <div class="qa-q"><span class="q-icon">Q3</span>AI生成的SQL敢直接用吗？</div>
+    <div class="qa-a">
+      简单的单表查询校验一下可以用，复杂的多表关联一定要：
+      <ol>
+        <li>先检查字段是不是都存在，有没有AI幻觉的字段</li>
+        <li>检查过滤条件是不是加全了</li>
+        <li>先查1天数据看结果数值在合理范围吗？（比如DAU是不是几百万级，CTR是不是在合理区间）</li>
+        <li>和已知的历史数据/看板数据对比，对得上再用</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="qa-item">
+    <div class="qa-q"><span class="q-icon">Q4</span>AB实验开了一周数据不显著怎么办？</div>
+    <div class="qa-a">
+      <ol>
+        <li>先算一下现在的样本量能检测出多大的MDE？如果能检测出的最小效果都比你预期的大，说明样本量不够，需要扩大流量或者延长时间</li>
+        <li>看效果是不是真的很小，如果提升不到0.5%，业务价值也不大，可以考虑停掉</li>
+        <li>分维度看，是不是某个细分人群显著，整体不显著？如果是的话可以考虑只对那个群体上线</li>
+        <li>不要为了显著而显著，硬凑p值&lt;0.05是自欺欺人</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="qa-item">
+    <div class="qa-q"><span class="q-icon">Q5</span>做分析时怎么找到问题的根因？</div>
+    <div class="qa-a">
+      用MECE原则拆分维度，互相独立、完全穷尽：
+      <ol>
+        <li>先拆时间：什么时候开始出问题？是突发还是逐步？</li>
+        <li>再拆人群：哪些用户出问题？新/老/高/低活/版本/渠道？</li>
+        <li>再拆业务模块：哪个功能/哪个内容/哪个入口出问题？</li>
+        <li>再拆链路：漏斗哪个环节掉了？</li>
+        <li>最后匹配对应时间点的业务动作：上线/活动/bug/运营动作，基本就能定位到</li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h2 class="section-title"><span class="section-num">03</span> 常用资料包汇总</h2>
+  <p>公共资料目录里已经给大家准备好了这些可直接复用的资料：</p>
+  <div class="resource-grid">
+    <div class="resource-card">
+      <div class="res-num">📘 资料 01</div>
+      <div class="res-ttl">内容生态业务线核心表速查手册</div>
+      <div class="res-desc">常用表、字段、过滤条件速查，取数前先看</div>
+    </div>
+    <div class="resource-card">
+      <div class="res-num">📝 资料 02</div>
+      <div class="res-ttl">日常取数SQL模板</div>
+      <div class="res-desc">4个最常用的SQL模板，改日期就能用</div>
+    </div>
+    <div class="resource-card">
+      <div class="res-num">🤖 资料 03</div>
+      <div class="res-ttl">AI写SQL提示词模板</div>
+      <div class="res-desc">基础+进阶提示词模板，复制修改即可使用</div>
+    </div>
+    <div class="resource-card">
+      <div class="res-num">✅ 资料 04</div>
+      <div class="res-ttl">数据分析常用框架Checklist</div>
+      <div class="res-desc">分析流程、异动排查、结论汇报模板</div>
+    </div>
+    <div class="resource-card">
+      <div class="res-num">🧪 资料 05</div>
+      <div class="res-ttl">AB实验判断Checklist</div>
+      <div class="res-desc">判断实验结果靠不靠谱的8条检查清单</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h2 class="section-title"><span class="section-num">04</span> 后续学习路径建议</h2>
+  <p>课程结束后，大家可以按这个路径继续提升：</p>
+  <div class="learning-path">
+    <div class="path-item">
+      <div class="stage">第一阶段：基础上手</div>
+      <div class="time">⏱️ 1~2周</div>
+      <div class="desc">把课件里的练习题都自己跑一遍，日常取数先尝试自己写SQL，用AI辅助，写完对照模板检查，遇到问题随时问。</div>
+    </div>
+    <div class="path-item">
+      <div class="stage">第二阶段：独立分析</div>
+      <div class="time">⏱️ 1~2个月</div>
+      <div class="desc">独立完成2~3个完整的小分析，比如某个功能上线后的效果分析、某个指标波动排查，按照课程里的框架走。</div>
+    </div>
+    <div class="path-item">
+      <div class="stage">第三阶段：长期提升</div>
+      <div class="time">⏱️ 长期</div>
+      <div class="desc">
+        <ul>
+          <li>复杂分析可以多和数据同学对思路，学习拆解问题的方法</li>
+          <li>做AB实验前先和数据同学一起review实验设计，避免踩坑</li>
+          <li>推荐书籍：《精益数据分析》《AB实验：科学归因与增长的艺术》《深入浅出数据分析》</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="tip-note">
+    <strong>💡 最后一句话：</strong>数据分析是实践技能，多写多练多踩坑，成长最快，不用追求一开始就写得完美。
+  </div>
+</div>
+
+<div class="congrats">
+  <div class="emoji">🎉</div>
+  <div class="ttl">课程全部结束</div>
+  <div class="desc">恭喜你完成数据分析通识培训全部6个课时的学习！</div>
+</div>
+
+<div class="nav-links">
+  <div class="nav-group">
+    <a href="./05-第5课时-AB实验.html" class="nav-link">← 第5课时</a>
+    <a href="./00-课程大纲与课表.html" class="nav-link">返回课表</a>
+  </div>
+</div>
+
+<div class="footer">
+  <span>数据分析通识培训 · 第6课时</span>
+  <span>2026年7月</span>
+</div>
+
+</div>
+</body>
+</html>

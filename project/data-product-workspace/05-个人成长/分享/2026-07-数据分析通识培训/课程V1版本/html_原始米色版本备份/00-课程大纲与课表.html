@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>数据分析通识培训 · 课程大纲与课表</title>
+<style>
+:root {
+  --ink: #151515;
+  --text: #252525;
+  --muted: #646464;
+  --quiet: #8a8a8a;
+  --line: #3a3a3a;
+  --line-muted: #777;
+  --line-soft: #deddd9;
+  --paper: #f7f6f2;
+  --panel: #fffefa;
+  --panel-soft: #f0efeb;
+  --panel-deep: #e2e1dd;
+  --accent: #2a2a2a;
+  --highlight: #fef3c7;
+  --blue: #1e40af;
+  --green: #15803d;
+  --orange: #c2410c;
+  --red: #b91c1c;
+  --shadow: 0 10px 24px rgba(0, 0, 0, 0.045);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: "Avenir Next", "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+  background: var(--paper);
+  color: var(--text);
+  line-height: 1.62;
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+}
+.page { max-width: 1100px; margin: 0 auto; padding: 54px 34px 86px; }
+h1, h2, h3, h4 {
+  font-family: "Songti SC", "Noto Serif CJK SC", serif;
+  color: var(--ink); font-weight: 700;
+}
+.header { margin-bottom: 48px; padding-bottom: 28px; border-bottom: 1.25px solid var(--line); }
+.eyebrow { font-family: "Avenir Next"; font-size: 12px; letter-spacing: 0.12em; color: var(--quiet); text-transform: uppercase; margin-bottom: 14px; font-weight: 600; }
+h1 { font-size: 40px; line-height: 1.1; margin-bottom: 12px; }
+.subtitle { font-size: 17px; color: var(--muted); font-weight: 400; margin-bottom: 20px; }
+.meta-row { display: flex; gap: 28px; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin-bottom: 24px; }
+.meta-item { display: flex; align-items: center; gap: 6px; }
+.section { margin-bottom: 48px; }
+.section-title { font-size: 24px; margin-bottom: 6px; padding-bottom: 12px; border-bottom: 0.75px solid var(--line-soft); display: flex; align-items: center; gap: 10px; }
+.section-num { font-family: "Avenir Next"; font-size: 14px; font-weight: 600; color: var(--quiet); }
+.section-sub { font-size: 14px; color: var(--muted); margin-bottom: 22px; font-weight: 400; font-family: "Avenir Next"; }
+.caliber-note { background: var(--panel); border-left: 3px solid var(--line); padding: 16px 20px; font-size: 14px; margin-bottom: 28px; color: var(--muted); }
+.caliber-note strong { color: var(--text); }
+.table-wrap { background: var(--panel); border: 1px solid var(--line-soft); box-shadow: var(--shadow); overflow-x: auto; margin-bottom: 20px; border-radius: 6px; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+thead { background: var(--panel-soft); }
+th { font-family: "Avenir Next"; font-weight: 600; font-size: 12px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--line-soft); }
+td { padding: 14px 14px; border-bottom: 0.5px solid var(--line-soft); vertical-align: top; color: var(--text); line-height: 1.7; }
+tbody tr:hover { background: var(--panel-soft); }
+tbody tr:last-child td { border-bottom: none; }
+.lesson-num { font-family: "Avenir Next"; font-weight: 700; color: var(--ink); font-size: 15px; white-space: nowrap; }
+.lesson-duration { font-family: "Avenir Next"; font-size: 12px; color: var(--quiet); white-space: nowrap; }
+ul, ol { margin-left: 20px; margin-bottom: 10px; }
+li { margin-bottom: 6px; }
+code { background: var(--panel-soft); padding: 2px 6px; border-radius: 3px; font-family: "SF Mono", "Menlo", monospace; font-size: 13px; color: var(--ink); }
+.highlight-card { background: var(--highlight); border: 1px solid #d4c88a; padding: 20px 24px; border-radius: 6px; margin-bottom: 20px; }
+.highlight-card .ttl { font-weight: 600; font-size: 16px; margin-bottom: 8px; color: var(--ink); }
+.feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-top: 20px; }
+.feature-card { background: var(--panel); border: 1px solid var(--line-soft); padding: 20px; border-radius: 6px; box-shadow: var(--shadow); }
+.feature-card .icon { font-size: 24px; margin-bottom: 10px; }
+.feature-card .ttl { font-weight: 600; font-size: 15px; margin-bottom: 6px; color: var(--ink); }
+.feature-card .desc { font-size: 13px; color: var(--muted); line-height: 1.6; }
+.footer { margin-top: 64px; padding-top: 24px; border-top: 0.75px solid var(--line-soft); font-size: 12px; color: var(--quiet); font-family: "Avenir Next"; display: flex; justify-content: space-between; }
+.nav-links { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 40px; }
+.nav-link { background: var(--panel); border: 1px solid var(--line-soft); padding: 10px 18px; border-radius: 6px; text-decoration: none; color: var(--text); font-size: 14px; font-family: "Avenir Next"; transition: all 0.2s; }
+.nav-link:hover { border-color: var(--line); background: var(--panel-soft); }
+@media (max-width: 768px) {
+  .page { padding: 30px 18px 50px; }
+  h1 { font-size: 32px; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+<div class="header">
+  <div class="eyebrow">DATA ANALYSIS TRAINING · FOR PRODUCT MANAGERS</div>
+  <h1>数据分析通识培训</h1>
+  <p class="subtitle">面向浏览器/信息流/PUSH产品同学的入门课程 · 场景化 · AI提效 · 学完即用</p>
+  <div class="meta-row">
+    <div class="meta-item">📅 周期：3周（每周2课时）</div>
+    <div class="meta-item">⏱️ 每课时：1~1.5小时</div>
+    <div class="meta-item">📦 业务场景：内容生态负责产品线</div>
+    <div class="meta-item">🤖 特色：全程融入AI辅助提效</div>
+  </div>
+</div>
+
+<div class="section">
+  <h2 class="section-title"><span class="section-num">01</span> 课程目标</h2>
+  <div class="highlight-card">
+    <div class="ttl">学完你可以独立完成：</div>
+    <ul>
+      <li>✅ 使用数据地图找到需要的表和字段，独立申请权限</li>
+      <li>✅ 自己写SQL查询日常指标（DAU/CTR/人均时长/VV等），结合AI辅助提效</li>
+      <li>✅ 独立完成简单的业务分析（指标异动排查、功能上线效果复盘）</li>
+      <li>✅ 看懂AB实验报告，判断结果靠不靠谱，科学决策新功能要不要上线</li>
+      <li>✅ 避开日常取数、分析、看实验中的常见坑，减少返工</li>
+    </ul>
+  </div>
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="icon">🎯</div>
+      <div class="ttl">完全场景化</div>
+      <div class="desc">所有案例、练习、SQL模板都来自浏览器/PUSH/信息流真实业务需求，不教没用的理论</div>
+    </div>
+    <div class="feature-card">
+      <div class="icon">🤖</div>
+      <div class="ttl">AI全程提效</div>
+      <div class="desc">从写SQL到做分析，全程教你怎么用AI辅助，提供提示词模板，效率提升10倍</div>
+    </div>
+    <div class="feature-card">
+      <div class="icon">📋</div>
+      <div class="ttl">模板可复用</div>
+      <div class="desc">提供SQL模板、分析Checklist、实验判断Checklist，日常工作直接复制就能用</div>
+    </div>
+    <div class="feature-card">
+      <div class="icon">⚠️</div>
+      <div class="ttl">避坑导向</div>
+      <div class="desc">总结了大量真实工作中踩过的坑，帮你少走弯路，避免低级错误</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h2 class="section-title"><span class="section-num">02</span> 课程安排</h2>
+  <p class="section-sub">共6课时，循序渐进，从基础到实战</p>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th style="width: 100px;">课时</th><th>主题</th><th style="width: 80px;">时长</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="lesson-num">第1课时</span></td>
+          <td>
+            <strong>数据地图入门 - 找数据不求人</strong><br>
+            <span style="color: var(--muted); font-size: 13px;">
+            数据思维入门 · 埋点与数仓分层基础 · 数据地图使用方法 · 内容生态业务线核心表导航 · 权限申请流程 · 实操作业
+            </span>
+          </td>
+          <td><span class="lesson-duration">1.5小时</span></td>
+        </tr>
+        <tr>
+          <td><span class="lesson-num">第2课时</span></td>
+          <td>
+            <strong>SQL基础语法（上）+ AI辅助入门</strong><br>
+            <span style="color: var(--muted); font-size: 13px;">
+            SQL基本逻辑 · SELECT/FROM/WHERE · GROUP BY聚合 · 常用函数 · AI写SQL入门（工具+提示词+校验方法）· 5个日常查询练习
+            </span>
+          </td>
+          <td><span class="lesson-duration">1.5小时</span></td>
+        </tr>
+        <tr>
+          <td><span class="lesson-num">第3课时</span></td>
+          <td>
+            <strong>SQL基础语法（下）+ AI进阶提效</strong><br>
+            <span style="color: var(--muted); font-size: 13px;">
+            JOIN多表关联 · CTE子查询 · SQL常见错误与性能优化 · 复杂场景AI提效技巧 · 3个复杂查询练习
+            </span>
+          </td>
+          <td><span class="lesson-duration">1.5小时</span></td>
+        </tr>
+        <tr>
+          <td><span class="lesson-num">第4课时</span></td>
+          <td>
+            <strong>常用数据分析方法 - 业务问题分析框架</strong><br>
+            <span style="color: var(--muted); font-size: 13px;">
+            数据驱动思维（DIKW模型）· 完整分析流程 · 对比/趋势/分群/漏斗4种核心方法 · PUSH CTR下降完整案例
+            </span>
+          </td>
+          <td><span class="lesson-duration">1.5小时</span></td>
+        </tr>
+        <tr>
+          <td><span class="lesson-num">第5课时</span></td>
+          <td>
+            <strong>AB实验原理与判断标准 - 以PUSH实验为例</strong><br>
+            <span style="color: var(--muted); font-size: 13px;">
+            AB实验完整流程 · 统计基础通俗解释（p值/置信区间/样本量）· 7个常见陷阱 · PUSH增量价值案例 · 结果可信度Checklist
+            </span>
+          </td>
+          <td><span class="lesson-duration">1.5小时</span></td>
+        </tr>
+        <tr>
+          <td><span class="lesson-num">第6课时</span></td>
+          <td>
+            <strong>综合实战与答疑</strong><br>
+            <span style="color: var(--muted); font-size: 13px;">
+            PUSH波动分析全流程案例 · 常见问题Q&A · 资料包汇总 · 后续学习路径建议
+            </span>
+          </td>
+          <td><span class="lesson-duration">1小时</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="section">
+  <h2 class="section-title"><span class="section-num">03</span> 前置准备</h2>
+  <div class="caliber-note">
+    <strong>开课前请提前完成：</strong>
+    <ol>
+      <li>开通数据地图权限：访问数据地图，搜索内容生态业务线核心表，确认能看到表结构</li>
+      <li>开通Kyuubi查询权限：可以在Kyuubi中执行SQL查询，测试连接正常</li>
+      <li>准备AI工具：可以使用公司内部AI助手/通用大模型（Claude/GPT等）辅助写SQL</li>
+      <li>预习：浏览一遍《内容生态业务线核心表速查手册》，对常用表有初步印象
+    </ol>
+  </div>
+</div>
+
+<div class="nav-links">
+  <a href="./01-第1课时-数据地图入门.html" class="nav-link">开始第1课时 →</a>
+  <a href="../README.md" class="nav-link">返回目录</a>
+</div>
+
+<div class="footer">
+  <span>数据分析通识培训 · 产品同学专用</span>
+  <span>2026年7月</span>
+</div>
+
+</div>
+</body>
+</html>

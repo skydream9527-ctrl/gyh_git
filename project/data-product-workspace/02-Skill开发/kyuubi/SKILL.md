@@ -11,6 +11,7 @@ description: |
   - "查看表"、"搜索表"、"表结构"、"看看表"、"表信息"
   - "查询历史"、"查看历史"、"历史记录"、"查询记录"
   - "workspace"、"工作空间"、"切换空间"、"切换区域"
+  - "配置"、"环境"、"查看配置"、"有哪些环境"、"配置了哪些"
   - "安装 kyuubi"、"更新 kyuubi"、"卸载 kyuubi"
 ---
 
@@ -34,6 +35,26 @@ GOOD: "当前版本 0.1.1，最低要求 0.2.1。请先升级：
 BAD:  自动执行升级命令
 BAD:  版本过低仍继续执行
 ```
+
+---
+
+## 重要提示：配置查询
+
+> **当用户询问配置、环境、workspace 时，必须使用命令查询，禁止读取配置文件。**
+
+| 操作 | 正确方式 | 错误方式 |
+|------|---------|---------|
+| 查看当前配置 | `kyuubi config show` | 读取 `~/.kyuubi/config.yml` |
+| 查看 JSON 格式 | `kyuubi config show --format json` | 读取配置文件 |
+| 验证 workspace | `kyuubi workspace validate` | 读取配置文件 |
+
+```
+GOOD: 用户问"配置了哪些环境" → 执行 kyuubi config show
+BAD:  用户问"配置了哪些环境" → cat ~/.kyuubi/config.yml
+BAD:  用户问"配置了哪些环境" → Read ~/.kyuubi/config.yml
+```
+
+**原因：** 在权限受限的环境中（如容器中的 Agent），直接读取配置文件会导致 Permission denied 错误。`kyuubi config show` 通过 CLI 安全访问配置，不受文件权限限制。
 
 ---
 
@@ -187,6 +208,49 @@ BAD:  kyuubi sql query 'SHOW CATALOGS' --engine doris  （Doris 2.x 不支持多
 
 ---
 
+## 时间范围分窗最佳实践（重要）
+
+**默认按 7 天为一个窗口循环执行查询**，避免单次扫描数据量过大导致超时（Kyuubi 工具运行时硬上限 300 秒）。
+
+### 何时必须分窗
+
+| 场景 | 分窗策略 |
+|------|---------|
+| 用户未限定时间窗口 | 默认查最近 7 天 |
+| 用户要求范围 ≤ 7 天 | 单次查询 |
+| 用户要求范围 > 7 天 | **必须分窗**：按 7 天滚动循环执行 |
+| 表是按 `date` / `dt` / `event_date` 分区 | 分窗查询时务必带上分区过滤条件 |
+
+### 分窗模板
+
+```sql
+-- 单窗：明确给出 [start, end) 半开区间，避免与下一窗重叠
+SELECT ... FROM iceberg_xxx.db.tbl
+WHERE date >= '{start_date}' AND date < '{end_date}'
+  AND ... 其他条件
+GROUP BY ...
+```
+
+每次循环把 `{start_date}` 推 7 天，`{end_date}` = `{start_date}` + 7 天，直到覆盖用户请求的总区间。
+
+### 跨窗结果合并
+
+对于聚合查询（SUM/COUNT/AVG/PERCENTILE 等），跨窗合并语义复杂，**严禁**自己拼 `UNION ALL` 一把跑：
+
+```
+GOOD: 分 4 窗各查一次 → LLM 端把 4 份结果取出 → 二次聚合（pandas 或自然语言归并）
+GOOD: 需要原始明细时 → 分窗每次都 SELECT 明细 → 全部拼接为一张大表
+BAD:  直接写一个 30 天的 SELECT SUM(...) GROUP BY date → 容易超时
+BAD:  把 4 窗的 SUM 简单相加当作"30 天的总 SUM" → 维度未对齐时会错（如同一用户跨窗去重）
+BAD:  在单条 SQL 里用 UNION ALL 拼 4 个 7 天 → 仍然单次执行，没省扫描量
+```
+
+### 早期反馈
+
+每跑完一个窗口就把结果（行数 / 关键指标）告诉用户，让用户能及时打断方向偏差，而不是等 4 个窗口全跑完才出报告。
+
+---
+
 ## 命令速查
 
 每个子命令的完整参数请通过 `kyuubi <cmd> -h` 查看。
@@ -274,6 +338,19 @@ kyuubi sql query "SELECT * FROM t" --catalog mydb --region chnbj --workspace 100
 
 # 天津 workspace（不同 token）
 kyuubi sql query "SELECT * FROM t" --catalog doris_c4prc_canoe --engine doris --region chntj --workspace 10136
+```
+
+### 配置查询
+
+```bash
+# 查看所有配置的 region 和 workspace
+kyuubi config show
+
+# JSON 格式输出（适合程序解析）
+kyuubi config show --format json
+
+# 验证 workspace 连通性
+kyuubi workspace validate
 ```
 
 ---

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SQL必知必会 · 第1章 SQL与数据检索基础</title>
+<link rel="stylesheet" href="./assets/deck.css">
+</head>
+<body>
+<div id="prog"></div>
+<a class="home" href="./index.html">☰ 课程目录</a>
+<div id="deck">
+
+<section class="slide center">
+  <p class="lead">SQL 必知必会 · 辅助课程 · 第 1 章</p>
+  <h1 class="display">SQL 与<span class="cyan">数据检索基础</span></h1>
+  <div class="rule"></div>
+  <p class="sub">知道 SQL 是什么，会用 SELECT 把数据取出来</p>
+  <div class="meta"><span>📖 对应原书课 1–2</span><span>🎯 SELECT · DISTINCT · LIMIT</span></div>
+</section>
+
+<section class="slide" data-kicker="开场">
+  <h1>SQL 是什么</h1>
+  <ul class="clean">
+    <li class="fragment"><b>数据库</b>装数据，<b>表</b>是结构化的数据清单</li>
+    <li class="fragment">表 = <b>行（记录）</b> + <b>列（字段）</b>，主键唯一标识一行（如 <code>prod_id</code>）</li>
+    <li class="fragment"><b>SQL</b> = 和数据库对话的语言，各库大同小异</li>
+  </ul>
+  <div class="hl fragment" style="margin-top:18px">💡 呼应主课：表就是二维表格，SQL 就是在表上"筛选 + 分组 + 计算"。</div>
+</section>
+
+<section class="slide" data-kicker="一 · SELECT">
+  <h1>SELECT：检索列</h1>
+  <div class="codeblk fragment"><span class="c">-- 单列 / 多列 / 所有列</span>
+<span class="k">SELECT</span> prod_name <span class="k">FROM</span> Products;
+<span class="k">SELECT</span> prod_id, prod_name, prod_price <span class="k">FROM</span> Products;
+<span class="k">SELECT</span> * <span class="k">FROM</span> Products;</div>
+  <p class="hl warn fragment" style="margin-top:16px">⚠️ 除非真要所有列，别用 <code>SELECT *</code>——多取列既慢又浪费（列裁剪）。</p>
+</section>
+
+<section class="slide" data-kicker="二 · DISTINCT">
+  <h1>DISTINCT：只要不同的值</h1>
+  <div class="codeblk fragment"><span class="k">SELECT DISTINCT</span> vend_id <span class="k">FROM</span> Products;   <span class="c">-- 有哪些供应商</span></div>
+  <p class="hl bad fragment" style="margin-top:18px">⚠️ <code>DISTINCT</code> 作用于<b>后面所有列</b>——<code>DISTINCT vend_id, prod_price</code> 是"两列组合去重"，不是只对 vend_id 去重。</p>
+</section>
+
+<section class="slide" data-kicker="三 · 限制行数">
+  <h1>限制行数：各库差别最大</h1>
+  <table class="tbl fragment">
+    <tbody>
+    <tr><th>环境</th><th>写法</th></tr>
+    <tr><td>SQL Server</td><td><code>SELECT TOP 5 …</code></td></tr>
+    <tr><td>DB2</td><td><code>FETCH FIRST 5 ROWS ONLY</code></td></tr>
+    <tr><td><b class="cyan">MySQL / Hive / Spark（我们）</b></td><td><code>… LIMIT 5</code></td></tr>
+    </tbody>
+  </table>
+  <p class="hl fragment" style="margin-top:16px">🎯 我们平台用 <code>LIMIT n</code>；探查数据养成加 LIMIT 的习惯。</p>
+</section>
+
+<section class="slide" data-kicker="小结">
+  <h1>本章要点</h1>
+  <ul class="clean tight" style="font-size:21px">
+    <li class="fragment"><code>SELECT 列 FROM 表</code> 是起点；平时只取需要的列</li>
+    <li class="fragment"><code>DISTINCT</code> 去重，作用于后面所有列</li>
+    <li class="fragment">限制行数我们用 <code>LIMIT n</code></li>
+  </ul>
+</section>
+
+<section class="slide center">
+  <p class="lead">第 1 章 · 完</p>
+  <h1 class="display">下一章：<span class="cyan">排序与数据过滤</span></h1>
+  <div class="rule"></div>
+  <p class="sub">ORDER BY · WHERE · IN/NOT · LIKE</p>
+  <p class="mist" style="margin-top:26px;font-size:20px">← → 翻页 · 空格逐条展开 · <a href="./index.html" style="color:var(--cyan)">返回目录</a></p>
+</section>
+
+</div>
+<button class="navbtn" id="prev">‹</button>
+<button class="navbtn" id="next">›</button>
+<div class="hint">← → 翻页 · 空格下一步 · F 全屏 · P 打印/导出 PDF · Home/End 首末页</div>
+<script src="./assets/deck.js"></script>
+</body></html>

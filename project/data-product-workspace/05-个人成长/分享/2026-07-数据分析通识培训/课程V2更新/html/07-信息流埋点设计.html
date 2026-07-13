@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>模块7 · 信息流埋点设计</title>
+<link rel="stylesheet" href="./assets/deck.css">
+</head>
+<body>
+<div id="prog"></div>
+<a class="home" href="./index.html">☰ 课程目录</a>
+<div id="deck">
+
+<section class="slide center">
+  <p class="lead">数据分析通识培训 · 模块7（专业）</p>
+  <h1 class="display">信息流<span class="cyan">埋点设计</span></h1>
+  <div class="rule"></div>
+  <p class="sub">数据的源头：表从哪来 · 四核心事件 · 时长原理 · 验收</p>
+  <div class="meta"><span>⏱️ 1.5 小时</span><span>🎯 产品（信息流方向）</span></div>
+</section>
+
+<section class="slide" data-kicker="开场">
+  <h1>产品是埋点需求的源头</h1>
+  <p class="mist fragment">数据的一生第一步就是埋点。<b class="red">埋点设计错了，后面再牛的分析都是错的</b>（GIGO，垃圾进垃圾出）。</p>
+  <div class="hl fragment" style="margin-top:20px">"一次曝光怎么算""时长从哪到哪"这些是<b class="cyan">业务定义</b>，得产品想清楚。</div>
+</section>
+
+<section class="slide" data-kicker="一 · 表从哪来">
+  <h1>你在数据工坊查的表，从哪来？</h1>
+  <div class="codeblk fragment">埋点（客户端 onetrack + 服务端）   <span class="c"># 源头，产品定义</span>
+   ↓ 上报
+日志层（onetrack 原始日志，最底层）
+   ↓ 清洗 / 加工
+ODS → DWM 聚合表   <span class="c"># 你查的 label_di / miui_di</span>
+   ↓
+你 SELECT 的那些字段</div>
+  <p class="hl bad fragment" style="margin-top:12px">🔴 <b>没埋点就没数据</b>。表里能查到的一定来自埋点（客户端或服务端）；但埋点上报的不一定都加工进表。</p>
+  <p class="mist fragment" style="font-size:18px;margin-top:8px">💡 "这个数能不能取到" = "产品有没有埋这个点、数仓有没有加工进表"。onetrack 是<b>日志层</b>，不等于你查的业务表。</p>
+</section>
+
+<section class="slide" data-kicker="二 · 四核心事件">
+  <h1>四个核心事件（抓住 80%）</h1>
+  <table class="tbl fragment">
+    <tbody>
+    <tr><th>事件</th><th>关键</th></tr>
+    <tr><td>曝光 expose</td><td>定<b>有效曝光</b>（露出≥50% 且停留≥500ms）</td></tr>
+    <tr><td>点击 click</td><td>CTR = 点击/曝光</td></tr>
+    <tr><td>进入 enter</td><td>和点击<b>拆开</b>：点了不一定进得去；记进入时间戳</td></tr>
+    <tr><td>退出 exit</td><td>记退出时间戳 + 消费进度</td></tr>
+    </tbody>
+  </table>
+  <p class="hl fragment" style="margin-top:14px">消费链路：曝光 → 点击 → 进入 →（消费）→ 退出，本身是个漏斗。</p>
+</section>
+
+<section class="slide" data-kicker="三 · 时长">
+  <h1>时长 = 退出 − 进入</h1>
+  <div class="hl fragment"><b class="cyan">消费时长 = 退出时刻 − 进入时刻</b>（算出来的，不是直接采的）。</div>
+  <ul class="clean" style="margin-top:18px">
+    <li class="fragment">只进入没退出（崩溃/切后台）→ 用<b>心跳埋点</b>（每 15 秒上报"还在看"）+ 超时截断兜底</li>
+    <li class="fragment">切后台一般算<b>前台有效时长</b></li>
+    <li class="fragment">多次进出同一内容一般累加</li>
+  </ul>
+  <p class="mist fragment" style="margin-top:14px">表里的 <code>feed_dura</code>/<code>app_dura</code>，就是这样采集聚合出来的（单位毫秒，<code>/60000</code> 转分钟）。</p>
+</section>
+
+<section class="slide" data-kicker="四 · 分题材">
+  <h1>四题材共用骨架，靠 content_type 区分</h1>
+  <table class="tbl fragment">
+    <tbody>
+    <tr><th>维度</th><th>短视频</th><th>短剧</th></tr>
+    <tr><td>进入=</td><td>开始播放</td><td>播放某一集</td></tr>
+    <tr><td>核心指标</td><td>VV、完播率</td><td>追剧率、付费解锁率</td></tr>
+    <tr><td>特有参数</td><td>播放进度、完播</td><td>剧id、集数、连播</td></tr>
+    </tbody>
+  </table>
+  <p class="hl fragment" style="margin-top:16px">图文/小说/短视频/短剧共用一套事件，只在细节上具体化。</p>
+</section>
+
+<section class="slide" data-kicker="五 · 闭环">
+  <h1>从埋点到指标：闭环</h1>
+  <table class="tbl fragment">
+    <tbody>
+    <tr><th>指标</th><th>来自埋点</th><th>字段</th></tr>
+    <tr><td>CTR</td><td>点击/曝光</td><td>click_cnt</td></tr>
+    <tr><td>VV</td><td>有效进入/播放</td><td>*_vv_cnt</td></tr>
+    <tr><td>消费时长</td><td>Σ(退出−进入)+心跳</td><td>feed_dura</td></tr>
+    <tr><td>信息流活跃</td><td>曝光+点击+播放+进空间>0</td><td>is_dau_...</td></tr>
+    </tbody>
+  </table>
+  <p class="hl warn fragment" style="margin-top:12px">💡 真实口径 <code>is_dau_2024</code>：曝光+点击+视频播放+进入空间次数 &gt; 0 <b>且 is_top=0（非置顶）</b>——一个"活跃"标记背后是好几个埋点事件的组合。</p>
+</section>
+
+<section class="slide" data-kicker="六 · 验收">
+  <h1>六大坑 + 上线前验收</h1>
+  <div class="grid2" style="align-items:start">
+    <div class="fragment"><p class="lead" style="margin-bottom:8px">六个高频坑</p><ul class="clean tight" style="font-size:18px"><li>重复上报 / 漏报</li><li>曝光未去重</li><li>时长异常（只进不出）</li><li>口径不一致 / 缺关键参数</li></ul></div>
+    <div class="fragment"><p class="lead" style="margin-bottom:8px">验收清单</p><ul class="clean tight" style="font-size:18px"><li>事件触发吗</li><li>参数齐吗、值对吗</li><li>去重生效吗</li><li>小流量指标在合理区间吗</li></ul></div>
+  </div>
+</section>
+
+<section class="slide center">
+  <p class="lead">模块7 · 完</p>
+  <h1 class="display">下一课：<span class="cyan">综合实战</span></h1>
+  <div class="rule"></div>
+  <p class="sub">用一个贯穿案例把取数、分析、判断全串起来</p>
+  <p class="mist" style="margin-top:26px;font-size:20px">← → 翻页 · 空格逐条展开 · <a href="./index.html" style="color:var(--cyan)">返回目录</a></p>
+</section>
+
+</div>
+<button class="navbtn" id="prev">‹</button>
+<button class="navbtn" id="next">›</button>
+<div class="hint">← → 翻页 · 空格下一步 · F 全屏 · P 打印/导出 PDF · Home/End 首末页</div>
+<script src="./assets/deck.js"></script>
+</body></html>

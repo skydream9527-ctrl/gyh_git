@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SQL必知必会 · 第4章 汇总与分组</title>
+<link rel="stylesheet" href="./assets/deck.css">
+</head>
+<body>
+<div id="prog"></div>
+<a class="home" href="./index.html">☰ 课程目录</a>
+<div id="deck">
+
+<section class="slide center">
+  <p class="lead">SQL 必知必会 · 辅助课程 · 第 4 章</p>
+  <h1 class="display">汇总<span class="cyan">与分组</span></h1>
+  <div class="rule"></div>
+  <p class="sub">聚集函数 · GROUP BY · HAVING —— 数据分析最高频</p>
+  <div class="meta"><span>📖 对应原书课 9–10</span><span>🎯 重点章</span></div>
+</section>
+
+<section class="slide" data-kicker="一 · 聚集函数">
+  <h1>把很多行"算成一个数"</h1>
+  <table class="tbl fragment">
+    <tbody>
+    <tr><th>函数</th><th>作用</th></tr>
+    <tr><td><code>COUNT(*)</code></td><td>行数（含 NULL）</td></tr>
+    <tr><td><code>COUNT(列)</code></td><td>该列<b>非 NULL</b> 的行数</td></tr>
+    <tr><td><code>COUNT(DISTINCT 列)</code></td><td>不同值个数（算"多少人/多少种"）</td></tr>
+    <tr><td><code>SUM/AVG/MAX/MIN</code></td><td>求和/平均/最大/最小</td></tr>
+    </tbody>
+  </table>
+  <p class="hl bad fragment" style="margin-top:14px">🔴 <code>COUNT(列)</code> 和 <code>AVG</code> 都<b>跳过 NULL</b>；算人数用 <code>COUNT(DISTINCT)</code>，人均别用 AVG。</p>
+</section>
+
+<section class="slide" data-kicker="二 · GROUP BY">
+  <h1>GROUP BY：分组聚集</h1>
+  <div class="codeblk fragment"><span class="c">-- 每个供应商各有多少个产品</span>
+<span class="k">SELECT</span> vend_id, <span class="k">COUNT</span>(*) <span class="k">AS</span> num_prods
+<span class="k">FROM</span> Products
+<span class="k">GROUP BY</span> vend_id;</div>
+  <p class="hl warn fragment" style="margin-top:18px">⚠️ SELECT 里的<b>非聚集列</b>，必须都出现在 GROUP BY 里。</p>
+</section>
+
+<section class="slide" data-kicker="三 · HAVING">
+  <h1>HAVING：过滤"分组"</h1>
+  <div class="codeblk fragment"><span class="k">SELECT</span> cust_id, <span class="k">COUNT</span>(*) <span class="k">AS</span> orders
+<span class="k">FROM</span> Orders
+<span class="k">WHERE</span> order_date &gt;= <span class="s">'2020-01-01'</span>   <span class="c">-- 先筛行</span>
+<span class="k">GROUP BY</span> cust_id
+<span class="k">HAVING</span> <span class="k">COUNT</span>(*) &gt;= 2;               <span class="c">-- 再筛组</span></div>
+  <p class="hl fragment" style="margin-top:16px">🎯 <b>WHERE 在分组前筛行，HAVING 在分组后筛组。</b></p>
+</section>
+
+<section class="slide" data-kicker="四 · 子句顺序">
+  <h1>SELECT 子句顺序（务必记牢）</h1>
+  <div class="codeblk fragment" style="font-size:20px"><span class="k">SELECT</span> → <span class="k">FROM</span> → <span class="k">WHERE</span> → <span class="k">GROUP BY</span> → <span class="k">HAVING</span> → <span class="k">ORDER BY</span> → <span class="k">LIMIT</span></div>
+  <p class="hl fragment" style="margin-top:20px">写错顺序直接报错——这就是主课"五段式"的完整版。</p>
+</section>
+
+<section class="slide" data-kicker="小结">
+  <h1>本章要点</h1>
+  <ul class="clean tight" style="font-size:21px">
+    <li class="fragment">聚集：COUNT/SUM/AVG/MAX/MIN；算人数用 <code>COUNT(DISTINCT)</code></li>
+    <li class="fragment"><code>COUNT(列)</code>/<code>AVG</code> 跳过 NULL，算人均当心偏高</li>
+    <li class="fragment">WHERE 筛行、HAVING 筛组；牢记子句顺序</li>
+  </ul>
+</section>
+
+<section class="slide center">
+  <p class="lead">第 4 章 · 完</p>
+  <h1 class="display">下一章：<span class="cyan">子查询与联结</span></h1>
+  <div class="rule"></div>
+  <p class="sub">子查询 · JOIN · LEFT JOIN —— 跨表分析核心</p>
+  <p class="mist" style="margin-top:26px;font-size:20px">← → 翻页 · 空格逐条展开 · <a href="./index.html" style="color:var(--cyan)">返回目录</a></p>
+</section>
+
+</div>
+<button class="navbtn" id="prev">‹</button>
+<button class="navbtn" id="next">›</button>
+<div class="hint">← → 翻页 · 空格下一步 · F 全屏 · P 打印/导出 PDF · Home/End 首末页</div>
+<script src="./assets/deck.js"></script>
+</body></html>

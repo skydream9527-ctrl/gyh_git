@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第4课时 · 常用数据分析方法 - 业务问题分析框架</title>
+<style>
+:root {
+  --ink: #151515;
+  --text: #252525;
+  --muted: #646464;
+  --quiet: #8a8a8a;
+  --line: #3a3a3a;
+  --line-muted: #777;
+  --line-soft: #deddd9;
+  --paper: #f7f6f2;
+  --panel: #fffefa;
+  --panel-soft: #f0efeb;
+  --panel-deep: #e2e1dd;
+  --accent: #2a2a2a;
+  --highlight: #fef3c7;
+  --blue: #1e40af;
+  --green: #15803d;
+  --orange: #c2410c;
+  --red: #b91c1c;
+  --purple: #7c3aed;
+  --shadow: 0 10px 24px rgba(0, 0, 0, 0.045);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: "Avenir Next", "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+  background: var(--paper);
+  color: var(--text);
+  line-height: 1.62;
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+}
+.page { max-width: 1100px; margin: 0 auto; padding: 54px 34px 86px; }
+h1, h2, h3, h4 {
+  font-family: "Songti SC", "Noto Serif CJK SC", serif;
+  color: var(--ink); font-weight: 700;
+}
+.header { margin-bottom: 48px; padding-bottom: 28px; border-bottom: 1.25px solid var(--line); }
+.eyebrow { font-family: "Avenir Next"; font-size: 12px; letter-spacing: 0.12em; color: var(--quiet); text-transform: uppercase; margin-bottom: 14px; font-weight: 600; }
+h1 { font-size: 36px; line-height: 1.1; margin-bottom: 12px; }
+.subtitle { font-size: 17px; color: var(--muted); font-weight: 400; margin-bottom: 20px; }
+.meta-row { display: flex; gap: 28px; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin-bottom: 24px; }
+.meta-item { display: flex; align-items: center; gap: 6px; }
+.section { margin-bottom: 48px; }
+.section-title { font-size: 24px; margin-bottom: 6px; padding-bottom: 12px; border-bottom: 0.75px solid var(--line-soft); display: flex; align-items: center; gap: 10px; }
+.section-num { font-family: "Avenir Next"; font-size: 14px; font-weight: 600; color: var(--quiet); }
+h3 { font-size: 18px; margin-top: 24px; margin-bottom: 12px; }
+p { margin-bottom: 12px; }
+.caliber-note { background: var(--panel); border-left: 3px solid var(--line); padding: 16px 20px; font-size: 14px; margin-bottom: 20px; color: var(--muted); border-radius: 0 4px 4px 0; }
+.caliber-note strong { color: var(--text); }
+.warning-note { background: #fef2f2; border-left: 3px solid var(--red); padding: 16px 20px; font-size: 14px; margin-bottom: 20px; color: #991b1b; border-radius: 0 4px 4px 0; }
+.tip-note { background: #f0fdf4; border-left: 3px solid var(--green); padding: 16px 20px; font-size: 14px; margin-bottom: 20px; color: #166534; border-radius: 0 4px 4px 0; }
+.dikw-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin: 20px 0; }
+.dikw-card { background: var(--panel); border: 1px solid var(--line-soft); padding: 18px; border-radius: 6px; box-shadow: var(--shadow); }
+.dikw-card.d { border-top: 3px solid var(--quiet); }
+.dikw-card.i { border-top: 3px solid var(--blue); }
+.dikw-card.k { border-top: 3px solid var(--green); }
+.dikw-card.w { border-top: 3px solid var(--orange); }
+.dikw-card .level { font-family: "Avenir Next"; font-weight: 700; font-size: 16px; margin-bottom: 6px; }
+.dikw-card.d .level { color: var(--quiet); }
+.dikw-card.i .level { color: var(--blue); }
+.dikw-card.k .level { color: var(--green); }
+.dikw-card.w .level { color: var(--orange); }
+.dikw-card .name { font-weight: 600; margin-bottom: 4px; color: var(--ink); }
+.dikw-card .desc { font-size: 13px; color: var(--muted); line-height: 1.5; margin-bottom: 6px; }
+.dikw-card .example { font-size: 12px; color: var(--quiet); font-style: italic; }
+.method-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin: 20px 0; }
+.method-card { background: var(--panel); border: 1px solid var(--line-soft); border-radius: 6px; padding: 20px; box-shadow: var(--shadow); }
+.method-card .icon { font-size: 24px; margin-bottom: 10px; }
+.method-card .ttl { font-weight: 600; font-size: 16px; margin-bottom: 8px; color: var(--ink); }
+.method-card .desc { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 10px; }
+.method-card .use-case { font-size: 12px; color: var(--green); font-weight: 500; }
+.flow-steps { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 20px 0; }
+.flow-step { background: var(--panel); border: 1px solid var(--line-soft); padding: 12px 16px; border-radius: 6px; font-size: 14px; font-weight: 500; }
+.flow-arrow { color: var(--quiet); font-size: 18px; }
+.funnel { margin: 20px 0; }
+.funnel-step { background: var(--panel); border: 1px solid var(--line-soft); padding: 14px 20px; margin: 0 auto 6px; border-radius: 4px; text-align: center; font-weight: 500; position: relative; }
+.funnel-step:nth-child(1) { width: 100%; background: var(--ink); color: white; }
+.funnel-step:nth-child(2) { width: 85%; background: #333; color: white; }
+.funnel-step:nth-child(3) { width: 70%; background: #444; color: white; }
+.funnel-step:nth-child(4) { width: 55%; background: #555; color: white; }
+.funnel-step:nth-child(5) { width: 40%; background: #666; color: white; }
+.funnel-step:nth-child(6) { width: 25%; background: #777; color: white; }
+.table-wrap { background: var(--panel); border: 1px solid var(--line-soft); box-shadow: var(--shadow); overflow-x: auto; margin-bottom: 20px; border-radius: 6px; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+thead { background: var(--panel-soft); }
+th { font-family: "Avenir Next"; font-weight: 600; font-size: 12px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--line-soft); }
+td { padding: 12px 14px; border-bottom: 0.5px solid var(--line-soft); vertical-align: top; color: var(--text); line-height: 1.6; }
+td:first-child { font-weight: 500; }
+tbody tr:hover { background: var(--panel-soft); }
+tbody tr:last-child td { border-bottom: none; }
+ul, ol { margin-left: 24px; margin-bottom: 16px; }
+li { margin-bottom: 8px; }
+code { background: var(--panel-soft); padding: 2px 6px; border-radius: 3px; font-family: "SF Mono", "Menlo", monospace; font-size: 13px; color: var(--ink); }
+.conclusion-card { background: var(--panel); border: 1px solid var(--line-soft); padding: 20px 24px; border-radius: 6px; margin-bottom: 16px; box-shadow: var(--shadow); }
+.conclusion-card .num { font-family: "Avenir Next"; font-weight: 700; color: var(--orange); font-size: 14px; margin-bottom: 6px; }
+.compare-report { display: grid; grid-template-columns: 1fr; gap: 12px; margin: 20px 0; }
+.report-bad { background: #fef2f2; border-left: 3px solid var(--red); padding: 16px 20px; border-radius: 0 4px 4px 0; }
+.report-good { background: #f0fdf4; border-left: 3px solid var(--green); padding: 16px 20px; border-radius: 0 4px 4px 0; }
+.report-label { font-weight: 600; font-size: 13px; margin-bottom: 6px; }
+.report-bad .report-label { color: var(--red); }
+.report-good .report-label { color: var(--green); }
+.nav-links { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 40px; justify-content: space-between; }
+.nav-group { display: flex; gap: 12px; }
+.nav-link { background: var(--panel); border: 1px solid var(--line-soft); padding: 10px 18px; border-radius: 6px; text-decoration: none; color: var(--text); font-size: 14px; font-family: "Avenir Next"; transition: all 0.2s; }
+.nav-link:hover { border-color: var(--line); background: var(--panel-soft); }
+.footer { margin-top: 64px; padding-top: 24px; border-top: 0.75px solid var(--line-soft); font-size: 12px; color: var(--quiet); font-family: "Avenir Next"; display: flex; justify-content: space-between; }
+@media (max-width: 768px) {
+  .page { padding: 30px 18px 50px; }
+  h1 { font-size: 28px; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+<div class="header">
+  <div class="eyebrow">LESSON 04 · DATA ANALYSIS METHODS</div>
+  <h1>第4课时：常用数据分析方法</h1>
+  <p class="subtitle">业务问题分析框架 · 数据驱动思维 · 4种核心方法 · 真实案例实战</p>
+  <div class="meta-row">
+    <div class="meta-item">⏱️ 课时：1.5小时</div>
+    <div class="meta-item">🎯 目标：独立拆解业务问题，完成完整分析输出结论</div>
+  </div>
+</div>
+
+<div class="section">
+  <h2 class="section-title"><span class="section-num">01</span> 数据驱动思维：从数据到决策</h2>
+
+  <h3>DIKW模型：数据怎么变成价值</h3>
+  <p>我们每天看的原始数据只是一堆数字，要经过四层加工才能变成决策依据：</p>
+  <div class="dikw-grid">
+    <div class="dikw-card d">
+      <div class="level">D</div>
+      <div class="name">数据 Data</div>
+      <div class="desc">原始的、未加工的数字</div>
+      <div class="example">例子：昨天PUSH点击量100万次</div>
+    </div>
+    <div class="dikw-card i">
+      <div class="level">I</div>
+      <div class="name">信息 Information</div>
+      <div class="desc">加工后有意义的指标</div>
+      <div class="example">例子：昨天PUSH CTR是8%，比前天下降了2个百分点</div>
+    </div>
+    <div class="dikw-card k">
+      <div class="level">K</div>
+      <div class="name">知识 Knowledge</div>
+      <div class="desc">信息对比后发现规律/问题</div>
+      <div class="example">例子：CTR下降主要是新用户群体下降，新的推送策略对新用户不友好</div>
+    </div>
+    <div class="dikw-card w">
+      <div class="level">W</div>
+      <div class="name">智慧/决策 Wisdom</div>
+      <div class="desc">基于知识给出行动方案</div>
+      <div class="example">例子：把新用户的推送策略回滚，预计能恢复CTR</div>
+    </div>
+  </div>
+  <div class="tip-note">
+    <strong>💡 关键认知：</strong>产品同学做分析的目标，不是停留在"报数据"阶段，而是要走到K和W层：<strong>发现问题、定位原因、给出建议</strong>。
+  </div>
+
+  <h3>数据驱动的核心特征</h3>
+  <ul>
+    <li><strong>用数据说话，而不是凭感觉</strong>："我觉得这个功能好" → "数据显示这个功能渗透率30%，提升了人均时长5分钟"</li>
+    <li><strong>相关性不等于因果性</strong>：看到两个指标一起涨/跌，不要急着下结论，有可能是第三个因素同时影响了两者</li>
+    <li><strong>数据是验证假设的工具，不是拍脑袋的佐证</strong>：不要先有结论再去找数据支持，而是先提出假设，用数据验证对不对</li>
+  </ul>
+</div>
+
+<div class="section">
+  <h2 class="section-title"><span class="section-num">02</span> 数据分析完整流程</h2>
+  <p>遇到一个业务问题，不要急着写SQL取数，按照这个流程走，避免做无用功：</p>
+  <div class="flow-steps">
+    <div class="flow-step">1. 明确业务目标</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">2. 拆解指标和维度</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">3. 取数验证</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">4. 分析定位原因</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">5. 输出结论和建议</div>
+  </div>
+
+  <h3>步骤1：明确业务目标（最容易被忽略，也是最重要的一步）</h3>
+  <p>先问清楚/想清楚：</p>
+  <ul>
+    <li>这个分析要解决什么问题？</li>
+    <li>谁看这个分析？要做什么决策？</li>
+    <li>时间范围是什么？要拆分哪些维度？</li>
+    <li>什么结果算"好"，什么结果算"坏"？</li>
+  </ul>
+  <div class="warning-note">
+    <strong>反例：</strong>"帮我看看PUSH数据怎么样" → 根本没法做，不知道看什么指标，看多长时间，对比什么<br>
+    <strong>正例：</strong>"帮我看看本周一PUSH CTR为什么比上周一下降了2个百分点，是不是新上线的推送策略有问题，需要定位到具体是哪类PUSH、哪类用户出的问题，决定要不要回滚"
+  </div>
+
+  <h3>步骤2：拆解指标和维度</h3>
+  <p>把大问题拆成可量化的指标和可拆分的维度：</p>
+  <ul>
+    <li><strong>指标</strong>：看什么数？DAU、CTR、留存、人均时长？</li>
+    <li><strong>维度</strong>：怎么拆分对比？时间、新老用户、渠道、启动方式、PUSH类型、版本？</li>
+    <li><strong>拆解方法</strong>：公式拆解，比如CTR = 总点击 / 总曝光 = Σ(各人群CTR × 各人群曝光占比)，可以一层层拆下去</li>
+  </ul>
+
+  <h3>步骤3-5：取数→分析→输出</h3>
+  <p>按照拆解的维度写SQL取数，用分析方法定位原因，最后输出明确结论和可落地建议。</p>
+</div>
+
+<div class="section">
+  <h2 class="section-title"><span class="section-num">03</span> 4种常用数据分析方法</h2>
+  <p>这4种方法能覆盖你日常90%的分析需求。</p>
+  <div class="method-grid">
+    <div class="method-card">
+      <div class="icon">⚖️</div>
+      <div class="ttl">对比分析</div>
+      <div class="desc">单个数字没有任何意义，必须要有对比基准：同比、环比、对照组、目标、细分群体对比。保证口径一致，单变量对比。</div>
+      <div class="use-case">→ 找差异，看变化，判断好坏</div>
+    </div>
+    <div class="method-card">
+      <div class="icon">📈</div>
+      <div class="ttl">趋势分析</div>
+      <div class="desc">把指标按时间序列排开，看周期性、趋势、异常点。判断是持续变化还是突然异动，有没有新奇效应。</div>
+      <div class="use-case">→ 看规律，找异常，监控波动</div>
+    </div>
+    <div class="method-card">
+      <div class="icon">👥</div>
+      <div class="ttl">分群分析</div>
+      <div class="desc">大盘指标会掩盖问题，按用户属性、行为、业务维度拆分看差异。警惕辛普森悖论，不要只看平均值。</div>
+      <div class="use-case">→ 拆人群，找差异，定位问题群体</div>
+    </div>
+    <div class="method-card">
+      <div class="icon">🔻</div>
+      <div class="ttl">漏斗分析</div>
+      <div class="desc">把用户完成目标的多步骤链路拆成漏斗，看每个环节转化率，找到流失瓶颈，针对性优化。</div>
+      <div class="use-case">→ 找瓶颈，优化转化链路</div>
+    </div>
+  </div>
+
+  <h3>对比分析：没有对比就没有结论</h3>
+  <ul>
+    <li><strong>同比</strong>：和去年同期比，看长期趋势</li>
+    <li><strong>环比</strong>：和上一个周期比（上周/昨天/上月），看短期变化</li>
+    <li><strong>对照组对比</strong>：实验组vs对照组，看AB实验效果</li>
+    <li><strong>目标对比</strong>：实际值vs目标值，看完成进度</li>
+    <li><strong>细分群体对比</strong>：新用户vs老用户、不同渠道vs大盘平均</li>
+  </ul>
+  <p><strong>对比分析原则：</strong></p>
+  <ol>
+    <li>保证对比口径一致：都是自然流量？都是同一时间段？有没有排除节假日/异常活动？</li>
+    <li>单变量对比：对比时其他条件尽量一致，才能看出差异来源</li>
+    <li>既要比绝对值，也要比相对值："DAU涨了10万" + "涨幅2%"，不同量级的产品看哪个更有意义</li>
+  </ol>
+
+  <h3>分群分析：不要只看大盘平均值</h3>
+  <div class="warning-note">
+    <strong>典型案例：辛普森悖论</strong><br>
+    整体CTR下降了，但分人群看每个群体的CTR都涨了，为什么？<br>
+    原因：高CTR的人群占比下降了，拉低了整体平均值。这时候如果只看大盘就会得出错误结论，必须分群看。
+  </div>
+  <p>核心原则：<strong>大盘异动时，先拆分维度，看是所有群体都变差了，还是只是某个群体/某个部分出问题了</strong>。</p>
+
+  <h3>漏斗分析：看转化链路哪里漏了</h3>
+  <p>用户完成一个目标要经过多个步骤，每个步骤都会有流失，把每个步骤的转化率排成漏斗，就能找到瓶颈在哪里。</p>
+  <p><strong>以PUSH全链路为例：</strong></p>
+  <div class="funnel">
+    <div class="funnel-step">PUSH下发</div>
+    <div class="funnel-step">→ 到达</div>
+    <div class="funnel-step">→ 展示</div>
+    <div class="funnel-step">→ 点击</div>
+    <div class="funnel-step">→ 落地页加载完成</div>
+    <div class="funnel-step">→ 信息流消费/留存</div>
+  </div>
+  <p>每个步骤流失原因不同：</p>
+  <ul>
+    <li>下发→到达：和推送通道、用户关闭通知权限有关</li>
+    <li>到达→展示：和用户手机状态、通知拦截有关</li>
+    <li>展示→点击：和文案、标题、推送时间、用户匹配度有关</li>
+    <li>点击→加载完成：和网络、落地页性能有关</li>
+  </ul>
+  <div class="tip-note">
+    <strong>💡 提示：</strong>CTR下降不要只盯着点击，要拆漏斗看是哪个环节出了问题：是到达少了？还是展示了没人点？
+  </div>
+</div>
+
+<div class="section">
+  <h2 class="section-title"><span class="section-num">04</span> 真实案例：PUSH CTR下降排查</h2>
+  <p>我们用完整流程走一遍，看真实工作中怎么分析问题：</p>
+
+  <h3>问题背景</h3>
+  <p>周一早上你发现：昨天（周日）PUSH CTR从平时的8%降到了6%，下降了2个百分点，需要排查原因。</p>
+
+  <h3>分析过程</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th style="width: 120px;">步骤</th><th>动作</th><th>发现</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>明确目标</strong></td>
+          <td>定位CTR下降原因，判断是否正常波动，给出是否回滚建议</td>
+          <td>-</td>
+        </tr>
+        <tr>
+          <td><strong>拆解维度</strong></td>
+          <td>时间（小时级）、PUSH类型、用户分群、漏斗环节</td>
+          <td>-</td>
+        </tr>
+        <tr>
+          <td><strong>取数对比</strong></td>
+          <td>按各维度拆分查询，和上周日对比</td>
+          <td>
+            1. 时间：凌晨0-2点特别低，其他时间正常<br>
+            2. PUSH类型：新上线的"热点新闻PUSH"CTR只有3%，其他正常<br>
+            3. 用户：新用户下降明显，老用户基本正常<br>
+            4. 漏斗：到达率、展示率正常，问题出在展示→点击环节
+          </td>
+        </tr>
+        <tr>
+          <td><strong>定位原因</strong></td>
+          <td>匹配业务动作</td>
+          <td>周日凌晨发的一批热点新闻PUSH全量推送给新用户，标题过于标题党，匹配度低，点击率差，贡献了80%的下降</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>结论和建议</h3>
+  <div class="caliber-note">
+    <strong>结论：</strong>周日凌晨上线的热点新闻批量推送策略有问题，标题与新用户匹配度低，导致整体CTR下降2个百分点。<br><br>
+    <strong>建议：</strong>
+    <ol>
+      <li>热点新闻PUSH先小流量灰度，不要直接全量发</li>
+      <li>新用户单独适配更温和的内容和标题，不要一开始就推标题党内容</li>
+      <li>预计调整后CTR能回到7.5%以上</li>
+    </ol>
+  </div>
+</div>
+
+<div class="section">
+  <h2 class="section-title"><span class="section-num">05</span> 分析结论怎么呈现？</h2>
+  <p>给业务方/老板汇报时，遵循<strong>结论先行</strong>原则：</p>
+  <ol>
+    <li><strong>一句话总结论</strong>：先把最核心的结论放最前面</li>
+    <li><strong>核心数据支撑</strong>：用3-5个关键数据证明结论</li>
+    <li><strong>原因拆解</strong>：问题出在哪里，贡献度多少</li>
+    <li><strong>可落地建议</strong>：具体做什么，预期收益多少</li>
+    <li><strong>附录</strong>：详细数据表格、SQL、明细</li>
+  </ol>
+
+  <div class="compare-report">
+    <div class="report-bad">
+      <div class="report-label">❌ 反面汇报（全是数据，没有结论）</div>
+      "我取了数，PUSH CTR周六是8%，周日是6%，分类型看A类是5%，B类是7%，C类是9%..."
+    </div>
+    <div class="report-good">
+      <div class="report-label">✅ 正面汇报（结论先行，数据支撑）</div>
+      "周日PUSH CTR下降2个点，80%是因为凌晨上线的热点新闻全量推送对新用户点击率过低导致，建议先回滚该策略，小流量灰度测试后再放量，预计CTR可恢复到7.5%以上。核心数据如下：..."
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h2 class="section-title"><span class="section-num">06</span> 常见分析误区避坑</h2>
+  <div class="warning-note">
+    <ol>
+      <li><strong>不要唯数据论</strong>：数据是工具不是目的，要理解数据背后的业务逻辑，异常数据先确认是不是埋点问题/数据口径问题</li>
+      <li><strong>不要忽略样本量</strong>：只有几百个用户的小样本，涨跌幅波动大，不要急着下结论，统计上不显著</li>
+      <li><strong>不要把相关性当因果</strong>：冰淇淋销量上升和溺水死亡人数上升正相关，但不是冰淇淋导致溺水，是因为夏天温度高</li>
+      <li><strong>不要过度拆解</strong>：维度拆分到能定位问题就行，不要拆到太细的维度，每个群体只有几百人，没有统计意义</li>
+      <li><strong>不要只看相对值不看绝对值</strong>："某功能转化率提升了100%"，听起来很厉害，但如果基数是100个人，其实也就多了100人用，影响不大</li>
+    </ol>
+  </div>
+</div>
+
+<div class="section">
+  <h2 class="section-title"><span class="section-num">07</span> 本节课小结</h2>
+  <div class="conclusion-card">
+    <div class="num">✅ 要点1</div>
+    数据分析的目标是从数据走到决策，不是只报数字，要走到DIKW模型的K和W层。
+  </div>
+  <div class="conclusion-card">
+    <div class="num">✅ 要点2</div>
+    完整分析流程：明确目标→拆解指标→取数→定位原因→输出可落地建议，不要上来就写SQL。
+  </div>
+  <div class="conclusion-card">
+    <div class="num">✅ 要点3</div>
+    四大核心方法：对比分析找差异、趋势分析看规律、分群分析拆人群、漏斗分析找链路瓶颈。
+  </div>
+  <div class="conclusion-card">
+    <div class="num">✅ 要点4</div>
+    遇到问题先拆分维度，不要只看大盘，警惕辛普森悖论。
+  </div>
+  <div class="conclusion-card">
+    <div class="num">✅ 要点5</div>
+    汇报结论先行，用数据支撑，建议要具体可落地，有预期收益。
+  </div>
+</div>
+
+<div class="nav-links">
+  <div class="nav-group">
+    <a href="./03-第3课时-SQL基础下.html" class="nav-link">← 第3课时</a>
+    <a href="./00-课程大纲与课表.html" class="nav-link">返回课表</a>
+  </div>
+  <div class="nav-group">
+    <a href="./05-第5课时-AB实验.html" class="nav-link">第5课时：AB实验 →</a>
+  </div>
+</div>
+
+<div class="footer">
+  <span>数据分析通识培训 · 第4课时</span>
+  <span>2026年7月</span>
+</div>
+
+</div>
+</body>
+</html>

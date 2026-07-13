@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第3课时 · SQL基础语法（下）+ AI提效进阶</title>
+<style>
+:root {
+  --ink: #151515;
+  --text: #252525;
+  --muted: #646464;
+  --quiet: #8a8a8a;
+  --line: #3a3a3a;
+  --line-muted: #777;
+  --line-soft: #deddd9;
+  --paper: #f7f6f2;
+  --panel: #fffefa;
+  --panel-soft: #f0efeb;
+  --panel-deep: #e2e1dd;
+  --accent: #2a2a2a;
+  --highlight: #fef3c7;
+  --blue: #1e40af;
+  --green: #15803d;
+  --orange: #c2410c;
+  --red: #b91c1c;
+  --shadow: 0 10px 24px rgba(0, 0, 0, 0.045);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: "Avenir Next", "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+  background: var(--paper);
+  color: var(--text);
+  line-height: 1.62;
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+}
+.page { max-width: 1100px; margin: 0 auto; padding: 54px 34px 86px; }
+h1, h2, h3, h4 {
+  font-family: "Songti SC", "Noto Serif CJK SC", serif;
+  color: var(--ink); font-weight: 700;
+}
+.header { margin-bottom: 48px; padding-bottom: 28px; border-bottom: 1.25px solid var(--line); }
+.eyebrow { font-family: "Avenir Next"; font-size: 12px; letter-spacing: 0.12em; color: var(--quiet); text-transform: uppercase; margin-bottom: 14px; font-weight: 600; }
+h1 { font-size: 36px; line-height: 1.1; margin-bottom: 12px; }
+.subtitle { font-size: 17px; color: var(--muted); font-weight: 400; margin-bottom: 20px; }
+.meta-row { display: flex; gap: 28px; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin-bottom: 24px; }
+.meta-item { display: flex; align-items: center; gap: 6px; }
+.section { margin-bottom: 48px; }
+.section-title { font-size: 24px; margin-bottom: 6px; padding-bottom: 12px; border-bottom: 0.75px solid var(--line-soft); display: flex; align-items: center; gap: 10px; }
+.section-num { font-family: "Avenir Next"; font-size: 14px; font-weight: 600; color: var(--quiet); }
+h3 { font-size: 18px; margin-top: 24px; margin-bottom: 12px; }
+p { margin-bottom: 12px; }
+.caliber-note { background: var(--panel); border-left: 3px solid var(--line); padding: 16px 20px; font-size: 14px; margin-bottom: 20px; color: var(--muted); border-radius: 0 4px 4px 0; }
+.caliber-note strong { color: var(--text); }
+.warning-note { background: #fef2f2; border-left: 3px solid var(--red); padding: 16px 20px; font-size: 14px; margin-bottom: 20px; color: #991b1b; border-radius: 0 4px 4px 0; }
+.tip-note { background: #f0fdf4; border-left: 3px solid var(--green); padding: 16px 20px; font-size: 14px; margin-bottom: 20px; color: #166534; border-radius: 0 4px 4px 0; }
+.ai-note { background: #eff6ff; border-left: 3px solid var(--blue); padding: 16px 20px; font-size: 14px; margin-bottom: 20px; color: #1e40af; border-radius: 0 4px 4px 0; }
+.compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0; }
+.compare-card { background: var(--panel); border: 1px solid var(--line-soft); padding: 20px; border-radius: 6px; }
+.compare-card.inner { border-top: 3px solid var(--ink); }
+.compare-card.left { border-top: 3px solid var(--blue); }
+.compare-card .ttl { font-weight: 600; font-size: 16px; margin-bottom: 8px; color: var(--ink); }
+.compare-card .desc { font-size: 14px; color: var(--muted); line-height: 1.6; }
+.table-wrap { background: var(--panel); border: 1px solid var(--line-soft); box-shadow: var(--shadow); overflow-x: auto; margin-bottom: 20px; border-radius: 6px; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+thead { background: var(--panel-soft); }
+th { font-family: "Avenir Next"; font-weight: 600; font-size: 12px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--line-soft); }
+td { padding: 12px 14px; border-bottom: 0.5px solid var(--line-soft); vertical-align: top; color: var(--text); line-height: 1.6; }
+td:first-child { font-weight: 500; }
+tbody tr:hover { background: var(--panel-soft); }
+tbody tr:last-child td { border-bottom: none; }
+ul, ol { margin-left: 24px; margin-bottom: 16px; }
+li { margin-bottom: 8px; }
+code { background: var(--panel-soft); padding: 2px 6px; border-radius: 3px; font-family: "SF Mono", "Menlo", monospace; font-size: 13px; color: var(--ink); }
+pre { background: #1e1e1e; color: #d4d4d4; padding: 16px 20px; border-radius: 6px; overflow-x: auto; margin-bottom: 20px; font-family: "SF Mono", "Menlo", monospace; font-size: 13px; line-height: 1.6; }
+pre code { background: transparent; padding: 0; color: inherit; }
+.sql-comment { color: #6a9955; }
+.sql-keyword { color: #569cd6; }
+.sql-function { color: #dcdcaa; }
+.sql-string { color: #ce9178; }
+.conclusion-card { background: var(--panel); border: 1px solid var(--line-soft); padding: 20px 24px; border-radius: 6px; margin-bottom: 16px; box-shadow: var(--shadow); }
+.conclusion-card .num { font-family: "Avenir Next"; font-weight: 700; color: var(--orange); font-size: 14px; margin-bottom: 6px; }
+.nav-links { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 40px; justify-content: space-between; }
+.nav-group { display: flex; gap: 12px; }
+.nav-link { background: var(--panel); border: 1px solid var(--line-soft); padding: 10px 18px; border-radius: 6px; text-decoration: none; color: var(--text); font-size: 14px; font-family: "Avenir Next"; transition: all 0.2s; }
+.nav-link:hover { border-color: var(--line); background: var(--panel-soft); }
+.footer { margin-top: 64px; padding-top: 24px; border-top: 0.75px solid var(--line-soft); font-size: 12px; color: var(--quiet); font-family: "Avenir Next"; display: flex; justify-content: space-between; }
+@media (max-width: 768px) {
+  .page { padding: 30px 18px 50px; }
+  h1 { font-size: 28px; }
+  .compare-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+<div class="header">
+  <div class="eyebrow">LESSON 03 · SQL BASICS PART 2 + ADVANCED AI</div>
+  <h1>第3课时：SQL基础语法（下）</h1>
+  <p class="subtitle">复杂场景取数 · JOIN多表关联 · CTE子查询 · 性能优化 · AI提效进阶</p>
+  <div class="meta-row">
+    <div class="meta-item">⏱️ 课时：1.5小时</div>
+    <div class="meta-item">🎯 目标：独立写复杂SQL，让查询跑得更快</div>
+  </div>
+</div>
+
+<div class="section">
+  <h2 class="section-title"><span class="section-num">01</span> 为什么需要多表关联（JOIN）？</h2>
+  <p>上节课学的SQL都是从单张表查询，但实际业务中我们经常需要：</p>
+  <ul>
+    <li>把APP启动数据和信息流消费数据关联起来看（miui_di + label_di）</li>
+    <li>把PUSH点击用户和后续的留存/消费行为关联起来</li>
+    <li>把用户属性标签和行为数据关联起来做分群分析</li>
+  </ul>
+  <p>这时候就需要用JOIN把多张表通过共同的"key"（比如date+did）拼接在一起查。</p>
+</div>
+
+<div class="section">
+  <h2 class="section-title"><span class="section-num">02</span> JOIN关联查询核心知识</h2>
+
+  <h3>JOIN的基本语法</h3>
+<pre><code><span class="sql-keyword">SELECT</span> a.字段, b.字段
+<span class="sql-keyword">FROM</span> 表1 a
+<span class="sql-keyword">JOIN</span> 表2 b
+  <span class="sql-keyword">ON</span> a.关联key = b.关联key
+<span class="sql-keyword">WHERE</span> 过滤条件</code></pre>
+  <div class="caliber-note">
+    <strong>💡 技巧：</strong>表名后面加a/b是给表起别名，简化书写，避免字段重名冲突。
+  </div>
+
+  <h3>最常用的两种JOIN：INNER JOIN vs LEFT JOIN</h3>
+  <p>这两个是产品同学99%场景会用到的，理解区别非常重要：</p>
+  <div class="compare-grid">
+    <div class="compare-card inner">
+      <div class="ttl">INNER JOIN（内连接）</div>
+      <div class="desc">
+        <strong>逻辑：</strong>只保留两张表都能匹配上的数据，匹配不上的直接丢掉<br>
+        <strong>适用场景：</strong>查"既启动了APP，又看了信息流"的用户<br>
+        <strong>通俗比喻：</strong>查"同时参加了数学考试和语文考试"的学生，缺考一门的都不算
+      </div>
+    </div>
+    <div class="compare-card left">
+      <div class="ttl">LEFT JOIN（左连接）</div>
+      <div class="desc">
+        <strong>逻辑：</strong>以左边表为基准，左边表数据全部保留，右边表匹配不上的字段填NULL<br>
+        <strong>适用场景：</strong>查"所有启动了APP的用户，他们有没有看信息流（没看的显示0）"<br>
+        <strong>通俗比喻：</strong>查"所有参加数学考试的学生，他们的语文成绩是多少（缺考语文的显示NULL）"
+      </div>
+    </div>
+  </div>
+
+  <h3>案例：关联两张核心表，查PUSH启动用户的信息流消费</h3>
+  <p><strong>需求：</strong>查2026-06-28通过PUSH启动APP的用户，他们的人均信息流时长是多少？</p>
+<pre><code><span class="sql-comment">-- 思路：</span>
+<span class="sql-comment">-- 1. 从miui_di表中筛选出通过PUSH启动的用户（左表a）</span>
+<span class="sql-comment">-- 2. LEFT JOIN关联label_di表（右表b），取他们的信息流消费数据</span>
+<span class="sql-comment">-- 3. 聚合计算指标</span>
+<span class="sql-keyword">SELECT</span>
+    <span class="sql-function">COUNT</span>(<span class="sql-keyword">DISTINCT</span> a.did) <span class="sql-keyword">AS</span> push_user_cnt,
+    <span class="sql-function">ROUND</span>(<span class="sql-function">SUM</span>(<span class="sql-function">COALESCE</span>(b.feed_dura, 0)) / <span class="sql-function">COUNT</span>(<span class="sql-keyword">DISTINCT</span> a.did) / 60000, 2) <span class="sql-keyword">AS</span> avg_feed_duration_min,
+    <span class="sql-function">ROUND</span>(<span class="sql-function">SUM</span>(<span class="sql-function">COALESCE</span>(b.news_vv_cnt + b.short_vv_cnt + b.mini_vv_cnt, 0)) * 1.0 / <span class="sql-function">COUNT</span>(<span class="sql-keyword">DISTINCT</span> a.did), 2) <span class="sql-keyword">AS</span> avg_vv_per_user
+<span class="sql-keyword">FROM</span> (
+    <span class="sql-comment">-- 子查询先筛出PUSH启动用户</span>
+    <span class="sql-keyword">SELECT</span> date, did
+    <span class="sql-keyword">FROM</span> iceberg_zjyprc_hadoop.browser.dwm_browser_event_aggregation_miui_di
+    <span class="sql-keyword">WHERE</span> date = 20260628
+      <span class="sql-keyword">AND</span> is_app_dau_2024 = 1
+      <span class="sql-keyword">AND</span> <span class="sql-function">COALESCE</span>(did, <span class="sql-string">''</span>) != <span class="sql-string">''</span>
+      <span class="sql-keyword">AND</span> app_launch_way <span class="sql-keyword">IN</span> (<span class="sql-string">'点击push'</span>, <span class="sql-string">'subscribe_push'</span>)
+) a
+<span class="sql-keyword">LEFT JOIN</span> (
+    <span class="sql-comment">-- 子查询先筛出有效信息流数据</span>
+    <span class="sql-keyword">SELECT</span> date, did, feed_dura, news_vv_cnt, short_vv_cnt, mini_vv_cnt
+    <span class="sql-keyword">FROM</span> iceberg_zjyprc_hadoop.browser.dwm_browser_event_aggregation_label_di
+    <span class="sql-keyword">WHERE</span> date = 20260628
+      <span class="sql-keyword">AND</span> is_dau_feed_dapan_2024 = 1
+      <span class="sql-keyword">AND</span> <span class="sql-function">COALESCE</span>(did, <span class="sql-string">''</span>) != <span class="sql-string">''</span>
+      <span class="sql-keyword">AND</span> is_top = 0
+) b
+<span class="sql-keyword">ON</span> a.date = b.date <span class="sql-keyword">AND</span> a.did = b.did</code></pre>
+
+  <p><strong>关键细节：</strong></p>
+  <ul>
+    <li>关联条件必须同时带上<code>date</code>和<code>did</code>，因为表是按did+date粒度的，同一个用户不同日期是不同记录</li>
+    <li>用<code>COALESCE(字段, 0)</code>把匹配不到的NULL值转换成0，避免SUM/AVG时结果异常（NULL和任何数运算都是NULL）</li>
+    <li>先在子查询里过滤数据再关联，性能比直接关联全表好很多！</li>
+  </ul>
+
+  <h3>JOIN避坑指南</h3>
+  <div class="warning-note">
+    <ol>
+      <li><strong>一定要写关联条件ON</strong>：漏写ON会产生笛卡尔积，100万用户×100万用户=1万亿条数据，直接把集群搞挂</li>
+      <li><strong>关联字段类型要一致</strong>：a.did是varchar字符串，b.did如果是bigint数字类型，关联会失败或结果不对，可以用CAST转类型</li>
+      <li><strong>注意多对多关联</strong>：如果两张表不是1对1关系，关联后数据会重复膨胀，导致指标计算偏大</li>
+      <li><strong>小表放前面</strong>：LEFT JOIN把数据量小的表放左边，性能更好</li>
+    </ol>
+  </div>
+</div>
+
+<div class="section">
+  <h2 class="section-title"><span class="section-num">03</span> 子查询与CTE（WITH语句）：把复杂SQL拆成简单块</h2>
+  <p>复杂需求一步写完会很乱，容易出错，推荐用WITH语句把逻辑拆成多个临时表，像搭积木一样写SQL，可读性极强。</p>
+
+  <h3>CTE（WITH语句）语法</h3>
+<pre><code><span class="sql-keyword">WITH</span> 
+临时表1 <span class="sql-keyword">AS</span> (
+    <span class="sql-keyword">SELECT</span> ... <span class="sql-keyword">FROM</span> ... <span class="sql-keyword">WHERE</span> ...
+),
+临时表2 <span class="sql-keyword">AS</span> (
+    <span class="sql-keyword">SELECT</span> ... <span class="sql-keyword">FROM</span> 临时表1 <span class="sql-keyword">JOIN</span> ... 
+)
+<span class="sql-comment">-- 最后从最终的临时表查询</span>
+<span class="sql-keyword">SELECT</span> ... <span class="sql-keyword">FROM</span> 临时表2</code></pre>
+
+  <h3>案例：对比PUSH启动用户 vs 全体用户的指标差异</h3>
+  <p><strong>需求：</strong>2026-06-28，对比PUSH启动用户和全体用户的人均APP时长、人均信息流时长、信息流VV渗透率</p>
+<pre><code><span class="sql-keyword">WITH</span> 
+<span class="sql-comment">-- 步骤1：全体APP用户基础指标</span>
+all_user <span class="sql-keyword">AS</span> (
+    <span class="sql-keyword">SELECT</span> did, app_dura
+    <span class="sql-keyword">FROM</span> iceberg_zjyprc_hadoop.browser.dwm_browser_event_aggregation_miui_di
+    <span class="sql-keyword">WHERE</span> date = 20260628
+      <span class="sql-keyword">AND</span> is_app_dau_2024 = 1
+      <span class="sql-keyword">AND</span> <span class="sql-function">COALESCE</span>(did, <span class="sql-string">''</span>) != <span class="sql-string">''</span>
+),
+<span class="sql-comment">-- 步骤2：PUSH启动用户</span>
+push_user <span class="sql-keyword">AS</span> (
+    <span class="sql-keyword">SELECT DISTINCT</span> did
+    <span class="sql-keyword">FROM</span> iceberg_zjyprc_hadoop.browser.dwm_browser_event_aggregation_miui_di
+    <span class="sql-keyword">WHERE</span> date = 20260628
+      <span class="sql-keyword">AND</span> is_app_dau_2024 = 1
+      <span class="sql-keyword">AND</span> <span class="sql-function">COALESCE</span>(did, <span class="sql-string">''</span>) != <span class="sql-string">''</span>
+      <span class="sql-keyword">AND</span> app_launch_way <span class="sql-keyword">IN</span> (<span class="sql-string">'点击push'</span>, <span class="sql-string">'subscribe_push'</span>)
+),
+<span class="sql-comment">-- 步骤3：信息流消费数据</span>
+feed_data <span class="sql-keyword">AS</span> (
+    <span class="sql-keyword">SELECT</span> did, feed_dura,
+        news_vv_cnt + short_vv_cnt + mini_vv_cnt <span class="sql-keyword">AS</span> vv
+    <span class="sql-keyword">FROM</span> iceberg_zjyprc_hadoop.browser.dwm_browser_event_aggregation_label_di
+    <span class="sql-keyword">WHERE</span> date = 20260628
+      <span class="sql-keyword">AND</span> is_dau_feed_dapan_2024 = 1
+      <span class="sql-keyword">AND</span> <span class="sql-function">COALESCE</span>(did, <span class="sql-string">''</span>) != <span class="sql-string">''</span>
+      <span class="sql-keyword">AND</span> is_top = 0
+),
+<span class="sql-comment">-- 步骤4：关联拼接用户标签</span>
+user_label <span class="sql-keyword">AS</span> (
+    <span class="sql-keyword">SELECT</span>
+        a.did,
+        a.app_dura,
+        <span class="sql-keyword">CASE WHEN</span> b.did <span class="sql-keyword">IS NOT NULL</span> <span class="sql-keyword">THEN</span> 1 <span class="sql-keyword">ELSE</span> 0 <span class="sql-keyword">END</span> <span class="sql-keyword">AS</span> is_push_user,
+        <span class="sql-function">COALESCE</span>(c.feed_dura, 0) <span class="sql-keyword">AS</span> feed_dura,
+        <span class="sql-function">COALESCE</span>(c.vv, 0) <span class="sql-keyword">AS</span> vv
+    <span class="sql-keyword">FROM</span> all_user a
+    <span class="sql-keyword">LEFT JOIN</span> push_user b <span class="sql-keyword">ON</span> a.did = b.did
+    <span class="sql-keyword">LEFT JOIN</span> feed_data c <span class="sql-keyword">ON</span> a.did = c.did
+)
+<span class="sql-comment">-- 步骤5：最终聚合对比</span>
+<span class="sql-keyword">SELECT</span>
+    <span class="sql-keyword">CASE WHEN</span> is_push_user = 1 <span class="sql-keyword">THEN</span> <span class="sql-string">'PUSH启动用户'</span> <span class="sql-keyword">ELSE</span> <span class="sql-string">'非PUSH启动用户'</span> <span class="sql-keyword">END</span> <span class="sql-keyword">AS</span> user_group,
+    <span class="sql-function">COUNT</span>(<span class="sql-keyword">DISTINCT</span> did) <span class="sql-keyword">AS</span> user_cnt,
+    <span class="sql-function">ROUND</span>(<span class="sql-function">AVG</span>(app_dura) / 60000, 2) <span class="sql-keyword">AS</span> avg_app_duration_min,
+    <span class="sql-function">ROUND</span>(<span class="sql-function">AVG</span>(feed_dura) / 60000, 2) <span class="sql-keyword">AS</span> avg_feed_duration_min,
+    <span class="sql-function">ROUND</span>(<span class="sql-function">SUM</span>(<span class="sql-keyword">CASE WHEN</span> vv > 0 <span class="sql-keyword">THEN</span> 1 <span class="sql-keyword">ELSE</span> 0 <span class="sql-keyword">END</span>) * 1.0 / <span class="sql-function">COUNT</span>(<span class="sql-keyword">DISTINCT</span> did), 4) <span class="sql-keyword">AS</span> vv_penetration
+<span class="sql-keyword">FROM</span> user_label
+<span class="sql-keyword">GROUP BY</span> <span class="sql-keyword">CASE WHEN</span> is_push_user = 1 <span class="sql-keyword">THEN</span> <span class="sql-string">'PUSH启动用户'</span> <span class="sql-keyword">ELSE</span> <span class="sql-string">'非PUSH启动用户'</span> <span class="sql-keyword">END</span></code></pre>
+  <div class="tip-note">
+    <strong>💡 优势：</strong>用WITH拆成5个步骤，每一步逻辑都很清晰，不容易出错，而且AI生成这种拆分后的SQL准确率会高很多。
+  </div>
+</div>
+
+<div class="section">
+  <h2 class="section-title"><span class="section-num">04</span> 常见SQL错误避坑（都是血泪教训）</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>坑点</th><th>后果</th><th>怎么避免</th></tr></thead>
+      <tbody>
+        <tr><td>忘记加分区过滤date</td><td>扫全表，查几小时出不来，影响集群</td><td>写SQL先写WHERE date条件</td></tr>
+        <tr><td>JOIN漏写ON条件</td><td>笛卡尔积，数据量爆炸</td><td>写完JOIN立刻写ON关联条件</td></tr>
+        <tr><td>多表关联后直接SUM/COUNT</td><td>数据重复，指标翻倍/翻好几倍</td><td>先验证关联后的记录数是不是对的</td></tr>
+        <tr><td>直接用AVG算人均</td><td>会把NULL的用户排除，导致人均偏高</td><td>用SUM(指标)/COUNT(DISTINCT did)更稳妥</td></tr>
+        <tr><td>没处理NULL值</td><td>计算结果是NULL，看起来像0但实际不是</td><td>用COALESCE(字段, 0)把NULL转成0</td></tr>
+        <tr><td>整数除法没乘1.0</td><td>CTR/渗透率算出来是0</td><td>除法都乘1.0转成小数再算</td></tr>
+        <tr><td>时长单位没转</td><td>结果大6万倍</td><td>毫秒转分钟除以60000，转小时除以3600000</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="section">
+  <h2 class="section-title"><span class="section-num">05</span> SQL性能优化入门：让你的查询跑的更快</h2>
+  <p>产品同学不用懂太深的优化，记住这几个原则，查询速度能快10倍：</p>
+  <ol>
+    <li><strong>越早过滤越好</strong>：先在子查询里把日期、有效用户、需要的字段过滤好，再做JOIN，不要先关联全表再过滤</li>
+    <li><strong>只查需要的字段</strong>：SELECT *会把所有字段都查出来，浪费资源，需要什么字段写什么字段</li>
+    <li><strong>避免大表关联大表</strong>：如果能先聚合再关联，就不要用明细数据关联</li>
+    <li><strong>数据量太大时分步跑</strong>：如果查3个月以上的数据，可以拆成按月查，或者先汇总成临时表再关联</li>
+    <li><strong>优先用DWM层聚合表</strong>：不要自己从DWD明细表算，DWM表已经提前聚合好了，快很多</li>
+  </ol>
+
+  <h3>查询跑不出来怎么办？</h3>
+  <ul>
+    <li>先查小范围日期（比如先查1天）验证逻辑对不对，再放大时间范围</li>
+    <li>看是不是没加分区过滤</li>
+    <li>看是不是产生了笛卡尔积</li>
+    <li>找数据同学帮忙优化，不要一直重试浪费集群资源</li>
+  </ul>
+</div>
+
+<div class="section">
+  <h2 class="section-title"><span class="section-num">06</span> AI辅助复杂SQL进阶 🤖</h2>
+
+  <h3>复杂需求怎么提给AI？</h3>
+  <p>不要一次性丢一个大需求给AI，要<strong>拆解成步骤</strong>告诉AI，每一步要做什么，用什么表，输出什么字段，准确率会大幅提升：</p>
+  <div class="ai-note">
+    <strong>复杂需求提示词示例：</strong>
+    <pre><code>请帮我写Hive SQL，按以下步骤实现：
+步骤1：从miui_di表筛选2026-06-28的有效用户（is_app_dau_2024=1，did非空），标记是否是PUSH启动（app_launch_way in ('点击push','subscribe_push')），取did、app_dura字段，别名t1
+步骤2：从label_di表筛选2026-06-28的信息流有效消费用户（is_dau_feed_dapan_2024=1，is_top=0，did非空），取did、feed_dura、(news_vv_cnt+short_vv_cnt+mini_vv_cnt) as vv，别名t2
+步骤3：t1 LEFT JOIN t2 ON t1.did = t2.did，关联后COALESCE把NULL转成0
+步骤4：按是否PUSH启动分组，统计用户数、人均APP时长（分钟，保留2位）、人均信息流时长（分钟，保留2位）、VV渗透率（vv>0的用户占比，保留4位）
+要求：用WITH语句拆分步骤，加注释，注意过滤条件和单位转换</code></pre>
+  </div>
+
+  <h3>AI写复杂SQL的常见坑怎么修？</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>AI常见错误</th><th>修复方法</th></tr></thead>
+      <tbody>
+        <tr><td>幻觉不存在的字段</td><td>对照数据地图把字段名替换成正确的</td></tr>
+        <tr><td>关联条件漏了date</td><td>补上date关联条件（如果是多天查询的话）</td></tr>
+        <tr><td>没处理NULL值</td><td>加上COALESCE把NULL转成0</td></tr>
+        <tr><td>指标口径错了（比如CTR公式）</td><td>把正确的公式明确告诉AI</td></tr>
+        <tr><td>性能差，大表直接关联</td><td>让AI先过滤聚合再关联，拆成多个WITH子句</td></tr>
+        <tr><td>计算人均用了AVG而不是SUM/COUNT</td><td>改成SUM(指标)/COUNT(DISTINCT did)的写法</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>慢查询/报错怎么让AI帮忙排查？</h3>
+  <p>把<strong>完整SQL+报错信息/问题描述</strong>发给AI：</p>
+<pre><code>我写的SQL跑了半小时没出来，帮我看看哪里可以优化：
+[贴SQL]</code></pre>
+  <p>AI基本能快速定位到忘记加过滤条件、笛卡尔积、重复关联这类常见问题。</p>
+</div>
+
+<div class="section">
+  <h2 class="section-title"><span class="section-num">07</span> 本节课小结</h2>
+  <div class="conclusion-card">
+    <div class="num">✅ 要点1</div>
+    多表关联用JOIN：INNER JOIN取交集，LEFT JOIN以左表为基准保留全部，记得写ON条件，避免笛卡尔积。
+  </div>
+  <div class="conclusion-card">
+    <div class="num">✅ 要点2</div>
+    复杂SQL用WITH（CTE）拆成多个临时表，像搭积木一样写，逻辑清晰不容易错。
+  </div>
+  <div class="conclusion-card">
+    <div class="num">✅ 要点3</div>
+    记住常见坑点：分区过滤、NULL处理、数据重复、单位转换、整数除法。
+  </div>
+  <div class="conclusion-card">
+    <div class="num">✅ 要点4</div>
+    性能优化原则：早过滤、少取字段、优先用聚合表、分步跑。
+  </div>
+  <div class="conclusion-card">
+    <div class="num">✅ 要点5</div>
+    复杂需求拆成步骤告诉AI，生成后重点校验关联逻辑、口径、NULL处理，不要直接复制就用。
+  </div>
+</div>
+
+<div class="nav-links">
+  <div class="nav-group">
+    <a href="./02-第2课时-SQL基础上.html" class="nav-link">← 第2课时</a>
+    <a href="./00-课程大纲与课表.html" class="nav-link">返回课表</a>
+  </div>
+  <div class="nav-group">
+    <a href="./04-第4课时-分析方法.html" class="nav-link">第4课时：分析方法 →</a>
+  </div>
+</div>
+
+<div class="footer">
+  <span>数据分析通识培训 · 第3课时</span>
+  <span>2026年7月</span>
+</div>
+
+</div>
+</body>
+</html>

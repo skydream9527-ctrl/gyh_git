@@ -472,6 +472,99 @@ def save_report(content: str, date_str: str):
         log(f"已保存: {file_path}")
     return saved_paths
 
+def generate_workplan_update_draft(date_str: str, auto_insights: dict, modified_files: list, commits: list):
+    """生成 WORK-PLAN.md 更新草稿"""
+    draft_dir = BASE_DIR / '99-临时文件' / 'work-plan-updates'
+    draft_dir.mkdir(parents=True, exist_ok=True)
+
+    # 1. 读取 WORK-PLAN.md 的「近期已完成」section，提取已有完成项用于去重
+    existing_done = set()
+    try:
+        wp_content = WORK_PLAN_PATH.read_text(encoding='utf-8')
+        import re
+        for line in wp_content.split('\n'):
+            if line.strip().startswith('- [x]'):
+                existing_done.add(line.strip()[5:].strip()[:30])
+    except Exception:
+        wp_content = ''
+
+    # 2. 从 auto_insights 提取完成项建议
+    completed_items = []
+    for item in auto_insights.get('work_plan_updates', []):
+        if any(kw in item for kw in ('已完成', '完成', '上线', '验收', '交付')):
+            if item[:30] not in existing_done:
+                completed_items.append(item)
+
+    # 从 performance_wins 补充
+    for item in auto_insights.get('performance_wins', []):
+        if item[:30] not in existing_done:
+            completed_items.append(item)
+
+    # 3. 从 auto_insights 提取状态变更建议
+    status_changes = []
+    for item in auto_insights.get('work_plan_updates', []):
+        if any(kw in item for kw in ('更新', '进度', '进行中', '阻塞', 'P0', 'P1')):
+            if item not in completed_items:
+                status_changes.append(item)
+
+    # 4. 从文件变更推断新增任务
+    new_tasks = []
+    changed_paths = [f['path'] for f in modified_files]
+    commit_msgs = [c.get('message', '') for c in commits]
+    # 检测新目录（可能是新项目）
+    new_dirs = set()
+    for p in changed_paths:
+        parts = p.split('/')
+        if len(parts) >= 2 and parts[0] in ('01-业务项目', '02-Skill开发'):
+            new_dirs.add('/'.join(parts[:2]))
+    for d in new_dirs:
+        if d not in wp_content:
+            new_tasks.append(f'疑似新项目/Skill目录出现：`{d}`，建议确认是否加入 WORK-PLAN')
+
+    # 5. 判断是否有内容
+    if not completed_items and not status_changes and not new_tasks:
+        log('WORK-PLAN 更新草稿：无建议内容，跳过生成')
+        return None
+
+    # 6. 生成草稿
+    draft = f"""# WORK-PLAN.md 更新草稿（{date_str}）
+
+> 自动生成于每日回顾，请确认后手动合并到 WORK-PLAN.md
+> 生成时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+
+"""
+    if completed_items:
+        draft += '## 建议新增「近期已完成」\n\n'
+        for item in completed_items[:8]:
+            draft += f'- [x] {item}\n'
+        draft += '\n'
+
+    if status_changes:
+        draft += '## 建议状态变更\n\n'
+        draft += '| 任务 | 建议动作 | 依据 |\n'
+        draft += '|------|----------|------|\n'
+        for item in status_changes[:8]:
+            draft += f'| {item} | 请确认 | 自动抽取 |\n'
+        draft += '\n'
+
+    if new_tasks:
+        draft += '## 建议新增任务\n\n'
+        for item in new_tasks[:5]:
+            draft += f'- {item}\n'
+        draft += '\n'
+
+    draft += f"""---
+
+*操作方式：确认后将对应内容复制到 `WORK-PLAN.md` 对应 section，或告知 Agent 帮你合并。*
+"""
+
+    # 7. 保存
+    draft_path = draft_dir / f'{date_str}-WORK-PLAN更新草稿.md'
+    draft_path.write_text(draft, encoding='utf-8')
+    log(f'WORK-PLAN 更新草稿已生成: {draft_path}')
+    return str(draft_path)
+
+
 def main():
     today = datetime.now()
     date_str = today.strftime("%Y-%m-%d")
@@ -493,8 +586,15 @@ def main():
     log("生成回顾报告...")
     report_content = generate_daily_report(date_str, modified_files, commits, auto_insights)
 
+    draft_path = None
+
     log("保存报告...")
     saved_paths = save_report(report_content, date_str)
+
+    log('生成 WORK-PLAN 更新草稿...')
+    draft_path = generate_workplan_update_draft(date_str, auto_insights, modified_files, commits)
+    if draft_path:
+        log(f'WORK-PLAN 更新草稿: {draft_path}')
 
     log("=" * 60)
     log("每日工作回顾已生成！")
@@ -513,6 +613,8 @@ def main():
 
     print(f"\n✅ 每日回顾已生成: {date_str}-每日工作回顾.md")
     print(f"请打开文件确认自动抽取建议并补充手动内容，完成后我可以帮你回写相关文件。")
+    if draft_path:
+        print(f'📋 WORK-PLAN 更新草稿: {draft_path}')
 
 if __name__ == "__main__":
     main()

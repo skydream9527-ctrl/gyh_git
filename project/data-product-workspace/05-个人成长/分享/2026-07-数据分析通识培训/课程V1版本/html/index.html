@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>数据分析通识培训 · 课程导航</title>
+<style>
+  :root{
+    --ink:#0C0F14; --slate:#161B22; --slate2:#1E242D; --line:#2A313C;
+    --snow:#EDF1F7; --mist:#98A4B3;
+    --cyan:#3DD8C4; --green:#33D17A; --amber:#F5A524; --red:#F2555A; --violet:#9B8CFF;
+    --mono:"SFMono-Regular",Menlo,Consolas,"JetBrains Mono","Liberation Mono",monospace;
+    --sans:"PingFang SC","Source Han Sans SC","Microsoft YaHei","Hiragino Sans GB",system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:var(--sans);color:var(--snow);line-height:1.6;min-height:100%;
+    background:
+      radial-gradient(1200px 700px at -8% -12%, rgba(61,216,196,.08), transparent 55%),
+      radial-gradient(1000px 620px at 108% 108%, rgba(51,209,122,.06), transparent 55%),
+      linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px),
+      var(--ink);
+    background-size:auto,auto,56px 56px,56px 56px,auto;
+    -webkit-font-smoothing:antialiased;
+  }
+  .accent{position:fixed;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--cyan),var(--green),var(--amber));z-index:10}
+  .wrap{max-width:1080px;margin:0 auto;padding:76px 32px 90px}
+
+  /* hero */
+  .hero{text-align:center;padding-bottom:44px;margin-bottom:44px;border-bottom:1px solid var(--line);position:relative}
+  .lead{font-family:var(--mono);color:var(--cyan);font-size:15px;letter-spacing:.28em;text-transform:uppercase;margin-bottom:20px}
+  .hero h1{font-size:clamp(38px,6vw,64px);font-weight:800;line-height:1.15;letter-spacing:.01em}
+  .hero h1 .cyan{color:var(--cyan)}
+  .rule{width:104px;height:5px;background:linear-gradient(90deg,var(--cyan),rgba(61,216,196,.25));border-radius:3px;margin:22px auto 0}
+  .hero .sub{font-size:21px;color:var(--mist);margin-top:22px}
+  .meta{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:28px;font-family:var(--mono);font-size:14px}
+  .meta span{background:var(--slate);border:1px solid var(--line);border-radius:999px;padding:8px 16px;color:var(--mist)}
+  .meta span b{color:var(--snow);font-weight:600}
+
+  /* intro */
+  .intro{background:linear-gradient(180deg,rgba(255,255,255,.02),transparent 50%),var(--slate);
+    border:1px solid var(--line);border-left:4px solid var(--cyan);border-radius:0 16px 16px 0;
+    padding:24px 28px;margin-bottom:52px}
+  .intro p{font-size:18px;color:var(--snow);line-height:1.7}
+  .intro .mist{color:var(--mist)}
+
+  /* section heading */
+  .sec-h{display:flex;align-items:center;gap:14px;margin:0 0 24px}
+  .sec-h .bar{width:26px;height:2px;background:var(--cyan)}
+  .sec-h h2{font-size:16px;font-family:var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--cyan);font-weight:700}
+
+  /* lesson cards */
+  .lessons{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:56px}
+  .lcard{
+    display:block;text-decoration:none;color:inherit;position:relative;overflow:hidden;
+    background:linear-gradient(180deg,rgba(255,255,255,.022),transparent 45%),var(--slate);
+    border:1px solid var(--line);border-radius:16px;padding:24px 26px;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease;
+  }
+  .lcard::after{content:attr(data-n);position:absolute;right:16px;bottom:-14px;font-family:var(--mono);font-weight:800;font-size:96px;line-height:1;color:rgba(255,255,255,.03);pointer-events:none}
+  .lcard:hover{transform:translateY(-4px);border-color:var(--acc,var(--cyan));box-shadow:0 18px 40px rgba(0,0,0,.35)}
+  .lc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+  .lc-num{font-family:var(--mono);font-weight:800;font-size:15px;color:var(--ink);background:var(--acc,var(--cyan));padding:5px 12px;border-radius:8px}
+  .lc-dur{font-family:var(--mono);font-size:13px;color:var(--mist)}
+  .lc-title{font-size:23px;font-weight:700;margin-bottom:10px;position:relative;z-index:1}
+  .lc-desc{font-size:15px;color:var(--mist);line-height:1.6;margin-bottom:16px;position:relative;z-index:1}
+  .lc-tags{display:flex;gap:8px;flex-wrap:wrap;position:relative;z-index:1}
+  .lc-tags span{font-family:var(--mono);font-size:12px;color:var(--mist);background:var(--slate2);border:1px solid var(--line);border-radius:999px;padding:4px 12px}
+  .lc-go{position:absolute;top:24px;right:26px;color:var(--acc,var(--cyan));font-size:20px;opacity:0;transform:translateX(-6px);transition:.18s}
+  .lcard:hover .lc-go{opacity:1;transform:none}
+
+  .lcard.c0{--acc:var(--mist)} .lcard.c1{--acc:var(--cyan)} .lcard.c2{--acc:var(--green)}
+  .lcard.c3{--acc:var(--green)} .lcard.c4{--acc:var(--amber)} .lcard.c5{--acc:var(--violet)} .lcard.c6{--acc:var(--cyan)}
+  .lcard.wide{grid-column:1/-1}
+
+  /* resources */
+  .res{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+  .ritem{background:var(--slate);border:1px solid var(--line);border-radius:12px;padding:16px 18px;font-size:15px;display:flex;gap:10px;align-items:flex-start}
+  .ritem .ic{font-size:20px;flex:0 0 auto}
+  .ritem .rt{font-weight:600}
+  .ritem .rd{font-size:13px;color:var(--mist);margin-top:2px}
+
+  .footer{margin-top:60px;padding-top:24px;border-top:1px solid var(--line);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-family:var(--mono);font-size:13px;color:var(--mist)}
+  .footer a{color:var(--cyan);text-decoration:none}
+
+  @media (max-width:760px){ .lessons{grid-template-columns:1fr} .wrap{padding:56px 20px 70px} }
+</style>
+</head>
+<body>
+<div class="accent"></div>
+<div class="wrap">
+
+  <div class="hero">
+    <p class="lead">Data Analysis Training · for PM</p>
+    <h1>数据分析<span class="cyan">通识培训</span></h1>
+    <div class="rule"></div>
+    <p class="sub">面向浏览器 / 信息流 / PUSH 产品同学 · 从数据地图到 AB 实验 · 6 课时完整课程</p>
+    <div class="meta">
+      <span>📅 <b>2026 年 7 月</b></span>
+      <span>⏱️ <b>6 课时</b> · 每课时 1~1.5h</span>
+      <span>🎯 独立取数 + 分析 + 判断实验</span>
+      <span>🤖 全程 AI 辅助提效</span>
+    </div>
+  </div>
+
+  <div class="intro">
+    <p>本课程围绕内容生态业务线（浏览器 / 信息流 / PUSH）的真实工作场景，从<b>数据地图使用</b>、<b>SQL 编写（结合 AI 辅助）</b>、<b>常用分析方法</b>、<b>AB 实验原理</b>四方面，帮你掌握基础数据分析能力，能独立完成日常取数、简单分析和实验结果判断。<span class="mist">所有案例和练习均使用业务真实表结构与真实场景。</span></p>
+  </div>
+
+  <div class="sec-h"><span class="bar"></span><h2>课程目录 · Curriculum</h2></div>
+  <div class="lessons">
+
+    <a class="lcard c0 wide" href="./00-课程大纲与课表.html" data-n="00">
+      <span class="lc-go">→</span>
+      <div class="lc-top"><span class="lc-num">00</span><span class="lc-dur">课前阅读</span></div>
+      <div class="lc-title">课程大纲与课表</div>
+      <div class="lc-desc">课程整体介绍、学习目标、6 课时安排、前置准备与环境配置。开课前先过一遍。</div>
+      <div class="lc-tags"><span>课程介绍</span><span>课表</span><span>准备工作</span></div>
+    </a>
+
+    <a class="lcard c0 wide" href="./00-启动课-数据从点击到表.html" data-n="0">
+      <span class="lc-go">→</span>
+      <div class="lc-top"><span class="lc-num">启动课</span><span class="lc-dur">1h · 课前打地基</span></div>
+      <div class="lc-title">数据是怎么来的 —— 从一次点击到一张表</div>
+      <div class="lc-desc">学 SQL 前先打地基：表结构（行 / 列 / 主键 / 粒度）、业务库 vs 数仓、数据从埋点到表的完整链路、读懂表样例；核心理念——SQL 让 AI 写、人来检查。</div>
+      <div class="lc-tags"><span>表结构</span><span>数据链路</span><span>AI 写 · 人检查</span></div>
+    </a>
+
+    <a class="lcard c1" href="./01-第1课时-数据地图入门.html" data-n="01">
+      <span class="lc-go">→</span>
+      <div class="lc-top"><span class="lc-num">01</span><span class="lc-dur">1.5h</span></div>
+      <div class="lc-title">数据地图与埋点入门</div>
+      <div class="lc-desc">数据思维、埋点与事件模型、数仓分层、数据地图使用、内容生态核心表导航、权限申请。</div>
+      <div class="lc-tags"><span>数据地图</span><span>埋点</span><span>核心表</span></div>
+    </a>
+
+    <a class="lcard c2" href="./02-第2课时-SQL基础上.html" data-n="02">
+      <span class="lc-go">→</span>
+      <div class="lc-top"><span class="lc-num">02</span><span class="lc-dur">1.5h</span></div>
+      <div class="lc-title">SQL 基础语法（上）</div>
+      <div class="lc-desc">SELECT-FROM-WHERE、GROUP BY 聚合、5 个聚合函数、核心指标 SQL、AI 辅助写 SQL 入门。</div>
+      <div class="lc-tags"><span>SQL 基础</span><span>聚合查询</span><span>AI 辅助</span></div>
+    </a>
+
+    <a class="lcard c3" href="./03-第3课时-SQL基础下.html" data-n="03">
+      <span class="lc-go">→</span>
+      <div class="lc-top"><span class="lc-num">03</span><span class="lc-dur">1.5h</span></div>
+      <div class="lc-title">SQL 基础语法（下）</div>
+      <div class="lc-desc">多表关联 JOIN、CTE 子查询、常见错误避坑、性能优化、AI 辅助写复杂 SQL 进阶。</div>
+      <div class="lc-tags"><span>JOIN</span><span>CTE</span><span>性能优化</span></div>
+    </a>
+
+    <a class="lcard c4" href="./04-第4课时-分析方法.html" data-n="04">
+      <span class="lc-go">→</span>
+      <div class="lc-top"><span class="lc-num">04</span><span class="lc-dur">1.5h</span></div>
+      <div class="lc-title">常用数据分析方法</div>
+      <div class="lc-desc">DIKW 数据驱动思维、分析流程、四大方法、排查数据问题（好维度 / 好参照 / 链路分析）、漏斗六步、CTR 案例。</div>
+      <div class="lc-tags"><span>DIKW</span><span>排查数据问题</span><span>漏斗分析</span></div>
+    </a>
+
+    <a class="lcard c5" href="./05-第5课时-AB实验.html" data-n="05">
+      <span class="lc-go">→</span>
+      <div class="lc-top"><span class="lc-num">05</span><span class="lc-dur">1.5h</span></div>
+      <div class="lc-title">AB 实验原理与判断</div>
+      <div class="lc-desc">AB 核心价值与流程、通俗统计基础、指标体系、7 大陷阱、DID 双重差分、双边市场、结果判断清单。</div>
+      <div class="lc-tags"><span>AB 实验</span><span>DID</span><span>陷阱避坑</span></div>
+    </a>
+
+    <a class="lcard c6" href="./06-第6课时-综合实战.html" data-n="06">
+      <span class="lc-go">→</span>
+      <div class="lc-top"><span class="lc-num">06</span><span class="lc-dur">1.5h</span></div>
+      <div class="lc-title">综合实战与答疑</div>
+      <div class="lc-desc">PUSH CTR 波动分析全流程案例、常见问题 Q&A、资料包汇总、后续学习路径建议。</div>
+      <div class="lc-tags"><span>综合实战</span><span>Q&amp;A</span><span>学习路径</span></div>
+    </a>
+  </div>
+
+  <div class="sec-h"><span class="bar"></span><h2>配套资料 · Toolkit</h2></div>
+  <div class="res">
+    <div class="ritem"><span class="ic">📘</span><div><div class="rt">核心表速查手册</div><div class="rd">常用表、字段、过滤条件</div></div></div>
+    <div class="ritem"><span class="ic">📝</span><div><div class="rt">日常取数 SQL 模板</div><div class="rd">4 个模板，改日期即用</div></div></div>
+    <div class="ritem"><span class="ic">🤖</span><div><div class="rt">AI 写 SQL 提示词</div><div class="rd">基础 + 进阶，复制修改</div></div></div>
+    <div class="ritem"><span class="ic">✅</span><div><div class="rt">分析框架 Checklist</div><div class="rd">流程 / 异动排查 / 汇报</div></div></div>
+    <div class="ritem"><span class="ic">🧪</span><div><div class="rt">AB 实验判断清单</div><div class="rd">8 条结果可信度检查</div></div></div>
+  </div>
+
+  <div class="footer">
+    <span>数据分析通识培训 · 产品团队专属</span>
+    <span>2026 年 7 月 · 内容生态业务线</span>
+  </div>
+
+</div>
+</body></html>

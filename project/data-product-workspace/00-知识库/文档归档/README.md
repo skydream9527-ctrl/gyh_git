@@ -1,97 +1,85 @@
-# 文档归档中心
+# 文档归档索引
 
-> 所有生成的文档统一归档管理，便于检索和追溯。支持飞书文档链接、Markdown源文件、HTML导出文件及其他格式。
+所有生成的正式文档（飞书文档、HTML、Markdown、PPT等）统一归档在此处，按类型分类存放。
 
-## 目录结构
+## 📚 AI 实践与方法论分享（2026-07-02 批量归档）
 
-```
-文档归档/
-├── README.md           # 本文件（归档索引）
-├── 季度规划复盘/       # 季度OKR规划与复盘文档（Q1/Q2/Q3...）
-├── 飞书文档/           # 飞书文档链接归档（.url 或 .md 记录链接+标题+日期）
-├── Markdown文件/       # Markdown源文件归档（按日期命名）
-├── HTML文件/           # HTML导出文件归档
-└── 其他格式/           # PDF、Word、PPT等其他格式文档归档
-```
+> 8 份飞书文档由 `feishu fetch` 抓取转 MD，存放于 `Markdown文件/`，白板图存于 `Markdown文件/assets/`。各文件头部含原文链接/token/修改时间元信息。
 
-## 归档规则
+| 归档日期 | 文档名称 | 主题 | 原文链接 |
+|---------|---------|------|---------|
+| 2026-07-01 | [龚云荷工作全景与AI可替代性分析](./Markdown文件/2026-07-01-龚云荷工作全景与AI可替代性分析.md) | 197 条事项 6 大类 19 子类 AI 可替代性矩阵 | [wiki](https://mi.feishu.cn/wiki/JdzLwjnARi6vfwkrvYrc1SlHnhd) |
+| 2025-10-29 | [内容生态产运班2025届-数据分析](./Markdown文件/2025-10-29-内容生态产运班2025届-数据分析.md) | 埋点基础/数据排查(DID)/漏斗/DIKW 培训 | [docx](https://mi.feishu.cn/docx/ZZrQdo9L0osPRcxe4rzcWNAanEW) |
+| 2026-06-05 | [如何在团队无人有AI-Agent开发经验时从零辅导完成AI平台落地](./Markdown文件/2026-06-05-如何在团队无人有AI-Agent开发经验时从零辅导完成AI平台落地.md) | 辅导方法论：原理→方案→论证→落地 | [wiki](https://mi.feishu.cn/wiki/LJeiwfaGniWGvdk17o2cJe1GnWb) |
+| 2026-05-25 | [智能体设计模式 Agentic Design Patterns](./Markdown文件/2026-05-25-智能体设计模式-Agentic-Design-Patterns.md) | 424 页 21 章+7 附录全文（Antonio Gulli） | [wiki](https://mi.feishu.cn/wiki/VhO9wK1w0iTpC8kV0O2cuFsvn6b) |
+| 2026-04-08 | [从demo到生产工具-数据产品AI实践经验分享](./Markdown文件/2026-04-08-从demo到生产工具-数据产品AI实践经验分享.md) | 95%工程+5%Prompt；Skill/Agent选型 | [wiki](https://mi.feishu.cn/wiki/GgGGwgEliiR7cRkelGkcEz1Fnaf) |
+| 2026-03-29 | [AI就业市场分析-Karpathy BLS](./Markdown文件/2026-03-29-AI就业市场分析-基于Karpathy的BLS数据可视化工具.md) | 342 职业 AI 暴露度分析 | [docx](https://mi.feishu.cn/docx/L69qdaYx7oaVWTx3ff8c8Qiantb) |
+| 2026-03-12 | [Openclaw安装过程记录与踩坑分享](./Markdown文件/2026-03-12-Openclaw安装过程记录与踩坑分享.md) | MAC+Telegram / 阿里云+钉钉飞书 双方案 | [docx](https://mi.feishu.cn/docx/Uk3zdfZAnoWjAix6NVSc4EBSngh) |
+| 2026-03-29 | [AI实践阶段性分享](./Markdown文件/2026-03-29-AI实践阶段性分享.md) | 工具/模型选型、Skill开发、安卓开发、Openclaw用途 | [docx](https://mi.feishu.cn/docx/Vmy9d8VVFoBNRqxrVzEcFE8an2d) |
 
-### 1. 命名规范
-- 统一命名格式：`YYYY-MM-DD-文档主题.扩展名`
-- 示例：
-  - 飞书文档：`2026-06-26-知识库重构方案.url.md`
-  - Markdown：`2026-06-26-AB实验方法论总结.md`
-  - HTML：`2026-06-26-数据分析报告.html`
+---
 
-### 2. 飞书文档归档格式
-飞书文档使用 `.url.md` 文件记录，包含以下信息：
-```markdown
-# 文档标题
-- 创建日期：YYYY-MM-DD
-- 飞书链接：https://feishu.cn/docx/xxxxxx
-- 文档类型：分析报告/方案/PRD/会议纪要/其他
-- 关键词：关键词1, 关键词2, 关键词3
-- 关联项目：项目名称（可选）
-```
+## 🏗️ 工作区指南与规范
 
-### 3. 归档流程
-1. 文档生成完成后，**必须**将文件/链接归档到本目录对应子目录
-2. 如果是飞书文档，创建 `.url.md` 索引文件记录链接和元信息
-3. 本地MD/HTML/其他文件直接复制/移动到对应子目录
-4. 在本README的「归档索引」表格中追加一条记录
-5. 跨领域关联文档在对应知识库目录中建立软链接或引用
+| 归档时间 | 文档名称 | 类型 | 飞书链接/本地路径 | 备注 |
+|---------|---------|------|------------------|------|
+| 2026-07-13 | PM AI Native分级体系与专项周报 | Markdown | [飞书wiki](https://mi.feishu.cn/wiki/WJHtw4dbxi2zUGk41IFcfKB5ngc) / [本地Markdown](../参考资料/PM-AI-Native分级体系与专项周报.md) | L0-L4五级分级标准、W28水位扫描、L3优秀案例特征（MEMORY五段结构/踩坑记录/决策闭环/多Agent协作）、升级路径 |
+| 2026-07-10 | 说话风格记录 | Markdown | [本地Markdown](./工作区指南/2026-07-10-说话风格记录.md) | 整理历史任务交互中的表述习惯、指令风格、协作偏好，用于AI协作风格匹配 |
+| 2026-07-09 | 数据产品AI协作工作区-完整指南 | Markdown+飞书 | [飞书文档](https://feishu.cn/wiki/DZdiwQlOxieWllk7ZIJcJuk3nOf) / [本地Markdown](./工作区指南/2026-07-09-数据产品AI协作工作区-完整指南.md) | 整合AGENTS/USER/CURRENT/WORK-PLAN/MEMORY/DECISIONS/WORKFLOWS 7个核心入口文件的完整工作区指南 |
 
-### 4. 索引维护
-每次归档后，在下方「归档索引」表格中追加记录，保持最新在最上方。
+---
 
-## 归档索引
+## 📅 季度规划复盘
 
-| 日期 | 文档主题 | 类型 | 链接/位置 | 关键词 |
-|------|----------|------|-----------|--------|
-| 2026-07-01 | 龚云荷工作全景与AI可替代性分析（2026 H1） | 工作分析 | [飞书文档](https://feishu.cn/wiki/JdzLwjnARi6vfwkrvYrc1SlHnhd) / [本地Markdown](Markdown文件/2026-07-01-龚云荷工作全景与AI可替代性分析.md) | 工作分类,AI可替代性,取数,人群包,nl-sql,埋点方案,工作画像 |
-| 2026-07-01 | 每日工作回顾：浏览器流量地图与信息流有效DAU | 工作回顾 | [主文档](../../05-个人成长/每日记录/2026-07-01-每日工作回顾.md) / [归档副本](Markdown文件/2026-07-01-每日工作回顾.md) | 每日回顾,nl-sql,浏览器流量地图,信息流有效DAU,Kyuubi,绩效素材 |
-| 2026-06-30 | 数据产品Q3 OKR V2（对齐团队OKR正式版） | OKR规划 | [飞书文档](https://feishu.cn/wiki/D1rpwY200iX6QekK39McZaAtnve) / [本地Markdown](季度规划复盘/2026-Q3-OKR-V2.md) | Q3 OKR,AI Native,nl-sql,聚焦原则,5个KA,团队对齐 |
-| 2026-06-30 | 每日待办跟踪 | 工作管理 | [工作文档](../../05-个人成长/每日记录/DAILY-TODO.md) / [归档副本](Markdown文件/2026-06-30-每日待办跟踪.md) | 每日待办,ToDo,周会任务,P0,P1,滚动跟进 |
-| 2026-06-29 | 浏览器核心分析报告综合总结（7份飞书报告提炼） | 业务分析 | [知识库案例](../../00-知识库/data-analysis/案例库/2026-06-29-浏览器核心分析报告综合总结.md) / [归档副本](Markdown文件/2026-06-29-浏览器核心分析报告综合总结.md) | 浏览器,用户画像,内容运营,PUSH,DAU,竞品分析,决策建议 |
-| 2026-06-29 | 1021 浏览器用户画像分析 | 飞书文档 | [飞书链接](https://mi.feishu.cn/docx/QSdZdlp3moBiQ7xnWsQcicGGnyd) | 用户画像,年龄性别,城市等级,行为偏好 |
-| 2026-06-29 | 1021 超级小爱在桌面增加ICON对浏览器影响 | 飞书文档 | [飞书链接](https://mi.feishu.cn/docx/Bhxnd2J80oeAoixAEShcXA4inth) | OS3,超级小爱,竞品分析,日活率 |
-| 2026-06-29 | 1021 国庆节后浏览器DAU趋势监控版 | 飞书表格 | [飞书链接](https://mi.feishu.cn/sheets/JYYPsj4GshJhsQt6lSKcLm3DnYd) | DAU监控,趋势分析,基准线 |
-| 2026-06-29 | 内容时效性数据分析报告（0413→0501） | 飞书文档 | [飞书链接](https://mi.feishu.cn/wiki/LXKLw1s7kiF9DnkqNJacZLvAndd) | 内容时效性,CTR,衰减曲线,品类效率 |
-| 2026-06-29 | 搜索用户画像分析 | 飞书文档 | [飞书链接](https://mi.feishu.cn/wiki/A8B4wiL2FiuW03k0OWkcbj7Anpc) | 搜索画像,留存,搜索入口,意图分布 |
-| 2026-06-29 | 1009 浏览器假期消费趋势分析 | 飞书文档 | [飞书链接](https://mi.feishu.cn/docx/Oo9IdXBAioz06Zx3RIJcXu6anJe) | 国庆假期,DAU,PUSH运营,竞品对比 |
-| 2026-06-29 | 1031 天气对浏览器DAU影响分析 | 飞书文档 | [飞书链接](https://mi.feishu.cn/docx/TVtydKv0lod7COxG7V5cAyqQnPS) | DAU归因,天气影响,省份数据 |
-| 2026-06-29 | WORKFLOWS 工作Agent运行手册 | 工作流规则 | [根目录](../../WORKFLOWS.md) / [归档副本](Markdown文件/2026-06-29-WORKFLOWS-工作Agent运行手册.md) | 工作Agent,运行手册,记录工作,辅助规划,辅助决策,归档流程 |
-| 2026-06-29 | DECISIONS 决策记录 | 决策记录 | [根目录](../../DECISIONS.md) / [归档副本](Markdown文件/2026-06-29-DECISIONS-决策记录.md) | 决策记录,ADR,回看事项,Q3聚焦,nl-sql |
-| 2026-06-29 | CURRENT 当前工作状态 | 工作管理 | [根目录](../../CURRENT.md) / [归档副本](Markdown文件/2026-06-29-CURRENT-当前工作状态.md) | 当前重点,P0,P1,明确不做,工作Agent,nl-sql |
-| 2026-06-29 | USER 个人上下文 | 上下文入口 | [根目录](../../USER.md) / [归档副本](Markdown文件/2026-06-29-USER-个人上下文.md) | 个人上下文,角色,偏好,工具链,决策风格 |
-| 2026-06-28 | ICE DataWork新平台设计 | 产品设计 | [飞书文档](https://mi.feishu.cn/docx/ZOREdrAPtoFD8PxruFqchNYSnbh) | ICE DataWork,平台设计,产品架构,nl-sql,AI工作台 |
-| 2026-06-27 | TokenWisdom 产品页面 v11 HTML 原型 | HTML网页 | [项目文档](../../01-业务项目/TokenWisdom/design/2026-06-27-tokenwisdom-product-prd-pages-v11.html) / [归档副本](HTML文件/2026-06-27-TokenWisdom-产品页面-v11.html) | TokenWisdom,Workstation,Workspace,Agent-to-Agent,数字分身,PRD页面 |
-| 2026-06-27 | TokenWisdom 产品 PRD v1 | 产品PRD | [项目文档](../../01-业务项目/TokenWisdom/2026-06-27-TokenWisdom-产品PRD-v1.md) / [归档副本](Markdown文件/2026-06-27-TokenWisdom-产品PRD-v1.md) | TokenWisdom,产品PRD,AI分身,Workstation,Agent协作,权限模型 |
-| 2026-06-27 | TokenWisdom Workstation v10 HTML 原型 | HTML网页 | [项目文档](../../01-业务项目/TokenWisdom/design/2026-06-27-tokenwisdom-workstation-v10.html) / [归档副本](HTML文件/2026-06-27-TokenWisdom-Workstation-v10.html) | TokenWisdom,Workstation,Workspace,数据分析工作台,普通工作台 |
-| 2026-06-27 | TokenWisdom 数据分析工作台 v9 HTML 原型 | HTML网页 | [项目文档](../../01-业务项目/TokenWisdom/design/2026-06-27-tokenwisdom-data-analysis-workspace-v9.html) / [归档副本](HTML文件/2026-06-27-TokenWisdom-数据分析工作台-v9.html) | TokenWisdom,数据分析,工作台,折叠抽屉,数字分身 |
-| 2026-06-27 | TokenWisdom 任务工作台 v8 HTML 原型 | HTML网页 | [项目文档](../../01-业务项目/TokenWisdom/design/2026-06-27-tokenwisdom-mission-workspace-v8.html) / [归档副本](HTML文件/2026-06-27-TokenWisdom-任务工作台-v8.html) | TokenWisdom,工作台页面,数字分身,Mission Workspace,工具Agent |
-| 2026-06-27 | TokenWisdom ICE全页面 v7 HTML 原型 | HTML网页 | [项目文档](../../01-业务项目/TokenWisdom/design/2026-06-27-tokenwisdom-ice-full-pages-v7.html) / [归档副本](HTML文件/2026-06-27-TokenWisdom-ICE全页面-v7.html) | TokenWisdom,ICE Workbench,全页面设计,数字分身,Mission |
-| 2026-06-27 | TokenWisdom AI主任务台 v6 HTML 原型 | HTML网页 | [项目文档](../../01-业务项目/TokenWisdom/design/2026-06-27-tokenwisdom-ai-workbench-v6.html) / [归档副本](HTML文件/2026-06-27-TokenWisdom-AI主任务台-v6.html) | TokenWisdom,AI交互,主任务台,数字分身,任务总结 |
-| 2026-06-27 | 飞书消息每日总结（周六） | 工作汇总 | [飞书文档](https://mi.feishu.cn/docx/TDpud8KPdoUQomxjH7kcoUganIf) | 飞书消息,每日总结,周六 |
-| 2026-06-27 | 每日工作回顾自动化体系建设 | 工具开发 | [脚本](../../07-定时任务/scripts/daily_work_review.py) / [说明](../../07-定时任务/README.md) | 自动化,定时任务,每日回顾,周总结,工作流 |
-| 2026-06-27 | ICE Workbench Agent 改进方案 | 技术方案 | [飞书文档](https://mi.feishu.cn/wiki/QmBwwFLwZiaPXwk0Vzlc23Ognxf) / [本地Markdown](Markdown文件/2026-06-27-ICE-Workbench-Agent改进方案.md) | ICE Workbench,Agent改进,skill元数据,并行执行,失败处理,memory机制,NL→SQL,语义层,evals |
-| 2026-06-27 | TokenWisdom 工作台 v5 HTML 原型 | HTML网页 | [项目文档](../../01-业务项目/TokenWisdom/design/2026-06-27-tokenwisdom-workbench-v5.html) / [归档副本](HTML文件/2026-06-27-TokenWisdom-工作台-v5.html) | TokenWisdom,工作台,参考页改进,数字分身,Agent管理 |
-| 2026-06-27 | TokenWisdom 参考页改进 v5 | 产品方案 | [项目文档](../../01-业务项目/TokenWisdom/design/2026-06-27-TokenWisdom-参考页改进-v5.md) / [归档副本](Markdown文件/2026-06-27-TokenWisdom-参考页改进-v5.md) | TokenWisdom,参考页分析,工作台,Agent配置台,Twin Dock |
-| 2026-06-27 | TokenWisdom 工作台 v4 HTML 原型 | HTML网页 | [项目文档](../../01-业务项目/TokenWisdom/design/2026-06-27-tokenwisdom-workbench-v4.html) / [归档副本](HTML文件/2026-06-27-TokenWisdom-工作台-v4.html) | TokenWisdom,工作台,数字分身,Twin Manager,任务管理 |
-| 2026-06-27 | TokenWisdom 工作台页面层级 v4 | 产品方案 | [项目文档](../../01-业务项目/TokenWisdom/design/2026-06-27-TokenWisdom-工作台页面层级-v4.md) / [归档副本](Markdown文件/2026-06-27-TokenWisdom-工作台页面层级-v4.md) | TokenWisdom,页面层级,工作台,数字分身管理,首页信息架构 |
-| 2026-06-27 | TokenWisdom Agent-to-Agent v3 HTML 原型 | HTML网页 | [项目文档](../../01-业务项目/TokenWisdom/design/2026-06-27-tokenwisdom-agent-to-agent-v3.html) / [归档副本](HTML文件/2026-06-27-TokenWisdom-Agent-to-Agent-v3.html) | TokenWisdom,Agent-to-Agent,Twin Agent,权限确认,HTML原型 |
-| 2026-06-27 | TokenWisdom 页面层级 v3 | 产品方案 | [项目文档](../../01-业务项目/TokenWisdom/design/2026-06-27-TokenWisdom-页面层级-v3.md) / [归档副本](Markdown文件/2026-06-27-TokenWisdom-页面层级-v3.md) | TokenWisdom,页面层级,User to Agent to Agents,Twin Dock,权限结构 |
-| 2026-06-27 | 数据产品 26年Q3规划 | OKR规划 | [飞书文档](https://feishu.cn/wiki/C1V2wb2owitM0qkwWakcDgIineg) / [本地Markdown](季度规划复盘/2026-Q3规划.md) | Q3规划,OKR,AI Native,nl-sql,聚焦,平台化 |
-| 2026-06-27 | 数据产品 26年Q2复盘 | 季度复盘 | [飞书文档](https://feishu.cn/wiki/LMjdwWoWwiXxH1kOFSKcn8vHn91) / [本地Markdown](季度规划复盘/2026-Q2复盘.md) | Q2复盘,OKR复盘,聚焦原则,ICE工作台,Skill,Agent |
-| 2026-06-27 | TokenWisdom 产品页面 v2 HTML 原型 | HTML网页 | [项目文档](../../01-业务项目/TokenWisdom/design/2026-06-27-tokenwisdom-product-pages-v2.html) / [归档副本](HTML文件/2026-06-27-TokenWisdom-产品页面-v2.html) | TokenWisdom,HTML原型,多页面,产品页面,清晰高效 |
-| 2026-06-27 | TokenWisdom 页面层级 v2 | 产品方案 | [项目文档](../../01-业务项目/TokenWisdom/design/2026-06-27-TokenWisdom-页面层级-v2.md) / [归档副本](Markdown文件/2026-06-27-TokenWisdom-页面层级-v2.md) | TokenWisdom,页面层级,IA,主页面,子页面 |
-| 2026-06-26 | TokenWisdom Mission Control HTML 原型 | HTML网页 | [项目文档](../../01-业务项目/TokenWisdom/design/2026-06-26-tokenwisdom-mission-control.html) / [归档副本](HTML文件/2026-06-26-TokenWisdom-Mission-Control-原型.html) | TokenWisdom,HTML原型,Twin Mission Control,AI分身,Agent工作台 |
-| 2026-06-26 | TokenWisdom × ICE Workbench 整合分析 | 产品方案 | [项目文档](../../01-业务项目/TokenWisdom/2026-06-26-TokenWisdom-ICE-Workbench整合分析.md) / [归档副本](Markdown文件/2026-06-26-TokenWisdom-ICE-Workbench整合分析.md) | TokenWisdom,ICE Workbench,Agent工作台,Local Runtime,Knowledge Hub |
-| 2026-06-26 | 飞书消息整理：团队原则与工作进展 | 工作汇总 | [Markdown文件](Markdown文件/2026-06-26-飞书消息整理-团队原则与工作进展.md) / [飞书链接](https://mi.feishu.cn/docx/EMhZdj3HHoOdupxrO7IcYlhdnYQ) | 团队管理,工作原则,周会TODO,数据问题,浏览器,信息流 |
-| 2026-06-26 | TokenWisdom 产品方案讨论记录 | 产品方案 | [项目文档](../../01-业务项目/TokenWisdom/2026-06-26-TokenWisdom-产品方案讨论记录.md) / [归档副本](Markdown文件/2026-06-26-TokenWisdom-产品方案讨论记录.md) | AI分身,Agent工作空间,专业执行Agent,Claude Code,Codex,Cursor |
-| 2026-06-26 | 协作关系与AI协作的思考 | HTML网页 | [本地](HTML文件/2026-06-26-AI协作思考.html) / [线上](http://ai.ice.miui.srv/#/方法论/ai/v1-0/ai.html) | AI协作,Prompt模板,方法论,角色陪跑 |
-| 2026-06-26 | 协作关系与AI协作的思考 | 飞书文档 | [飞书链接](https://mi.feishu.cn/wiki/UerGwv4UTiGs31kE83NcIu76nfd) | AI协作,Prompt模板,方法论 |
-| 2026-06-26 | 工作待办与计划管理 | 工作管理 | Markdown文件/2026-06-26-工作待办与计划管理.md | 待办,工作计划,项目管理,P0/P1,进度跟踪 |
-| 2026-06-26 | 龚云荷工作梳理：历史完成项与在研项目 | 工作梳理 | Markdown文件/2026-06-26-龚云荷工作梳理-历史与在研.md | 工作梳理,历史项目,在研项目,ICE,AI Skill,埋点 |
-| 2026-06-26 | 数据产品周会纪要 | 飞书文档 | 飞书文档/2026-06-26-数据产品周会纪要-工作梳理.url.md | 周会纪要,工作安排,团队协作 |
-| 2026-06-26 | 知识库架构重构方案 | 规则文档 | 本README | 知识库,架构,组织方式 |
+| 归档时间 | 文档名称 | 类型 | 飞书链接/本地路径 | 备注 |
+|---------|---------|------|------------------|------|
+| 2026-07-08 | 2026年Q3 OKR规划（双KA聚焦V3） | Markdown+飞书 | [飞书文档](https://feishu.cn/wiki/TsObwFTS8iVqTtkPxEVcvgjLnHg) / [本地Markdown](./季度规划复盘/2026-Q3-OKR-V3.md) | Q3 OKR最终版，聚焦AI平台能力建设+AI数据赋能培训双KA |
+
+---
+
+## 📝 会议纪要
+
+| 归档时间 | 文档名称 | 类型 | 飞书链接/本地路径 | 备注 |
+|---------|---------|------|------------------|------|
+| 2026-07-07 | 沉浸态图文口径对齐会议纪要 | Markdown | [飞书文档](https://mi.feishu.cn/docx/ALyEdy25CoCgX5xL5RicVuUxnNb) / [本地Markdown](./会议纪要/2026-07-07-沉浸态图文口径对齐会议纪要.md) | 二期悬浮框埋点bug导致消费时长重复计算，决策：产品形态改动终审必须邀请算法参与 |
+| 2026-07-08 | 数据夜校第一期：数据通识与AI辅助取数 | Markdown | [飞书文档](https://mi.feishu.cn/docx/FSPZdTt84ocMsZxaxorcnjoTnMe) / [本地Markdown](./会议纪要/2026-07-08-数据夜校第一期-数据通识与AI辅助取数.md) | 数据夜校开课，DIKW/数仓分层/SQL六条铁律/DID方法培训，发布初版nl-sql Skill |
+| 2026-07-09 | 数据夜校第二期：SQL进阶与性能优化 | Markdown | [飞书文档](https://mi.feishu.cn/docx/AhZ4d6XUDovSfUxpq3Ecjr0Fnvd) / [本地Markdown](./会议纪要/2026-07-09-数据夜校第二期-SQL进阶与性能优化.md) | 数据地图使用、JOIN/WITH语法、SQL性能优化原则，现场实操 |
+| 2026-07-10 | LLM原理培训：上下文工程与生成机制 | Markdown | [飞书文档](https://mi.feishu.cn/docx/NgzodaxGgogF8Fx1l0McetHgnPe) / [本地Markdown](./会议纪要/2026-07-10-LLM原理培训-上下文工程与生成机制.md) | 大模型生成机制、缓存策略、长上下文处理、幻觉对策，对nl-sql优化的启示 |
+| 2026-07-10 | MICA平台培训：多人多Agent协作平台 | Markdown | [飞书文档](https://mi.feishu.cn/docx/U2wUd9gifovSpWxQ90ZcT2Glnxh) / [本地Markdown](./会议纪要/2026-07-10-MICA平台培训-多人多Agent协作平台.md) | 集团多Agent协作平台介绍，三种编排模式（单Agent/团队/DAG），评估与ICE工作台互补可能性 |
+| 2026-07-10 | 浏览器产品组周会会议纪要 | Markdown | [飞书文档](https://mi.feishu.cn/docx/YV4Zdy3Qfo6fvixzJzbcLOBXn8e) / [本地Markdown](./会议纪要/2026-07-10-浏览器产品组周会会议纪要.md) | 7月10日周会，含20.23版本进度、核心数据、各业务线进展与决策、14项待办任务 |
+
+---
+
+## 📊 数据分析报告
+
+| 归档时间 | 文档名称 | 类型 | 飞书链接/本地路径 | 备注 |
+|---------|---------|------|------------------|------|
+| 2026-07-01 | 浏览器信息流流量地图现状摸底（新口径） | HTML+飞书 | [飞书文档](https://feishu.cn/wiki/T8sbwe47ri8m1kkXLmtcc82OnCe) / [本地HTML](./数据分析报告/2026-07-01-浏览器信息流流量地图新口径.html) | 基于神策新埋点`page_expo_view_new`+`content_duration_new`口径的信息流流量分析，含页面/频道UV/时长/留存 |
+| 2026-07-01 | 浏览器信息流流量地图现状摸底（旧口径） | Markdown | [本地Markdown](../data-analysis/cases/2026-07-01-浏览器信息流流量地图现状摸底.md) | 基于旧埋点的第一版流量地图分析 |
+
+---
+
+## 🧭 交互式 HTML 页面
+
+| 归档时间 | 文档名称 | 类型 | 本地路径 | 备注 |
+|---------|---------|------|----------|------|
+| 2026-07-02 | ICE-DATA-WORK Agent 框架交互解读 | HTML | [本地HTML](./HTML文件/2026-07-02-ICE-DATA-WORK-Agent框架交互解读.html) | 基于 AI Native H5 文件预览工作台交互重构，含左侧目录搜索、中间幻灯片阅读、右侧评论、键盘翻页、主题切换与演示模式 |
+
+---
+
+## 🔁 复盘总结
+
+| 归档时间 | 文档名称 | 类型 | 飞书链接/本地路径 | 备注 |
+|---------|---------|------|------------------|------|
+| 2026-07-01 | Agent 取数复盘与全局经验 | Markdown | [本地Markdown](../data-analysis/methods/Agent取数复盘与全局经验.md) | 基于浏览器流量地图、信息流有效 DAU/时长两次取数沉淀的 Agent 取数协议 |
+
+---
+
+## 目录说明
+
+| 目录 | 内容 |
+|------|------|
+| 数据分析报告/ | 各类数据分析报告HTML/PDF版本 |
+| 产品方案/ | 产品需求文档、方案设计文档 |
+| 会议纪要/ | 正式会议纪要归档 |
+| 复盘总结/ | 月度/季度复盘、项目总结 |

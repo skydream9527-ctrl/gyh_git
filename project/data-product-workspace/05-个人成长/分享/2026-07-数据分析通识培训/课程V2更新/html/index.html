@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>数据分析通识培训 V2 · 课程目录</title>
+<style>
+  :root{--ink:#0C0F14;--slate:#161B22;--slate2:#1E242D;--line:#2A313C;--snow:#EDF1F7;--mist:#98A4B3;--cyan:#3DD8C4;--green:#33D17A;--amber:#F5A524;--red:#F2555A;--violet:#9B8CFF;--mono:"SFMono-Regular",Menlo,Consolas,monospace;--sans:"PingFang SC","Source Han Sans SC","Microsoft YaHei",system-ui,sans-serif;}
+  *{box-sizing:border-box}
+  html,body{margin:0;color:var(--snow);font-family:var(--sans)}
+  body{background:radial-gradient(1200px 700px at -8% -12%,rgba(61,216,196,.08),transparent 55%),radial-gradient(1000px 620px at 108% 112%,rgba(51,209,122,.05),transparent 55%),linear-gradient(rgba(255,255,255,.016) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.016) 1px,transparent 1px),var(--ink);background-size:auto,auto,56px 56px,56px 56px,auto;min-height:100vh}
+  .wrap{max-width:1120px;margin:0 auto;padding:7vh 5vw 10vh}
+  .lead{font-family:var(--mono);color:var(--cyan);font-size:15px;letter-spacing:.26em;margin:0 0 14px;text-transform:uppercase}
+  h1{font-size:clamp(34px,5vw,58px);font-weight:800;margin:0;line-height:1.15}
+  h1 .cyan{color:var(--cyan)}
+  .sub{font-size:21px;color:var(--mist);margin:18px 0 0;line-height:1.6;max-width:760px}
+  .rule{width:104px;height:5px;background:linear-gradient(90deg,var(--cyan),rgba(61,216,196,.2));border-radius:3px;margin:26px 0 0}
+  .legend{display:flex;gap:20px;flex-wrap:wrap;margin:34px 0 8px;font-size:15px;color:var(--mist)}
+  .legend b{color:var(--snow)}
+  .sect{font-family:var(--mono);color:var(--mist);font-size:14px;letter-spacing:.2em;text-transform:uppercase;margin:46px 0 16px;display:flex;align-items:center;gap:12px}
+  .sect::after{content:"";flex:1;height:1px;background:var(--line)}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+  .mod{display:block;text-decoration:none;color:inherit;background:linear-gradient(180deg,rgba(255,255,255,.02),transparent 45%),var(--slate);border:1px solid var(--line);border-radius:16px;padding:20px 22px;transition:border-color .2s,transform .2s;position:relative}
+  .mod:hover{border-color:var(--cyan);transform:translateY(-2px)}
+  .mod .top{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+  .mod .no{font-family:var(--mono);font-size:13px;color:var(--mist);border:1px solid var(--line);border-radius:7px;padding:3px 9px}
+  .mod .lvl{font-size:13px;padding:3px 10px;border-radius:20px;font-weight:700}
+  .lv-must{background:rgba(51,209,122,.14);color:var(--green)}
+  .lv-adv{background:rgba(61,216,196,.14);color:var(--cyan)}
+  .lv-pro{background:rgba(155,140,255,.16);color:var(--violet)}
+  .lv-none{background:rgba(152,164,179,.12);color:var(--mist)}
+  .mod .t{font-size:22px;font-weight:700;margin:0 0 6px}
+  .mod .d{font-size:15px;color:var(--mist);margin:0;line-height:1.5}
+  .mod .go{position:absolute;right:20px;top:20px;color:var(--mist);font-size:18px}
+  .mod:hover .go{color:var(--cyan)}
+  .mod.wide{grid-column:1 / -1}
+  .links{display:flex;gap:14px;flex-wrap:wrap;margin-top:6px}
+  .lnk{text-decoration:none;color:var(--mist);border:1px solid var(--line);border-radius:10px;padding:12px 18px;font-size:15px;transition:.2s}
+  .lnk:hover{border-color:var(--cyan);color:var(--cyan)}
+  .foot{margin-top:44px;color:var(--mist);font-size:14px;line-height:1.7}
+  .foot a{color:var(--cyan);text-decoration:none}
+  @media (max-width:760px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="lead">数据分析通识培训 · V2</p>
+  <h1>课程<span class="cyan">目录</span></h1>
+  <p class="sub">给产品 / 销售 / 运营新人的数据分析通识课——建立数据思维、会用数据自证业务、能借助 AI 上手取数。点击卡片进入对应演示 deck（← → 翻页，空格逐条展开，P 导出 PDF）。</p>
+  <div class="rule"></div>
+  <div class="legend">
+    <span>层级：<b class="lv-must" style="padding:2px 8px;border-radius:12px">✅ 必会</b> 人人都要会</span>
+    <span><b class="lv-adv" style="padding:2px 8px;border-radius:12px">🔷 进阶</b> 想深入取数/分析</span>
+    <span><b class="lv-pro" style="padding:2px 8px;border-radius:12px">⭐ 专业</b> 数据/产品方向</span>
+  </div>
+
+  <div class="sect">演示 deck</div>
+  <div class="grid">
+    <a class="mod wide" href="./课程串讲-数据从哪来与指标口径.html">
+      <span class="go">→</span>
+      <div class="top"><span class="no">导览</span><span class="lvl lv-must">✅ 必看</span></div>
+      <p class="t">课程串讲：数据从哪来 + 指标口径</p>
+      <p class="d">全局认知，抓住"数据从哪来""口径怎么定"两大痛点 · 0.5h</p>
+    </a>
+    <a class="mod" href="./00-启动课-数据从点击到表.html">
+      <span class="go">→</span>
+      <div class="top"><span class="no">00</span><span class="lvl lv-must">✅ 必会</span></div>
+      <p class="t">启动课 · 数据从点击到表</p>
+      <p class="d">表结构、数仓、数据链路、SQL 本质 · 1h</p>
+    </a>
+    <a class="mod" href="./01-数据思维与业务自证.html">
+      <span class="go">→</span>
+      <div class="top"><span class="no">01</span><span class="lvl lv-must">✅ 必会·核心</span></div>
+      <p class="t">数据思维与业务自证</p>
+      <p class="d">用数据发现问题、给业务自证（销售/运营重点）· 1.5h</p>
+    </a>
+    <a class="mod" href="./02-数据地图与找数.html">
+      <span class="go">→</span>
+      <div class="top"><span class="no">02</span><span class="lvl lv-must">✅ 必会</span></div>
+      <p class="t">数据地图与找数</p>
+      <p class="d">找表、看字段、数据工坊执行、权限申请、提需求 · 1.5h</p>
+    </a>
+    <a class="mod" href="./03-SQL基础与AI辅助取数.html">
+      <span class="go">→</span>
+      <div class="top"><span class="no">03</span><span class="lvl lv-must">✅ 必会(基本)</span></div>
+      <p class="t">SQL 基础 + AI 辅助取数</p>
+      <p class="d">看懂写简单 SQL、AI 辅助 + 4 步校验、执行原理入门 · 1.5h</p>
+    </a>
+    <a class="mod" href="./04-SQL进阶-多表JOIN与CTE.html">
+      <span class="go">→</span>
+      <div class="top"><span class="no">04</span><span class="lvl lv-adv">🔷 进阶</span></div>
+      <p class="t">SQL 进阶 · JOIN、CTE 与执行调优</p>
+      <p class="d">多表关联 + 执行原理(MapReduce/Shuffle/倾斜) + 调优 · 1.5h</p>
+    </a>
+    <a class="mod" href="./05-数据分析方法.html">
+      <span class="go">→</span>
+      <div class="top"><span class="no">05</span><span class="lvl lv-adv">🔷 进阶</span></div>
+      <p class="t">数据分析方法</p>
+      <p class="d">先对口径 + 四把尺子、对比/趋势/分群/漏斗 · 1.5h</p>
+    </a>
+    <a class="mod" href="./06-AB实验原理与判断.html">
+      <span class="go">→</span>
+      <div class="top"><span class="no">06</span><span class="lvl lv-pro">⭐ 专业</span></div>
+      <p class="t">AB 实验原理与判断</p>
+      <p class="d">看懂实验、判断可信度、怎么读实验报告 · 1.5h</p>
+    </a>
+    <a class="mod" href="./07-信息流埋点设计.html">
+      <span class="go">→</span>
+      <div class="top"><span class="no">07</span><span class="lvl lv-pro">⭐ 专业</span></div>
+      <p class="t">信息流埋点设计</p>
+      <p class="d">数据从哪来、四核心事件、时长原理、验收 · 1.5h</p>
+    </a>
+    <a class="mod" href="./08-综合实战.html">
+      <span class="go">→</span>
+      <div class="top"><span class="no">08</span><span class="lvl lv-adv">🔷 进阶</span></div>
+      <p class="t">综合实战</p>
+      <p class="d">贯穿案例 + 取数实战，走完全流程 · 1h</p>
+    </a>
+    <a class="mod" href="../课件讲义/09-答疑.md">
+      <span class="go">→</span>
+      <div class="top"><span class="no">09</span><span class="lvl lv-none">— 机动</span></div>
+      <p class="t">答疑（动态 FAQ）</p>
+      <p class="d">随授课积累，无固定 deck，见课件讲义/09-答疑.md</p>
+    </a>
+  </div>
+
+  <div class="sect">配套资料（Markdown）</div>
+  <div class="links">
+    <a class="lnk" href="../README.md">📘 课程导航 README</a>
+    <a class="lnk" href="../课件讲义/">📚 课件讲义（00~09）</a>
+    <a class="lnk" href="../配套练习/">✍️ 配套练习（带参考答案）</a>
+    <a class="lnk" href="../公共资料/">🧰 公共资料（速查/模板/Checklist）</a>
+  </div>
+
+  <div class="foot">
+    产品新人（全量）：导览 → 0 → 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →（9 / 选修手册）<br>
+    销售 / 运营（精简）：导览 → 0(轻) → <b style="color:var(--snow)">1 数据思维（重点）</b> → 2 → 3 →（5 / 8 业务版 选学）<br>
+    <span style="opacity:.7">设计依据见 <a href="../课程改版方案.md">课程改版方案.md</a></span>
+  </div>
+</div>
+</body></html>

@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第2课时 · SQL基础语法（上）- 面向0编程基础入门</title>
+<style>
+:root {
+  --ink: #151515;
+  --text: #252525;
+  --muted: #646464;
+  --quiet: #8a8a8a;
+  --line: #3a3a3a;
+  --line-muted: #777;
+  --line-soft: #deddd9;
+  --paper: #f7f6f2;
+  --panel: #fffefa;
+  --panel-soft: #f0efeb;
+  --panel-deep: #e2e1dd;
+  --accent: #2a2a2a;
+  --highlight: #fef3c7;
+  --blue: #1e40af;
+  --green: #15803d;
+  --orange: #c2410c;
+  --red: #b91c1c;
+  --purple: #7c3aed;
+  --shadow: 0 10px 24px rgba(0, 0, 0, 0.045);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: "Avenir Next", "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+  background: var(--paper);
+  color: var(--text);
+  line-height: 1.62;
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+}
+.page { max-width: 1100px; margin: 0 auto; padding: 54px 34px 86px; }
+h1, h2, h3, h4 {
+  font-family: "Songti SC", "Noto Serif CJK SC", serif;
+  color: var(--ink); font-weight: 700;
+}
+.header { margin-bottom: 48px; padding-bottom: 28px; border-bottom: 1.25px solid var(--line); }
+.eyebrow { font-family: "Avenir Next"; font-size: 12px; letter-spacing: 0.12em; color: var(--quiet); text-transform: uppercase; margin-bottom: 14px; font-weight: 600; }
+h1 { font-size: 36px; line-height: 1.1; margin-bottom: 12px; }
+.subtitle { font-size: 17px; color: var(--muted); font-weight: 400; margin-bottom: 20px; }
+.meta-row { display: flex; gap: 28px; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin-bottom: 24px; }
+.meta-item { display: flex; align-items: center; gap: 6px; }
+.section { margin-bottom: 48px; }
+.section-title { font-size: 24px; margin-bottom: 6px; padding-bottom: 12px; border-bottom: 0.75px solid var(--line-soft); display: flex; align-items: center; gap: 10px; }
+.section-num { font-family: "Avenir Next"; font-size: 14px; font-weight: 600; color: var(--quiet); }
+h3 { font-size: 18px; margin-top: 24px; margin-bottom: 12px; }
+h4 { font-size: 16px; margin-top: 16px; margin-bottom: 8px; }
+p { margin-bottom: 12px; }
+.caliber-note { background: var(--panel); border-left: 3px solid var(--line); padding: 16px 20px; font-size: 14px; margin-bottom: 20px; color: var(--muted); border-radius: 0 4px 4px 0; }
+.caliber-note strong { color: var(--text); }
+.warning-note { background: #fef2f2; border-left: 3px solid var(--red); padding: 16px 20px; font-size: 14px; margin-bottom: 20px; color: #991b1b; border-radius: 0 4px 4px 0; }
+.tip-note { background: #f0fdf4; border-left: 3px solid var(--green); padding: 16px 20px; font-size: 14px; margin-bottom: 20px; color: #166534; border-radius: 0 4px 4px 0; }
+.purple-note { background: #faf5ff; border-left: 3px solid var(--purple); padding: 16px 20px; font-size: 14px; margin-bottom: 20px; color: #6b21a8; border-radius: 0 4px 4px 0; }
+pre { background: var(--panel-soft); padding: 20px; border-radius: 6px; overflow-x: auto; margin-bottom: 16px; font-family: "SF Mono", "Menlo", monospace; font-size: 13px; line-height: 1.6; border: 1px solid var(--line-soft); }
+code { background: var(--panel-soft); padding: 2px 6px; border-radius: 3px; font-family: "SF Mono", "Menlo", monospace; font-size: 13px; color: var(--ink); }
+pre code { background: none; padding: 0; }
+.code-explain { background: var(--highlight); padding: 14px 18px; border-radius: 0 0 6px 6px; margin-top: -12px; margin-bottom: 20px; font-size: 13px; }
+.concept-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 10px; margin: 20px 0; }
+.concept-card { background: var(--panel); border: 1px solid var(--line-soft); padding: 16px; border-radius: 6px; box-shadow: var(--shadow); }
+.concept-card .term { font-weight: 700; color: var(--ink); margin-bottom: 4px; }
+.concept-card .def { font-size: 13px; color: var(--muted); margin-bottom: 4px; line-height: 1.5; }
+.concept-card .note { font-size: 12px; color: var(--orange); font-weight: 500; }
+.table-wrap { background: var(--panel); border: 1px solid var(--line-soft); box-shadow: var(--shadow); overflow-x: auto; margin-bottom: 20px; border-radius: 6px; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+thead { background: var(--panel-soft); }
+th { font-family: "Avenir Next"; font-weight: 600; font-size: 12px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--line-soft); }
+td { padding: 12px 14px; border-bottom: 0.5px solid var(--line-soft); vertical-align: top; color: var(--text); line-height: 1.6; }
+td:first-child { font-weight: 500; }
+tbody tr:hover { background: var(--panel-soft); }
+tbody tr:last-child td { border-bottom: none; }
+ul, ol { margin-left: 24px; margin-bottom: 16px; }
+li { margin-bottom: 8px; }
+.metric-card { background: var(--panel); border: 1px solid var(--line-soft); border-radius: 6px; padding: 24px; margin-bottom: 20px; box-shadow: var(--shadow); }
+.metric-card .metric-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.metric-card .metric-icon { font-size: 22px; }
+.metric-card .metric-ttl { font-weight: 700; font-size: 17px; color: var(--ink); }
+.sql-structure { background: var(--panel); border: 1px solid var(--line-soft); padding: 24px; border-radius: 6px; margin: 20px 0; box-shadow: var(--shadow); font-family: "SF Mono", "Menlo", monospace; font-size: 14px; line-height: 2; }
+.sql-keyword { color: var(--blue); font-weight: 700; }
+.sql-comment { color: var(--quiet); font-style: italic; }
+.trap-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin: 20px 0; }
+.trap-card { background: var(--panel); border: 1px solid var(--line-soft); border-radius: 6px; padding: 16px; box-shadow: var(--shadow); }
+.trap-card .trap-num { font-family: "Avenir Next"; font-weight: 700; color: var(--red); font-size: 13px; margin-bottom: 6px; }
+.trap-card .trap-ttl { font-weight: 600; margin-bottom: 6px; }
+.trap-card .trap-effect { font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+.trap-card .trap-fix { font-size: 12px; color: var(--green); font-weight: 500; }
+.fun-fact { background: #eff6ff; border-left: 3px solid var(--blue); padding: 16px 20px; font-size: 14px; margin-bottom: 20px; color: #1e40af; border-radius: 0 4px 4px 0; }
+.nav-links { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 40px; justify-content: space-between; }
+.nav-group { display: flex; gap: 12px; }
+.nav-link { background: var(--panel); border: 1px solid var(--line-soft); padding: 10px 18px; border-radius: 6px; text-decoration: none; color: var(--text); font-size: 14px; font-family: "Avenir Next"; transition: all 0.2s; }
+.nav-link:hover { border-color: var(--line); background: var(--panel-soft); }
+.footer { margin-top: 64px; padding-top: 24px; border-top: 0.75px solid var(--line-soft); font-size: 12px; color: var(--quiet); font-family: "Avenir Next"; display: flex; justify-content: space-between; }
+.psych-card { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 8px; padding: 20px; margin: 20px 0; }
+.psych-card h4 { color: #92400e; margin-bottom: 12px; }
+@media (max-width: 768px) {
+  .page { padding: 30px 18px 50px; }
+  h1 { font-size: 28px; }
+  .section-title { font-size: 20px; }
+  pre { font-size: 12px; padding: 14px; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+<header class="header">
+  <div class="eyebrow">数据分析通识培训 · 第2课时</div>
+  <h1>SQL基础语法（上）</h1>
+  <p class="subtitle">面向0编程基础的产品同学 · 看完就能写日常取数SQL</p>
+  <div class="meta-row">
+    <div class="meta-item">⏱️ 课时：1.5小时</div>
+    <div class="meta-item">🎯 目标：看懂SQL、会写简单查询、会用AI辅助</div>
+    <div class="meta-item">📚 前置：第1课时学过的核心表结构</div>
+  </div>
+</header>
+
+<!-- 课前说明 -->
+<section class="section">
+  <h2 class="section-title"><span class="section-num">零</span>课前说明：完全不用怕编程</h2>
+  
+  <div class="caliber-note">
+    <strong>你不需要成为程序员。</strong> 产品同学学SQL的目标是：
+    <ol style="margin-top: 8px;">
+      <li>能看懂别人写的SQL，知道取了什么数、口径对不对</li>
+      <li>能写简单的日常取数SQL，不用每次找数据同学排队</li>
+      <li>会用AI辅助写SQL，校验结果对错，满足80%日常需求</li>
+    </ol>
+    我们不会学复杂的编程逻辑，所有内容都围绕你日常工作中会用到的真实指标，学完就能用。
+  </div>
+</section>
+
+<!-- 基础概念扫盲 -->
+<section class="section">
+  <h2 class="section-title"><span class="section-num">一</span>基础概念扫盲（先搞懂这些词是什么意思）</h2>
+  
+  <p>在学SQL之前，先把最常听到的几个概念用大白话讲清楚，完全不用记，有个印象就行：</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>名词</th><th>大白话解释</th><th>你需要知道的</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>数据库</strong></td>
+          <td>存所有数据的"大Excel文件"，比Excel能存多得多的数据（能存几百亿行），查询速度更快</td>
+          <td>你不用管它存在哪里，只要知道从哪张表查就行</td>
+        </tr>
+        <tr>
+          <td><strong>表（Table）</strong></td>
+          <td>类似Excel里的一个sheet页，按行列存数据</td>
+          <td>我们日常用的都是数据同学加工好的汇总表（DWM/ADS层），不是原始日志，不用自己处理脏数据</td>
+        </tr>
+        <tr>
+          <td><strong>字段（列）</strong></td>
+          <td>类似Excel里的列，每个字段存一类信息：日期、用户ID、点击次数、时长...</td>
+          <td>字段名都是英文缩写，比如<code>did</code>是设备ID（代表一个用户），<code>date</code>是日期，<code>cnt</code>结尾的一般是次数，<code>dura</code>结尾的一般是时长</td>
+        </tr>
+        <tr>
+          <td><strong>记录（行）</strong></td>
+          <td>类似Excel里的一行，一条记录就是一个用户一天/一个PUSH的汇总数据</td>
+          <td>我们用的用户行为汇总表，基本都是「每个用户每天一行」，不会有重复行</td>
+        </tr>
+        <tr>
+          <td><strong>SQL</strong></td>
+          <td>和数据库说话的语言，你告诉它你要什么数，它帮你算出来返回给你</td>
+          <td>语法非常像英语，读出来就知道是什么意思，不用记复杂逻辑</td>
+        </tr>
+        <tr>
+          <td><strong>查询</strong></td>
+          <td>就是你给数据库提需求，让它算数据给你</td>
+          <td>你写一段SQL，点运行，等几十秒到几分钟出结果，结果可以直接导出Excel</td>
+        </tr>
+        <tr>
+          <td><strong>分区</strong></td>
+          <td>数据库按日期把数据分成一小块一小块，就像把Excel按天拆成不同文件</td>
+          <td><span style="color: var(--red); font-weight: 600;">最重要！</span>查数据一定要加<code>date</code>日期过滤，不然会查所有历史数据，跑几小时都出不来，还可能影响别人用</td>
+        </tr>
+        <tr>
+          <td><strong>聚合</strong></td>
+          <td>把多行数据汇总成一个数，比如把1000万个用户的时长加起来算总时长</td>
+          <td>我们算指标几乎都要用到聚合，不用你自己手动加，SQL自动算</td>
+        </tr>
+        <tr>
+          <td><strong>去重</strong></td>
+          <td>算人数的时候，同一个用户只算一次</td>
+          <td>算DAU/UV这种"多少人"的指标，必须去重，不然会重复计数</td>
+        </tr>
+        <tr>
+          <td><strong>语法</strong></td>
+          <td>就是写SQL的固定格式，就像中文要说"我吃饭"而不是"饭吃我"，顺序错了数据库看不懂</td>
+          <td>语法就那固定5个关键词，顺序固定，不用死记硬背</td>
+        </tr>
+        <tr>
+          <td><strong>注释</strong></td>
+          <td>SQL里写的说明文字，数据库不会执行，写给人看的</td>
+          <td>两个减号<code>--</code>后面的内容就是注释，我们例子里有很多注释帮你理解</td>
+        </tr>
+        <tr>
+          <td><strong>运行/执行</strong></td>
+          <td>把你写的SQL提交给数据库，让它开始算数据</td>
+          <td>点界面上的"运行"按钮就行，跑的过程中可以取消</td>
+        </tr>
+        <tr>
+          <td><strong>结果集</strong></td>
+          <td>SQL运行完返回给你的表格数据，和Excel长得一样</td>
+          <td>可以直接复制、导出Excel，用来做分析或做PPT</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="psych-card">
+    <h4>💡 给0基础同学的几个心理建设</h4>
+    <ol>
+      <li><strong>SQL真的不难</strong>：它不是编程语言，没有循环、判断这些复杂逻辑，就是固定的几个关键词拼起来，告诉数据库你要什么</li>
+      <li><strong>不用背语法</strong>：忘了就查，或者直接让AI帮你写，我们的目标是"能看懂、会改简单条件、会校验结果"</li>
+      <li><strong>写错了没关系</strong>：SQL写错了最多就是报错，不会把数据改坏，也不会把数据库搞挂（我们都是查数据，没有修改权限），大胆试</li>
+      <li><strong>先抄再改</strong>：我们给的所有例子都是日常用的，你先把例子里的日期改成你要查的，跑通了再慢慢改其他条件</li>
+    </ol>
+  </div>
+</section>
+
+<!-- SQL是什么 -->
+<section class="section">
+  <h2 class="section-title"><span class="section-num">二</span>SQL是什么？长什么样？</h2>
+  
+  <p>SQL（Structured Query Language）是结构化查询语言，它的语法非常像英语，你按顺序读就能明白意思。</p>
+
+  <p>举个最简单的例子，你一看就懂：</p>
+<pre><code><span class="sql-comment">-- 查询2026年6月28日的DAU（日活跃用户数）</span>
+<span class="sql-keyword">SELECT</span> COUNT(DISTINCT did) <span class="sql-keyword">AS</span> dau
+<span class="sql-keyword">FROM</span> browser.dwm_browser_event_aggregation_miui_di
+<span class="sql-keyword">WHERE</span> date = 20260628
+  <span class="sql-keyword">AND</span> is_app_dau_2024 = 1</code></pre>
+
+  <div class="caliber-note">
+    翻译成大白话就是：<br>
+    从<code>dwm_browser_event_aggregation_miui_di</code>这张表里，<br>
+    筛选出日期是20260628、且是有效活跃用户的数据，<br>
+    对设备ID去重后数一下有多少个，<br>
+    给这个结果起个名字叫dau。<br><br>
+    是不是很简单？SQL的核心就是这固定的几部分，按顺序写就行。
+  </div>
+</section>
+
+<!-- 基础查询结构 -->
+<section class="section">
+  <h2 class="section-title"><span class="section-num">三</span>基础查询固定结构：SELECT - FROM - WHERE</h2>
+  
+  <p>所有简单查询都遵循这个固定顺序，不要搞混顺序：</p>
+
+  <div class="sql-structure">
+<span class="sql-keyword">SELECT</span> 【你要什么字段/算什么指标】<br>
+<span class="sql-keyword">FROM</span> 【从哪张表查】<br>
+<span class="sql-keyword">WHERE</span> 【筛选什么条件的数据】<br>
+<span class="sql-keyword">GROUP BY</span> 【按什么维度分组】（如果要分天/分群算就加）<br>
+<span class="sql-keyword">ORDER BY</span> 【按什么排序】（可选）
+  </div>
+
+  <p>就这5个关键词，记住顺序：<strong>SELECT → FROM → WHERE → GROUP BY → ORDER BY</strong>，90%的日常查询都够用了。</p>
+  <p>我们一个一个讲，从最简单的开始，每个都配真实业务例子。</p>
+
+  <h3>🎯 第一步：先看10行数据，认识一下表长什么样</h3>
+  <p>拿到一张不熟悉的表，第一件事不是算指标，而是先看几行原始数据，知道里面有什么字段、长什么样：</p>
+
+<pre><code><span class="sql-comment">-- 查看这张表前10行数据，看看都有什么字段</span>
+<span class="sql-keyword">SELECT</span> *
+<span class="sql-keyword">FROM</span> iceberg_zjyprc_hadoop.browser.dwm_browser_event_aggregation_miui_di
+<span class="sql-keyword">WHERE</span> date = 20260628
+<span class="sql-keyword">LIMIT</span> 10</code></pre>
+
+  <div class="code-explain">
+    <strong>逐行解释：</strong><br>
+    • <code>SELECT *</code>：<code>*</code>代表"所有字段"，把这一行的所有信息都拿出来<br>
+    • <code>LIMIT 10</code>：只返回10行结果，不然会返回几百万行，卡半天<br>
+    • 👉 这是你拿到新表第一个要跑的SQL，先看看数据长啥样，有哪些字段
+  </div>
+
+  <p>运行结果就像这样（简化版）：</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>date</th><th>did</th><th>app_launch_way</th><th>is_app_dau_2024</th><th>push_send_cnt</th><th>feed_dura</th><th>...</th></tr></thead>
+      <tbody>
+        <tr><td>20260628</td><td>123456789</td><td>点击icon</td><td>1</td><td>2</td><td>1800000</td><td>...</td></tr>
+        <tr><td>20260628</td><td>987654321</td><td>点击push</td><td>1</td><td>3</td><td>2400000</td><td>...</td></tr>
+        <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>你看，每一行就是一个用户一天的数据，每一列就是一个字段，和Excel一模一样！</p>
+
+  <h3>3.1 最简单的单值查询：查单日DAU</h3>
+  <p><strong>需求：</strong>查2026-06-28当天，浏览器APP的DAU（日活跃用户数）是多少？</p>
+
+<pre><code><span class="sql-keyword">SELECT</span> COUNT(DISTINCT did) <span class="sql-keyword">AS</span> dau
+<span class="sql-keyword">FROM</span> iceberg_zjyprc_hadoop.browser.dwm_browser_event_aggregation_miui_di
+<span class="sql-keyword">WHERE</span> date = 20260628
+  <span class="sql-keyword">AND</span> is_app_dau_2024 = 1
+  <span class="sql-keyword">AND</span> COALESCE(did, '') != ''</code></pre>
+
+  <div class="code-explain">
+    <strong>逐行解释（面向0基础）：</strong><br>
+    • <code>COUNT(DISTINCT did) AS dau</code>：
+      <ul style="margin: 4px 0 4px 20px;">
+        <li><code>COUNT</code>：数个数</li>
+        <li><code>DISTINCT did</code>：对<code>did</code>（设备ID，代表一个用户）去重，同一个用户只算一次</li>
+        <li><code>AS dau</code>：给算出来的结果起个别名叫<code>dau</code>，结果里列名就显示dau</li>
+        <li>👉 这一行的意思：数一下有多少个不重复的用户ID，这就是DAU</li>
+      </ul>
+    • <code>FROM iceberg_zjyprc_hadoop.browser.dwm_browser_event_aggregation_miui_di</code>：
+      <ul style="margin: 4px 0 4px 20px;">
+        <li>👉 从用户日汇总行为表（miui_di表）里查数据</li>
+      </ul>
+    • <code>WHERE date = 20260628</code>：
+      <ul style="margin: 4px 0 4px 20px;">
+        <li>👉 <strong>非常重要！</strong>只查2026年6月28日这一天的数据，这就是分区过滤，不加会跑死</li>
+      </ul>
+    • <code>AND is_app_dau_2024 = 1</code>：
+      <ul style="margin: 4px 0 4px 20px;">
+        <li>👉 只统计判定为有效活跃的用户，过滤掉测试账号、异常数据</li>
+      </ul>
+    • <code>AND COALESCE(did, '') != ''</code>：
+      <ul style="margin: 4px 0 4px 20px;">
+        <li>👉 过滤掉设备ID为空的异常数据</li>
+      </ul>
+  </div>
+
+  <p>运行结果就是一个数：</p>
+  <div class="table-wrap">
+    <table><thead><tr><th>dau</th></tr></thead><tbody><tr><td>8562341</td></tr></tbody></table>
+  </div>
+  <p>就是说当天DAU是856万左右。</p>
+
+  <h4>📝 补充：WHERE条件常用写法（过滤数据就靠它）</h4>
+  <p>WHERE就是筛选条件，和Excel里的筛选一模一样，常用的就这几种：</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>写法</th><th>大白话意思</th><th>例子</th></tr></thead>
+      <tbody>
+        <tr><td><code>字段 = 值</code></td><td>等于某个值</td><td><code>date = 20260628</code> 只看6月28日；<code>is_app_dau_2024 = 1</code> 只看有效活跃用户</td></tr>
+        <tr><td><code>字段 != 值</code></td><td>不等于某个值</td><td><code>is_top != 1</code> 过滤掉置顶内容</td></tr>
+        <tr><td><code>字段 &gt; 值</code> / <code>字段 &lt; 值</code></td><td>大于/小于</td><td><code>feed_dura &gt; 0</code> 只看有时长的用户</td></tr>
+        <tr><td><code>字段 BETWEEN 值1 AND 值2</code></td><td>在两个值之间（包含两端）</td><td><code>date BETWEEN 20260620 AND 20260628</code> 看20号到28号</td></tr>
+        <tr><td><code>字段 IN (值1, 值2, 值3)</code></td><td>在这几个值里面</td><td><code>app_launch_way IN ('点击icon', '点击push')</code> 只看这两种启动方式</td></tr>
+        <tr><td><code>字段 LIKE '%关键词%'</code></td><td>包含某个关键词</td><td><code>app_launch_way LIKE '%搜索%'</code> 启动方式里带"搜索"的都算</td></tr>
+        <tr><td><code>字段 IS NULL</code> / <code>字段 IS NOT NULL</code></td><td>是空值/不是空值</td><td><code>did IS NOT NULL</code> 过滤掉没有设备ID的异常数据</td></tr>
+        <tr><td><code>条件1 AND 条件2</code></td><td>两个条件都满足</td><td><code>date = 20260628 AND is_app_dau_2024 = 1</code></td></tr>
+        <tr><td><code>条件1 OR 条件2</code></td><td>满足其中一个条件就行</td><td><code>app_launch_way = '点击push' OR app_launch_way = 'subscribe_push'</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="tip-note">
+    💡 提示：字符串（文字内容）要用单引号包起来，比如'点击icon'；数字不用引号，直接写就行，比如20260628、1。
+  </div>
+
+  <h3>3.2 查趋势：按日期分组，查每天的DAU</h3>
+  <p><strong>需求：</strong>查2026-06-20到2026-06-28这9天，每天的DAU是多少，看趋势。</p>
+
+<pre><code><span class="sql-keyword">SELECT</span> 
+    date,
+    COUNT(DISTINCT did) <span class="sql-keyword">AS</span> dau
+<span class="sql-keyword">FROM</span> iceberg_zjyprc_hadoop.browser.dwm_browser_event_aggregation_miui_di
+<span class="sql-keyword">WHERE</span> date <span class="sql-keyword">BETWEEN</span> 20260620 <span class="sql-keyword">AND</span> 20260628  <span class="sql-comment">-- 日期范围，包含20号和28号</span>
+  <span class="sql-keyword">AND</span> is_app_dau_2024 = 1
+  <span class="sql-keyword">AND</span> COALESCE(did, '') != ''
+<span class="sql-keyword">GROUP BY</span> date  <span class="sql-comment">-- 按日期分组，每天算一个DAU</span>
+<span class="sql-keyword">ORDER BY</span> date  <span class="sql-comment">-- 按日期从小到大排序，看趋势更清楚</span></code></pre>
+
+  <div class="code-explain">
+    <strong>新增的语法解释：</strong><br>
+    • <code>date BETWEEN 20260620 AND 20260628</code>：日期在这个区间内，等价于<code>date &gt;= 20260620 AND date &lt;= 20260628</code><br>
+    • <code>GROUP BY date</code>：按日期分组，相同日期的数据放在一起算，每天出一行结果<br>
+    • <code>ORDER BY date</code>：按日期升序排列（从小到大），如果要倒序就写<code>ORDER BY date DESC</code>
+  </div>
+
+  <div class="warning-note">
+    ⚠️ <strong>重要规则：</strong>SELECT里出现的、不是聚合函数包起来的字段（这里是<code>date</code>），必须出现在GROUP BY后面！不然会报错。
+  </div>
+
+  <p>运行结果（示例）：</p>
+  <div class="table-wrap">
+    <table><thead><tr><th>date</th><th>dau</th></tr></thead>
+      <tbody>
+        <tr><td>20260620</td><td>8423123</td></tr>
+        <tr><td>20260621</td><td>8654321</td></tr>
+        <tr><td>20260622</td><td>8712345</td></tr>
+        <tr><td>...</td><td>...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- 聚合函数 -->
+<section class="section">
+  <h2 class="section-title"><span class="section-num">四</span>5个必学聚合函数：算所有指标都靠它们</h2>
+  
+  <p>聚合函数就是把多行数据汇总计算成一个/多个结果，日常用的就5个，记下来：</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>函数</th><th>作用</th><th>什么时候用</th><th>注意事项</th></tr></thead>
+      <tbody>
+        <tr><td><code>COUNT(DISTINCT 字段)</code></td><td>去重后计数</td><td>算<strong>多少人</strong>：DAU、UV、点击用户数、留存用户数</td><td>✅ 算人数必须加DISTINCT！不然会重复计数</td></tr>
+        <tr><td><code>COUNT(字段)</code></td><td>不去重计数</td><td>算<strong>多少次</strong>：PV、曝光次数、点击次数、发送量</td><td>不用加DISTINCT，一次点击就算一次</td></tr>
+        <tr><td><code>SUM(字段)</code></td><td>求和</td><td>算<strong>总量</strong>：总时长、总VV、总发送量、总点击量</td><td>把每个用户的数值加起来</td></tr>
+        <tr><td><code>AVG(字段)</code></td><td>平均值</td><td>算<strong>人均XX</strong>：人均时长、人均点击次数、人均VV</td><td>注意：AVG是对行求平均，算人均最好用SUM/人数</td></tr>
+        <tr><td><code>MAX(字段)</code> / <code>MIN(字段)</code></td><td>最大值 / 最小值</td><td>找峰值、最小值：单日最高DAU、最低CTR</td><td>用得比较少</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>还有一个非常常用的辅助函数：</p>
+  <div class="table-wrap">
+    <table><thead><tr><th>函数</th><th>作用</th></tr></thead>
+      <tbody><tr><td><code>ROUND(数字, 小数位数)</code></td><td>四舍五入保留指定小数位，比如<code>ROUND(0.08234, 4)</code>得到<code>0.0823</code>也就是8.23%</td></tr></tbody>
+    </table>
+  </div>
+
+  <p>下面我们用真实业务场景，把所有核心指标的SQL都写一遍，你照着改日期就能用。</p>
+</section>
+
+<!-- 核心指标SQL示例 -->
+<section class="section">
+  <h2 class="section-title"><span class="section-num">五</span>核心指标SQL示例大全（覆盖日常90%需求）</h2>
+  <p>所有例子都用真实表，直接改日期/条件就能用。</p>
+
+  <!-- 指标1 -->
+  <div class="metric-card">
+    <div class="metric-header">
+      <span class="metric-icon">📊</span>
+      <span class="metric-ttl">指标1：分渠道DAU</span>
+    </div>
+    <p><strong>需求：</strong>查2026-06-28当天，按启动方式拆分的DAU：主启、PUSH启动、第三方调起、搜索启动、其他</p>
+
+<pre><code><span class="sql-keyword">SELECT</span> 
+    date,
+    COUNT(DISTINCT did) <span class="sql-keyword">AS</span> total_dau,  <span class="sql-comment">-- 总DAU</span>
+    <span class="sql-comment">-- 主启：点击icon/桌面书签</span>
+    COUNT(DISTINCT <span class="sql-keyword">CASE WHEN</span> app_launch_way <span class="sql-keyword">IN</span> ('点击icon', '点击桌面书签') <span class="sql-keyword">THEN</span> did <span class="sql-keyword">END</span>) <span class="sql-keyword">AS</span> main_launch_dau,
+    <span class="sql-comment">-- PUSH启动：点击push/订阅push</span>
+    COUNT(DISTINCT <span class="sql-keyword">CASE WHEN</span> app_launch_way <span class="sql-keyword">IN</span> ('点击push', 'subscribe_push') <span class="sql-keyword">THEN</span> did <span class="sql-keyword">END</span>) <span class="sql-keyword">AS</span> push_launch_dau,
+    <span class="sql-comment">-- 第三方调起</span>
+    COUNT(DISTINCT <span class="sql-keyword">CASE WHEN</span> app_launch_way = '第三方调起' <span class="sql-keyword">THEN</span> did <span class="sql-keyword">END</span>) <span class="sql-keyword">AS</span> third_party_dau,
+    <span class="sql-comment">-- 搜索启动</span>
+    COUNT(DISTINCT <span class="sql-keyword">CASE WHEN</span> app_launch_way <span class="sql-keyword">LIKE</span> '%搜索%' <span class="sql-keyword">THEN</span> did <span class="sql-keyword">END</span>) <span class="sql-keyword">AS</span> search_launch_dau
+<span class="sql-keyword">FROM</span> iceberg_zjyprc_hadoop.browser.dwm_browser_event_aggregation_miui_di
+<span class="sql-keyword">WHERE</span> date = 20260628
+  <span class="sql-keyword">AND</span> is_app_dau_2024 = 1
+  <span class="sql-keyword">AND</span> COALESCE(did, '') != ''
+<span class="sql-keyword">GROUP BY</span> date</code></pre>
+
+    <div class="code-explain">
+      <strong>这里用到了新语法：<code>CASE WHEN</code>，相当于Excel里的IF函数：</strong>
+<pre><code><span class="sql-keyword">CASE WHEN</span> 条件 <span class="sql-keyword">THEN</span> 满足条件返回的值
+     <span class="sql-keyword">WHEN</span> 条件2 <span class="sql-keyword">THEN</span> 满足条件2返回的值
+     <span class="sql-keyword">ELSE</span> 都不满足返回的值（可选）
+<span class="sql-keyword">END</span></code></pre>
+      在这个例子里，满足启动方式条件的才返回did，不满足的返回空，COUNT(DISTINCT)就不会统计它，实现分群计数。
+    </div>
+  </div>
+
+  <!-- 指标2 -->
+  <div class="metric-card">
+    <div class="metric-header">
+      <span class="metric-icon">📊</span>
+      <span class="metric-ttl">指标2：信息流基础指标（曝光、点击、CTR、人均时长、总VV）</span>
+    </div>
+    <p><strong>需求：</strong>查2026-06-28当天，信息流的核心指标：DAU、总曝光、总点击、CTR、人均信息流时长（分钟）、总VV。</p>
+    <p>用的是<code>label_di</code>信息流汇总表：</p>
+
+<pre><code><span class="sql-keyword">SELECT</span> 
+    date,
+    COUNT(DISTINCT did) <span class="sql-keyword">AS</span> feed_dau,                    <span class="sql-comment">-- 信息流DAU：看了信息流的用户数</span>
+    SUM(expos_cnt) <span class="sql-keyword">AS</span> total_expose,                    <span class="sql-comment">-- 总曝光次数：多少次内容被展示</span>
+    SUM(click_cnt) <span class="sql-keyword">AS</span> total_click,                     <span class="sql-comment">-- 总点击次数：多少次内容被点击</span>
+    <span class="sql-comment">-- CTR（点击率）= 总点击 / 总曝光，*1.0是为了避免整数除法，保留4位小数</span>
+    ROUND(SUM(click_cnt) * 1.0 / SUM(expos_cnt), 4) <span class="sql-keyword">AS</span> ctr,
+    <span class="sql-comment">-- 人均信息流时长：总时长（毫秒）/ 用户数 / 60000 转成分钟，保留2位小数</span>
+    ROUND(SUM(feed_dura) * 1.0 / COUNT(DISTINCT did) / 60000, 2) <span class="sql-keyword">AS</span> avg_feed_duration_min,
+    <span class="sql-comment">-- 总VV = 资讯VV + 短视频VV + 小视频VV</span>
+    SUM(news_vv_cnt + short_vv_cnt + mini_vv_cnt) <span class="sql-keyword">AS</span> total_vv,
+    <span class="sql-comment">-- 人均VV</span>
+    ROUND(SUM(news_vv_cnt + short_vv_cnt + mini_vv_cnt) * 1.0 / COUNT(DISTINCT did), 2) <span class="sql-keyword">AS</span> avg_vv_per_user
+<span class="sql-keyword">FROM</span> iceberg_zjyprc_hadoop.browser.dwm_browser_event_aggregation_label_di
+<span class="sql-keyword">WHERE</span> date = 20260628
+  <span class="sql-keyword">AND</span> is_dau_feed_dapan_2024 = 1  <span class="sql-comment">-- 有效信息流活跃用户</span>
+  <span class="sql-keyword">AND</span> COALESCE(did, '') != ''
+  <span class="sql-keyword">AND</span> is_top = 0  <span class="sql-comment">-- 过滤置顶内容，只看自然推荐的内容</span>
+<span class="sql-keyword">GROUP BY</span> date</code></pre>
+
+    <div class="code-explain">
+      <strong>关键细节解释（0基础必看）：</strong><br>
+      <strong>1. 为什么要乘<code>*1.0</code>？</strong>
+      <ul style="margin: 4px 0 8px 20px;">
+        <li>数据库里两个整数相除，默认会取整，比如<code>1/2</code>结果是0而不是0.5</li>
+        <li>乘一个1.0转成小数，除法就能得到正确的小数结果了</li>
+        <li>所有算率、算比例、算人均的时候，都记得乘1.0</li>
+      </ul>
+      <strong>2. 时长单位：</strong>
+      <ul style="margin: 4px 0 8px 20px;">
+        <li>表里存的<code>feed_dura</code>字段单位是<strong>毫秒</strong>，转成秒除以1000，转成分钟除以60000</li>
+        <li>不要直接看毫秒数值，会大6万倍</li>
+      </ul>
+      <strong>3. 为什么用<code>SUM(click_cnt)/SUM(expos_cnt)</code>而不是<code>AVG(ctr)</code>？</strong>
+      <ul style="margin: 4px 0 0 20px;">
+        <li>因为AVG是对每个用户的CTR求平均，会受每个用户曝光量多少的影响，结果不对</li>
+        <li>正确的大盘CTR一定是「总点击/总曝光」，先求和再相除</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 指标3 -->
+  <div class="metric-card">
+    <div class="metric-header">
+      <span class="metric-icon">📊</span>
+      <span class="metric-ttl">指标3：分内容类型的VV和时长</span>
+    </div>
+    <p><strong>需求：</strong>查2026-06-28当天，按内容类型拆分的VV和时长：资讯、短视频、小视频各自的VV、占比、人均消费时长。</p>
+
+<pre><code><span class="sql-keyword">SELECT</span> 
+    date,
+    <span class="sql-comment">-- 总VV和总时长</span>
+    SUM(news_vv_cnt + short_vv_cnt + mini_vv_cnt) <span class="sql-keyword">AS</span> total_vv,
+    SUM(feed_dura) <span class="sql-keyword">AS</span> total_duration_ms,
+    <span class="sql-comment">-- 资讯</span>
+    SUM(news_vv_cnt) <span class="sql-keyword">AS</span> news_vv,
+    ROUND(SUM(news_vv_cnt) * 1.0 / SUM(news_vv_cnt + short_vv_cnt + mini_vv_cnt), 4) <span class="sql-keyword">AS</span> news_vv_ratio,
+    ROUND(SUM(news_dura) * 1.0 / COUNT(DISTINCT <span class="sql-keyword">CASE WHEN</span> news_vv_cnt > 0 <span class="sql-keyword">THEN</span> did <span class="sql-keyword">END</span>) / 60000, 2) <span class="sql-keyword">AS</span> avg_news_duration_min,
+    <span class="sql-comment">-- 短视频</span>
+    SUM(short_vv_cnt) <span class="sql-keyword">AS</span> short_vv,
+    ROUND(SUM(short_vv_cnt) * 1.0 / SUM(news_vv_cnt + short_vv_cnt + mini_vv_cnt), 4) <span class="sql-keyword">AS</span> short_vv_ratio,
+    ROUND(SUM(short_dura) * 1.0 / COUNT(DISTINCT <span class="sql-keyword">CASE WHEN</span> short_vv_cnt > 0 <span class="sql-keyword">THEN</span> did <span class="sql-keyword">END</span>) / 60000, 2) <span class="sql-keyword">AS</span> avg_short_duration_min,
+    <span class="sql-comment">-- 小视频</span>
+    SUM(mini_vv_cnt) <span class="sql-keyword">AS</span> mini_vv,
+    ROUND(SUM(mini_vv_cnt) * 1.0 / SUM(news_vv_cnt + short_vv_cnt + mini_vv_cnt), 4) <span class="sql-keyword">AS</span> mini_vv_ratio,
+    ROUND(SUM(mini_dura) * 1.0 / COUNT(DISTINCT <span class="sql-keyword">CASE WHEN</span> mini_vv_cnt > 0 <span class="sql-keyword">THEN</span> did <span class="sql-keyword">END</span>) / 60000, 2) <span class="sql-keyword">AS</span> avg_mini_duration_min
+<span class="sql-keyword">FROM</span> iceberg_zjyprc_hadoop.browser.dwm_browser_event_aggregation_label_di
+<span class="sql-keyword">WHERE</span> date = 20260628
+  <span class="sql-keyword">AND</span> is_dau_feed_dapan_2024 = 1
+  <span class="sql-keyword">AND</span> COALESCE(did, '') != ''
+  <span class="sql-keyword">AND</span> is_top = 0
+<span class="sql-keyword">GROUP BY</span> date</code></pre>
+  </div>
+
+  <!-- 指标4 -->
+  <div class="metric-card">
+    <div class="metric-header">
+      <span class="metric-icon">📊</span>
+      <span class="metric-ttl">指标4：PUSH核心指标（发送、到达、点击、CTR）</span>
+    </div>
+    <p><strong>需求：</strong>查2026-06-20到2026-06-28每天的PUSH核心指标：发送量、到达量、点击量、到达率、CTR（点击/到达）、PUSH启动DAU。</p>
+    <p>如果PUSH有单独的表就用PUSH表，这里用miui_di表先算：</p>
+
+<pre><code><span class="sql-keyword">SELECT</span> 
+    date,
+    <span class="sql-comment">-- PUSH发送/到达/点击量（如果用PUSH专用表更准确）</span>
+    SUM(push_send_cnt) <span class="sql-keyword">AS</span> total_send,    <span class="sql-comment">-- 总发送量</span>
+    SUM(push_arrive_cnt) <span class="sql-keyword">AS</span> total_arrive, <span class="sql-comment">-- 总到达量</span>
+    SUM(push_click_cnt) <span class="sql-keyword">AS</span> total_click,  <span class="sql-comment">-- 总点击量</span>
+    <span class="sql-comment">-- 到达率 = 到达/发送</span>
+    ROUND(SUM(push_arrive_cnt) * 1.0 / NULLIF(SUM(push_send_cnt), 0), 4) <span class="sql-keyword">AS</span> arrive_rate,
+    <span class="sql-comment">-- CTR = 点击/到达（注意不是点击/发送！）</span>
+    ROUND(SUM(push_click_cnt) * 1.0 / NULLIF(SUM(push_arrive_cnt), 0), 4) <span class="sql-keyword">AS</span> ctr,
+    <span class="sql-comment">-- PUSH启动DAU</span>
+    COUNT(DISTINCT <span class="sql-keyword">CASE WHEN</span> app_launch_way <span class="sql-keyword">IN</span> ('点击push', 'subscribe_push') <span class="sql-keyword">THEN</span> did <span class="sql-keyword">END</span>) <span class="sql-keyword">AS</span> push_dau
+<span class="sql-keyword">FROM</span> iceberg_zjyprc_hadoop.browser.dwm_browser_event_aggregation_miui_di
+<span class="sql-keyword">WHERE</span> date <span class="sql-keyword">BETWEEN</span> 20260620 <span class="sql-keyword">AND</span> 20260628
+  <span class="sql-keyword">AND</span> is_app_dau_2024 = 1
+  <span class="sql-keyword">AND</span> COALESCE(did, '') != ''
+<span class="sql-keyword">GROUP BY</span> date
+<span class="sql-keyword">ORDER BY</span> date</code></pre>
+
+    <div class="code-explain">
+      <strong>新语法解释：<code>NULLIF(字段, 0)</code></strong><br>
+      • 防止分母是0导致报错，比如某天没有发送PUSH，到达量是0，直接除会报错<br>
+      • NULLIF的意思是：如果字段等于0，就返回NULL，除法结果就是NULL，不会报错<br>
+      • 所有除法都建议加NULLIF保护
+    </div>
+  </div>
+
+  <!-- 指标5 -->
+  <div class="metric-card">
+    <div class="metric-header">
+      <span class="metric-icon">📊</span>
+      <span class="metric-ttl">指标5：分新老用户的指标拆分</span>
+    </div>
+    <p><strong>需求：</strong>查2026-06-28当天，新用户（安装7天内）和老用户的DAU、人均时长、CTR对比。</p>
+
+<pre><code><span class="sql-keyword">SELECT</span> 
+    date,
+    <span class="sql-comment">-- 用户分群</span>
+    <span class="sql-keyword">CASE WHEN</span> datediff(from_unixtime(date, 'yyyyMMdd'), install_date) < 7 <span class="sql-keyword">THEN</span> '新用户(7天内)'
+         <span class="sql-keyword">ELSE</span> '老用户'
+    <span class="sql-keyword">END</span> <span class="sql-keyword">AS</span> user_type,
+    <span class="sql-comment">-- 指标</span>
+    COUNT(DISTINCT did) <span class="sql-keyword">AS</span> dau,
+    ROUND(SUM(feed_dura) * 1.0 / COUNT(DISTINCT did) / 60000, 2) <span class="sql-keyword">AS</span> avg_duration_min,
+    ROUND(SUM(click_cnt) * 1.0 / NULLIF(SUM(expos_cnt), 0), 4) <span class="sql-keyword">AS</span> ctr
+<span class="sql-keyword">FROM</span> iceberg_zjyprc_hadoop.browser.dwm_browser_event_aggregation_label_di
+<span class="sql-keyword">WHERE</span> date = 20260628
+  <span class="sql-keyword">AND</span> is_dau_feed_dapan_2024 = 1
+  <span class="sql-keyword">AND</span> COALESCE(did, '') != ''
+  <span class="sql-keyword">AND</span> is_top = 0
+<span class="sql-keyword">GROUP BY</span> date,
+    <span class="sql-keyword">CASE WHEN</span> datediff(from_unixtime(date, 'yyyyMMdd'), install_date) < 7 <span class="sql-keyword">THEN</span> '新用户(7天内)'
+         <span class="sql-keyword">ELSE</span> '老用户'
+    <span class="sql-keyword">END</span></code></pre>
+  </div>
+
+  <h4>常用小技巧：查字段枚举值</h4>
+  <p>如果你不知道某个字段都有哪些取值（比如启动方式有哪几种、内容类型怎么分），用<code>DISTINCT</code>查：</p>
+<pre><code><span class="sql-comment">-- 查app_launch_way字段都有哪些取值</span>
+<span class="sql-keyword">SELECT DISTINCT</span> app_launch_way
+<span class="sql-keyword">FROM</span> iceberg_zjyprc_hadoop.browser.dwm_browser_event_aggregation_miui_di
+<span class="sql-keyword">WHERE</span> date = 20260628
+  <span class="sql-keyword">AND</span> app_launch_way <span class="sql-keyword">IS NOT NULL</span></code></pre>
+  <p>运行结果就会列出所有不同的启动方式名称，你就知道怎么写CASE WHEN了。</p>
+</section>
+
+<!-- AI辅助写SQL -->
+<section class="section">
+  <h2 class="section-title"><span class="section-num">六</span>AI辅助写SQL：不用记语法也能写</h2>
+  
+  <p>现在完全不需要死记硬背语法，AI可以帮你生成90%的SQL代码，你只要会提需求、会校验结果就可以了。</p>
+
+  <h3>6.1 推荐工具</h3>
+  <ol>
+    <li><strong>公司内部NL-SQL工具（首选）</strong>：直接用中文说需求，自动生成可直接运行的SQL，还能直接查结果</li>
+    <li><strong>通用大模型（Claude/豆包/GPT）</strong>：适合复杂需求，但需要你提供表结构和字段说明</li>
+    <li><strong>IDE内置AI助手</strong>：写SQL的时候自动补全，报错了直接把错误贴给它帮你改</li>
+  </ol>
+
+  <h3>6.2 高质量提示词模板（照着填空就行）</h3>
+  <p>AI生成的SQL准不准，90%取决于你需求说的清不清楚，按照这个模板写：</p>
+<pre><code>请帮我写Hive SQL，要求如下：
+
+【使用的表】：iceberg_zjyprc_hadoop.browser.dwm_browser_event_aggregation_label_di（信息流用户日汇总表）
+【主要字段说明】：
+- date：日期，格式yyyyMMdd，分区字段
+- did：设备ID
+- expos_cnt：信息流曝光次数
+- click_cnt：信息流点击次数
+- feed_dura：信息流消费时长，单位毫秒
+- news_vv_cnt/short_vv_cnt/mini_vv_cnt：资讯/短视频/小视频VV
+- is_dau_feed_dapan_2024：是否有效信息流活跃用户，1=是
+- is_top：是否置顶内容，0=自然内容，1=置顶
+
+【查询需求】：
+查询2026年6月20日到6月28日，每天的以下指标：
+1. 信息流DAU
+2. 总曝光、总点击、CTR=点击/曝光，保留4位小数
+3. 人均信息流时长（分钟），保留2位小数
+4. 总VV（三类VV相加）、人均VV
+过滤条件：只看自然内容（is_top=0），有效活跃用户，did不为空
+按日期升序排列</code></pre>
+
+  <div class="warning-note">
+    ❌ <strong>反面例子（AI会瞎编字段、错口径）：</strong><br>
+    "帮我查一下信息流的CTR和时长"
+  </div>
+
+  <h3>6.3 必须做的4步校验（AI会幻觉，一定要检查！）</h3>
+  <p>AI生成的SQL一定要检查这4点，再运行：</p>
+  <ol>
+    <li><strong>字段校验</strong>：用到的字段是不是这张表里真的有的？对照数据地图看，不要有AI瞎编的字段</li>
+    <li><strong>分区校验</strong>：有没有加<code>date</code>过滤？不加的话会跑几小时出不来，这是最常见错误</li>
+    <li><strong>逻辑校验</strong>：
+      <ul>
+        <li>算"多少人"是不是用了<code>COUNT(DISTINCT did)</code>？有没有漏DISTINCT？</li>
+        <li>除法是不是乘了<code>1.0</code>？有没有加<code>NULLIF</code>防止分母为0？</li>
+        <li>单位对不对？毫秒转分钟有没有除以60000？</li>
+        <li>指标公式对不对？CTR是点击/曝光还是点击/到达？有没有搞反分子分母？</li>
+      </ul>
+    </li>
+    <li><strong>结果校验</strong>：跑出来的数值合不合理？
+      <ul>
+        <li>DAU是不是在几百万的量级？如果跑出来只有几万肯定错了</li>
+        <li>CTR是不是在1%~20%之间？如果出来80%肯定错了</li>
+        <li>人均时长是不是在几分钟到几十分钟？出来几万分钟肯定单位错了</li>
+        <li>和你已知的历史数据/看板数据对一对，差很多肯定哪里错了</li>
+      </ul>
+    </li>
+  </ol>
+
+  <div class="tip-note">
+    💡 最佳实践：先查1天的数据验证逻辑对不对，结果没问题再扩大时间范围。
+  </div>
+</section>
+
+<!-- 新手避坑 -->
+<section class="section">
+  <h2 class="section-title"><span class="section-num">七</span>新手最常犯的7个错误（避坑！）</h2>
+  
+  <p>我把大家刚学SQL最容易踩的坑列出来，写完对照检查：</p>
+
+  <div class="trap-grid">
+    <div class="trap-card">
+      <div class="trap-num">❌ 错误 01</div>
+      <div class="trap-ttl">忘记加date分区过滤</div>
+      <div class="trap-effect">后果：查询扫全表，跑几小时出不来，甚至影响集群</div>
+      <div class="trap-fix">✅ 修复：WHERE第一行就写date条件，养成习惯</div>
+    </div>
+    <div class="trap-card">
+      <div class="trap-num">❌ 错误 02</div>
+      <div class="trap-ttl">算人数没加DISTINCT</div>
+      <div class="trap-effect">后果：COUNT(did)算出来是记录数，DAU比真实大好几倍</div>
+      <div class="trap-fix">✅ 修复：只要算"XX用户数"，必须COUNT(DISTINCT did)</div>
+    </div>
+    <div class="trap-card">
+      <div class="trap-num">❌ 错误 03</div>
+      <div class="trap-ttl">除法没乘1.0</div>
+      <div class="trap-effect">后果：两个整数相除取整，比如CTR算出来是0</div>
+      <div class="trap-fix">✅ 修复：所有除法都在分子乘*1.0</div>
+    </div>
+    <div class="trap-card">
+      <div class="trap-num">❌ 错误 04</div>
+      <div class="trap-ttl">单位忘记转换</div>
+      <div class="trap-effect">后果：时长直接用毫秒数值，出来的结果大6万倍</div>
+      <div class="trap-fix">✅ 修复：时长/毫秒字段，转分钟除以60000，转秒除以1000</div>
+    </div>
+    <div class="trap-card">
+      <div class="trap-num">❌ 错误 05</div>
+      <div class="trap-ttl">漏掉有效用户过滤</div>
+      <div class="trap-effect">后果：没加is_app_dau_2024=1，包含测试账号/异常数据，指标不准</div>
+      <div class="trap-fix">✅ 修复：查用户行为表都加上对应is_dau过滤</div>
+    </div>
+    <div class="trap-card">
+      <div class="trap-num">❌ 错误 06</div>
+      <div class="trap-ttl">分母为0没处理</div>
+      <div class="trap-effect">后果：某天分母是0，SQL直接报错跑不出来</div>
+      <div class="trap-fix">✅ 修复：所有除法分母都加NULLIF(分母, 0)</div>
+    </div>
+    <div class="trap-card">
+      <div class="trap-num">❌ 错误 07</div>
+      <div class="trap-ttl">直接用AI生成的SQL不校验</div>
+      <div class="trap-effect">后果：AI瞎编字段/错口径，结果完全错</div>
+      <div class="trap-fix">✅ 修复：按上面4步校验完再跑</div>
+    </div>
+  </div>
+</section>
+
+<!-- 小结 -->
+<section class="section">
+  <h2 class="section-title"><span class="section-num">八</span>本节课小结</h2>
+  
+  <ol>
+    <li><strong>不用怕SQL</strong>：语法很简单，固定5个关键词顺序：SELECT → FROM → WHERE → GROUP BY → ORDER BY</li>
+    <li><strong>核心概念</strong>：表=sheet，字段=列，记录=行，分区=按日期分块，算人数必须去重</li>
+    <li><strong>5个聚合函数</strong>：COUNT(DISTINCT)算人数，SUM求和，AVG平均，ROUND保留小数</li>
+    <li><strong>核心指标</strong>：DAU、分渠道DAU、分内容类型VV/时长、PUSH指标、分新老用户，都给了现成SQL，改日期就能用</li>
+    <li><strong>AI提效</strong>：用模板写提示词让AI生成，但是一定要做4步校验再运行</li>
+    <li><strong>避坑</strong>：加date分区、算人数加DISTINCT、除法乘1.0、注意单位转换</li>
+  </ol>
+</section>
+
+<!-- 课后练习 -->
+<section class="section">
+  <h2 class="section-title"><span class="section-num">📝</span>课后练习（一定要动手做！）</h2>
+  <ol>
+    <li>查近7天每天的浏览器APP总DAU和PUSH启动DAU</li>
+    <li>查昨天的信息流总曝光、总点击、CTR、人均时长（分钟）、总VV</li>
+    <li>查昨天的资讯/短视频/小视频各自的VV和VV占比</li>
+    <li>尝试用AI帮你写上面的SQL，然后对照我们讲的要点做校验</li>
+  </ol>
+</section>
+
+<!-- 下节课预告 -->
+<section class="section">
+  <div class="purple-note">
+    <strong>📢 下节课预告</strong><br>
+    第3课时：SQL基础语法（下），学习JOIN多表关联、CTE子查询，解决更复杂的取数需求，以及SQL性能优化、常见报错排查。
+  </div>
+</section>
+
+<!-- 导航 -->
+<div class="nav-links">
+  <div class="nav-group">
+    <a href="01-第1课时-数据地图入门.html" class="nav-link">← 上一课：数据地图入门</a>
+  </div>
+  <div class="nav-group">
+    <a href="index.html" class="nav-link">🏠 课程首页</a>
+    <a href="03-第3课时-SQL基础下.html" class="nav-link">下一课：SQL基础下 →</a>
+  </div>
+</div>
+
+<footer class="footer">
+  <div>内容生态业务线 · 数据分析通识培训</div>
+  <div>第2课时 · SQL基础（上）</div>
+</footer>
+
+</div>
+</body>
+</html>

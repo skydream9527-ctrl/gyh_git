@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>模块5 · 数据分析方法</title>
+<link rel="stylesheet" href="./assets/deck.css">
+</head>
+<body>
+<div id="prog"></div>
+<a class="home" href="./index.html">☰ 课程目录</a>
+<div id="deck">
+
+<section class="slide center">
+  <p class="lead">数据分析通识培训 · 模块5（进阶）</p>
+  <h1 class="display">数据<span class="cyan">分析方法</span></h1>
+  <div class="rule"></div>
+  <p class="sub">从"报数"到"给结论"：排查、漏斗、分群</p>
+  <div class="meta"><span>⏱️ 1.5 小时</span><span>🎯 产品重点，销售/运营选学</span></div>
+</section>
+
+<section class="slide" data-kicker="开场">
+  <h1>从"报数"到"给结论"</h1>
+  <p class="mist fragment">模块 2-4 你已经会<b>找数、写 SQL / 让 AI 取数</b>了。这节课再进一步：拿到一个业务问题（如"CTR 为什么降了"），<b class="cyan">怎么把查询结果系统地拆解、定位、给结论</b>。</p>
+  <div class="hl warn fragment" style="margin-top:18px">⚠️ 动手分析前先做一件事：<b>对齐口径、校验数据</b>。现场就踩过——自己算的 DAU 和看板差一截，多半是过滤/口径没对齐。<b>别拿错的数做分析</b>。</div>
+</section>
+
+<section class="slide" data-kicker="一 · 四把尺子">
+  <h1>排查问题的四把尺子</h1>
+  <div class="grid2">
+    <div class="card fragment"><p class="t">① 好维度</p><p class="d">强区分度：按 PUSH 类型拆 3% vs 7.8% 一眼定位；按性别拆没用</p></div>
+    <div class="card fragment"><p class="t">② 好参照</p><p class="d">基准线：时间参照 / 对照组 / 大盘 / 目标</p></div>
+    <div class="card fragment"><p class="t">③ 好视角</p><p class="d">对的样本（最小作用颗粒度）+ 对的周期</p></div>
+    <div class="card fragment"><p class="t">④ 好起止点</p><p class="d">链路分析：改动只影响该功能"往后"的环节</p></div>
+  </div>
+</section>
+
+<section class="slide" data-kicker="二 · 四种方法">
+  <h1>四种常用分析方法</h1>
+  <table class="tbl fragment">
+    <tbody>
+    <tr><th>方法</th><th>一句话</th></tr>
+    <tr><td>对比分析</td><td>同比/环比/对照/细分——找差异、判好坏</td></tr>
+    <tr><td>趋势分析</td><td>看周期、拐点、异常，别被单点误导</td></tr>
+    <tr><td>分群分析</td><td>按属性/行为拆，定位问题群体</td></tr>
+    <tr><td>漏斗分析</td><td>多步链路转化，找流失瓶颈</td></tr>
+    </tbody>
+  </table>
+  <p class="mist fragment" style="font-size:18px;margin-top:12px">💡 分群落到 SQL 就是 <code>CASE WHEN</code> 打标（呼应模块3）：把用户按新老 / 活跃度 / 来源打成组再聚合。</p>
+  <p class="hl warn fragment" style="margin-top:12px">⚠️ 辛普森悖论：整体降但分群都涨——大盘异动<b>先拆维度</b>，别只看平均。</p>
+</section>
+
+<section class="slide" data-kicker="三 · 漏斗">
+  <h1>漏斗六步法</h1>
+  <div class="flow">
+    <div class="step fragment" data-n="1"><p class="t">明确目标</p><p class="d">SMART</p></div>
+    <div class="step fragment" data-n="2"><p class="t">设计路径</p><p class="d">拆环节</p></div>
+    <div class="step fragment" data-n="3"><p class="t">采集数据</p><p class="d">各步人数</p></div>
+    <div class="step fragment" data-n="4"><p class="t">算转化率</p><p class="d">相对上一步</p></div>
+    <div class="step fragment" data-n="5"><p class="t">定位瓶颈</p><p class="d">流失最大处</p></div>
+    <div class="step fragment" data-n="6"><p class="t">优化验证</p><p class="d">A/B</p></div>
+  </div>
+  <p class="hl fragment" style="margin-top:20px">PUSH 全链路：下发 → 到达 → 展示 → 点击 → 落地页 → 消费。CTR 降别只盯点击，拆漏斗看哪环掉。</p>
+</section>
+
+<section class="slide" data-kicker="四 · 案例">
+  <h1>案例：PUSH CTR 降 2pct 排查</h1>
+  <table class="tbl fragment">
+    <tbody>
+    <tr><th>步骤</th><th>发现</th></tr>
+    <tr><td>拆时间</td><td>周四 8.3% → 周日 6%，凌晨 2-4 点特别低</td></tr>
+    <tr><td>拆类型</td><td>新热点推送 CTR 仅 3%，贡献 80% 下降</td></tr>
+    <tr><td>拆用户</td><td>新用户从 7% 降到 3.5%，重灾区</td></tr>
+    <tr><td>拆漏斗</td><td>问题在"展示→点击"</td></tr>
+    </tbody>
+  </table>
+  <p class="hl fragment" style="margin-top:14px">结论：新策略对老用户正向、对新用户严重负向——不必全量回滚，立刻调整。</p>
+  <p class="mist fragment" style="font-size:18px;margin-top:10px">👉 这些"拆时间 / 类型 / 用户 / 漏斗"的取数，就让 AI 用 <code>label_di</code> 生成分维度 SQL、你按 4 步校验，最快。</p>
+</section>
+
+<section class="slide" data-kicker="五 · 误区">
+  <h1>常见分析误区</h1>
+  <ul class="clean">
+    <li class="fragment">唯数据论（异常先查埋点/口径）</li>
+    <li class="fragment">忽略样本量（几百人的组别别过度解读）</li>
+    <li class="fragment">相关当因果</li>
+    <li class="fragment">过度拆解 / 只看相对不看绝对</li>
+  </ul>
+</section>
+
+<section class="slide center">
+  <p class="lead">模块5 · 完</p>
+  <h1 class="display">下一课：<span class="cyan">AB 实验原理与判断</span></h1>
+  <div class="rule"></div>
+  <p class="sub">用实验验证策略到底行不行</p>
+  <p class="mist" style="margin-top:26px;font-size:20px">← → 翻页 · 空格逐条展开 · <a href="./index.html" style="color:var(--cyan)">返回目录</a></p>
+</section>
+
+</div>
+<button class="navbtn" id="prev">‹</button>
+<button class="navbtn" id="next">›</button>
+<div class="hint">← → 翻页 · 空格下一步 · F 全屏 · P 打印/导出 PDF · Home/End 首末页</div>
+<script src="./assets/deck.js"></script>
+</body></html>

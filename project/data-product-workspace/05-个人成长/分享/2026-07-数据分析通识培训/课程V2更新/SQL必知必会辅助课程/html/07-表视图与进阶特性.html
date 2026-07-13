@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SQL必知必会 · 第7章 表、视图与进阶特性</title>
+<link rel="stylesheet" href="./assets/deck.css">
+</head>
+<body>
+<div id="prog"></div>
+<a class="home" href="./index.html">☰ 课程目录</a>
+<div id="deck">
+
+<section class="slide center">
+  <p class="lead">SQL 必知必会 · 辅助课程 · 第 7 章</p>
+  <h1 class="display">表、视图<span class="cyan">与进阶特性</span></h1>
+  <div class="rule"></div>
+  <p class="sub">建表 · 视图 · 事务 · 索引 · 存储过程</p>
+  <div class="meta"><span>📖 对应原书课 17–22</span><span>🎯 了解级：知道是什么即可</span></div>
+</section>
+
+<section class="slide" data-kicker="一 · 建表">
+  <h1>创建和操纵表</h1>
+  <div class="codeblk fragment"><span class="k">CREATE TABLE</span> Products (
+  prod_id    <span class="k">CHAR</span>(10)     <span class="k">NOT NULL</span>,
+  prod_price <span class="k">DECIMAL</span>(8,2) <span class="k">NOT NULL DEFAULT</span> 0,
+  prod_desc  <span class="k">VARCHAR</span>(1000) <span class="k">NULL</span> );
+<span class="k">ALTER TABLE</span> Vendors <span class="k">ADD</span> vend_phone <span class="k">CHAR</span>(20);   <span class="c">-- 加列</span>
+<span class="k">DROP TABLE</span> Products;                        <span class="c">-- 删表（危险）</span></div>
+  <p class="hl fragment" style="margin-top:14px">💡 我们数仓建表多由数据同学/调度负责，分析同学一般只查。</p>
+</section>
+
+<section class="slide" data-kicker="二 · 视图">
+  <h1>视图 = 存起来的查询</h1>
+  <div class="codeblk fragment"><span class="k">CREATE VIEW</span> ProductCustomers <span class="k">AS</span>
+<span class="k">SELECT</span> c.cust_name, p.prod_id
+<span class="k">FROM</span> Customers c <span class="k">JOIN</span> Orders o <span class="k">ON</span> …
+                  <span class="k">JOIN</span> OrderItems i <span class="k">ON</span> … <span class="k">JOIN</span> Products p <span class="k">ON</span> …;
+<span class="c">-- 之后像查表一样用它</span>
+<span class="k">SELECT</span> cust_name <span class="k">FROM</span> ProductCustomers <span class="k">WHERE</span> prod_id=<span class="s">'RGAN01'</span>;</div>
+  <p class="hl fragment" style="margin-top:14px">💡 视图本身<b>不存数据</b>，用来封装复用复杂 JOIN（类似 BI 里复用报表 SQL）。</p>
+</section>
+
+<section class="slide" data-kicker="三 · 进阶特性">
+  <h1>其余特性：各一句话</h1>
+  <table class="tbl fragment">
+    <tbody>
+    <tr><th>特性</th><th>一句话</th></tr>
+    <tr><td>存储过程</td><td>预编译、可反复调用的一组 SQL</td></tr>
+    <tr><td>事务处理</td><td>一组操作"要么全成、要么全回滚"</td></tr>
+    <tr><td>游标</td><td>逐行处理（分析里几乎不用）</td></tr>
+    <tr><td>约束</td><td>主键/外键/UNIQUE/CHECK 保证完整性</td></tr>
+    <tr><td>索引</td><td>给列建"目录"加速查找</td></tr>
+    <tr><td>触发器</td><td>增删改时自动触发的 SQL</td></tr>
+    </tbody>
+  </table>
+  <p class="hl bad fragment" style="margin-top:12px">🎯 我们数仓<b>不靠索引、靠分区(date)</b>加速；事务/触发器/游标离线分析基本用不到。</p>
+</section>
+
+<section class="slide" data-kicker="小结">
+  <h1>本章要点</h1>
+  <ul class="clean tight" style="font-size:21px">
+    <li class="fragment">建改删表：CREATE/ALTER/DROP，分析多只读、了解即可</li>
+    <li class="fragment"><b>视图</b> = 存起来的查询，封装复用复杂 JOIN</li>
+    <li class="fragment">存储过程/事务/索引等知道是什么即可；数仓靠分区加速</li>
+  </ul>
+</section>
+
+<section class="slide center">
+  <p class="lead">SQL 必知必会辅助课程 · 完</p>
+  <h1 class="display">回到主课，<span class="cyan">开始取数实战</span></h1>
+  <div class="rule"></div>
+  <p class="sub">底子稳了 → 主课模块3/4 + AI 辅助 + 执行调优</p>
+  <p class="mist" style="margin-top:26px;font-size:20px">← → 翻页 · <a href="./index.html" style="color:var(--cyan)">返回目录</a> · 速查见课程目录</p>
+</section>
+
+</div>
+<button class="navbtn" id="prev">‹</button>
+<button class="navbtn" id="next">›</button>
+<div class="hint">← → 翻页 · 空格下一步 · F 全屏 · P 打印/导出 PDF · Home/End 首末页</div>
+<script src="./assets/deck.js"></script>
+</body></html>

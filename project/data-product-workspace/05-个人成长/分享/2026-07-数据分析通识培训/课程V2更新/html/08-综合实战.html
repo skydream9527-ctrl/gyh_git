@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>模块8 · 综合实战</title>
+<link rel="stylesheet" href="./assets/deck.css">
+</head>
+<body>
+<div id="prog"></div>
+<a class="home" href="./index.html">☰ 课程目录</a>
+<div id="deck">
+
+<section class="slide center">
+  <p class="lead">数据分析通识培训 · 模块8（进阶）</p>
+  <h1 class="display">综合<span class="cyan">实战</span></h1>
+  <div class="rule"></div>
+  <p class="sub">一个贯穿案例走完全流程：从问题到结论</p>
+  <div class="meta"><span>⏱️ 1 小时</span><span>🎯 产品完整版 / 销售运营业务版</span></div>
+</section>
+
+<section class="slide" data-kicker="开场">
+  <h1>把学过的串成一条线</h1>
+  <div class="codeblk fragment">明确问题 → 找数据 → 取数 → 分析定位 → 判断归因 → 结论建议
+（模块5）  （模块2） （模块3/4）（模块5）   （模块6）   （模块1）</div>
+  <p class="hl fragment" style="margin-top:20px">🎯 遇到任何数据问题，都按这条线走一遍，就不会乱。</p>
+  <p class="mist fragment" style="font-size:18px;margin-top:10px">💡 现场经验：光看代码以为都懂，一手搓全忘、坑全踩——所以这节<b>边学边自己手搓</b>，才知道 AI 写得对不对。</p>
+</section>
+
+<section class="slide" data-kicker="完整版 · 案例">
+  <h1>PUSH CTR 突然下降怎么查？</h1>
+  <p class="mist fragment">周日 CTR 从 8% 降到 6%，是不是上周四的新策略有问题？要不要回滚？</p>
+  <div class="grid2" style="margin-top:12px;align-items:start">
+    <div class="step fragment" data-n="1"><p class="t">明确问题</p><p class="d">定指标(CTR=点击/到达)、时间、拆分维度</p></div>
+    <div class="step fragment" data-n="2"><p class="t">校验数据</p><p class="d">先排除延迟/埋点/口径变化</p></div>
+    <div class="step fragment" data-n="3"><p class="t">对比定位</p><p class="d">拆时间/类型/人群/漏斗</p></div>
+    <div class="step fragment" data-n="4"><p class="t">深入原因</p><p class="d">内容/受众/时间/灰度没覆盖新用户</p></div>
+  </div>
+</section>
+
+<section class="slide" data-kicker="完整版 · 定位">
+  <h1>拆维度，锁定问题</h1>
+  <table class="tbl fragment">
+    <tbody>
+    <tr><th>拆解</th><th>发现</th></tr>
+    <tr><td>拆时间</td><td>逐步下降，凌晨 2-4 点特别低</td></tr>
+    <tr><td>拆类型</td><td>新"热点推送"CTR 仅 3%，拉低整体</td></tr>
+    <tr><td>拆用户</td><td>新用户 7%→3.5%，重灾区</td></tr>
+    <tr><td>拆漏斗</td><td>问题在"展示→点击"</td></tr>
+    </tbody>
+  </table>
+  <p class="hl fragment" style="margin-top:14px">结论先行：不必全量回滚，新用户 7 天内不推时政 + 凌晨不批量发 + 灰度覆盖新用户。</p>
+</section>
+
+<section class="slide" data-kicker="取数实战">
+  <h1>现场命题：一个刁钻取数怎么拆</h1>
+  <p class="mist fragment">命题：<b>昨天，浏览器自建源、视频沉浸式场景的"人均评论发布次数"</b>。条件一多就懵——拆步骤 + 让 AI 补。</p>
+  <div class="codeblk fragment"><span class="c">-- 人均 = 评论总次数 / 发过评论的人数（先圈场景，再算）</span>
+<span class="k">SELECT</span> <span class="k">SUM</span>(comment_pv)*1.0
+     / <span class="k">COUNT</span>(<span class="k">DISTINCT</span> <span class="k">CASE WHEN</span> comment_pv>0 <span class="k">THEN</span> did <span class="k">END</span>) <span class="k">AS</span> avg_cmt
+<span class="k">FROM</span> …内容评论表
+<span class="k">WHERE</span> date = <span class="s">'${date-1}'</span>
+  <span class="k">AND</span> source=<span class="s">'自建源'</span> <span class="k">AND</span> item_tab <span class="k">IN</span>(<span class="s">'短视频','小视频'</span>) <span class="k">AND</span> page=<span class="s">'沉浸式'</span>;</div>
+  <p class="hl fragment" style="margin-top:10px">🎯 步骤：① 先取评论总量验证 → ② 加"自建源/视频/沉浸式"场景条件 → ③ 再算人均。<b>一步步来，别一口气写完</b>（字段以数据地图为准）。</p>
+</section>
+
+<section class="slide" data-kicker="业务版">
+  <h1>业务版：给一次活动做复盘</h1>
+  <p class="mist fragment">不写复杂 SQL 也能走完整流程，把自证三板斧用起来：</p>
+  <ul class="clean">
+    <li class="fragment"><b>明确 + 找数</b>：不会写 SQL 就按"提需求五要素"找数据同学 / 让 AI 取</li>
+    <li class="fragment"><b>对比定位</b>：活动前后 + 分渠道，<b class="amber">排除大盘自然增长</b></li>
+    <li class="fragment"><b>结论建议</b>：结论先行——"净拉新 X，A 渠道最优、C 亏损，砍 C 保 A"</li>
+  </ul>
+</section>
+
+<section class="slide" data-kicker="速查">
+  <h1>常见卡点速查</h1>
+  <table class="tbl fragment">
+    <tbody>
+    <tr><th>卡点</th><th>怎么办</th></tr>
+    <tr><td>算的和看板对不上</td><td>先对口径，再找数据同学核对</td></tr>
+    <tr><td>SQL 跑很久</td><td>90% 没加 date；先查 1 天验证</td></tr>
+    <tr><td>找不到根因</td><td>MECE 拆：时间→人群→模块→链路</td></tr>
+    <tr><td>实验不显著</td><td>看样本量、效果大小、是否某细分显著</td></tr>
+    </tbody>
+  </table>
+  <p class="mist fragment" style="font-size:18px;margin-top:12px">📝 课后作业：手写 SQL 算周报里的 DAU / 人均时长——为后续"AI 写周报"打底。</p>
+</section>
+
+<section class="slide center">
+  <p class="lead">模块8 · 完</p>
+  <h1 class="display">下一课：<span class="cyan">答疑</span> + 选修手册</h1>
+  <div class="rule"></div>
+  <p class="sub">带着实战里的真实问题来，集中解答沉淀 FAQ</p>
+  <p class="mist" style="margin-top:26px;font-size:20px">← → 翻页 · 空格逐条展开 · <a href="./index.html" style="color:var(--cyan)">返回目录</a></p>
+</section>
+
+</div>
+<button class="navbtn" id="prev">‹</button>
+<button class="navbtn" id="next">›</button>
+<div class="hint">← → 翻页 · 空格下一步 · F 全屏 · P 打印/导出 PDF · Home/End 首末页</div>
+<script src="./assets/deck.js"></script>
+</body></html>

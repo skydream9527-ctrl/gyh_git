@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SQL必知必会 · 第5章 子查询与联结</title>
+<link rel="stylesheet" href="./assets/deck.css">
+</head>
+<body>
+<div id="prog"></div>
+<a class="home" href="./index.html">☰ 课程目录</a>
+<div id="deck">
+
+<section class="slide center">
+  <p class="lead">SQL 必知必会 · 辅助课程 · 第 5 章</p>
+  <h1 class="display">子查询<span class="cyan">与联结</span></h1>
+  <div class="rule"></div>
+  <p class="sub">子查询"套娃" · JOIN 把多表拼起来 —— 跨表分析核心</p>
+  <div class="meta"><span>📖 对应原书课 11–13</span><span>🎯 子查询 · JOIN · LEFT JOIN</span></div>
+</section>
+
+<section class="slide" data-kicker="一 · 子查询">
+  <h1>子查询：查询里套查询</h1>
+  <div class="codeblk fragment"><span class="c">-- 找订购了 RGAN01 的顾客：从里往外读</span>
+<span class="k">SELECT</span> cust_name <span class="k">FROM</span> Customers
+<span class="k">WHERE</span> cust_id <span class="k">IN</span> (
+  <span class="k">SELECT</span> cust_id <span class="k">FROM</span> Orders
+  <span class="k">WHERE</span> order_num <span class="k">IN</span> (
+    <span class="k">SELECT</span> order_num <span class="k">FROM</span> OrderItems <span class="k">WHERE</span> prod_id=<span class="s">'RGAN01'</span> ) );</div>
+  <p class="hl warn fragment" style="margin-top:14px">⚠️ 子查询直观，但大表<b>性能常不如 JOIN</b>，能用 JOIN 就用 JOIN。</p>
+</section>
+
+<section class="slide" data-kicker="二 · JOIN">
+  <h1>JOIN：把多表拼起来</h1>
+  <div class="codeblk fragment"><span class="k">SELECT</span> vend_name, prod_name, prod_price
+<span class="k">FROM</span> Vendors
+<span class="k">INNER JOIN</span> Products <span class="k">ON</span> Vendors.vend_id = Products.vend_id;</div>
+  <p class="hl bad fragment" style="margin-top:16px">🔴 一定写 <code>ON</code>！漏了 = 笛卡尔积，行数爆炸（主课案例：100万×80万=8000亿行）。</p>
+</section>
+
+<section class="slide" data-kicker="二 · JOIN">
+  <h1>沿外键串多个表</h1>
+  <div class="codeblk fragment"><span class="k">SELECT</span> cust_name, order_num, prod_name, quantity
+<span class="k">FROM</span> Customers
+<span class="k">JOIN</span> Orders     <span class="k">ON</span> Customers.cust_id = Orders.cust_id
+<span class="k">JOIN</span> OrderItems <span class="k">ON</span> Orders.order_num = OrderItems.order_num
+<span class="k">JOIN</span> Products   <span class="k">ON</span> OrderItems.prod_id = Products.prod_id;</div>
+  <p class="hl fragment" style="margin-top:14px">💡 顾客 → 订单 → 物品 → 产品，沿着外键一路拼。</p>
+</section>
+
+<section class="slide" data-kicker="三 · 内 vs 外">
+  <h1>内联结 vs 外联结</h1>
+  <table class="tbl fragment">
+    <tbody>
+    <tr><th>类型</th><th>保留什么</th></tr>
+    <tr><td><b class="cyan">INNER JOIN</b></td><td>只留两表<b>都匹配</b>的行</td></tr>
+    <tr><td><b class="green">LEFT JOIN</b></td><td><b>左表全留</b>，右表没匹配填 NULL</td></tr>
+    </tbody>
+  </table>
+  <div class="codeblk fragment" style="margin-top:12px"><span class="c">-- 所有顾客及订单数（含没下单的，算 0）</span>
+<span class="k">SELECT</span> c.cust_name, <span class="k">COUNT</span>(o.order_num) <span class="k">AS</span> orders
+<span class="k">FROM</span> Customers c <span class="k">LEFT JOIN</span> Orders o <span class="k">ON</span> c.cust_id=o.cust_id
+<span class="k">GROUP BY</span> c.cust_name;</div>
+  <p class="hl warn fragment" style="margin-top:12px">⚠️ 没下单的 order_num 是 NULL，<code>COUNT</code> 跳过 NULL 正好算成 0（呼应主课 COALESCE）。</p>
+</section>
+
+<section class="slide" data-kicker="小结">
+  <h1>本章要点</h1>
+  <ul class="clean tight" style="font-size:21px">
+    <li class="fragment">子查询直观，大表优先 JOIN</li>
+    <li class="fragment">JOIN <b>必写 ON</b>，否则笛卡尔积爆炸</li>
+    <li class="fragment">INNER 只留都匹配的；LEFT 左表全留、右表缺失为 NULL</li>
+    <li class="fragment">多表沿外键串联，用表别名让 SQL 更短</li>
+  </ul>
+</section>
+
+<section class="slide center">
+  <p class="lead">第 5 章 · 完</p>
+  <h1 class="display">下一章：<span class="cyan">组合查询与数据操作</span></h1>
+  <div class="rule"></div>
+  <p class="sub">UNION · INSERT/UPDATE/DELETE（了解级）</p>
+  <p class="mist" style="margin-top:26px;font-size:20px">← → 翻页 · 空格逐条展开 · <a href="./index.html" style="color:var(--cyan)">返回目录</a></p>
+</section>
+
+</div>
+<button class="navbtn" id="prev">‹</button>
+<button class="navbtn" id="next">›</button>
+<div class="hint">← → 翻页 · 空格下一步 · F 全屏 · P 打印/导出 PDF · Home/End 首末页</div>
+<script src="./assets/deck.js"></script>
+</body></html>

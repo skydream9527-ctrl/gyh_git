@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SQL必知必会 · 第2章 排序与数据过滤</title>
+<link rel="stylesheet" href="./assets/deck.css">
+</head>
+<body>
+<div id="prog"></div>
+<a class="home" href="./index.html">☰ 课程目录</a>
+<div id="deck">
+
+<section class="slide center">
+  <p class="lead">SQL 必知必会 · 辅助课程 · 第 2 章</p>
+  <h1 class="display">排序与<span class="cyan">数据过滤</span></h1>
+  <div class="rule"></div>
+  <p class="sub">把结果排好序，用 WHERE 精准筛出想要的行</p>
+  <div class="meta"><span>📖 对应原书课 3–6</span><span>🎯 ORDER BY · WHERE · IN/NOT · LIKE</span></div>
+</section>
+
+<section class="slide" data-kicker="一 · ORDER BY">
+  <h1>ORDER BY：排序</h1>
+  <div class="codeblk fragment"><span class="k">SELECT</span> prod_name, prod_price <span class="k">FROM</span> Products
+<span class="k">ORDER BY</span> prod_price <span class="k">DESC</span>, prod_name;   <span class="c">-- 价格降序，同价再按名字升序</span></div>
+  <p class="hl fragment" style="margin-top:18px">💡 <code>ORDER BY</code> 放最后；取"最贵的 5 个"→ <code>ORDER BY prod_price DESC LIMIT 5</code>。</p>
+</section>
+
+<section class="slide" data-kicker="二 · WHERE">
+  <h1>WHERE：过滤行</h1>
+  <table class="tbl fragment">
+    <tbody>
+    <tr><th>操作符</th><th>例</th></tr>
+    <tr><td><code>= &lt;&gt; !=</code></td><td>prod_price &lt;&gt; 3.49</td></tr>
+    <tr><td><code>BETWEEN a AND b</code></td><td>prod_price BETWEEN 5 AND 10</td></tr>
+    <tr><td><code>IS NULL</code></td><td>prod_price IS NULL</td></tr>
+    </tbody>
+  </table>
+  <p class="hl bad fragment" style="margin-top:16px">🔴 NULL 用 <code>IS NULL</code>，不能 <code>=NULL</code>；<code>&lt;&gt; 3.49</code> 一般也查不出 NULL 行。</p>
+</section>
+
+<section class="slide" data-kicker="三 · AND/OR/IN">
+  <h1>高级过滤：AND / OR / IN / NOT</h1>
+  <div class="codeblk fragment"><span class="c">-- 🔴 AND 优先级高于 OR，混用必加括号</span>
+<span class="k">WHERE</span> (vend_id=<span class="s">'DLL01'</span> <span class="k">OR</span> vend_id=<span class="s">'BRS01'</span>) <span class="k">AND</span> prod_price&gt;=10;
+<span class="c">-- IN 比一串 OR 更清晰</span>
+<span class="k">WHERE</span> vend_id <span class="k">IN</span> (<span class="s">'DLL01'</span>,<span class="s">'BRS01'</span>);
+<span class="k">WHERE</span> vend_id <span class="k">NOT IN</span> (<span class="s">'DLL01'</span>);</div>
+  <p class="hl warn fragment" style="margin-top:14px">⚠️ 不加括号，<code>A OR B AND C</code> 会被读成 <code>A OR (B AND C)</code>，结果全错。</p>
+</section>
+
+<section class="slide" data-kicker="四 · LIKE">
+  <h1>通配符过滤：LIKE</h1>
+  <table class="tbl fragment">
+    <tbody>
+    <tr><th>通配符</th><th>匹配</th><th>例</th></tr>
+    <tr><td><code>%</code></td><td>任意多个字符</td><td><code>LIKE 'Fish%'</code></td></tr>
+    <tr><td><code>_</code></td><td>单个字符</td><td><code>LIKE '_ inch'</code></td></tr>
+    </tbody>
+  </table>
+  <p class="hl bad fragment" style="margin-top:16px">⚠️ LIKE 慢——<code>'%xxx'</code>（% 在开头）用不上索引最慢；能不用就不用、% 别乱放开头。</p>
+</section>
+
+<section class="slide" data-kicker="小结">
+  <h1>本章要点</h1>
+  <ul class="clean tight" style="font-size:21px">
+    <li class="fragment"><code>ORDER BY … DESC</code> 配 <code>LIMIT</code> 取 TopN</li>
+    <li class="fragment">NULL 用 <code>IS NULL</code></li>
+    <li class="fragment">AND 比 OR 优先，混用<b>必加括号</b>；一组值用 <code>IN</code></li>
+    <li class="fragment"><code>LIKE</code> 模糊匹配但慢，<code>%</code> 别乱放开头</li>
+  </ul>
+</section>
+
+<section class="slide center">
+  <p class="lead">第 2 章 · 完</p>
+  <h1 class="display">下一章：<span class="cyan">计算字段与函数</span></h1>
+  <div class="rule"></div>
+  <p class="sub">拼接 · 算术 · 文本/日期/数值函数</p>
+  <p class="mist" style="margin-top:26px;font-size:20px">← → 翻页 · 空格逐条展开 · <a href="./index.html" style="color:var(--cyan)">返回目录</a></p>
+</section>
+
+</div>
+<button class="navbtn" id="prev">‹</button>
+<button class="navbtn" id="next">›</button>
+<div class="hint">← → 翻页 · 空格下一步 · F 全屏 · P 打印/导出 PDF · Home/End 首末页</div>
+<script src="./assets/deck.js"></script>
+</body></html>

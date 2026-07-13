@@ -118,3 +118,67 @@
 
 **解决**：用 `echo "y" | feishu docx update ...` 管道输入确认，避免交互式阻塞。
 
+---
+
+## 坑11：新埋点事件UV统计漏算导致人均时长异常
+
+**现象**：使用神策`page_expo_view_new`事件统计UV，`content_duration_new`事件统计时长，出现小说阅读页、沉浸式视频、短剧等场景人均时长高达几百分钟的异常值。
+
+**根因**：部分场景（小说阅读页、沉浸式小视频、短剧详情等）只有`content_duration_new`时长上报事件，没有`page_expo_view_new`曝光事件，仅从曝光事件统计UV会严重低估用户量，导致人均时长虚高。
+
+**错误写法**：
+```sql
+SELECT
+  properties['page'] AS page,
+  COUNT(DISTINCT DISTINCT_ID) AS uv,  -- 只统计曝光事件的用户
+  SUM(CAST(properties['duration'] AS DOUBLE)) / 60000 AS dura_min
+FROM dwd_ot_event_di
+WHERE event_name IN ('page_expo_view_new', 'content_duration_new')
+  AND event_name = 'page_expo_view_new'  -- ❌ 错误：时长事件的用户没算进UV
+GROUP BY page
+```
+
+**正确写法**：
+```sql
+SELECT
+  page,
+  COUNT(DISTINCT uv_did) AS uv,  -- 两个事件的用户去重合集
+  SUM(dura_ms) / 60000 AS dura_min
+FROM (
+  SELECT
+    properties['page'] AS page,
+    CASE WHEN event_name IN ('page_expo_view_new', 'content_duration_new') THEN DISTINCT_ID ELSE NULL END AS uv_did,
+    CASE WHEN event_name = 'content_duration_new' THEN CAST(properties['duration'] AS DOUBLE) ELSE 0 END AS dura_ms
+  FROM dwd_ot_event_di
+  WHERE event_name IN ('page_expo_view_new', 'content_duration_new')
+) t
+GROUP BY page
+```
+
+**验证方法**：对比单独统计两个事件的UV，如果`content_duration_new`的UV明显高于`page_expo_view_new`，说明存在场景漏算，必须用合并口径。
+
+**来源案例**：2026-07 浏览器信息流流量地图新口径分析。
+
+---
+
+## 坑12：埋点字段空字符串''漏统计导致UV偏低
+
+**现象**：筛选PUSH落地页数据时加了`properties['from_page'] = 'feed_info_rec'`条件，统计结果UV比实际少3%~5%，人均时长偏高。
+
+**根因**：部分PUSH直开场景下`from_page`字段为空字符串`''`而非null，也不等于'feed_info_rec'，直接写等于条件会漏掉这部分流量。埋点字段经常存在空字符串、null、默认值等多种"空"形态，不能只判断等于目标值。
+
+**错误写法**：
+```sql
+WHERE properties['from_page'] = 'feed_info_rec'  -- ❌ 漏掉了from_page=''的场景
+```
+
+**正确写法**：
+```sql
+WHERE (properties['from_page'] = 'feed_info_rec' OR properties['from_page'] = '')  -- ✅ 覆盖空字符串场景
+-- 如果有null场景，还要加 OR properties['from_page'] IS NULL
+```
+
+**验证方法**：先统计`from_page`的所有枚举值分布，检查空值、空字符串、null的占比，确认所有合法场景都被覆盖。
+
+**来源案例**：2026-07 PUSH分维度时长价值分析。
+

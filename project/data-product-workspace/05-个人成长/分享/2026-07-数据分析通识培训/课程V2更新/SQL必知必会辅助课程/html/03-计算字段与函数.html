@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SQL必知必会 · 第3章 计算字段与函数</title>
+<link rel="stylesheet" href="./assets/deck.css">
+</head>
+<body>
+<div id="prog"></div>
+<a class="home" href="./index.html">☰ 课程目录</a>
+<div id="deck">
+
+<section class="slide center">
+  <p class="lead">SQL 必知必会 · 辅助课程 · 第 3 章</p>
+  <h1 class="display">计算字段<span class="cyan">与函数</span></h1>
+  <div class="rule"></div>
+  <p class="sub">在查询里"现算"新列，用函数加工文本/日期/数值</p>
+  <div class="meta"><span>📖 对应原书课 7–8</span><span>🎯 拼接 · 算术 · 函数</span></div>
+</section>
+
+<section class="slide" data-kicker="一 · 计算字段">
+  <h1>什么是计算字段</h1>
+  <p class="mist fragment">数据库存的是<b>原始数据</b>，报表常要<b>加工后</b>的值（拼接/算术/格式化）。这些不改数据、只在查询时"现算"的列 = <b class="cyan">计算字段</b>。</p>
+</section>
+
+<section class="slide" data-kicker="二 · 拼接">
+  <h1>拼接字段 + 别名</h1>
+  <div class="codeblk fragment"><span class="c">-- 书里各库拼接不同(+ 或 ||)；我们 Hive/Spark 用 CONCAT</span>
+<span class="k">SELECT</span> <span class="k">CONCAT</span>(vend_name, <span class="s">' ('</span>, vend_country, <span class="s">')'</span>) <span class="k">AS</span> vend_title
+<span class="k">FROM</span> Vendors;</div>
+  <p class="hl fragment" style="margin-top:18px">💡 计算列<b>一定用 <code>AS</code> 起别名</b>，否则列名是一串表达式、没法引用。</p>
+</section>
+
+<section class="slide" data-kicker="三 · 算术">
+  <h1>算术计算</h1>
+  <div class="codeblk fragment"><span class="k">SELECT</span> prod_id, quantity, item_price,
+       quantity * item_price <span class="k">AS</span> expanded_price   <span class="c">-- 每个物品小计</span>
+<span class="k">FROM</span> OrderItems <span class="k">WHERE</span> order_num = 20008;</div>
+  <p class="hl fragment" style="margin-top:18px">支持 <code>+ - * /</code>，用括号控制优先级。</p>
+</section>
+
+<section class="slide" data-kicker="四 · 函数">
+  <h1>函数：加工数据</h1>
+  <div class="grid2" style="align-items:start">
+    <div class="fragment"><p class="lead" style="margin-bottom:8px">文本</p><ul class="clean tight" style="font-size:18px"><li><code>UPPER/LOWER</code> 大小写</li><li><code>TRIM</code> 去空格</li><li><code>SUBSTR(x,起,长)</code></li><li><code>LENGTH</code> 长度</li></ul></div>
+    <div class="fragment"><p class="lead" style="margin-bottom:8px">日期 / 数值</p><ul class="clean tight" style="font-size:18px"><li><code>YEAR(d)</code> 取年份</li><li><code>ROUND(x,2)</code> 保留小数</li><li><code>ABS()</code> 等</li></ul></div>
+  </div>
+  <p class="hl warn fragment" style="margin-top:14px">⚠️ 函数是 SQL 最不通用的部分（尤其文本/日期）——学思路，落地查所用平台。</p>
+  <p class="hl bad fragment" style="margin-top:10px">🔴 我们平台：分区列 <code>date</code> ≠ 业务日期，先 <code>WHERE date=…</code> 裁剪，再用日期函数筛业务。</p>
+</section>
+
+<section class="slide" data-kicker="小结">
+  <h1>本章要点</h1>
+  <ul class="clean tight" style="font-size:21px">
+    <li class="fragment">计算字段 = 查询时现算的列，不改原数据</li>
+    <li class="fragment">拼接用 <code>CONCAT</code>；计算列<b>记得 AS 起别名</b></li>
+    <li class="fragment">函数最不通用，落地查平台函数；日期筛选别忘先加分区 date</li>
+  </ul>
+</section>
+
+<section class="slide center">
+  <p class="lead">第 3 章 · 完</p>
+  <h1 class="display">下一章：<span class="cyan">汇总与分组</span></h1>
+  <div class="rule"></div>
+  <p class="sub">聚集函数 · GROUP BY · HAVING（分析最高频）</p>
+  <p class="mist" style="margin-top:26px;font-size:20px">← → 翻页 · 空格逐条展开 · <a href="./index.html" style="color:var(--cyan)">返回目录</a></p>
+</section>
+
+</div>
+<button class="navbtn" id="prev">‹</button>
+<button class="navbtn" id="next">›</button>
+<div class="hint">← → 翻页 · 空格下一步 · F 全屏 · P 打印/导出 PDF · Home/End 首末页</div>
+<script src="./assets/deck.js"></script>
+</body></html>

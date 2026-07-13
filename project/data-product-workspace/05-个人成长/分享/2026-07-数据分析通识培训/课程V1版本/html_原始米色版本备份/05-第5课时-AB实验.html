@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第5课时 · AB实验原理与判断标准</title>
+<style>
+:root {
+  --ink: #151515;
+  --text: #252525;
+  --muted: #646464;
+  --quiet: #8a8a8a;
+  --line: #3a3a3a;
+  --line-muted: #777;
+  --line-soft: #deddd9;
+  --paper: #f7f6f2;
+  --panel: #fffefa;
+  --panel-soft: #f0efeb;
+  --panel-deep: #e2e1dd;
+  --accent: #2a2a2a;
+  --highlight: #fef3c7;
+  --blue: #1e40af;
+  --green: #15803d;
+  --orange: #c2410c;
+  --red: #b91c1c;
+  --purple: #7c3aed;
+  --shadow: 0 10px 24px rgba(0, 0, 0, 0.045);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: "Avenir Next", "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+  background: var(--paper);
+  color: var(--text);
+  line-height: 1.62;
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+}
+.page { max-width: 1100px; margin: 0 auto; padding: 54px 34px 86px; }
+h1, h2, h3, h4 {
+  font-family: "Songti SC", "Noto Serif CJK SC", serif;
+  color: var(--ink); font-weight: 700;
+}
+.header { margin-bottom: 48px; padding-bottom: 28px; border-bottom: 1.25px solid var(--line); }
+.eyebrow { font-family: "Avenir Next"; font-size: 12px; letter-spacing: 0.12em; color: var(--quiet); text-transform: uppercase; margin-bottom: 14px; font-weight: 600; }
+h1 { font-size: 36px; line-height: 1.1; margin-bottom: 12px; }
+.subtitle { font-size: 17px; color: var(--muted); font-weight: 400; margin-bottom: 20px; }
+.meta-row { display: flex; gap: 28px; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin-bottom: 24px; }
+.meta-item { display: flex; align-items: center; gap: 6px; }
+.section { margin-bottom: 48px; }
+.section-title { font-size: 24px; margin-bottom: 6px; padding-bottom: 12px; border-bottom: 0.75px solid var(--line-soft); display: flex; align-items: center; gap: 10px; }
+.section-num { font-family: "Avenir Next"; font-size: 14px; font-weight: 600; color: var(--quiet); }
+h3 { font-size: 18px; margin-top: 24px; margin-bottom: 12px; }
+p { margin-bottom: 12px; }
+.caliber-note { background: var(--panel); border-left: 3px solid var(--line); padding: 16px 20px; font-size: 14px; margin-bottom: 20px; color: var(--muted); border-radius: 0 4px 4px 0; }
+.caliber-note strong { color: var(--text); }
+.warning-note { background: #fef2f2; border-left: 3px solid var(--red); padding: 16px 20px; font-size: 14px; margin-bottom: 20px; color: #991b1b; border-radius: 0 4px 4px 0; }
+.tip-note { background: #f0fdf4; border-left: 3px solid var(--green); padding: 16px 20px; font-size: 14px; margin-bottom: 20px; color: #166534; border-radius: 0 4px 4px 0; }
+.stat-concept-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; margin: 20px 0; }
+.stat-card { background: var(--panel); border: 1px solid var(--line-soft); padding: 18px; border-radius: 6px; box-shadow: var(--shadow); }
+.stat-card .term { font-weight: 700; color: var(--ink); font-size: 16px; margin-bottom: 6px; }
+.stat-card .desc { font-size: 13px; color: var(--muted); line-height: 1.5; }
+.stat-card .rule { font-size: 12px; color: var(--green); font-weight: 500; margin-top: 6px; }
+.ab-flow { background: var(--panel); border: 1px solid var(--line-soft); padding: 24px; border-radius: 6px; margin: 20px 0; box-shadow: var(--shadow); font-family: "SF Mono", "Menlo", monospace; font-size: 13px; line-height: 2; text-align: center; }
+.ab-group { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0; }
+.group-card { background: var(--panel); border: 1px solid var(--line-soft); padding: 20px; border-radius: 6px; box-shadow: var(--shadow); }
+.group-card.control { border-top: 3px solid var(--quiet); }
+.group-card.experiment { border-top: 3px solid var(--green); }
+.group-card .label { font-weight: 700; font-size: 16px; margin-bottom: 8px; }
+.group-card.control .label { color: var(--quiet); }
+.group-card.experiment .label { color: var(--green); }
+.trap-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin: 20px 0; }
+.trap-card { background: var(--panel); border: 1px solid var(--line-soft); border-radius: 6px; padding: 16px; box-shadow: var(--shadow); }
+.trap-card .trap-num { font-family: "Avenir Next"; font-weight: 700; color: var(--red); font-size: 13px; margin-bottom: 6px; }
+.trap-card .trap-ttl { font-weight: 600; margin-bottom: 6px; }
+.trap-card .trap-desc { font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+.trap-card .trap-fix { font-size: 12px; color: var(--green); font-weight: 500; }
+.checklist { background: var(--panel); border: 1px solid var(--line-soft); border-radius: 6px; padding: 24px; box-shadow: var(--shadow); margin: 20px 0; }
+.checklist-item { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; font-size: 14px; }
+.check-icon { color: var(--green); font-weight: 700; flex-shrink: 0; }
+.table-wrap { background: var(--panel); border: 1px solid var(--line-soft); box-shadow: var(--shadow); overflow-x: auto; margin-bottom: 20px; border-radius: 6px; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+thead { background: var(--panel-soft); }
+th { font-family: "Avenir Next"; font-weight: 600; font-size: 12px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--line-soft); }
+td { padding: 12px 14px; border-bottom: 0.5px solid var(--line-soft); vertical-align: top; color: var(--text); line-height: 1.6; }
+td:first-child { font-weight: 500; }
+tbody tr:hover { background: var(--panel-soft); }
+tbody tr:last-child td { border-bottom: none; }
+ul, ol { margin-left: 24px; margin-bottom: 16px; }
+li { margin-bottom: 8px; }
+code { background: var(--panel-soft); padding: 2px 6px; border-radius: 3px; font-family: "SF Mono", "Menlo", monospace; font-size: 13px; color: var(--ink); }
+.conclusion-card { background: var(--panel); border: 1px solid var(--line-soft); padding: 20px 24px; border-radius: 6px; margin-bottom: 16px; box-shadow: var(--shadow); }
+.conclusion-card .num { font-family: "Avenir Next"; font-weight: 700; color: var(--orange); font-size: 14px; margin-bottom: 6px; }
+.steps-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin: 20px 0; }
+.step-card { background: var(--panel); border: 1px solid var(--line-soft); padding: 16px 12px; border-radius: 6px; text-align: center; box-shadow: var(--shadow); }
+.step-card .step-num { font-family: "Avenir Next"; font-weight: 700; color: var(--blue); font-size: 14px; margin-bottom: 4px; }
+.step-card .step-ttl { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+.step-card .step-desc { font-size: 12px; color: var(--muted); }
+.nav-links { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 40px; justify-content: space-between; }
+.nav-group { display: flex; gap: 12px; }
+.nav-link { background: var(--panel); border: 1px solid var(--line-soft); padding: 10px 18px; border-radius: 6px; text-decoration: none; color: var(--text); font-size: 14px; font-family: "Avenir Next"; transition: all 0.2s; }
+.nav-link:hover { border-color: var(--line); background: var(--panel-soft); }
+.footer { margin-top: 64px; padding-top: 24px; border-top: 0.75px solid var(--line-soft); font-size: 12px; color: var(--quiet); font-family: "Avenir Next"; display: flex; justify-content: space-between; }
+@media (max-width: 768px) {
+  .page { padding: 30px 18px 50px; }
+  h1 { font-size: 28px; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+<div class="header">
+  <div class="eyebrow">LESSON 05 · A/B TESTING</div>
+  <h1>第5课时：AB实验原理与判断标准</h1>
+  <p class="subtitle">以PUSH实验为例 · 核心逻辑 · 统计基础 · 常见陷阱 · 结果判断方法</p>
+  <div class="meta-row">
+    <div class="meta-item">⏱️ 课时：1.5小时</div>
+    <div class="meta-item">🎯 目标：看懂实验结论，判断结果是否靠谱，避开常见陷阱</div>
+  </div>
+</div>
+
+<div class="section">
+  <h2 class="section-title"><span class="section-num">01</span> 为什么要做AB实验？</h2>
+
+  <h3>不做AB实验的坑</h3>
+  <p>产品迭代最容易犯的三个错误：</p>
+  <ul>
+    <li><strong>幸存者偏差</strong>：只看到了用了功能的用户说好用，没看到用了之后流失的用户</li>
+    <li><strong>归因错误</strong>：新功能上线后指标涨了，就说是功能的功劳，但有可能是自然趋势/活动/节假日/其他功能同时上线导致的</li>
+    <li><strong>主观判断</strong>："我觉得这个功能好"、"用户反馈说想要"，结果上线后没人用</li>
+  </ul>
+
+  <div class="tip-note">
+    <strong>💡 AB实验的核心价值：</strong>通过科学的流量分流，排除其他因素干扰，准确测量策略带来的真实效果，做到"数据驱动决策"，而不是靠拍脑袋。
+  </div>
+
+  <h3>AB实验基本逻辑</h3>
+  <p>把用户<strong>随机</strong>分成两组，在相同时间、相同环境下运行，唯一的区别就是要测试的策略，最后对比两组指标差异，这个差异就是策略带来的真实效果。</p>
+  <div class="ab-group">
+    <div class="group-card control">
+      <div class="label">对照组（A组）</div>
+      <div class="desc">保持原有策略，什么都不改，作为对比基准</div>
+    </div>
+    <div class="group-card experiment">
+      <div class="label">实验组（B组）</div>
+      <div class="desc">上线新策略/新功能，和对照组唯一的变量就是待测试策略</div>
+    </div>
+  </div>
+  <div class="ab-flow">
+    用户流量 → 随机分流 → 对照组A（老策略）→ 收集指标 → 对比差异 → 判断效果<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↳ 实验组B（新策略）→ 收集指标 ↗
+  </div>
+</div>
+
+<div class="section">
+  <h2 class="section-title"><span class="section-num">02</span> AB实验完整流程</h2>
+  <p>一个严谨的AB实验要走完这6步，缺一步都可能得到错误结论：</p>
+  <div class="steps-grid">
+    <div class="step-card">
+      <div class="step-num">01</div>
+      <div class="step-ttl">实验设计</div>
+      <div class="step-desc">明确目标、核心指标、流量、周期（最关键）</div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">02</div>
+      <div class="step-ttl">流量分配</div>
+      <div class="step-desc">随机分流，AA测试保证两组同质</div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">03</div>
+      <div class="step-ttl">实验上线</div>
+      <div class="step-desc">先小流量灰度，确认无问题再放量</div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">04</div>
+      <div class="step-ttl">数据收集</div>
+      <div class="step-desc">保证埋点正确，等数据稳定</div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">05</div>
+      <div class="step-ttl">效果评估</div>
+      <div class="step-desc">看核心指标、辅助指标、护栏指标，计算置信度</div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">06</div>
+      <div class="step-ttl">结论决策</div>
+      <div class="step-desc">显著正就全量，不显著/负就回滚</div>
+    </div>
+  </div>
+
+  <h3>步骤1：实验设计（最关键，做不好后面全错）</h3>
+  <ul>
+    <li><strong>明确实验目标</strong>：要验证什么假设？提升什么核心指标？</li>
+    <li><strong>确定实验单位</strong>：按用户分流（did/uid）？绝大多数用户侧产品按用户分流，保证同一用户始终看到同一种策略</li>
+    <li><strong>确定三类指标</strong>：
+      <ul>
+        <li>核心指标：你要提升的第一指标，比如PUSH CTR、信息流人均时长、留存</li>
+        <li>辅助指标：支持核心效果的其他指标，比如PUSH点击量、VV</li>
+        <li><strong>反向指标（护栏指标）</strong>：你不能损害的指标，比如提升了CTR但卸载率涨了，这样的策略不能上线</li>
+      </ul>
+    </li>
+    <li><strong>确定流量比例和实验周期</strong>：需要多少样本量？开多少流量？开多久？</li>
+  </ul>
+</div>
+
+<div class="section">
+  <h2 class="section-title"><span class="section-num">03</span> 必须懂的统计基础（通俗版）</h2>
+  <p>产品同学不用背复杂的统计公式，只要理解这几个概念，能看懂实验结果就行：</p>
+
+  <div class="stat-concept-grid">
+    <div class="stat-card">
+      <div class="term">🎲 随机波动 vs 真实效果</div>
+      <div class="desc">抛10次硬币不一定5正5反，可能6正4反是随机波动；抛10000次大概率接近5000正。AB实验也是一样，即使什么都不改，两组指标也会有小差异，要判断差异是真实效果还是随机巧合。</div>
+    </div>
+    <div class="stat-card">
+      <div class="term">📊 p值</div>
+      <div class="desc">如果新策略其实完全没用，观察到当前这个差异的概率。p=0.01意思是纯靠随机波动出现这么大差异的概率只有1%。</div>
+      <div class="rule">✅ 行业标准：p < 0.05 认为结果统计显著</div>
+    </div>
+    <div class="stat-card">
+      <div class="term">📏 置信区间</div>
+      <div class="desc">真实效果的可能范围，比如"提升3%，置信区间[+1%, +5%]"意思是真实效果有95%概率在1%到5%之间。</div>
+      <div class="rule">✅ 置信区间不包含0才显著：[+1%,+5%]→显著正，[-1%,+3%]→不显著</div>
+    </div>
+    <div class="stat-card">
+      <div class="term">👥 样本量</div>
+      <div class="desc">样本量太小→随机波动大，容易误判；样本量太大→出问题影响范围广。核心指标基数越大、想检测的效果越小，需要样本越多。</div>
+      <div class="rule">✅ 用公司样本量计算器计算，测比例类指标一般开3~7天，测留存开1~2周</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h2 class="section-title"><span class="section-num">04</span> PUSH/信息流业务常见实验指标</h2>
+  <p>设计实验时要选对指标，不要只盯着一个指标看：</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>指标类型</th><th>PUSH实验常用指标</th><th>信息流实验常用指标</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>核心指标</strong></td>
+          <td>CTR（点击/到达）、PUSH带来的启动量、PUSH带来的人均时长</td>
+          <td>人均信息流时长、CTR、人均VV、有效DAU</td>
+        </tr>
+        <tr>
+          <td><strong>辅助指标</strong></td>
+          <td>到达率、展示率、点击量、落地页打开率、点击率分人群</td>
+          <td>人均曝光、人均点击、完读率/完播率、各频道指标</td>
+        </tr>
+        <tr>
+          <td><strong>护栏指标（反向）</strong></td>
+          <td>通知关闭率、APP卸载率、7日留存、整体APP时长、负反馈率</td>
+          <td>跳出率、APP整体时长、卸载率、负反馈、用户活跃度</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="warning-note">
+    <strong>⚠️ 重要提醒：</strong>不要用"北极星指标"当唯一指标，一定要看护栏指标：比如你给PUSH加了声音震动，CTR涨了，但用户嫌烦把通知关了/卸载了，长期是负向的。
+  </div>
+</div>
+
+<div class="section">
+  <h2 class="section-title"><span class="section-num">05</span> AB实验常见陷阱（90%的错误都在这）</h2>
+  <div class="trap-grid">
+    <div class="trap-card">
+      <div class="trap-num">陷阱 01</div>
+      <div class="trap-ttl">样本量不足/时间太短</div>
+      <div class="trap-desc">实验刚开1天看到涨了10%就上线，结果后面几天数据回去了，还有新奇效应问题。</div>
+      <div class="trap-fix">✅ 开够样本量，至少等一个完整周，等数据稳定再判断</div>
+    </div>
+    <div class="trap-card">
+      <div class="trap-num">陷阱 02</div>
+      <div class="trap-ttl">SRM样本比例失衡</div>
+      <div class="trap-desc">设计50%vs50%，实际分流是55%vs45%，两组用户新老/活跃度差异大，分流有问题。</div>
+      <div class="trap-fix">✅ 实验开始就做SRM校验，分流不均匀立刻停实验排查</div>
+    </div>
+    <div class="trap-card">
+      <div class="trap-num">陷阱 03</div>
+      <div class="trap-ttl">多重比较问题</div>
+      <div class="trap-desc">每天看数据，看20次哪怕策略没用也有一次碰巧p<0.05；同时看10个指标也容易出假阳性。</div>
+      <div class="trap-fix">✅ 提前定好周期和核心指标，结束再统一看，提前看用更严格阈值</div>
+    </div>
+    <div class="trap-card">
+      <div class="trap-num">陷阱 04</div>
+      <div class="trap-ttl">辛普森悖论</div>
+      <div class="trap-desc">整体指标涨了，但分所有人群看都降了，因为分流后用户结构变了。</div>
+      <div class="trap-fix">✅ 分维度拆分看，看新老/高低活用户分别效果，不要只看大盘</div>
+    </div>
+    <div class="trap-card">
+      <div class="trap-num">陷阱 05</div>
+      <div class="trap-ttl">实验之间互相干扰</div>
+      <div class="trap-desc">两个实验同时开流量重叠，实验组用户同时中两个策略，不知道哪个导致效果。</div>
+      <div class="trap-fix">✅ 相关实验流量正交，上线前确认有没有冲突实验</div>
+    </div>
+    <div class="trap-card">
+      <div class="trap-num">陷阱 06</div>
+      <div class="trap-ttl">只看相对不看绝对值</div>
+      <div class="trap-desc">"CTR相对提升20%"听起来厉害，但基准1%的话只涨0.2个点，业务价值不大。</div>
+      <div class="trap-fix">✅ 同时看相对和绝对值，算业务影响范围（每天多多少点击/时长）</div>
+    </div>
+    <div class="trap-card">
+      <div class="trap-num">陷阱 07</div>
+      <div class="trap-ttl">没有AA测试</div>
+      <div class="trap-desc">分流系统本身有偏差，对照组实验组一开始就不一样，结果肯定不对。</div>
+      <div class="trap-fix">✅ 正式实验前先开几天AA测试，确认两组无显著差异再切策略</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h2 class="section-title"><span class="section-num">06</span> 怎么判断一个实验结果靠不靠谱？</h2>
+  <p>拿到一个实验报告，按这8个问题问一遍，都答得上来结论才可信：</p>
+  <div class="checklist">
+    <div class="checklist-item"><span class="check-icon">✅</span>实验开了多久？样本量够不够？有没有覆盖周末？新奇效应过了吗？</div>
+    <div class="checklist-item"><span class="check-icon">✅</span>分流均匀吗？SRM校验过吗？AA测试过吗？两组用户基线特征一致吗？</div>
+    <div class="checklist-item"><span class="check-icon">✅</span>核心指标提升了多少？p值多少？置信区间包含0吗？统计显著吗？</div>
+    <div class="checklist-item"><span class="check-icon">✅</span>反向/护栏指标有没有负向？</div>
+    <div class="checklist-item"><span class="check-icon">✅</span>分维度看效果一致吗？有没有辛普森悖论？</div>
+    <div class="checklist-item"><span class="check-icon">✅</span>有没有其他同时开的实验干扰？</div>
+    <div class="checklist-item"><span class="check-icon">✅</span>绝对值提升有多少？业务价值大吗？</div>
+    <div class="checklist-item"><span class="check-icon">✅</span>结论和建议符合数据吗？</div>
+  </div>
+</div>
+
+<div class="section">
+  <h2 class="section-title"><span class="section-num">07</span> 本节课小结</h2>
+  <div class="conclusion-card">
+    <div class="num">✅ 要点1</div>
+    AB实验是排除干扰、准确测量策略效果的最科学方法，避免拍脑袋决策。
+  </div>
+  <div class="conclusion-card">
+    <div class="num">✅ 要点2</div>
+    实验流程6步走：设计→分流→上线→收集→评估→决策，设计环节最关键。
+  </div>
+  <div class="conclusion-card">
+    <div class="num">✅ 要点3</div>
+    不用背统计公式，理解p<0.05显著、置信区间不包含0、样本量足够这几个核心点就能看懂结果。
+  </div>
+  <div class="conclusion-card">
+    <div class="num">✅ 要点4</div>
+    选指标要同时选核心指标+辅助指标+反向护栏指标，不能只看一个指标。
+  </div>
+  <div class="conclusion-card">
+    <div class="num">✅ 要点5</div>
+    避开7个常见陷阱，拿到实验结果按8条Checklist逐一验证，才能保证结论可信。
+  </div>
+</div>
+
+<div class="nav-links">
+  <div class="nav-group">
+    <a href="./04-第4课时-分析方法.html" class="nav-link">← 第4课时</a>
+    <a href="./00-课程大纲与课表.html" class="nav-link">返回课表</a>
+  </div>
+  <div class="nav-group">
+    <a href="./06-第6课时-综合实战.html" class="nav-link">第6课时：综合实战 →</a>
+  </div>
+</div>
+
+<div class="footer">
+  <span>数据分析通识培训 · 第5课时</span>
+  <span>2026年7月</span>
+</div>
+
+</div>
+</body>
+</html>

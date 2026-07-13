@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第3课时 · SQL 基础语法（下）</title>
+<style>
+  :root{
+    --ink:#0C0F14; --slate:#161B22; --slate2:#1E242D; --line:#2A313C;
+    --snow:#EDF1F7; --mist:#98A4B3;
+    --cyan:#3DD8C4; --green:#33D17A; --amber:#F5A524; --red:#F2555A; --violet:#9B8CFF;
+    --cyan-dim:rgba(61,216,196,.12); --amber-dim:rgba(245,165,36,.10); --red-dim:rgba(242,85,90,.10);
+    --mono:"SFMono-Regular",Menlo,Consolas,"JetBrains Mono","Liberation Mono",monospace;
+    --sans:"PingFang SC","Source Han Sans SC","Microsoft YaHei","Hiragino Sans GB",system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;color:var(--snow);font-family:var(--sans);overflow:hidden}
+  body{background:
+      radial-gradient(1200px 700px at -8% -12%, rgba(61,216,196,.07), transparent 55%),
+      radial-gradient(1000px 620px at 108% 112%, rgba(51,209,122,.05), transparent 55%),
+      linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px),
+      var(--ink);
+    background-size:auto,auto,56px 56px,56px 56px,auto;}
+  #deck{position:fixed;inset:0}
+  .slide{position:absolute;inset:0;display:none;padding:6vh 6.5vw 8.5vh;flex-direction:column;justify-content:center;opacity:0;transition:opacity .35s ease}
+  .slide.active{display:flex;opacity:1}
+  .slide.center{align-items:center;text-align:center}
+  .kicker{position:absolute;top:4.2vh;left:6.5vw;font-family:var(--mono);font-size:14px;color:var(--cyan);letter-spacing:.16em;text-transform:uppercase;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:2px;background:var(--cyan);border-radius:1px}
+  .kicker .n{color:var(--mist);letter-spacing:.08em}
+  .pageno{position:absolute;bottom:3.2vh;right:6.5vw;font-family:var(--mono);font-size:14px;color:var(--mist);opacity:.75}
+  .secnum{position:absolute;right:4vw;bottom:-4vh;font-family:var(--mono);font-weight:800;font-size:34vh;line-height:1;color:transparent;pointer-events:none;user-select:none;-webkit-text-stroke:1.5px rgba(61,216,196,.13)}
+  h1{font-size:40px;font-weight:700;margin:0 0 20px;line-height:1.25}
+  h1 .tag{font-size:18px;color:var(--mist);font-weight:400;margin-left:14px}
+  .display{font-size:clamp(38px,5.4vw,72px);font-weight:800;line-height:1.18;margin:0}
+  .sub{font-size:24px;color:var(--mist);font-weight:400;margin:20px 0 0;line-height:1.6}
+  p,li{font-size:22px;line-height:1.6}
+  .mist{color:var(--mist)} .green{color:var(--green)} .amber{color:var(--amber)} .cyan{color:var(--cyan)} .red{color:var(--red)} .violet{color:var(--violet)}
+  b,strong{font-weight:700}
+  .rule{width:104px;height:5px;background:linear-gradient(90deg,var(--cyan),rgba(61,216,196,.25));border-radius:3px;margin:24px auto 0}
+  .lead{font-family:var(--mono);color:var(--cyan);font-size:16px;letter-spacing:.26em;margin:0 0 16px;text-transform:uppercase}
+  .meta{display:flex;gap:26px;justify-content:center;flex-wrap:wrap;margin-top:30px;font-family:var(--mono);font-size:16px;color:var(--mist)}
+  .meta span{display:flex;align-items:center;gap:8px}
+  .hl{background:var(--cyan-dim);border-left:4px solid var(--cyan);padding:16px 22px;border-radius:0 12px 12px 0;font-size:23px;font-weight:700;line-height:1.55}
+  .hl.warn{background:var(--amber-dim);border-left-color:var(--amber)}
+  .hl.bad{background:var(--red-dim);border-left-color:var(--red)}
+  .cards{display:flex;gap:20px;flex-wrap:wrap;margin-top:12px}
+  .card{background:linear-gradient(180deg,rgba(255,255,255,.022),transparent 45%),var(--slate);border:1px solid var(--line);border-radius:16px;padding:20px 24px;flex:1;min-width:220px}
+  .card .ic{font-size:30px;line-height:1;margin-bottom:10px}
+  .card .t{font-size:22px;font-weight:700;margin:0 0 8px}
+  .card .d{font-size:18px;color:var(--mist);margin:0;line-height:1.55}
+  .card .d b{color:var(--snow)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:8px}
+  ul.clean{list-style:none;padding:0;margin:8px 0 0}
+  ul.clean li{margin:0 0 12px;padding-left:32px;position:relative}
+  ul.clean li::before{content:"▸";position:absolute;left:0;color:var(--cyan)}
+  code,.mono{font-family:var(--mono)}
+  .codeblk{background:var(--slate2);border:1px solid var(--line);border-left:4px solid var(--cyan);border-radius:0 12px 12px 0;padding:16px 20px;font-family:var(--mono);font-size:16px;color:var(--snow);white-space:pre-wrap;line-height:1.6}
+  .codeblk.sm{font-size:14.5px;line-height:1.5}
+  .codeblk .c{color:var(--mist)} .codeblk .k{color:var(--cyan);font-weight:700} .codeblk .s{color:var(--amber)}
+  .explain{background:var(--amber-dim);border-radius:12px;padding:14px 18px;margin-top:12px;font-size:17px;line-height:1.6}
+  .explain b{color:var(--amber)}
+  .tbl{width:100%;border-collapse:collapse;margin-top:6px;font-size:17px;line-height:1.4}
+  .tbl th{font-family:var(--mono);font-size:15px;color:var(--cyan);text-align:left;padding:10px 13px;border-bottom:2px solid var(--cyan);font-weight:700}
+  .tbl th:first-child{color:var(--mist)}
+  .tbl td{padding:10px 13px;border-bottom:1px solid var(--line);color:var(--snow);vertical-align:top}
+  .tbl td:first-child{color:var(--mist);font-weight:600}
+  .tbl tr:last-child td{border-bottom:none}
+  .tbl .no{color:var(--red);font-weight:700} .tbl .good{color:var(--green);font-weight:700} .tbl code{color:var(--cyan);font-size:14px}
+  .howto{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px;counter-reset:howto}
+  .howto .it{background:var(--slate);border:1px solid var(--line);border-radius:14px;padding:14px 18px 14px 56px;position:relative;counter-increment:howto}
+  .howto .it::before{content:counter(howto,decimal-leading-zero);position:absolute;left:16px;top:14px;font-family:var(--mono);font-size:17px;font-weight:800;color:var(--cyan)}
+  .howto .t{font-size:20px;font-weight:700;margin:0 0 4px} .howto .d{font-size:16px;color:var(--mist);margin:0;line-height:1.5}
+  .howto .it.wide{grid-column:1/-1}
+  .tips{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:4px}
+  .tip{background:var(--slate);border:1px solid var(--line);border-radius:14px;padding:13px 16px;display:flex;gap:12px;align-items:flex-start}
+  .tip .ic{font-size:21px;flex:0 0 auto} .tip .t{font-size:18px;font-weight:700;margin:0 0 2px} .tip .d{font-size:15px;color:var(--mist);margin:0;line-height:1.4}
+  .tip.wide{grid-column:1/-1}
+  .fragment{opacity:0;transition:opacity .35s ease, transform .35s ease;transform:translateY(10px)}
+  .fragment.on{opacity:1;transform:none}
+  #prog{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--cyan),var(--green));width:0;z-index:50;transition:width .3s}
+  .navbtn{position:fixed;bottom:2.6vh;width:42px;height:42px;border-radius:50%;border:1px solid var(--line);background:var(--slate);color:var(--snow);font-size:20px;cursor:pointer;z-index:40;opacity:.5;transition:opacity .2s}
+  .navbtn:hover{opacity:1}
+  #prev{left:6.5vw} #next{left:calc(6.5vw + 54px)}
+  .hint{position:fixed;bottom:3vh;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:13px;color:var(--mist);opacity:.45;z-index:40}
+  .home{position:fixed;top:3.6vh;right:6.5vw;font-family:var(--mono);font-size:13px;color:var(--mist);text-decoration:none;z-index:40;border:1px solid var(--line);padding:6px 12px;border-radius:8px;opacity:.6;transition:opacity .2s}
+  .home:hover{opacity:1;color:var(--cyan)}
+  /* demo join */
+  .demo{display:grid;grid-template-columns:1fr 1.1fr;gap:22px;margin-top:8px;align-items:start}
+  .panel{background:var(--slate2);border:1px solid var(--line);border-radius:16px;padding:20px 22px}
+  .panel h3{margin:0 0 12px;font-size:15px;color:var(--mist);font-family:var(--mono);letter-spacing:.05em;font-weight:600}
+  .minitbl{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:15px;margin-bottom:14px}
+  .minitbl th{color:var(--mist);text-align:left;padding:5px 8px;border-bottom:1px solid var(--line);font-weight:600}
+  .minitbl td{padding:5px 8px;border-bottom:1px solid var(--line)}
+  .minitbl tr:last-child td{border-bottom:none}
+  .minitbl .a{color:var(--cyan)} .minitbl .b{color:var(--green)}
+  .btnrow{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+  .btn{font-family:var(--sans);font-size:18px;font-weight:700;color:var(--snow);background:var(--slate);border:1px solid var(--line);border-radius:10px;padding:10px 18px;cursor:pointer;transition:.15s}
+  .btn:hover{filter:brightness(1.1)} .btn.on{background:var(--cyan);color:var(--ink);border-color:var(--cyan)}
+  .rescell.null{color:var(--red)} .rescell.fill{color:var(--amber)}
+  .joinnote{font-size:16px;color:var(--mist);margin-top:12px;line-height:1.5;min-height:22px}
+  .src{position:absolute;bottom:3.2vh;left:6.5vw;font-family:var(--mono);font-size:12px;color:var(--mist);opacity:.5}
+  @media print{html,body{overflow:visible;height:auto}#prog,.navbtn,.hint,.home{display:none!important}.slide{position:relative;display:flex!important;opacity:1!important;height:100vh;page-break-after:always;inset:auto}.fragment{opacity:1!important;transform:none!important}}
+  @media (max-width:820px){.demo,.grid2,.howto,.tips{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div id="prog"></div>
+<a class="home" href="./index.html">☰ 课程目录</a>
+<div id="deck">
+
+<!-- 1 封面 -->
+<section class="slide center" data-kicker="">
+  <p class="lead">数据分析通识培训 · 第 3 课</p>
+  <h1 class="display">SQL 基础语法<span class="cyan">（下）</span></h1>
+  <div class="rule"></div>
+  <p class="sub">复杂场景取数 —— JOIN 多表关联 · CTE 子查询 · 性能优化 · AI 进阶</p>
+  <div class="meta">
+    <span>⏱️ 1.5 小时</span>
+    <span>🎯 独立写复杂 SQL，让查询跑得更快</span>
+  </div>
+</section>
+
+<!-- 2 路线 -->
+<section class="slide" data-kicker="第3课 · 路线图">
+  <h1>这一课解决"更复杂的取数"</h1>
+  <div class="cards">
+    <div class="card fragment"><div class="ic">🔗</div><div class="t">JOIN 多表关联</div><p class="d">把两张表拼起来查，INNER vs LEFT。</p></div>
+    <div class="card fragment"><div class="ic">🧱</div><div class="t">CTE 拆积木</div><p class="d">WITH 语句把复杂逻辑拆成清晰步骤。</p></div>
+    <div class="card fragment"><div class="ic">⚡</div><div class="t">避坑 + 性能</div><p class="d">笛卡尔积、数据膨胀、慢查询优化。</p></div>
+    <div class="card fragment"><div class="ic">🤖</div><div class="t">AI 进阶</div><p class="d">复杂需求拆步骤，让 AI 少犯错。</p></div>
+  </div>
+</section>
+
+<!-- 3 章节一 -->
+<section class="slide center" data-kicker="一 · 多表关联 JOIN">
+  <div class="secnum">01</div>
+  <p class="lead">SECTION 01</p>
+  <h1 class="display">JOIN：把多张表<br>拼起来查</h1>
+  <div class="rule"></div>
+</section>
+
+<!-- 4 为什么JOIN -->
+<section class="slide" data-kicker="一 · 多表关联 JOIN">
+  <h1>为什么需要 JOIN？</h1>
+  <p class="mist" style="margin-bottom:6px">单表不够用，实际业务经常要"跨表看"：</p>
+  <ul class="clean">
+    <li class="fragment">把 APP 启动数据和信息流消费数据关联起来看（<code class="cyan">miui_di + label_di</code>）</li>
+    <li class="fragment">把 PUSH 点击用户和后续的留存 / 消费行为关联起来</li>
+    <li class="fragment">把用户属性标签和行为数据关联起来做分群分析</li>
+  </ul>
+  <div class="hl fragment" style="margin-top:20px">JOIN = 用共同的"钥匙"（比如 <code>date + did</code>）把多张表<b class="cyan">拼接在一起</b>查。</div>
+</section>
+
+<!-- 5 INNER vs LEFT -->
+<section class="slide" data-kicker="一 · 多表关联 JOIN">
+  <h1>最常用两种：INNER vs LEFT <span class="tag">99% 场景</span></h1>
+  <div class="grid2">
+    <div class="card fragment" style="border-color:var(--cyan)">
+      <div class="t cyan">INNER JOIN 内连接</div>
+      <p class="d">只保留<b>两张表都能匹配上</b>的数据，匹配不上的丢掉。<br><span class="mist">→ 查"既启动 APP 又看了信息流"的用户。</span><br><span class="mist">比喻：同时参加了数学和语文考试的学生。</span></p>
+    </div>
+    <div class="card fragment" style="border-color:var(--green)">
+      <div class="t green">LEFT JOIN 左连接</div>
+      <p class="d">以<b>左表为基准全保留</b>，右表匹配不上的填 NULL。<br><span class="mist">→ 查"所有启动 APP 的用户，有没有看信息流（没看显示 0）"。</span><br><span class="mist">比喻：所有考数学的学生，语文成绩缺考记 NULL。</span></p>
+    </div>
+  </div>
+</section>
+
+<!-- 6 DEMO JOIN -->
+<section class="slide" data-kicker="一 · 多表关联 JOIN" id="slide-demo">
+  <h1>Demo · 同样两张表，两种 JOIN 结果 <span class="tag">切换看</span></h1>
+  <div class="demo">
+    <div class="panel">
+      <h3>两张小表（did 为钥匙）</h3>
+      <table class="minitbl"><tbody>
+        <tr><th class="a">表A · 启动APP</th><th class="b">表B · 看信息流(feed_dura)</th></tr>
+        <tr><td class="a">u1</td><td class="b">u2 → 30</td></tr>
+        <tr><td class="a">u2</td><td class="b">u3 → 12</td></tr>
+        <tr><td class="a">u3</td><td class="b">u4 → 8</td></tr>
+      </tbody></table>
+      <div class="btnrow">
+        <button class="btn on" id="j-inner">INNER JOIN</button>
+        <button class="btn" id="j-left">LEFT JOIN</button>
+      </div>
+      <p class="mist" style="font-size:14px">* 以表A为左表，ON a.did = b.did。</p>
+    </div>
+    <div class="panel">
+      <h3>关联结果</h3>
+      <table class="minitbl" id="jres"><tbody></tbody></table>
+      <div class="joinnote" id="jnote"></div>
+    </div>
+  </div>
+  <p class="mist" style="font-size:16px;margin-top:10px">💡 LEFT JOIN 后，右表没匹配上的是 <b class="red">NULL</b> —— 记得用 <code class="cyan">COALESCE(feed_dura, 0)</code> 转成 0，否则 SUM/AVG 结果异常。</p>
+  <div class="src">来源：内容生态业务线取数场景</div>
+</section>
+
+<!-- 7 案例 -->
+<section class="slide" data-kicker="一 · 多表关联 JOIN">
+  <h1>案例：PUSH 启动用户的信息流消费</h1>
+  <div class="codeblk sm fragment"><span class="c">-- 先在子查询里各自过滤，再关联（性能更好）</span>
+<span class="k">SELECT</span> COUNT(DISTINCT a.did) <span class="k">AS</span> push_user,
+  ROUND(SUM(COALESCE(b.feed_dura,0)) / COUNT(DISTINCT a.did) / 60000, 2) <span class="k">AS</span> avg_min
+<span class="k">FROM</span> ( <span class="k">SELECT</span> date,did <span class="k">FROM</span> …miui_di
+       <span class="k">WHERE</span> date=20260628 <span class="k">AND</span> is_app_dau_2024=1
+         <span class="k">AND</span> app_launch_way <span class="k">IN</span>(<span class="s">'点击push'</span>,<span class="s">'subscribe_push'</span>) ) a
+<span class="k">LEFT JOIN</span> ( <span class="k">SELECT</span> date,did,feed_dura <span class="k">FROM</span> …label_di
+       <span class="k">WHERE</span> date=20260628 <span class="k">AND</span> is_dau_feed_dapan_2024=1 <span class="k">AND</span> is_top=0 ) b
+  <span class="k">ON</span> a.date=b.date <span class="k">AND</span> a.did=b.did</div>
+  <ul class="clean" style="font-size:18px;margin-top:12px">
+    <li class="fragment">关联条件带上 <code class="cyan">date + did</code> —— 表是 did+date 粒度</li>
+    <li class="fragment"><code class="cyan">COALESCE(…,0)</code> 把 NULL 转 0，避免 SUM/AVG 异常</li>
+    <li class="fragment">先在子查询过滤再关联，比关联全表快很多</li>
+  </ul>
+</section>
+
+<!-- 8 JOIN避坑 -->
+<section class="slide" data-kicker="一 · 多表关联 JOIN">
+  <h1>JOIN 避坑指南</h1>
+  <div class="tips">
+    <div class="tip fragment"><div class="ic">💥</div><div><div class="t">一定写 ON 条件</div><p class="d">漏写 = 笛卡尔积，百万×百万，直接搞挂集群</p></div></div>
+    <div class="tip fragment"><div class="ic">🔤</div><div><div class="t">关联字段类型一致</div><p class="d">字符串 did 关联数字 did 会失败，必要时 CAST</p></div></div>
+    <div class="tip fragment"><div class="ic">📈</div><div><div class="t">注意多对多</div><p class="d">不是 1 对 1 会数据膨胀，指标算大</p></div></div>
+    <div class="tip fragment"><div class="ic">📦</div><div><div class="t">小表放前面</div><p class="d">LEFT JOIN 把小表放左边，性能更好</p></div></div>
+  </div>
+  <div class="hl bad fragment" style="margin-top:18px">🚨 头号事故：<b>JOIN 漏写 ON</b> → 笛卡尔积，1 万亿条数据。写完 JOIN 立刻写 ON。</div>
+</section>
+
+<!-- 9 章节二 -->
+<section class="slide center" data-kicker="二 · CTE 拆积木">
+  <div class="secnum">02</div>
+  <p class="lead">SECTION 02</p>
+  <h1 class="display">CTE：把复杂 SQL<br>拆成简单块</h1>
+  <div class="rule"></div>
+</section>
+
+<!-- 10 CTE语法 -->
+<section class="slide" data-kicker="二 · CTE 拆积木">
+  <h1>WITH 语句：像搭积木一样写 SQL</h1>
+  <div class="codeblk fragment"><span class="k">WITH</span>
+临时表1 <span class="k">AS</span> ( <span class="k">SELECT</span> … <span class="k">FROM</span> … <span class="k">WHERE</span> … ),
+临时表2 <span class="k">AS</span> ( <span class="k">SELECT</span> … <span class="k">FROM</span> 临时表1 <span class="k">JOIN</span> … )
+<span class="c">-- 最后从最终的临时表查询</span>
+<span class="k">SELECT</span> … <span class="k">FROM</span> 临时表2</div>
+  <div class="grid2" style="margin-top:20px">
+    <div class="card fragment"><div class="t cyan">好处 1 · 清晰</div><p class="d">复杂需求拆成多步，每步逻辑一目了然，不容易出错。</p></div>
+    <div class="card fragment"><div class="t cyan">好处 2 · AI 友好</div><p class="d">让 AI 生成拆分后的 SQL，准确率会高很多。</p></div>
+  </div>
+</section>
+
+<!-- 11 CTE案例 -->
+<section class="slide" data-kicker="二 · CTE 拆积木">
+  <h1>案例：PUSH 用户 vs 全体，5 步拆解</h1>
+  <div class="codeblk sm fragment"><span class="k">WITH</span>
+all_user  <span class="k">AS</span> ( <span class="c">-- ① 全体 APP 用户 + app_dura</span> … ),
+push_user <span class="k">AS</span> ( <span class="c">-- ② PUSH 启动用户</span> … ),
+feed_data <span class="k">AS</span> ( <span class="c">-- ③ 信息流消费数据</span> … ),
+user_label <span class="k">AS</span> ( <span class="c">-- ④ 关联拼接，CASE WHEN 打标 + COALESCE 补 0</span>
+  <span class="k">SELECT</span> a.did, a.app_dura,
+    <span class="k">CASE WHEN</span> b.did <span class="k">IS NOT NULL THEN</span> 1 <span class="k">ELSE</span> 0 <span class="k">END</span> <span class="k">AS</span> is_push,
+    COALESCE(c.feed_dura,0) <span class="k">AS</span> feed_dura
+  <span class="k">FROM</span> all_user a <span class="k">LEFT JOIN</span> push_user b <span class="k">ON</span> a.did=b.did
+                    <span class="k">LEFT JOIN</span> feed_data c <span class="k">ON</span> a.did=c.did )
+<span class="k">SELECT</span> is_push, COUNT(DISTINCT did), <span class="c">-- ⑤ 最终分组聚合对比</span>
+  ROUND(AVG(app_dura)/60000,2) <span class="k">FROM</span> user_label <span class="k">GROUP BY</span> is_push</div>
+  <p class="fragment mist" style="margin-top:12px">💡 5 步各司其职，逻辑清晰、便于校验 —— 复杂查询都建议这么拆。</p>
+</section>
+
+<!-- 12 章节三 -->
+<section class="slide center" data-kicker="三 · 避坑与性能">
+  <div class="secnum">03</div>
+  <p class="lead">SECTION 03</p>
+  <h1 class="display">常见错误 & 性能优化</h1>
+  <div class="rule"></div>
+</section>
+
+<!-- 13 常见错误 -->
+<section class="slide" data-kicker="三 · 避坑与性能">
+  <h1>常见 SQL 错误（血泪教训）</h1>
+  <table class="tbl fragment">
+    <tbody>
+    <tr><th>坑点</th><th>后果</th><th>怎么避免</th></tr>
+    <tr><td>忘加分区 date</td><td class="no">扫全表跑几小时</td><td class="good">先写 WHERE date</td></tr>
+    <tr><td>JOIN 漏 ON</td><td class="no">笛卡尔积爆炸</td><td class="good">写完 JOIN 立刻写 ON</td></tr>
+    <tr><td>多表关联直接 SUM</td><td class="no">数据重复、指标翻倍</td><td class="good">先验证关联后记录数</td></tr>
+    <tr><td>直接 AVG 算人均</td><td class="no">排除 NULL 用户，偏高</td><td class="good">SUM(x)/COUNT(DISTINCT did)</td></tr>
+    <tr><td>没处理 NULL</td><td class="no">结果变 NULL</td><td class="good">COALESCE(x, 0)</td></tr>
+    <tr><td>整数除法没 *1.0</td><td class="no">率算出来是 0</td><td class="good">分子乘 1.0</td></tr>
+    <tr><td>时长单位没转</td><td class="no">结果大 6 万倍</td><td class="good">毫秒 /60000 转分钟</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- 14 性能优化 -->
+<section class="slide" data-kicker="三 · 避坑与性能">
+  <h1>性能优化 5 原则 <span class="tag">快 10 倍</span></h1>
+  <div class="howto">
+    <div class="it fragment"><div class="t">越早过滤越好</div><div class="d">子查询里先过滤日期 / 有效用户 / 字段，再 JOIN</div></div>
+    <div class="it fragment"><div class="t">只查需要的字段</div><div class="d">别 SELECT *，要什么写什么</div></div>
+    <div class="it fragment"><div class="t">避免大表关联大表</div><div class="d">能先聚合再关联，就别用明细关联</div></div>
+    <div class="it fragment"><div class="t">数据量大分步跑</div><div class="d">查 3 个月以上拆成按月，或先汇总临时表</div></div>
+    <div class="it fragment wide"><div class="t">优先用 DWM 聚合表</div><div class="d">别从 DWD 明细自己算，DWM 已聚合好，快很多</div></div>
+  </div>
+  <div class="hl fragment" style="margin-top:16px">🐢 跑不出来先查 1 天验证逻辑 → 看是否漏分区 / 笛卡尔积 → 再找数据同学，别一直重试占资源。</div>
+</section>
+
+<!-- 15 章节四 -->
+<section class="slide center" data-kicker="四 · AI 进阶">
+  <div class="secnum">04</div>
+  <p class="lead">SECTION 04</p>
+  <h1 class="display">AI 辅助写复杂 SQL</h1>
+  <div class="rule"></div>
+</section>
+
+<!-- 16 复杂需求拆步骤 -->
+<section class="slide" data-kicker="四 · AI 进阶">
+  <h1>复杂需求，拆成步骤喂给 AI</h1>
+  <div class="codeblk sm fragment">请帮我写 Hive SQL，按步骤实现：
+<span class="k">步骤1</span> 从 miui_di 筛 6/28 有效用户，标记是否 PUSH 启动，取 did、app_dura（别名 t1）
+<span class="k">步骤2</span> 从 label_di 筛 6/28 信息流有效消费，取 did、feed_dura、vv（别名 t2）
+<span class="k">步骤3</span> t1 LEFT JOIN t2 ON did，COALESCE 补 0
+<span class="k">步骤4</span> 按是否 PUSH 分组，统计人数 / 人均时长 / VV 渗透率
+<span class="k">要求</span> 用 WITH 拆分、加注释、注意过滤与单位转换</div>
+  <div class="hl fragment" style="margin-top:16px">🔑 不要一次丢大需求 —— <b class="cyan">拆成"用什么表、输出什么字段"的步骤</b>，AI 准确率大幅提升。</div>
+</section>
+
+<!-- 17 AI坑修复 -->
+<section class="slide" data-kicker="四 · AI 进阶">
+  <h1>AI 写复杂 SQL 的坑，怎么修</h1>
+  <table class="tbl fragment">
+    <tbody>
+    <tr><th>AI 常见错误</th><th>修复方法</th></tr>
+    <tr><td>幻觉不存在的字段</td><td class="good">对照数据地图替换成正确字段名</td></tr>
+    <tr><td>关联漏了 date</td><td class="good">补上 date 关联条件</td></tr>
+    <tr><td>没处理 NULL</td><td class="good">加 COALESCE(x, 0)</td></tr>
+    <tr><td>指标口径错（CTR 公式）</td><td class="good">把正确公式明确告诉 AI</td></tr>
+    <tr><td>大表直接关联，慢</td><td class="good">让它先过滤聚合再关联，拆 WITH</td></tr>
+    <tr><td>人均用了 AVG</td><td class="good">改成 SUM(x)/COUNT(DISTINCT did)</td></tr>
+    </tbody>
+  </table>
+  <p class="fragment mist" style="margin-top:14px">🐢 慢查询 / 报错：把<b>完整 SQL + 报错</b>发给 AI，基本能定位漏过滤、笛卡尔积、重复关联。</p>
+</section>
+
+<!-- 18 小结 -->
+<section class="slide" data-kicker="第3课 · 小结">
+  <h1>本课要点回收</h1>
+  <div class="tips">
+    <div class="tip fragment"><div class="ic">🔗</div><div><div class="t">INNER vs LEFT</div><p class="d">交集 vs 左表全保留；记得写 ON、避免笛卡尔积</p></div></div>
+    <div class="tip fragment"><div class="ic">🧱</div><div><div class="t">CTE 拆积木</div><p class="d">WITH 拆多步，清晰不易错，AI 也更准</p></div></div>
+    <div class="tip fragment"><div class="ic">⚠️</div><div><div class="t">7 类常见坑</div><p class="d">分区 / NULL / 重复 / 单位 / 整数除法</p></div></div>
+    <div class="tip fragment"><div class="ic">⚡</div><div><div class="t">性能 5 原则</div><p class="d">早过滤、少字段、优先聚合表、分步跑</p></div></div>
+    <div class="tip fragment wide"><div class="ic">🤖</div><div><div class="t">AI 进阶</div><p class="d">复杂需求拆步骤，生成后重点校验关联逻辑、口径、NULL，别复制就用</p></div></div>
+  </div>
+</section>
+
+<!-- 19 结尾 -->
+<section class="slide center" data-kicker="">
+  <p class="lead">第 3 课 · 完</p>
+  <h1 class="display">下一课：<span class="cyan">常用分析方法</span></h1>
+  <div class="rule"></div>
+  <p class="sub">会取数了 —— 下节课学怎么把数据变成结论：DIKW、排查数据问题、四大方法</p>
+  <p class="mist" style="margin-top:26px;font-size:20px"><a href="./04-第4课时-分析方法.html" style="color:var(--cyan)">进入第 4 课 →</a> &nbsp;·&nbsp; <a href="./index.html" style="color:var(--cyan)">返回课程目录</a></p>
+</section>
+
+</div>
+<button class="navbtn" id="prev">‹</button>
+<button class="navbtn" id="next">›</button>
+<div class="hint">← → 翻页 · 空格下一步 · F 全屏 · P 打印/导出 PDF · Home/End 首末页</div>
+<script>
+(function(){
+  var slides=[].slice.call(document.querySelectorAll('.slide'));
+  var i=0, fi=0; var prog=document.getElementById('prog');
+  function $(id){return document.getElementById(id);}
+  function frags(s){return [].slice.call(s.querySelectorAll('.fragment'));}
+  function render(){
+    slides.forEach(function(s,idx){
+      s.classList.toggle('active', idx===i);
+      if(!s.querySelector('.kicker') && s.dataset.kicker){var k=document.createElement('div');k.className='kicker';k.innerHTML=s.dataset.kicker+' <span class="n">/ '+String(slides.length).padStart(2,'0')+'</span>';s.appendChild(k);}
+      if(!s.querySelector('.pageno')){var p=document.createElement('div');p.className='pageno';p.textContent=String(idx+1).padStart(2,'0')+' / '+String(slides.length).padStart(2,'0');s.appendChild(p);}
+    });
+    var f=frags(slides[i]); f.forEach(function(el,idx){el.classList.toggle('on', idx<fi);});
+    prog.style.width=(i/(slides.length-1)*100)+'%'; location.hash='s'+(i+1);
+  }
+  function next(){var f=frags(slides[i]);if(fi<f.length){fi++;render();return;}if(i<slides.length-1){i++;fi=0;render();}}
+  function prev(){if(fi>0){fi--;render();return;}if(i>0){i--;fi=frags(slides[i]).length;render();}}
+  function go(n){i=Math.max(0,Math.min(slides.length-1,n));fi=0;render();}
+  document.addEventListener('keydown',function(e){
+    if(['ArrowRight','ArrowDown',' ','PageDown'].indexOf(e.key)>-1){e.preventDefault();next();}
+    else if(['ArrowLeft','ArrowUp','PageUp'].indexOf(e.key)>-1){e.preventDefault();prev();}
+    else if(e.key==='Home'){go(0);} else if(e.key==='End'){go(slides.length-1);}
+    else if(e.key==='p'||e.key==='P'){window.print();}
+    else if(e.key==='f'||e.key==='F'){if(!document.fullscreenElement)document.documentElement.requestFullscreen();else document.exitFullscreen();}
+  });
+  $('next').onclick=next; $('prev').onclick=prev;
+
+  /* JOIN demo */
+  function renderJoin(mode){
+    var rows;
+    if(mode==='inner'){
+      rows=[['u2','✓','30'],['u3','✓','12']];
+    }else{
+      rows=[['u1','✓','<span class="rescell fill">0</span> <span class="rescell null">(NULL→0)</span>'],['u2','✓','30'],['u3','✓','12']];
+    }
+    var html='<tbody><tr><th>did</th><th>启动APP</th><th>feed_dura</th></tr>';
+    rows.forEach(function(r){ html+='<tr><td class="a">'+r[0]+'</td><td class="green">'+r[1]+'</td><td>'+r[2]+'</td></tr>'; });
+    html+='</tbody>';
+    $('jres').innerHTML=html;
+    $('j-inner').classList.toggle('on', mode==='inner');
+    $('j-left').classList.toggle('on', mode==='left');
+    $('jnote').innerHTML = mode==='inner'
+      ? '只保留两表都有的 <b class="cyan">u2、u3</b> —— u1（没看信息流）和 u4（没启动 APP）都被丢掉。'
+      : '左表 u1、u2、u3 <b class="green">全部保留</b>；u1 没匹配上，feed_dura 是 <b class="red">NULL</b>，需 COALESCE 补 0。';
+  }
+  $('j-inner').onclick=function(){renderJoin('inner');};
+  $('j-left').onclick=function(){renderJoin('left');};
+  renderJoin('inner');
+
+  var m=location.hash.match(/s(\d+)/); if(m){i=Math.min(slides.length-1,Math.max(0,parseInt(m[1])-1));}
+  render();
+})();
+</script>
+</body></html>

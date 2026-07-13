@@ -1,0 +1,37 @@
+{
+  "enabled_hooks": [
+    "priority_checker",
+    "rule_checker",
+    "task_classifier",
+    "result_validator",
+    "auto_archiver",
+    "knowledge_recall"
+  ],
+  "trigger_points": {
+    "pre_task": ["priority_checker", "rule_checker", "task_classifier"],
+    "pre_dispatch": [],
+    "post_execution": ["result_validator"],
+    "post_task": ["auto_archiver", "knowledge_recall"]
+  },
+  "priority_checker": {
+    "block_p2": true,
+    "block_not_do_list": true
+  },
+  "rule_checker": {
+    "hard_rules_path": "../../AGENTS.md",
+    "block_on_violation": true
+  },
+  "task_classifier": {
+    "data_keywords": ["SQL", "查询", "取数", "分析", "数据", "指标", "DAU", "时长", "AB实验", "DID", "口径"],
+    "doc_keywords": ["文档", "归档", "飞书", "报告", "纪要", "总结", "写", "整理", "同步"],
+    "confidence_threshold": 0.6
+  },
+  "auto_archiver": {
+    "auto_update_index": true,
+    "daily_review_backup_three_locations": true
+  },
+  "knowledge_recall": {
+    "suggest_sedimentation": true,
+    "sql_sedimentation_threshold": 3
+  }
+}

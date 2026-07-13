@@ -13,10 +13,11 @@
 
 数据资产层就是解决这四个痛点，把「一次性交付」变成「可复用资产」。
 
-## 三个子域
+## 四个子域
 
 | 子域 | 解决什么 | 内容 |
 |------|----------|------|
+| **业务术语字典** | 业务黑话多，AI理解偏差 | [业务术语字典.md](./业务术语字典.md)：产品术语、指标口径、分析方法、内部缩写、红线规则，nl-sql和多Agent协作的理解基础 |
 | [SQL模板库/](./SQL模板库/) | 同类取数/圈人反复写 | 参数化 SQL 骨架：人群包圈选、三大高频取数簇 |
 | [指标口径字典/](./指标口径字典/) | 口径反复口头确认 | 核心指标的权威定义、计算方式、数据源、坑 |
 | [人群包资产登记/](./人群包资产登记/) | 人群包交付无追溯 | 人群包登记表：ID、圈选条件、量级、用途、SQL 位置 |
@@ -29,6 +30,7 @@
 - 有效 DAU 口径 SQL → [../data-analysis/sql/信息流有效DAU口径查询模板.sql](../data-analysis/sql/信息流有效DAU口径查询模板.sql)
 - 取数优化方法 → [../data-analysis/methods/Kyuubi-Presto大数据量取数优化方法.md](../data-analysis/methods/)
 - 取数踩坑 → [../data-analysis/pitfalls/Kyuubi-Presto取数踩坑.md](../data-analysis/pitfalls/)
+- 内容生态核心指标 SQL 库（数据监控百宝箱，33 条指标）→ [../参考资料/data-monitoring.md](../参考资料/data-monitoring.md)
 
 ## 怎么用（喂给 nl-sql）
 

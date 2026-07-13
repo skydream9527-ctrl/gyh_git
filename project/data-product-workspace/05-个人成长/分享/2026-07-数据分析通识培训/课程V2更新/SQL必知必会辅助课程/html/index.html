@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SQL 必知必会辅助课程 · 课程目录</title>
+<style>
+  :root{--ink:#0C0F14;--slate:#161B22;--line:#2A313C;--snow:#EDF1F7;--mist:#98A4B3;--cyan:#3DD8C4;--green:#33D17A;--amber:#F5A524;--violet:#9B8CFF;--mono:"SFMono-Regular",Menlo,Consolas,monospace;--sans:"PingFang SC","Source Han Sans SC","Microsoft YaHei",system-ui,sans-serif;}
+  *{box-sizing:border-box}
+  html,body{margin:0;color:var(--snow);font-family:var(--sans)}
+  body{background:radial-gradient(1200px 700px at -8% -12%,rgba(61,216,196,.08),transparent 55%),radial-gradient(1000px 620px at 108% 112%,rgba(51,209,122,.05),transparent 55%),linear-gradient(rgba(255,255,255,.016) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.016) 1px,transparent 1px),var(--ink);background-size:auto,auto,56px 56px,56px 56px,auto;min-height:100vh}
+  .wrap{max-width:1120px;margin:0 auto;padding:7vh 5vw 10vh}
+  .lead{font-family:var(--mono);color:var(--cyan);font-size:15px;letter-spacing:.26em;margin:0 0 14px;text-transform:uppercase}
+  h1{font-size:clamp(34px,5vw,58px);font-weight:800;margin:0;line-height:1.15}
+  h1 .cyan{color:var(--cyan)}
+  .sub{font-size:21px;color:var(--mist);margin:18px 0 0;line-height:1.6;max-width:820px}
+  .rule{width:104px;height:5px;background:linear-gradient(90deg,var(--cyan),rgba(61,216,196,.2));border-radius:3px;margin:26px 0 0}
+  .sect{font-family:var(--mono);color:var(--mist);font-size:14px;letter-spacing:.2em;text-transform:uppercase;margin:44px 0 16px;display:flex;align-items:center;gap:12px}
+  .sect::after{content:"";flex:1;height:1px;background:var(--line)}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+  .mod{display:block;text-decoration:none;color:inherit;background:linear-gradient(180deg,rgba(255,255,255,.02),transparent 45%),var(--slate);border:1px solid var(--line);border-radius:16px;padding:20px 22px;transition:border-color .2s,transform .2s;position:relative}
+  .mod:hover{border-color:var(--cyan);transform:translateY(-2px)}
+  .mod .top{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+  .mod .no{font-family:var(--mono);font-size:13px;color:var(--mist);border:1px solid var(--line);border-radius:7px;padding:3px 9px}
+  .mod .bk{font-size:13px;color:var(--mist)}
+  .mod .t{font-size:22px;font-weight:700;margin:0 0 6px}
+  .mod .d{font-size:15px;color:var(--mist);margin:0;line-height:1.5}
+  .mod .go{position:absolute;right:20px;top:20px;color:var(--mist);font-size:18px}
+  .mod:hover .go{color:var(--cyan)}
+  .mod.wide{grid-column:1 / -1}
+  .links{display:flex;gap:14px;flex-wrap:wrap;margin-top:6px}
+  .lnk{text-decoration:none;color:var(--mist);border:1px solid var(--line);border-radius:10px;padding:12px 18px;font-size:15px;transition:.2s}
+  .lnk:hover{border-color:var(--cyan);color:var(--cyan)}
+  .foot{margin-top:40px;color:var(--mist);font-size:14px;line-height:1.7}
+  .foot a{color:var(--cyan);text-decoration:none}
+  @media (max-width:760px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="lead">数据分析通识培训 · 选修</p>
+  <h1>SQL 必知必会 · <span class="cyan">辅助课程</span></h1>
+  <p class="sub">系统补齐 SQL 基本功的自学辅助课，提炼自 Ben Forta《SQL 必知必会（第4版）》，配合主课模块3/4 使用。所有示例用书里的玩具经销商订单库（Vendors/Products/Customers/Orders/OrderItems）。</p>
+  <div class="rule"></div>
+
+  <div class="sect">章节 deck（点击进入）</div>
+  <div class="grid">
+    <a class="mod" href="./01-SQL与数据检索基础.html">
+      <span class="go">→</span>
+      <div class="top"><span class="no">01</span><span class="bk">原书课 1–2</span></div>
+      <p class="t">SQL 与数据检索基础</p>
+      <p class="d">SELECT · DISTINCT · LIMIT</p>
+    </a>
+    <a class="mod" href="./02-排序与数据过滤.html">
+      <span class="go">→</span>
+      <div class="top"><span class="no">02</span><span class="bk">原书课 3–6</span></div>
+      <p class="t">排序与数据过滤</p>
+      <p class="d">ORDER BY · WHERE · IN/NOT · LIKE</p>
+    </a>
+    <a class="mod" href="./03-计算字段与函数.html">
+      <span class="go">→</span>
+      <div class="top"><span class="no">03</span><span class="bk">原书课 7–8</span></div>
+      <p class="t">计算字段与函数</p>
+      <p class="d">拼接 · 算术 · 文本/日期/数值函数</p>
+    </a>
+    <a class="mod" href="./04-汇总与分组.html">
+      <span class="go">→</span>
+      <div class="top"><span class="no">04</span><span class="bk">原书课 9–10</span><span class="bk" style="color:var(--green)">★重点</span></div>
+      <p class="t">汇总与分组</p>
+      <p class="d">聚集函数 · GROUP BY · HAVING</p>
+    </a>
+    <a class="mod" href="./05-子查询与联结.html">
+      <span class="go">→</span>
+      <div class="top"><span class="no">05</span><span class="bk">原书课 11–13</span><span class="bk" style="color:var(--green)">★重点</span></div>
+      <p class="t">子查询与联结</p>
+      <p class="d">子查询 · JOIN · LEFT JOIN · 别名</p>
+    </a>
+    <a class="mod" href="./06-组合查询与数据操作.html">
+      <span class="go">→</span>
+      <div class="top"><span class="no">06</span><span class="bk">原书课 14–16</span></div>
+      <p class="t">组合查询与数据操作</p>
+      <p class="d">UNION · INSERT/UPDATE/DELETE（了解级）</p>
+    </a>
+    <a class="mod wide" href="./07-表视图与进阶特性.html">
+      <span class="go">→</span>
+      <div class="top"><span class="no">07</span><span class="bk">原书课 17–22</span></div>
+      <p class="t">表、视图与进阶特性</p>
+      <p class="d">建表 · 视图 · 事务 · 索引 · 存储过程（了解级）</p>
+    </a>
+  </div>
+
+  <div class="sect">配套文档（Markdown）</div>
+  <div class="links">
+    <a class="lnk" href="../README.md">📘 课程说明 + 样例数据库</a>
+    <a class="lnk" href="../速查-常用SQL语句.md">⚡ 常用 SQL 语句速查</a>
+    <a class="lnk" href="../../README.md">↩ 返回主课</a>
+  </div>
+
+  <div class="foot">
+    学习建议：<b style="color:var(--snow)">01–05</b>（检索到联结）是分析取数最常用，重点掌握；<b>06–07</b>（写数据/建表/事务）分析同学多为只读，了解即可。<br>
+    <span style="opacity:.7">语法看本课，实际取数以主课的公司表、口径和 Hive/Spark 写法为准。</span>
+  </div>
+</div>
+</body></html>

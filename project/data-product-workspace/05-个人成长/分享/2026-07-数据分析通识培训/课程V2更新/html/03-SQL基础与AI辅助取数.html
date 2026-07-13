@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>模块3 · SQL 基础 + AI 辅助取数</title>
+<link rel="stylesheet" href="./assets/deck.css">
+</head>
+<body>
+<div id="prog"></div>
+<a class="home" href="./index.html">☰ 课程目录</a>
+<div id="deck">
+
+<section class="slide center">
+  <p class="lead">数据分析通识培训 · 模块3（必会 · 基本）</p>
+  <h1 class="display">SQL 基础 + <span class="cyan">AI 辅助取数</span></h1>
+  <div class="rule"></div>
+  <p class="sub">看得懂 · 写得出简单查询 · 会用 AI 写并校验</p>
+  <div class="meta"><span>⏱️ 1.5 小时</span><span>🎯 销售/运营：看懂+会改+AI写+校验</span></div>
+</section>
+
+<section class="slide" data-kicker="开场">
+  <h1>SQL 没那么难</h1>
+  <ul class="clean">
+    <li class="fragment"><b>看得懂</b>：别人的 SQL 在查什么</li>
+    <li class="fragment"><b>写得出</b>：日常取数的简单查询</li>
+    <li class="fragment"><b>会校验</b>：AI 生成的 SQL 对不对</li>
+  </ul>
+  <div class="hl fragment" style="margin-top:20px">💡 SQL 没有循环判断，写错最多报错、改不坏数据（你只有查询权限）。放心大胆试。</div>
+</section>
+
+<section class="slide" data-kicker="一 · 五段式">
+  <h1>SQL 五段式结构（固定顺序）</h1>
+  <div class="codeblk fragment"><span class="k">SELECT</span>    要什么字段 / 算什么指标
+<span class="k">FROM</span>      从哪张表查
+<span class="k">WHERE</span>     筛选什么条件
+<span class="k">GROUP BY</span>  按什么维度分组   <span class="c">-- 要分天/分群才加</span>
+<span class="k">ORDER BY</span>  按什么排序       <span class="c">-- 可选</span></div>
+  <p class="hl fragment" style="margin-top:18px">就像点菜：要什么菜（SELECT）· 哪家店（FROM）· 什么口味（WHERE）· 按菜系归类（GROUP BY）。</p>
+</section>
+
+<section class="slide" data-kicker="二 · WHERE">
+  <h1>WHERE：筛选数据</h1>
+  <table class="tbl fragment">
+    <tbody>
+    <tr><th>运算符</th><th>例</th></tr>
+    <tr><td><code>= !=</code></td><td>date = 20260628</td></tr>
+    <tr><td><code>BETWEEN</code></td><td>date BETWEEN 20260601 AND 20260628</td></tr>
+    <tr><td><code>IN</code>（"或"）</td><td>app_launch_way IN ('点击icon','点击push')</td></tr>
+    <tr><td><code>LIKE</code>（模糊）</td><td>app_ver LIKE '20.%'（<code>%</code> 通配任意字符）</td></tr>
+    <tr><td>动态日期</td><td>date = '${date-1}'（调度/复用时取昨天）</td></tr>
+    </tbody>
+  </table>
+  <p class="hl bad fragment" style="margin-top:14px">🔴 分区过滤是重中之重：WHERE 第一行必须写 <code>date</code>，否则扫全表、几小时跑不出来。</p>
+  <p class="mist fragment" style="font-size:18px;margin-top:10px">💡 <code>IN</code> 是一串"或"的简写，但枚举太多会拖慢性能；<code>LIKE</code> 必须配 <code>%</code> 才能模糊匹配。</p>
+</section>
+
+<section class="slide" data-kicker="三 · 聚合">
+  <h1>GROUP BY + 聚合函数</h1>
+  <table class="tbl fragment">
+    <tbody>
+    <tr><th>函数</th><th>用于</th></tr>
+    <tr><td><code>COUNT(DISTINCT x)</code></td><td>算<b>多少人</b>（DAU/UV）</td></tr>
+    <tr><td><code>COUNT(x)</code></td><td>算<b>多少次</b>（PV/曝光）</td></tr>
+    <tr><td><code>SUM(x)</code></td><td>总时长、总 VV</td></tr>
+    <tr><td><code>ROUND(x,n)</code></td><td>率保留几位小数</td></tr>
+    </tbody>
+  </table>
+  <p class="hl warn fragment" style="margin-top:16px">算人数一定 <code>COUNT(DISTINCT did)</code>——漏了 DISTINCT 结果翻倍。</p>
+</section>
+
+<section class="slide" data-kicker="三 · CASE WHEN">
+  <h1>CASE WHEN：分类打标</h1>
+  <div class="codeblk fragment"><span class="k">SELECT</span>
+  <span class="k">CASE</span>
+    <span class="k">WHEN</span> app_launch_way <span class="k">IN</span>(<span class="s">'点击icon'</span>) <span class="k">THEN</span> <span class="s">'主启'</span>
+    <span class="k">WHEN</span> app_launch_way <span class="k">IN</span>(<span class="s">'点击push'</span>) <span class="k">THEN</span> <span class="s">'Push启动'</span>
+    <span class="k">ELSE</span> <span class="s">'其他'</span>
+  <span class="k">END</span> <span class="k">AS</span> launch_type,
+  <span class="k">COUNT</span>(<span class="k">DISTINCT</span> did) <span class="k">AS</span> user_cnt
+<span class="k">FROM</span> …miui_di <span class="k">WHERE</span> date=20260628 <span class="k">GROUP BY</span> <span class="c">/* 同段 CASE */</span>;</div>
+  <p class="hl bad fragment" style="margin-top:14px">🔴 三铁律：① 从上往下匹配、命中即停 ② 必须 <code>END</code> 结尾 ③ <b>别用中文括号/标点</b>（会报错）。</p>
+</section>
+
+<section class="slide" data-kicker="四 · 实战">
+  <h1>核心指标：信息流 CTR / 人均时长</h1>
+  <div class="codeblk fragment"><span class="k">SELECT</span>
+  <span class="k">ROUND</span>(<span class="k">SUM</span>(click_cnt)*1.0/<span class="k">SUM</span>(expos_cnt), 4)              <span class="k">AS</span> ctr,
+  <span class="k">ROUND</span>(<span class="k">SUM</span>(feed_dura)*1.0/<span class="k">COUNT</span>(<span class="k">DISTINCT</span> did)/60000, 2)  <span class="k">AS</span> avg_min
+<span class="k">FROM</span> …label_di
+<span class="k">WHERE</span> date = 20260628 <span class="k">AND</span> is_dau_feed_dapan_2024 = 1 <span class="k">AND</span> is_top = 0;</div>
+  <p class="hl fragment" style="margin-top:16px">三个高频细节：除法 <code>*1.0</code> · 时长 <code>/60000</code> · 大盘 CTR 用 <code>SUM/SUM</code> 不用 AVG。</p>
+</section>
+
+<section class="slide" data-kicker="五 · 原理入门">
+  <h1>SQL 是怎么跑起来的？<span class="tag">了解级</span></h1>
+  <ul class="clean">
+    <li class="fragment"><b>不在一台机器上跑</b>：几百亿行 → 拆给上千台机器<b class="cyan">并行</b>算再汇总（分布式）</li>
+    <li class="fragment"><b>Kyuubi → Spark 引擎</b>：你写"要什么"，引擎决定"怎么跑"</li>
+    <li class="fragment">加 <code>date</code> = <b class="cyan">分区裁剪</b>：只读那一天的文件夹，其他碰都不碰——最省</li>
+  </ul>
+  <div class="hl fragment" style="margin-top:18px">3 个提速常识：只查需要的列 · 先过滤再算 · 探查加 LIMIT。<span class="mist" style="font-weight:400"> （原理深入见模块4）</span></div>
+</section>
+
+<section class="slide" data-kicker="六 · AI 辅助">
+  <h1>AI 辅助写 SQL <span class="tag">业务岗主力方式</span></h1>
+  <div class="grid2" style="align-items:start">
+    <div class="fragment">
+      <p class="lead" style="margin-bottom:8px">提示词 5 要素</p>
+      <ul class="clean tight" style="font-size:18px"><li>【表】用哪张表</li><li>【字段】关键字段含义</li><li>【需求】算什么指标</li><li>【过滤】什么条件</li><li>【注意】分区/去重/单位</li></ul>
+    </div>
+    <div class="fragment">
+      <p class="lead" style="margin-bottom:8px">生成后 4 步校验</p>
+      <ul class="clean tight" style="font-size:18px"><li>① 字段：有没有编字段</li><li>② 分区：加 date 了吗</li><li>③ 逻辑：去重/*1.0/单位</li><li>④ 结果：数量级合理吗</li></ul>
+    </div>
+  </div>
+  <p class="hl fragment" style="margin-top:18px">🎯 呼应启动课：<b class="cyan">AI 写作业，你批改作业。</b>模板见公共资料《AI 写 SQL 提示词模板》。</p>
+</section>
+
+<section class="slide" data-kicker="七 · 避坑">
+  <h1>新手最常犯的 5 个错</h1>
+  <ul class="clean">
+    <li class="fragment">忘加 <code>date</code> 分区 → 扫全表</li>
+    <li class="fragment">算人数漏 <code>DISTINCT</code> → 翻倍</li>
+    <li class="fragment">除法没 <code>*1.0</code> → 率算成 0</li>
+    <li class="fragment">时长没 <code>/60000</code> → 大 6 万倍</li>
+    <li class="fragment">AI 生成不校验直接用 → 瞎编字段/错口径</li>
+  </ul>
+</section>
+
+<section class="slide center">
+  <p class="lead">模块3 · 完</p>
+  <h1 class="display">下一课：<span class="cyan">SQL 进阶 · JOIN、CTE 与执行调优</span></h1>
+  <div class="rule"></div>
+  <p class="sub">多表关联 + 执行原理（MapReduce/Shuffle）+ 调优</p>
+  <p class="mist" style="margin-top:26px;font-size:20px">← → 翻页 · 空格逐条展开 · <a href="./index.html" style="color:var(--cyan)">返回目录</a></p>
+</section>
+
+</div>
+<button class="navbtn" id="prev">‹</button>
+<button class="navbtn" id="next">›</button>
+<div class="hint">← → 翻页 · 空格下一步 · F 全屏 · P 打印/导出 PDF · Home/End 首末页</div>
+<script src="./assets/deck.js"></script>
+</body></html>

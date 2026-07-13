@@ -23,8 +23,11 @@
 | [templates/数据分析Prompt模板.md](./templates/数据分析Prompt模板.md) | AI辅助数据分析的标准Prompt模板，从问题定义到报告生成全流程 |
 | [cases/2026-06-29-浏览器核心分析报告综合总结.md](./cases/2026-06-29-浏览器核心分析报告综合总结.md) | 7份飞书报告综合提炼：用户画像/行为分层/内容规律/竞品影响/节假日运营/决策建议矩阵 |
 | [methods/Kyuubi-Presto大数据量取数优化方法.md](./methods/Kyuubi-Presto大数据量取数优化方法.md) | ✅ presto引擎选择/rlike→regexp_like改写/count(distinct)→count(*)等价优化/按月分批/校验驱动（2026-07-01） |
-| [pitfalls/Kyuubi-Presto取数踩坑.md](./pitfalls/Kyuubi-Presto取数踩坑.md) | ✅ presto OOM 240GB/HAVING别名布尔组合/worker fetch临时错误/spark慢/workspace校验/rlike不支持（2026-07-01） |
+| [methods/Agent取数复盘与全局经验.md](./methods/Agent取数复盘与全局经验.md) | ✅ 将两次 Agent 取数复盘沉淀为“需求契约→口径校验→探针验证→分批执行→合并校验→业务解释→资产沉淀”的全局协议（2026-07-01） |
+| [pitfalls/Kyuubi-Presto取数踩坑.md](./pitfalls/Kyuubi-Presto取数踩坑.md) | ✅ presto OOM 240GB/HAVING别名布尔组合/worker fetch临时错误/spark慢/workspace校验/rlike不支持/新埋点UV漏算（2026-07-01更新） |
+| [cases/2026-07-01-浏览器信息流流量地图新口径/](./cases/2026-07-01-浏览器信息流流量地图新口径/) | ✅ 基于神策新埋点(page_expo_view_new+content_duration_new)的信息流流量地图分析，含页面/频道UV/时长/留存、HTML可视化报告（2026-07-01） |
 | [sql/信息流有效DAU口径查询模板.sql](./sql/信息流有效DAU口径查询模板.sql) | ✅ 浏览器+内容中心信息流有效DAU/时长 presto查询模板，含口径校验参考值（2026-07-01） |
+| [内容生态产运班2025届-数据分析（归档）](../文档归档/Markdown文件/2025-10-29-内容生态产运班2025届-数据分析.md) | 数据分析培训全文：埋点五要素(when/who/where/what/how)、数据排查四视角(维度/参照DID/视角/链路)、漏斗分析6步、DIKW模型、数据驱动闭环（2025-10-29） |
 
 ## 业务覆盖
 - **浏览器主端**：DAU、留存、使用时长、功能渗透率
@@ -46,4 +49,5 @@
 - 观察数据因果推断 → [../causal-inference/](../causal-inference/)
 - AI数据分析Agent → [../agent-llm/](../agent-llm/)
 - 产品指标体系设计 → [../product/](../product/)
+- 数据资产层（SQL模板/口径字典/人群包，服务 nl-sql）→ [../数据资产/](../数据资产/)
 - 日常临时分析工作区 → [../../03-数据分析/](../../03-数据分析/)

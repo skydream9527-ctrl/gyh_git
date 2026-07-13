@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SQL必知必会 · 第6章 组合查询与数据操作</title>
+<link rel="stylesheet" href="./assets/deck.css">
+</head>
+<body>
+<div id="prog"></div>
+<a class="home" href="./index.html">☰ 课程目录</a>
+<div id="deck">
+
+<section class="slide center">
+  <p class="lead">SQL 必知必会 · 辅助课程 · 第 6 章</p>
+  <h1 class="display">组合查询<span class="cyan">与数据操作</span></h1>
+  <div class="rule"></div>
+  <p class="sub">UNION 并结果 · INSERT/UPDATE/DELETE（了解级）</p>
+  <div class="meta"><span>📖 对应原书课 14–16</span><span>🎯 分析多为只读，重在看懂</span></div>
+</section>
+
+<section class="slide" data-kicker="一 · UNION">
+  <h1>组合查询：UNION</h1>
+  <div class="codeblk fragment"><span class="k">SELECT</span> cust_name, cust_contact <span class="k">FROM</span> Customers <span class="k">WHERE</span> cust_state=<span class="s">'CA'</span>
+<span class="k">UNION</span>
+<span class="k">SELECT</span> cust_name, cust_contact <span class="k">FROM</span> Customers <span class="k">WHERE</span> cust_id <span class="k">IN</span>
+       (<span class="k">SELECT</span> cust_id <span class="k">FROM</span> Orders);</div>
+  <table class="tbl fragment" style="margin-top:12px">
+    <tbody>
+    <tr><th>写法</th><th>区别</th></tr>
+    <tr><td><code>UNION</code></td><td>自动<b>去重</b></td></tr>
+    <tr><td><code>UNION ALL</code></td><td><b>不去重</b>，更快</td></tr>
+    </tbody>
+  </table>
+  <p class="hl fragment" style="margin-top:12px">🎯 UNION 上下<b>拼行</b>，JOIN 左右<b>拼列</b>，别搞混；ORDER BY 放最后一个 SELECT 之后。</p>
+</section>
+
+<section class="slide" data-kicker="二 · 写操作">
+  <h1>INSERT / UPDATE / DELETE（了解级）</h1>
+  <div class="codeblk fragment"><span class="k">INSERT INTO</span> Customers(cust_id, cust_name) <span class="k">VALUES</span>(<span class="s">'...'</span>, <span class="s">'小米'</span>);
+<span class="k">UPDATE</span> Customers <span class="k">SET</span> cust_email=<span class="s">'x'</span> <span class="k">WHERE</span> cust_id=<span class="s">'...'</span>;
+<span class="k">DELETE FROM</span> Customers <span class="k">WHERE</span> cust_id=<span class="s">'...'</span>;</div>
+  <p class="hl bad fragment" style="margin-top:16px">🔴 最危险的坑：<b>忘写 WHERE</b>！<code>UPDATE 无 WHERE</code>=改全表，<code>DELETE 无 WHERE</code>=删光表。</p>
+</section>
+
+<section class="slide" data-kicker="三 · 铁律">
+  <h1>写操作铁律</h1>
+  <ul class="clean">
+    <li class="fragment"><code>INSERT</code> 建议<b>写明列名</b>，别用省略列名的写法</li>
+    <li class="fragment"><code>UPDATE/DELETE</code> <b>必带 WHERE</b></li>
+    <li class="fragment">改之前<b>先用同样 WHERE 写一条 SELECT</b> 确认影响的行</li>
+  </ul>
+  <div class="hl fragment" style="margin-top:18px">💡 分析同学多为只读，写数据走公司规范，别在生产表上随手改。</div>
+</section>
+
+<section class="slide" data-kicker="小结">
+  <h1>本章要点</h1>
+  <ul class="clean tight" style="font-size:21px">
+    <li class="fragment"><code>UNION</code> 拼行去重、<code>UNION ALL</code> 不去重更快</li>
+    <li class="fragment">写操作必带 WHERE，先 SELECT 验证</li>
+    <li class="fragment">分析重点是 UNION 和"看懂写操作"</li>
+  </ul>
+</section>
+
+<section class="slide center">
+  <p class="lead">第 6 章 · 完</p>
+  <h1 class="display">下一章：<span class="cyan">表、视图与进阶特性</span></h1>
+  <div class="rule"></div>
+  <p class="sub">建表 · 视图 · 事务 · 索引（了解级）</p>
+  <p class="mist" style="margin-top:26px;font-size:20px">← → 翻页 · 空格逐条展开 · <a href="./index.html" style="color:var(--cyan)">返回目录</a></p>
+</section>
+
+</div>
+<button class="navbtn" id="prev">‹</button>
+<button class="navbtn" id="next">›</button>
+<div class="hint">← → 翻页 · 空格下一步 · F 全屏 · P 打印/导出 PDF · Home/End 首末页</div>
+<script src="./assets/deck.js"></script>
+</body></html>
