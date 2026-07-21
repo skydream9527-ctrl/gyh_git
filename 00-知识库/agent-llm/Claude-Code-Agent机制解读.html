@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Claude Code · Agent 机制解读</title>
+<style>
+  :root {
+    --blue: #2563eb;
+    --blue-soft: #eff4ff;
+    --violet: #7c3aed;
+    --green: #16a34a;
+    --amber: #d97706;
+    --red: #dc2626;
+    --slate: #64748b;
+    --ink: #111827;
+    --text: #1f2937;
+    --dim: #6b7280;
+    --line: #e5e7eb;
+    --bg: #f6f7f9;
+    --card: #ffffff;
+    --sidebar: #0f172a;
+    --sidebar-dim: #94a3b8;
+    --brand: #c2410c;
+    --brand-soft: #fff2ec;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    --radius: 12px;
+    --shadow: 0 1px 3px rgba(15, 23, 42, .06), 0 8px 24px rgba(15, 23, 42, .04);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    color: var(--text);
+    background: var(--bg);
+    line-height: 1.65;
+    font-size: 15px;
+  }
+  a { color: var(--blue); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  code {
+    font-family: var(--mono);
+    font-size: .86em;
+    background: #f1f5f9;
+    color: #334155;
+    padding: 1px 6px;
+    border-radius: 5px;
+    border: 1px solid #e2e8f0;
+  }
+
+  /* ---------- 布局 ---------- */
+  .layout { display: flex; min-height: 100vh; }
+  .sidebar {
+    width: 296px;
+    background: var(--sidebar);
+    color: #e2e8f0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    flex-shrink: 0;
+    padding: 20px 0 40px;
+  }
+  .sidebar::-webkit-scrollbar { width: 8px; }
+  .sidebar::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+  .sb-brand { padding: 6px 22px 16px; border-bottom: 1px solid #1e293b; margin-bottom: 10px; }
+  .sb-brand b { font-size: 16px; color: #fff; letter-spacing: .3px; }
+  .sb-brand span { display: block; font-size: 11.5px; color: var(--sidebar-dim); margin-top: 4px; }
+  .sb-group { font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: #64748b; padding: 16px 22px 6px; font-weight: 700; }
+  .sb-link {
+    display: block; padding: 6px 22px 6px 24px; color: #cbd5e1; font-size: 13.3px;
+    border-left: 3px solid transparent; cursor: pointer;
+  }
+  .sb-link:hover { background: #1e293b; color: #fff; text-decoration: none; }
+  .sb-link.active { border-left-color: var(--brand); background: #172033; color: #fff; font-weight: 600; }
+
+  .main { flex: 1; min-width: 0; }
+  .content { max-width: 1060px; margin: 0 auto; padding: 40px 44px 100px; }
+
+  /* ---------- Hero ---------- */
+  .hero {
+    background: linear-gradient(135deg, #1e293b 0%, #c2410c 125%);
+    color: #fff; border-radius: 18px; padding: 40px 40px 36px; margin-bottom: 32px;
+    box-shadow: var(--shadow);
+  }
+  .hero .eyebrow { font-size: 12.5px; letter-spacing: 2px; text-transform: uppercase; color: #fed7aa; margin-bottom: 12px; }
+  .hero h1 { margin: 0 0 12px; font-size: 29px; line-height: 1.25; }
+  .hero p { margin: 0; color: #ffedd5; max-width: 800px; font-size: 15px; }
+  .hero .flow {
+    display: inline-flex; gap: 10px; align-items: center; margin-top: 22px; flex-wrap: wrap;
+    background: rgba(255,255,255,.1); padding: 8px 16px; border-radius: 999px; font-size: 13.5px; font-weight: 600;
+  }
+  .hero .flow .arrow { color: #fdba74; }
+  .hero-stats { display: flex; flex-wrap: wrap; gap: 30px; margin-top: 28px; }
+  .hero-stats .s b { font-size: 23px; display: block; }
+  .hero-stats .s span { font-size: 12.5px; color: #fed7aa; }
+
+  /* ---------- 章节 ---------- */
+  section { margin-bottom: 14px; scroll-margin-top: 20px; }
+  .sec-h { display: flex; align-items: center; gap: 12px; margin: 44px 0 6px; }
+  .sec-h .num {
+    font-family: var(--mono); font-size: 13px; font-weight: 700; color: var(--brand);
+    background: var(--brand-soft); border: 1px solid #fed7aa; border-radius: 8px; padding: 3px 9px;
+  }
+  .sec-h h2 { font-size: 23px; margin: 0; color: var(--ink); }
+  .sec-desc { color: var(--dim); margin: 4px 0 18px; max-width: 830px; }
+  .sub-h { font-size: 17px; color: var(--ink); margin: 26px 0 10px; padding-left: 12px; border-left: 4px solid var(--brand); }
+
+  /* ---------- 卡片 ---------- */
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 20px 22px; margin-bottom: 16px; box-shadow: var(--shadow);
+  }
+  .card > h3 { margin: 0 0 4px; font-size: 16.5px; color: var(--ink); display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+  .card .lead { color: var(--dim); margin: 0 0 14px; font-size: 14px; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  @media (max-width: 860px) { .grid2, .grid3 { grid-template-columns: 1fr; } }
+
+  /* ---------- 表格 ---------- */
+  table { width: 100%; border-collapse: collapse; font-size: 13.6px; margin: 10px 0 6px; }
+  th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { background: #f8fafc; color: #475569; font-weight: 600; font-size: 12.5px; text-transform: uppercase; letter-spacing: .4px; }
+  tr:last-child td { border-bottom: none; }
+  td.el { font-weight: 600; color: var(--ink); white-space: nowrap; }
+  td .mono, .mono { font-family: var(--mono); }
+  tbody tr:hover { background: #fafbfc; }
+
+  /* ---------- 徽标 ---------- */
+  .pill {
+    display: inline-block; font-size: 11.5px; font-weight: 600; padding: 2px 9px; border-radius: 999px;
+    line-height: 1.7; white-space: nowrap;
+  }
+  .pill.blue { background: #dbeafe; color: #1d4ed8; }
+  .pill.green { background: #dcfce7; color: #15803d; }
+  .pill.amber { background: #fef3c7; color: #b45309; }
+  .pill.red { background: #fee2e2; color: #b91c1c; }
+  .pill.violet { background: #ede9fe; color: #6d28d9; }
+  .pill.slate { background: #f1f5f9; color: #475569; }
+  .pill.brand { background: #ffedd5; color: #c2410c; }
+
+  ul.clean { margin: 8px 0; padding-left: 20px; }
+  ul.clean li { margin-bottom: 6px; }
+  .note {
+    background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; padding: 12px 16px;
+    font-size: 13.6px; color: #92400e; margin: 14px 0;
+  }
+  .note.info { background: #eff6ff; border-color: #bfdbfe; color: #1e40af; }
+  .note.ok { background: #f0fdf4; border-color: #bbf7d0; color: #166534; }
+  .note.red { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+  .note b { font-weight: 700; }
+  .kicker { font-size: 12px; color: var(--slate); text-transform: uppercase; letter-spacing: .6px; font-weight: 700; margin: 18px 0 8px; }
+
+  /* ---------- 代码块 ---------- */
+  pre {
+    background: #0f172a; color: #e2e8f0; border-radius: 12px; padding: 16px 18px;
+    overflow-x: auto; font-family: var(--mono); font-size: 12.9px; line-height: 1.6;
+    margin: 12px 0; border: 1px solid #1e293b;
+  }
+  pre .c { color: #7c8db5; }        /* 注释 */
+  pre .k { color: #93c5fd; }        /* 关键点/关键字 */
+  pre .s { color: #86efac; }        /* 字符串/标记 */
+  pre .d { color: #fca5a5; }        /* 危险/拒绝 */
+  pre .m { color: #fcd34d; }        /* 强调 */
+  pre::-webkit-scrollbar { height: 9px; }
+  pre::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+
+  /* ---------- 流程盒 ---------- */
+  .flowbox { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 14px 0; }
+  .flowbox .step { background: var(--brand-soft); border: 1px solid #fed7aa; color: #9a3412; padding: 7px 13px; border-radius: 9px; font-size: 13px; font-weight: 600; }
+  .flowbox .arrow { color: var(--slate); font-weight: 700; }
+
+  /* 循环时序 */
+  .lane { border-left: 3px solid #fed7aa; margin: 16px 0 16px 6px; padding: 2px 0 2px 20px; }
+  .lane .row { position: relative; margin: 0 0 14px; }
+  .lane .row::before {
+    content: ""; position: absolute; left: -27px; top: 5px; width: 11px; height: 11px;
+    background: #fff; border: 3px solid var(--brand); border-radius: 50%;
+  }
+  .lane .row.gate::before { border-color: var(--amber); }
+  .lane .row.stop::before { border-color: var(--red); }
+  .lane .row .t { font-weight: 700; color: var(--ink); font-size: 14.5px; }
+  .lane .row .t .mono { font-size: 12.5px; color: var(--slate); font-weight: 500; }
+  .lane .row .dsc { color: var(--dim); font-size: 13.4px; margin-top: 2px; }
+  .loopback { color: var(--violet); font-weight: 700; font-size: 12.5px; margin: 2px 0 0 -2px; }
+
+  .footer { text-align: center; color: var(--dim); font-size: 13px; padding: 30px 0 10px; border-top: 1px solid var(--line); margin-top: 44px; }
+  .footer .mono { font-size: 12px; }
+
+  .hamburger { display: none; }
+  @media (max-width: 900px) {
+    .sidebar { position: fixed; left: -320px; z-index: 50; transition: left .25s; box-shadow: 4px 0 24px rgba(0,0,0,.3); }
+    .sidebar.open { left: 0; }
+    .content { padding: 20px 18px 80px; }
+    .hamburger {
+      display: flex; position: fixed; top: 14px; left: 14px; z-index: 60; width: 42px; height: 42px;
+      align-items: center; justify-content: center; background: var(--sidebar); color: #fff;
+      border: none; border-radius: 10px; font-size: 20px; cursor: pointer;
+    }
+    .hero { padding: 28px 22px; }
+    .hero h1 { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+<button class="hamburger" id="hamburger">☰</button>
+<div class="layout">
+  <!-- ============ 侧栏 ============ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-brand">
+      <b>Claude Code · Agent 机制解读</b>
+      <span>基于 2.1.88 恢复版源码 · 运行时 / 工具 / 子 Agent</span>
+    </div>
+    <div class="sb-group">概览</div>
+    <a class="sb-link" href="#what">这套源码是什么</a>
+    <a class="sb-link" href="#arch">全景：六层运行时</a>
+    <a class="sb-link" href="#engine">会话层：QueryEngine</a>
+    <div class="sb-group">主循环（核心）</div>
+    <a class="sb-link" href="#loop">queryLoop 一次回合</a>
+    <a class="sb-link" href="#streaming">流式工具执行</a>
+    <a class="sb-link" href="#recover">恢复、压缩与有界</a>
+    <div class="sb-group">工具与权限</div>
+    <a class="sb-link" href="#tool-contract">Tool 声明式契约</a>
+    <a class="sb-link" href="#tool-pool">工具清单与装配</a>
+    <a class="sb-link" href="#toolsearch">ToolSearch 延迟加载</a>
+    <a class="sb-link" href="#permission">权限系统四态</a>
+    <div class="sb-group">子 Agent 编排</div>
+    <a class="sb-link" href="#agenttool">AgentTool 派生子 Agent</a>
+    <a class="sb-link" href="#fork">Fork 自我分身</a>
+    <a class="sb-link" href="#coordinator">Coordinator 编排模式</a>
+    <a class="sb-link" href="#tasktype">任务类型与生命周期</a>
+    <div class="sb-group">上下文治理</div>
+    <a class="sb-link" href="#compaction">多级压缩管线</a>
+    <a class="sb-link" href="#prompt">系统提示与记忆</a>
+    <a class="sb-link" href="#hooks">Hooks 横切</a>
+    <a class="sb-link" href="#skills">Skills 技能</a>
+    <div class="sb-group">收尾</div>
+    <a class="sb-link" href="#principles">贯穿设计原则</a>
+    <a class="sb-link" href="#compare">与 ICE-DATA-WORK 对照</a>
+  </aside>
+
+  <!-- ============ 正文 ============ -->
+  <main class="main">
+  <div class="content">
+
+    <div class="hero">
+      <div class="eyebrow">Runtime Deep-Dive</div>
+      <h1>Claude Code · Agent 机制解读</h1>
+      <p>一份面向工程读者的运行时解读：Claude Code 不是"一个大模型 + 一堆工具"，而是一个<b>流式、可中断、受权限治理、可无限自我派生</b>的 Agent 运行时。核心是一个 async generator 主循环，围绕它叠出工具执行、子 Agent 编排、上下文压缩三套能力。</p>
+      <div class="flow"><span>User / SDK</span><span class="arrow">→</span><span>QueryEngine（会话）</span><span class="arrow">→</span><span>queryLoop（回合）</span><span class="arrow">→</span><span>Tools / Sub-agents</span></div>
+      <div class="hero-stats">
+        <div class="s"><b>1</b><span>async generator 主循环</span></div>
+        <div class="s"><b>60+</b><span>内置工具（可延迟加载）</span></div>
+        <div class="s"><b>5</b><span>权限模式 · 三态判定</span></div>
+        <div class="s"><b>5+</b><span>上下文压缩层级</span></div>
+      </div>
+    </div>
+
+    <div class="note info">本文所有结论均来自 <span class="mono">参考内容/cc-recovered-main/src/</span> 的真实实现（重点文件：<span class="mono">QueryEngine.ts · query.ts · Tool.ts · tools.ts · tools/AgentTool/* · coordinator/coordinatorMode.ts · types/permissions.ts · Task.ts</span>）。该源码是从 <b>Claude Code 2.1.88 的 sourcemap 逆向恢复</b>并重整为可构建的 npm 工程，含少量兼容 shim/stub，行为不保证与官方 bundle 完全一致，作机制研究足够可靠。</div>
+
+    <!-- ========== 01 这套源码是什么 ========== -->
+    <section id="what">
+      <div class="sec-h"><span class="num">01</span><h2>这套源码是什么</h2></div>
+      <p class="sec-desc">Claude Code 是一个跑在终端里的编码 Agent。它的运行时是纯 TypeScript，UI 用 <span class="mono">ink</span>（终端里的 React），模型侧通过 <span class="mono">@anthropic-ai/sdk</span> 与 <span class="mono">claude-agent-sdk</span> 走流式接口。理解它的价值在于：它是目前工业级 Agent Loop 里少见的、把"<b>模型-工具-子Agent-上下文治理</b>"四件事在一份代码里同时做扎实的实现。</p>
+      <div class="grid3">
+        <div class="card"><h3>入口形态</h3><p class="lead" style="margin:0">交互式 REPL（终端 TUI）、无头 <span class="mono">-p</span> / SDK 单发、远程 bridge（手机 / 桌面 / cowork）。三种入口共享同一套 <span class="mono">QueryEngine</span> 与 <span class="mono">query()</span> 内核。</p></div>
+        <div class="card"><h3>技术栈</h3><p class="lead" style="margin:0"><span class="mono">React 19 + ink</span> 渲染，<span class="mono">zod</span> 定义工具入参，<span class="mono">esbuild</span> 打包。全流程基于 <b>async generator</b>，天然可流式、可中断。</p></div>
+        <div class="card"><h3>阅读地图</h3><p class="lead" style="margin:0">看懂三个文件就抓住主干：<span class="mono">QueryEngine.ts</span>（会话）、<span class="mono">query.ts</span>（回合循环）、<span class="mono">Tool.ts</span>（工具契约）。其余是围绕它们的治理与编排。</p></div>
+      </div>
+    </section>
+
+    <!-- ========== 02 六层运行时 ========== -->
+    <section id="arch">
+      <div class="sec-h"><span class="num">02</span><h2>全景：六层运行时</h2></div>
+      <p class="sec-desc">自上而下六层，一次用户提问由上层驱动到下层执行；权限、Hooks、预算作为横切治理贯穿始终。理解这套分层，是后面主循环与子 Agent 的前提。</p>
+      <table>
+        <thead><tr><th>层</th><th>落点</th><th>职责</th></tr></thead>
+        <tbody>
+          <tr><td class="el">入口层</td><td class="mono">entrypoints / bridge / cli</td><td>REPL / SDK / 远程；把用户输入变成一次 <span class="mono">submitMessage</span></td></tr>
+          <tr><td class="el">会话层</td><td class="mono">QueryEngine.ts</td><td>一个会话一个实例，持有 messages / usage / 文件缓存；管理"回合"边界与结果封装</td></tr>
+          <tr><td class="el">循环层</td><td class="mono">query.ts · queryLoop</td><td>真正的 agentic loop：<b>调模型 → 解析 tool_use → 执行工具 → 回填 → 再调</b>，async generator 流式产出</td></tr>
+          <tr><td class="el">工具层</td><td class="mono">Tool.ts · tools.ts · tools/*</td><td>60+ 工具的统一契约、装配、并发执行、结果落盘</td></tr>
+          <tr><td class="el">子 Agent 层</td><td class="mono">tools/AgentTool/* · coordinator/</td><td>派生专业子 Agent、Fork 自我分身、Coordinator 编排 workers</td></tr>
+          <tr><td class="el">治理层（横切）</td><td class="mono">permissions · hooks · 预算 / compaction</td><td>权限四态、Pre/Post/Stop Hooks、maxTurns / 成本 / token 上限、多级压缩</td></tr>
+        </tbody>
+      </table>
+      <div class="note"><b>一句话抓住主干：</b>上面五层都在给最下面那个 <span class="mono">while(true)</span> 循环"喂料"和"设闸"——喂的是消息与工具，设的是权限与预算。</div>
+    </section>
+
+    <!-- ========== 03 QueryEngine ========== -->
+    <section id="engine">
+      <div class="sec-h"><span class="num">03</span><h2>会话层：<span class="mono" style="font-size:17px">QueryEngine</span></h2></div>
+      <p class="sec-desc"><span class="mono">QueryEngine</span> 是"一个会话一个实例"。它不做 agentic 推理，只负责<b>回合的进出</b>：装配系统提示、处理用户输入（含斜杠命令）、驱动 <span class="mono">query()</span> 循环、把流式事件翻译成 SDK 消息、最后封装 <span class="mono">result</span>。跨回合的状态（消息、用量、文件缓存）都挂在它身上。</p>
+      <pre><span class="c">// QueryEngine.submitMessage(prompt)：一个用户回合的骨架</span>
+1. <span class="k">fetchSystemPromptParts</span>(tools, model, mcp)   <span class="c"># 系统提示 + userContext + systemContext</span>
+   systemPrompt = [customSystemPrompt ?? default, memoryPrompt?, appendSystemPrompt?]
+2. <span class="k">processUserInput</span>(prompt)                    <span class="c"># 解析斜杠命令 / 附件；决定 shouldQuery</span>
+3. recordTranscript(messages)                     <span class="c"># 用户消息先落盘 → 崩溃也可 --resume</span>
+4. yield <span class="k">buildSystemInitMessage</span>(...)           <span class="c"># 首条 system.init：模型 / 工具 / 权限模式</span>
+5. for await (msg of <span class="m">query</span>({messages, systemPrompt, canUseTool, ...})) {
+     记录 assistant / user / compact_boundary；累计 usage；<span class="k">yield* normalizeMessage</span>(msg)
+     <span class="d">检查 maxBudgetUsd / maxTurns / 结构化输出重试上限 → 命中即 yield result 并 return</span>
+   }
+6. yield {type:"result", subtype:"success", result: textResult, usage, cost, ...}</pre>
+      <div class="grid2">
+        <div class="card"><h3>回合 vs 会话</h3><p class="lead" style="margin:0">每次 <span class="mono">submitMessage()</span> 是<b>一个回合</b>；同一 <span class="mono">QueryEngine</span> 跨多个回合复用 <span class="mono">mutableMessages</span>。<span class="mono">ask()</span> 是它的一次性包装，供无头 / SDK 单发场景。</p></div>
+        <div class="card"><h3>可中断</h3><p class="lead" style="margin:0"><span class="mono">interrupt()</span> 直接 <span class="mono">abortController.abort()</span>。因为全链路是 generator，中断能干净地传播到模型流与工具执行，并补齐缺失的 <span class="mono">tool_result</span> 块。</p></div>
+      </div>
+    </section>
+
+    <!-- ========== 04 queryLoop ========== -->
+    <section id="loop">
+      <div class="sec-h"><span class="num">04</span><h2>主循环：<span class="mono" style="font-size:17px">queryLoop</span> 的一次回合</h2></div>
+      <p class="sec-desc">这是整个 Agent 的心脏。<span class="mono">query.ts</span> 里的 <span class="mono">queryLoop</span> 是一个 <span class="mono">async function*</span>，用一个 <span class="mono">while(true)</span> 承载经典的 <b>ReAct 循环</b>。每一圈：先治理上下文，再流式调模型，边流边跑工具，把结果作为 user 消息回填，然后决定"再来一圈"还是"收工"。</p>
+      <div class="lane">
+        <div class="row"><div class="t">① 上下文治理 <span class="mono">applyToolResultBudget → snip → microcompact → autocompact → collapse</span></div><div class="dsc">先把历史修剪 / 压缩到安全区间；工具结果超预算的先做内容替换（见第 15 节）</div></div>
+        <div class="row gate"><div class="t">② token 硬门 <span class="mono">isAtBlockingLimit</span></div><div class="dsc">自动压缩关闭时，预留空间让用户还能手动 <span class="mono">/compact</span></div></div>
+        <div class="row"><div class="t">③ 组装 <span class="mono">fullSystemPrompt = systemPrompt + systemContext</span> · 选模型</div><div class="dsc"><span class="mono">getRuntimeMainLoopModel</span>：plan 模式且历史超 200k 时切更大上下文模型</div></div>
+        <div class="row"><div class="t">④ 流式调模型 <span class="mono">queryModelWithStreaming</span></div><div class="dsc">逐块产出 assistant 消息；<span class="mono">yield</span> 给上层实时渲染</div></div>
+        <div class="row gate"><div class="t">⑤ 检测 <span class="mono">tool_use</span> 块 → <span class="mono">needsFollowUp = true</span></div><div class="dsc">流里只要出现工具调用块，就登记进 <span class="mono">toolUseBlocks</span>，标记"本轮还得续"</div></div>
+        <div class="row"><div class="t">⑥ 执行工具（流式或批量）→ 结果 <span class="mono">normalizeMessagesForAPI</span> 成 user 消息</div><div class="dsc"><span class="mono">toolResults</span> 累积；期间还会 drain 排队命令、注入附件（技能 / 记忆）</div></div>
+        <div class="row stop"><div class="t">⑦ 若 <span class="mono">!needsFollowUp</span> → 收工</div><div class="dsc">没有工具调用了 → 跑 Stop Hooks，若无异议则 <span class="mono">return</span> Terminal</div></div>
+        <div class="row"><div class="t">⑧ 否则把 <span class="mono">assistant + toolResults</span> 并入 messages</div><div class="loopback">↺ <span class="mono">state = {messages: [...]}; continue</span> —— 回到 ① 再调模型</div></div>
+      </div>
+      <div class="note info"><b>循环的唯一"继续信号"是 <span class="mono">needsFollowUp</span>。</b>它只由"模型输出里是否含 <span class="mono">tool_use</span> 块"决定——模型想调工具就续圈，模型只说话就收工。这比依赖 <span class="mono">stop_reason === 'tool_use'</span> 更可靠（源码注释明确指出后者"不总是被正确设置"）。</div>
+    </section>
+
+    <!-- ========== 05 流式工具执行 ========== -->
+    <section id="streaming">
+      <div class="sec-h"><span class="num">05</span><h2>流式工具执行：不等模型说完就开跑</h2></div>
+      <p class="sec-desc">最能体现工程功力的一处优化。默认路径下工具不是"等模型整段输出完再批量执行"，而是用 <span class="mono">StreamingToolExecutor</span> 在模型<b>还在流式吐字</b>的时候，就把已经完整到达的 <span class="mono">tool_use</span> 块塞进执行器提前跑起来。</p>
+      <div class="grid2">
+        <div class="card"><h3>两条执行路径</h3>
+          <ul class="clean" style="margin:0">
+            <li><b>流式</b>（默认，gate 开）：<span class="mono">streamingToolExecutor.addTool(block)</span> 边流边执行，<span class="mono">getCompletedResults()</span> 边产出</li>
+            <li><b>批量</b>（回退）：流结束后 <span class="mono">runTools(toolUseBlocks, ...)</span> 统一跑</li>
+          </ul>
+        </div>
+        <div class="card"><h3>并发安全闸</h3><p class="lead" style="margin:0">工具是否能并行，看 <span class="mono">isConcurrencySafe(input)</span>。默认 <span class="mono">false</span>（假设会写）；只读工具（Read/Grep/Glob）返回 <span class="mono">true</span> 才允许与同批工具并跑。写操作串行，避免互相踩踏。</p></div>
+      </div>
+      <pre><span class="c">// 流式循环内：一边收模型消息，一边喂执行器、收结果</span>
+if (message.type === 'assistant') {
+  assistantMessages.push(message)
+  const toolUses = message.content.filter(c =&gt; c.type === 'tool_use')
+  if (toolUses.length &gt; 0) { toolUseBlocks.push(...toolUses); <span class="m">needsFollowUp = true</span> }
+  for (const block of toolUses) <span class="k">streamingToolExecutor.addTool</span>(block, message)  <span class="c"># 立即排队执行</span>
+}
+for (const r of <span class="k">streamingToolExecutor.getCompletedResults</span>()) {
+  yield r.message
+  toolResults.push(...<span class="k">normalizeMessagesForAPI</span>([r.message]).filter(m =&gt; m.type==='user'))
+}</pre>
+      <div class="note"><b>中断安全：</b>一旦 <span class="mono">abortController</span> 触发，执行器通过 <span class="mono">getRemainingResults()</span> 为排队中 / 执行中的工具补齐<b>合成的 tool_result 块</b>——保证每个 <span class="mono">tool_use</span> 都有配对结果，否则下一次 API 调用会因为块不配对而报错。</div>
+    </section>
+
+    <!-- ========== 06 恢复与有界 ========== -->
+    <section id="recover">
+      <div class="sec-h"><span class="num">06</span><h2>恢复、压缩与有界：循环里的安全网</h2></div>
+      <p class="sec-desc">主循环不是"顺风顺水地转圈"，它内建了多套失败恢复与硬性边界。这些机制让长会话既不会因为上下文爆掉而崩，也不会无限烧钱。</p>
+      <table>
+        <thead><tr><th>触发</th><th>机制</th><th>动作</th></tr></thead>
+        <tbody>
+          <tr><td class="el">模型过载</td><td class="mono">FallbackTriggeredError</td><td>切 <span class="mono">fallbackModel</span>，清空本轮消息与工具，<span class="mono">continue</span> 重试；提示"因高需求已切换模型"</td></tr>
+          <tr><td class="el">上下文超限 (413)</td><td class="mono">prompt_too_long</td><td>先 context-collapse 排空折叠，再 <b>reactive compact</b> 全量摘要，重试一次</td></tr>
+          <tr><td class="el">输出超长</td><td class="mono">max_output_tokens</td><td>同一请求把上限从 8k <b>升到 64k</b> 重试；再不行走多轮恢复</td></tr>
+          <tr><td class="el">图片过大</td><td class="mono">ImageSizeError</td><td>产出友好错误消息，<span class="mono">return {reason:'image_error'}</span></td></tr>
+          <tr><td class="el">回合上限</td><td class="mono">maxTurns</td><td>产出 <span class="mono">max_turns_reached</span> 附件 → result <span class="mono">error_max_turns</span></td></tr>
+          <tr><td class="el">成本上限</td><td class="mono">maxBudgetUsd</td><td>每圈查 <span class="mono">getTotalCost()</span>，超则 <span class="mono">error_max_budget_usd</span></td></tr>
+          <tr><td class="el">用户中断</td><td class="mono">abort</td><td>补齐 tool_result，<span class="mono">return {reason:'aborted_streaming' | 'aborted_tools'}</span></td></tr>
+        </tbody>
+      </table>
+      <div class="grid2" style="margin-top:14px">
+        <div class="card"><h3>Query 链追踪 <span class="pill brand">depth</span></h3><p class="lead" style="margin:0">每次进循环带 <span class="mono">queryTracking = {chainId, depth}</span>。主线程 <span class="mono">depth=0</span>；子 Agent 继承并 <span class="mono">depth+1</span>。这让"谁在第几层调了谁"可观测，也是防止子 Agent 无限套娃的基础。</p></div>
+        <div class="card"><h3>终止即 Terminal</h3><p class="lead" style="margin:0"><span class="mono">queryLoop</span> 的返回值是一个 <span class="mono">Terminal = {reason}</span>：<span class="mono">model_error / prompt_too_long / aborted_* / hook_stopped / image_error</span> 或正常结束。上层据此决定 result 形态。</p></div>
+      </div>
+    </section>
+
+    <!-- ========== 07 Tool 契约 ========== -->
+    <section id="tool-contract">
+      <div class="sec-h"><span class="num">07</span><h2>Tool 声明式契约</h2></div>
+      <p class="sec-desc">每个工具都是一个实现 <span class="mono">Tool</span> 接口的对象。它不止是"一个函数"，而是一份把<b>执行、鉴权、渲染、序列化、安全分级</b>全部打包的契约。<span class="mono">buildTool()</span> 为常被省略的方法填 <b>fail-closed</b>（保守）默认值，让所有工具都拿到一致的完整形态。</p>
+      <table>
+        <thead><tr><th>成员</th><th>作用</th><th>默认（buildTool）</th></tr></thead>
+        <tbody>
+          <tr><td class="el mono">call()</td><td>真正执行，返回 <span class="mono">ToolResult</span>（可带 newMessages / contextModifier）</td><td>—</td></tr>
+          <tr><td class="el mono">inputSchema</td><td><span class="mono">zod</span> 定义入参，供模型生成结构化调用</td><td>—</td></tr>
+          <tr><td class="el mono">validateInput()</td><td>执行前校验，失败把原因回给模型（不弹 UI）</td><td>放行</td></tr>
+          <tr><td class="el mono">checkPermissions()</td><td>工具专属鉴权逻辑，返回 allow/deny/ask</td><td><span class="pill green">allow</span> 交给通用权限系统</td></tr>
+          <tr><td class="el mono">isConcurrencySafe()</td><td>能否与同批工具并行</td><td><span class="pill red">false</span>（假设会写）</td></tr>
+          <tr><td class="el mono">isReadOnly() / isDestructive()</td><td>只读 / 不可逆（删除、覆盖、发送）</td><td>false / false</td></tr>
+          <tr><td class="el mono">maxResultSizeChars</td><td>结果超此长度即落盘，回给模型一个文件路径预览</td><td>各工具自定（Read=∞）</td></tr>
+          <tr><td class="el mono">interruptBehavior()</td><td>运行中来了新消息：<span class="mono">cancel</span> 还是 <span class="mono">block</span></td><td>block</td></tr>
+          <tr><td class="el mono">render* / mapToolResult*</td><td>TUI 渲染 + 转成 API 的 <span class="mono">tool_result</span> 块</td><td>—</td></tr>
+        </tbody>
+      </table>
+      <div class="note ok"><b>Fail-closed 是刻意的：</b><span class="mono">isConcurrencySafe → false</span>、<span class="mono">isReadOnly → false</span>，意味着"除非工具明确声明安全，否则一律当作会写、不可并行"。安全默认优先于性能默认。</div>
+    </section>
+
+    <!-- ========== 08 工具清单与装配 ========== -->
+    <section id="tool-pool">
+      <div class="sec-h"><span class="num">08</span><h2>工具清单与装配</h2></div>
+      <p class="sec-desc"><span class="mono">tools.ts</span> 里的 <span class="mono">getAllBaseTools()</span> 是所有内置工具的唯一真相源；再经 <span class="mono">getTools()</span> 按权限 deny 规则与模式过滤，最后 <span class="mono">assembleToolPool()</span> 把内置工具与 MCP 工具合并去重。</p>
+      <div class="sub-h">内置工具地图（约 60+，随特性开关增减）</div>
+      <div class="grid3">
+        <div class="card"><h3>文件</h3><p class="lead" style="margin:0"><span class="mono">FileRead / FileWrite / FileEdit / NotebookEdit</span></p></div>
+        <div class="card"><h3>搜索</h3><p class="lead" style="margin:0"><span class="mono">Glob / Grep</span>（ant 构建内嵌 bfs/ugrep 时改走 Bash）</p></div>
+        <div class="card"><h3>执行</h3><p class="lead" style="margin:0"><span class="mono">Bash / PowerShell / REPL</span></p></div>
+        <div class="card"><h3>Web</h3><p class="lead" style="margin:0"><span class="mono">WebFetch / WebSearch</span></p></div>
+        <div class="card"><h3>子 Agent / 任务</h3><p class="lead" style="margin:0"><span class="mono">Agent / TaskCreate / TaskGet / TaskUpdate / TaskList / TaskOutput / TaskStop</span></p></div>
+        <div class="card"><h3>计划 / 隔离</h3><p class="lead" style="margin:0"><span class="mono">EnterPlanMode / ExitPlanMode · EnterWorktree / ExitWorktree</span></p></div>
+        <div class="card"><h3>协作</h3><p class="lead" style="margin:0"><span class="mono">TeamCreate / TeamDelete / SendMessage</span>（多 Agent swarm）</p></div>
+        <div class="card"><h3>MCP / 技能</h3><p class="lead" style="margin:0"><span class="mono">ListMcpResources / ReadMcpResource · Skill / ToolSearch</span></p></div>
+        <div class="card"><h3>交互 / 其他</h3><p class="lead" style="margin:0"><span class="mono">TodoWrite / AskUserQuestion / Brief / Config / LSP / Sleep / Cron</span></p></div>
+      </div>
+      <div class="note info"><b>装配为 prompt 缓存服务：</b><span class="mono">assembleToolPool</span> 把内置工具排成一段<b>连续前缀</b>、MCP 工具排在后面，各自按名排序、<span class="mono">uniqBy</span> 去重（内置优先）。因为服务端在"最后一个内置工具"后设了缓存断点——若 MCP 工具插进内置之间，会让下游所有缓存键失效。<span class="mono">CLAUDE_CODE_SIMPLE</span> 模式则只给 <span class="mono">Bash / Read / Edit</span> 三件套。</div>
+    </section>
+
+    <!-- ========== 09 ToolSearch ========== -->
+    <section id="toolsearch">
+      <div class="sec-h"><span class="num">09</span><h2>ToolSearch：工具延迟加载</h2></div>
+      <p class="sec-desc">工具一多，把所有工具的完整 JSON Schema 都塞进初始 prompt 会又贵又占上下文。Claude Code 的解法是"<b>延迟加载</b>"：一部分工具以 <span class="mono">defer_loading: true</span> 发送，模型看不到完整 schema，需要先用 <span class="mono">ToolSearch</span> 按关键字把它"搜"出来才能调用。</p>
+      <div class="flowbox">
+        <span class="step">初始只带 alwaysLoad 工具</span><span class="arrow">→</span>
+        <span class="step">模型用 ToolSearch(关键字)</span><span class="arrow">→</span>
+        <span class="step">命中 searchHint 的工具展开 schema</span><span class="arrow">→</span>
+        <span class="step">模型正常调用</span>
+      </div>
+      <div class="grid3">
+        <div class="card"><h3><span class="mono">shouldDefer</span></h3><p class="lead" style="margin:0">标记该工具默认延迟，不进初始 schema。</p></div>
+        <div class="card"><h3><span class="mono">alwaysLoad</span></h3><p class="lead" style="margin:0">强制第一轮就带完整 schema——模型必须在 turn 1 就能看到的工具（MCP 侧用 <span class="mono">anthropic/alwaysLoad</span>）。</p></div>
+        <div class="card"><h3><span class="mono">searchHint</span></h3><p class="lead" style="margin:0">3–10 词的能力短语，供关键字匹配。刻意用工具名里没有的词（如给 NotebookEdit 配 "jupyter"）。</p></div>
+      </div>
+      <div class="note">效果是把"工具很多"与"初始 prompt 精简、缓存稳定"这对矛盾解开：常用工具直发，长尾工具按需检索。</div>
+    </section>
+
+    <!-- ========== 10 权限系统 ========== -->
+    <section id="permission">
+      <div class="sec-h"><span class="num">10</span><h2>权限系统：模式 × 规则 × 分类器</h2></div>
+      <p class="sec-desc">工具执行前必过权限关。<span class="mono">canUseTool</span> 先调工具自己的 <span class="mono">checkPermissions</span>，再叠加会话的权限模式与规则，产出 <b>allow / deny / ask</b> 三态（外加 <span class="mono">passthrough</span> 透传）。每个决策都带 <span class="mono">decisionReason</span>，可解释可审计。</p>
+      <div class="sub-h">五种权限模式（用户可寻址）</div>
+      <table>
+        <thead><tr><th>模式</th><th>含义</th></tr></thead>
+        <tbody>
+          <tr><td class="el mono">default</td><td>标准：按规则判定，未知的写操作弹确认</td></tr>
+          <tr><td class="el mono">plan</td><td>只读计划模式：不落地改动，只读与调研</td></tr>
+          <tr><td class="el mono">acceptEdits</td><td>自动接受文件编辑，减少打断</td></tr>
+          <tr><td class="el mono">dontAsk</td><td>不主动询问（在允许范围内直行）</td></tr>
+          <tr><td class="el mono">bypassPermissions</td><td>绕过权限（需环境显式可用），高危</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:6px">另有两个内部模式：<span class="mono">auto</span>（下面的分类器模式）与 <span class="mono">bubble</span>（Fork 子 Agent 把权限提示"冒泡"回父终端）。</p>
+      <div class="grid2">
+        <div class="card"><h3>规则的六个来源</h3><p class="lead" style="margin:0">allow / deny / ask 三类规则可来自 <span class="mono">userSettings · projectSettings · localSettings · policySettings · cliArg · session</span> 等。deny 规则在<b>装配阶段</b>就把工具从池里滤掉（连模型都看不到），不只是调用时拦。</p></div>
+        <div class="card"><h3>auto 模式：模型当安检</h3><p class="lead" style="margin:0">开启后，Bash 命令交给一个 <b>haiku 分类器</b>（<span class="mono">YoloClassifier</span>，两阶段 fast → thinking）判"是否该拦"。敏感路径（<span class="mono">.git/ .claude/</span>、shell 配置）标 <span class="mono">classifierApprovable</span> 让分类器带上下文裁决，而非一律弹窗。</p></div>
+      </div>
+      <pre><span class="c">// 权限判定的优先级链（简化）</span>
+canUseTool(tool, input, ctx):
+  tool.<span class="k">validateInput</span>()            <span class="c"># 入参非法 → 直接回错，不进权限</span>
+  tool.<span class="k">checkPermissions</span>()         <span class="c"># 工具专属逻辑</span>
+  → deny 规则命中?   <span class="d">deny</span>       <span class="c"># decisionReason: {type:'rule'}</span>
+  → allow 规则命中?  <span class="s">allow</span>
+  → 按 <span class="m">mode</span> 决策           <span class="c"># plan/acceptEdits/... {type:'mode'}</span>
+  → Hook / classifier 介入      <span class="c"># {type:'hook' | 'classifier' | 'safetyCheck'}</span>
+  → 否则 <span class="m">ask</span> 用户            <span class="c"># 弹确认，可记为持久规则</span></pre>
+    </section>
+
+    <!-- ========== 11 AgentTool ========== -->
+    <section id="agenttool">
+      <div class="sec-h"><span class="num">11</span><h2>AgentTool：派生专业子 Agent</h2></div>
+      <p class="sec-desc">Claude Code 最有辨识度的能力：主 Agent 可以用 <span class="mono">Agent</span> 工具<b>派生子 Agent</b> 去自主完成复杂多步任务。子 Agent 是一个带独立上下文的 <span class="mono">query()</span> 实例（<span class="mono">depth+1</span>），跑完把<b>一条总结消息</b>交回主 Agent——中间的工具噪音不污染主上下文。</p>
+      <div class="sub-h">AgentDefinition：一个子 Agent 就是一份声明</div>
+      <p class="sec-desc" style="margin-top:0">子 Agent 定义可以是内置的，也可以来自 <span class="mono">.md</span>（frontmatter）或 <span class="mono">.json</span>，落在 user / project / plugin 等来源。关键字段本身就是能力边界：</p>
+      <table>
+        <thead><tr><th>字段</th><th>含义</th></tr></thead>
+        <tbody>
+          <tr><td class="el mono">tools / disallowedTools</td><td>工具白名单 / 黑名单（子 Agent 能看到哪些工具）</td></tr>
+          <tr><td class="el mono">model / effort</td><td>模型分级与推理强度（<span class="mono">inherit</span> = 跟随父级）</td></tr>
+          <tr><td class="el mono">permissionMode</td><td>子 Agent 的权限模式</td></tr>
+          <tr><td class="el mono">maxTurns</td><td>子 Agent 自身的回合上限</td></tr>
+          <tr><td class="el mono">skills / mcpServers / hooks</td><td>预载技能、专属 MCP、会话级 Hooks</td></tr>
+          <tr><td class="el mono">memory</td><td>持久记忆范围 <span class="mono">user / project / local</span></td></tr>
+          <tr><td class="el mono">isolation</td><td><span class="mono">worktree</span>（临时 git worktree）/ <span class="mono">remote</span>（远程 CCR 沙箱）</td></tr>
+          <tr><td class="el mono">background</td><td>是否总以后台任务方式运行</td></tr>
+          <tr><td class="el mono">omitClaudeMd</td><td>只读 Agent（Explore/Plan）省略 CLAUDE.md 以省 token</td></tr>
+        </tbody>
+      </table>
+      <div class="grid2">
+        <div class="card"><h3>内置子 Agent</h3><p class="lead" style="margin:0"><span class="mono">general-purpose · explore · plan · statusline-setup · code-guide · verification</span>。<span class="mono">CLAUDE_AGENT_SDK_DISABLE_BUILTIN_AGENTS</span> 可让 SDK 用户拿到"空白画布"。</p></div>
+        <div class="card"><h3>前台 vs 后台</h3><p class="lead" style="margin:0"><span class="mono">run_in_background</span>：后台子 Agent 完成时以 <span class="mono">&lt;task-notification&gt;</span> 主动通知——提示词明确要求"<b>别 sleep、别轮询</b>"，去干别的活。前台则用于"结果决定下一步"的调研。</p></div>
+      </div>
+      <div class="note"><b>续接而非重启：</b>用 <span class="mono">SendMessage</span> 以子 Agent 的 <span class="mono">id / name</span> 作 <span class="mono">to</span>，可让它带着<b>完整上下文</b>继续；相对地，每次全新 <span class="mono">Agent(subagent_type)</span> 都是零上下文起步，必须在 prompt 里交代清楚。</div>
+    </section>
+
+    <!-- ========== 12 Fork ========== -->
+    <section id="fork">
+      <div class="sec-h"><span class="num">12</span><h2>Fork：Agent 的自我分身</h2></div>
+      <p class="sec-desc">当 <span class="mono">FORK_SUBAGENT</span> 特性开启时，调用 <span class="mono">Agent</span> 工具却<b>省略 <span class="mono">subagent_type</span></b>，就触发一次 fork——子进程<b>继承父级完整对话上下文与系统提示</b>，而不是零起步。它专治"这段工具输出我不想留在自己上下文里"的场景（大范围调研、多处实现）。</p>
+      <div class="grid2">
+        <div class="card"><h3>为什么 fork 很便宜</h3><p class="lead" style="margin:0">所有 fork 子进程共享父级的 <b>prompt 缓存</b>：<span class="mono">buildForkedMessages</span> 让每个子进程的 API 请求前缀<b>逐字节一致</b>（相同占位 tool_result + 仅末尾指令不同），最大化缓存命中。所以提示词说"别在 fork 上设 <span class="mono">model</span>"——换模型就无法复用父级缓存。</p></div>
+        <div class="card"><h3>Fork 的合成定义</h3><p class="lead" style="margin:0"><span class="mono">FORK_AGENT</span>：<span class="mono">tools:['*']</span>（继承父级全部工具，保前缀一致）、<span class="mono">model:'inherit'</span>、<span class="mono">permissionMode:'bubble'</span>（权限提示冒泡回父终端）、<span class="mono">maxTurns:200</span>。</p></div>
+      </div>
+      <pre><span class="c">// 注入给 fork 子进程的强指令（buildChildMessage 摘要）</span>
+&lt;fork-boilerplate&gt;
+  你是一个 fork 出来的 worker 进程，不是主 Agent。
+  1. 系统提示说"默认 fork"—— <span class="d">忽略它</span>，你就是那个 fork，直接执行，别再派子 Agent。
+  2. 别对话、别问问题、别加元评论；<span class="k">静默用工具</span>，最后一次性汇报。
+  3. 改了文件就先 commit，汇报里带 commit hash。
+  4. 严格待在 directive 范围内；回复必须以 "Scope:" 开头。
+&lt;/fork-boilerplate&gt;
+&lt;fork-directive&gt;{父级下达的具体指令}&lt;/fork-directive&gt;</pre>
+      <div class="note red"><b>防递归 fork：</b>fork 子进程为了缓存一致仍保留 <span class="mono">Agent</span> 工具，因此靠 <span class="mono">isInForkChild()</span> 扫历史里的 fork 标记，在调用时拒绝"fork 里再 fork"。此外 fork 与 coordinator 模式<b>互斥</b>——两者都想当编排者。worktree 隔离下还会注入路径翻译提示，告知子进程它在独立工作副本里干活。</div>
+    </section>
+
+    <!-- ========== 13 Coordinator ========== -->
+    <section id="coordinator">
+      <div class="sec-h"><span class="num">13</span><h2>Coordinator：主 Agent 当编排者</h2></div>
+      <p class="sec-desc"><span class="mono">COORDINATOR_MODE</span> 开启后，主 Agent 的人设从"亲自干活"变成"<b>协调者</b>"：它把研究 / 实现 / 验证派给 workers（子 Agent），自己负责综合结论、跟用户沟通。worker 的结果以 <b>user-role 消息里的 <span class="mono">&lt;task-notification&gt;</span></b> XML 回流——看着像用户消息，实为内部信号。</p>
+      <div class="flowbox">
+        <span class="step">Research（并行 workers）</span><span class="arrow">→</span>
+        <span class="step">Synthesis（coordinator 亲自消化）</span><span class="arrow">→</span>
+        <span class="step">Implementation（workers 按 spec 改 + commit）</span><span class="arrow">→</span>
+        <span class="step">Verification（workers 独立验证）</span>
+      </div>
+      <div class="grid2">
+        <div class="card"><h3>并行是超能力</h3><p class="lead" style="margin:0">提示词直言"parallelism is your superpower"：独立的活并发起（一条消息里多个 <span class="mono">Agent</span> 调用）。只读调研随便并行；写操作按文件集串行；验证可与实现在不同文件区并行。</p></div>
+        <div class="card"><h3>绝不"懒委派"</h3><p class="lead" style="margin:0">禁止 "based on your findings, fix it" 这类把理解甩给 worker 的话。coordinator 必须<b>亲自综合</b>，写出带文件路径、行号、具体改动的 spec——用"证明你读懂了"的方式派活。</p></div>
+      </div>
+      <div class="card"><h3>Continue vs Spawn 决策</h3><p class="lead" style="margin:0">派活前先判断上下文重叠度：worker 刚好探过要改的文件 → <b>Continue</b>（<span class="mono">SendMessage</span> 复用其上下文）；调研宽泛但实现很窄、或要"换个新脑子"验证别人写的代码 → <b>Spawn fresh</b>（干净上下文避免锚定）。没有万能默认，看重叠度。</p></div>
+    </section>
+
+    <!-- ========== 14 任务类型 ========== -->
+    <section id="tasktype">
+      <div class="sec-h"><span class="num">14</span><h2>任务类型与生命周期</h2></div>
+      <p class="sec-desc"><span class="mono">Task.ts</span> 把所有"可派发的活儿"抽象成统一的任务模型：一个 <span class="mono">TaskType</span> + 一套状态机 + 一个落盘输出文件。子 Agent、后台 shell、远程执行、定时监控都收敛到这里。</p>
+      <div class="grid2">
+        <div class="card"><h3>TaskType（7 类）</h3>
+          <ul class="clean" style="margin:0">
+            <li><span class="mono">local_agent</span> / <span class="mono">remote_agent</span> — 本地 / 远程子 Agent</li>
+            <li><span class="mono">local_bash</span> — 后台 shell 任务</li>
+            <li><span class="mono">in_process_teammate</span> — 进程内队友</li>
+            <li><span class="mono">local_workflow</span> — 工作流脚本</li>
+            <li><span class="mono">monitor_mcp</span> — MCP 监控</li>
+            <li><span class="mono">dream</span> — 空闲自驱</li>
+          </ul>
+        </div>
+        <div class="card"><h3>状态机</h3>
+          <div class="flowbox" style="margin-top:2px">
+            <span class="step">pending</span><span class="arrow">→</span>
+            <span class="step">running</span><span class="arrow">→</span>
+            <span class="step" style="background:#dcfce7;border-color:#bbf7d0;color:#166534">completed</span>
+          </div>
+          <p class="lead" style="margin:8px 0 0">终态还有 <span class="mono">failed / killed</span>。<span class="mono">isTerminalTaskStatus()</span> 守护：不往死队友里注消息、终态任务从 AppState 逐出。</p>
+        </div>
+      </div>
+      <div class="note info"><b>任务 ID 是安全设计：</b><span class="mono">generateTaskId</span> 用"类型前缀 + 8 位随机（36 进制，约 2.8 万亿组合）"，注释点明这是为了<b>抵御符号链接爆破攻击</b>——任务输出落盘在以 ID 命名的文件里，ID 可猜就有风险。每个任务有独立 <span class="mono">outputFile</span> 与读偏移，通知已读位置可增量。</div>
+    </section>
+
+    <!-- ========== 15 压缩管线 ========== -->
+    <section id="compaction">
+      <div class="sec-h"><span class="num">15</span><h2>多级压缩管线：把上下文按住</h2></div>
+      <p class="sec-desc">长会话最大的敌人是上下文膨胀。Claude Code 不靠单一手段，而是在<b>每圈循环开头</b>叠了一条压缩流水线，各管一段，从"轻剪枝"到"全量摘要"层层递进。目标：尽量保留细粒度上下文，实在不行才总结。</p>
+      <div class="lane">
+        <div class="row"><div class="t">① <span class="mono">applyToolResultBudget</span> — 工具结果预算</div><div class="dsc">聚合工具结果超预算时做内容替换（按 tool_use_id，对缓存透明）；<span class="mono">maxResultSizeChars=∞</span> 的工具（如 Read）豁免</div></div>
+        <div class="row"><div class="t">② <span class="mono">snip</span> — 剪僵尸</div><div class="dsc">移除僵尸消息与陈旧标记，释放的 token 数还会喂给下游阈值判断</div></div>
+        <div class="row"><div class="t">③ <span class="mono">microcompact</span> — 微压缩</div><div class="dsc">按 <span class="mono">tool_use_id</span> 删除旧工具调用（缓存编辑），细粒度腾空间</div></div>
+        <div class="row"><div class="t">④ <span class="mono">context collapse</span> — 折叠视图</div><div class="dsc">读时投影的折叠：跑在 autocompact 前，若折叠后已达标就不必全量摘要</div></div>
+        <div class="row gate"><div class="t">⑤ <span class="mono">autocompact</span> — 自动摘要</div><div class="dsc">到阈值把历史总结成摘要，产出 <span class="mono">compact_boundary</span> 边界消息</div></div>
+        <div class="row stop"><div class="t">⑥ <span class="mono">reactive compact</span> — 反应式（兜底）</div><div class="dsc">仅当真的 413 prompt-too-long 才触发，全量摘要后重试一次</div></div>
+      </div>
+      <div class="note"><b>compact_boundary 是分水岭：</b>压缩后 <span class="mono">getMessagesAfterCompactBoundary()</span> 只取边界之后的消息进 API，边界之前的原始消息可被 GC 释放。<span class="mono">taskBudget</span> 还会跨压缩边界记账——压缩前的最终上下文窗口被"减去"，让服务端不会因为只看到摘要而少算花费。</div>
+    </section>
+
+    <!-- ========== 16 系统提示与记忆 ========== -->
+    <section id="prompt">
+      <div class="sec-h"><span class="num">16</span><h2>系统提示与记忆</h2></div>
+      <p class="sec-desc">系统提示不是一个大字符串，而是分件组装（<span class="mono">fetchSystemPromptParts</span>）再拼装的：默认提示 + 用户上下文 + 系统上下文，可被 <span class="mono">custom</span> 替换或 <span class="mono">append</span> 追加。记忆分两条线：项目级 CLAUDE.md 与 Agent 持久记忆。</p>
+      <div class="grid2">
+        <div class="card"><h3>系统提示三段</h3>
+          <ul class="clean" style="margin:0">
+            <li><span class="mono">defaultSystemPrompt</span> — 内核人设与规则（或被 <span class="mono">customSystemPrompt</span> 整段替换）</li>
+            <li><span class="mono">userContext</span> — 工作目录、coordinator worker 工具说明等</li>
+            <li><span class="mono">systemContext</span> — 环境 / 会话态，循环内 <span class="mono">appendSystemContext</span> 合入</li>
+            <li><span class="mono">appendSystemPrompt</span> — 调用方追加的策略文本</li>
+          </ul>
+        </div>
+        <div class="card"><h3>两条记忆线</h3>
+          <ul class="clean" style="margin:0">
+            <li><b>CLAUDE.md（nested memory）</b>：分层注入为附件，<span class="mono">loadedNestedMemoryPaths</span> 去重，避免同一文件被重复注入几十次</li>
+            <li><b>Agent memory</b>：<span class="mono">MEMORY.md</span>，范围 <span class="mono">user / project / local</span>，跨会话持久；SDK 用 <span class="mono">CLAUDE_COWORK_MEMORY_PATH_OVERRIDE</span> 显式接入时才注入"记忆使用说明"</li>
+          </ul>
+        </div>
+      </div>
+      <div class="note info"><b>省 token 的小心思：</b>只读子 Agent（Explore / Plan）带 <span class="mono">omitClaudeMd</span>——它们不需要提交 / PR / lint 规范，主 Agent 有完整 CLAUDE.md 并负责解读其产出。源码注释称这跨海量 Explore 派生每周省下 5–15 Gtok。</div>
+    </section>
+
+    <!-- ========== 17 Hooks ========== -->
+    <section id="hooks">
+      <div class="sec-h"><span class="num">17</span><h2>Hooks：横切进循环的扩展点</h2></div>
+      <p class="sec-desc">Hooks 让外部逻辑在关键节点插进 Agent 生命周期——做校验、注入上下文、或直接拦停。它既是权限判定链的一环，也是回合收尾的把关者。</p>
+      <table>
+        <thead><tr><th>时机</th><th>作用</th></tr></thead>
+        <tbody>
+          <tr><td class="el">PreToolUse</td><td>工具执行前：可 <span class="mono">ask</span> 二次确认，或直接拦（权限判定链里的 <span class="mono">{type:'hook'}</span>）</td></tr>
+          <tr><td class="el">PostToolUse</td><td>工具执行后：审计、通知、后处理</td></tr>
+          <tr><td class="el">postSampling</td><td>模型响应完成后异步执行（<span class="mono">executePostSamplingHooks</span>）</td></tr>
+          <tr><td class="el">Stop</td><td>回合收工时把关：可注入延续或 <span class="mono">hook_stopped_continuation</span> 阻止收工</td></tr>
+          <tr><td class="el">SessionStart / UserPromptSubmit</td><td>会话开始 / 用户提交时注入上下文</td></tr>
+        </tbody>
+      </table>
+      <div class="note red"><b>Stop Hook 的死循环防护：</b>源码特意指出——prompt-too-long 时<b>不</b>走 Stop Hooks。因为模型根本没产出有效响应，跑 Stop Hook 会形成"错误 → hook 拦停 → 重试 → 又错误"的死亡螺旋（hook 每轮还往里灌 token）。这类"别在 X 情况下触发 Y"的边界，正是工业级 Loop 与玩具 Loop 的差距所在。</div>
+    </section>
+
+    <!-- ========== 18 Skills ========== -->
+    <section id="skills">
+      <div class="sec-h"><span class="num">18</span><h2>Skills：可发现的能力包</h2></div>
+      <p class="sec-desc">Skill 是把"一段可复用的能力 / 工作流"打包成可被模型发现和调用的单元。它通过 <span class="mono">Skill</span> 工具触发，来源有内置 bundled 与用户 / 项目目录（<span class="mono">loadSkillsDir</span>）。</p>
+      <div class="grid3">
+        <div class="card"><h3>发现机制</h3><p class="lead" style="margin:0">循环里有 skill discovery 预取（<span class="mono">startSkillDiscoveryPrefetch</span>），在模型流式期间并行找相关技能；<span class="mono">discoveredSkillNames</span> 记录本回合已浮现的技能（喂遥测 <span class="mono">was_discovered</span>）。</p></div>
+        <div class="card"><h3>预载与派发</h3><p class="lead" style="margin:0">子 Agent 定义里的 <span class="mono">skills</span> 字段可预载技能；coordinator 模式则被要求把技能调用（如 <span class="mono">/commit</span>、<span class="mono">/verify</span>）<b>下派给 worker</b> 执行。</p></div>
+        <div class="card"><h3>与斜杠命令</h3><p class="lead" style="margin:0"><span class="mono">getSlashCommandToolSkills</span> 把斜杠命令也纳入技能体系，在 <span class="mono">system.init</span> 时一并声明给模型。</p></div>
+      </div>
+    </section>
+
+    <!-- ========== 19 设计原则 ========== -->
+    <section id="principles">
+      <div class="sec-h"><span class="num">19</span><h2>贯穿的设计原则</h2></div>
+      <p class="sec-desc">把散落在各处的实现抽象出来，Claude Code 的 Agent 运行时其实反复在贯彻同一组原则。</p>
+      <div class="grid2">
+        <div class="card"><h3>① 流式即一等公民</h3><p class="lead" style="margin:0">全链路 async generator：模型输出、工具执行、子 Agent 结果都能边产边渲染、边产边中断。工具甚至在模型没说完时就开跑（第 5 节）。</p></div>
+        <div class="card"><h3>② 有界一切</h3><p class="lead" style="margin:0"><span class="mono">maxTurns</span> / <span class="mono">maxBudgetUsd</span> / <span class="mono">taskBudget</span> / token 上限 / 子 Agent <span class="mono">depth</span>。没有无界的自动行为，每条路径都能收口。</p></div>
+        <div class="card"><h3>③ Fail-closed 安全默认</h3><p class="lead" style="margin:0">工具默认"会写、不可并行"；权限未明即 <span class="mono">ask</span>；deny 规则在装配期就滤掉工具。安全默认优先于性能与便利。</p></div>
+        <div class="card"><h3>④ 上下文是稀缺资源</h3><p class="lead" style="margin:0">延迟加载工具、多级压缩、子 Agent 隔离噪音、只读 Agent 省 CLAUDE.md——处处在为上下文窗口"省地方"。</p></div>
+        <div class="card"><h3>⑤ Prompt 缓存驱动架构</h3><p class="lead" style="margin:0">工具排序保连续前缀、Fork 逐字节对齐、Agent 列表改走附件——很多结构决策的第一动机就是"别把缓存打穿"。</p></div>
+        <div class="card"><h3>⑥ 可恢复 / 可观测</h3><p class="lead" style="margin:0">transcript 提前落盘（崩溃可 <span class="mono">--resume</span>）、任务输出独立文件、query 链带 <span class="mono">chainId/depth</span>、每个权限决策带 <span class="mono">decisionReason</span>。</p></div>
+      </div>
+    </section>
+
+    <!-- ========== 20 对照 ========== -->
+    <section id="compare">
+      <div class="sec-h"><span class="num">20</span><h2>与 ICE-DATA-WORK 的对照</h2></div>
+      <p class="sec-desc">两套系统解决的问题不同——Claude Code 是<b>单用户、本地、编码</b>的通用 Agent；ICE-DATA-WORK 是<b>多参与者、受治理、数据工作</b>的协作运行时。但骨架上有不少可互相印证的设计。此处仅作机制对照，不评优劣。</p>
+      <table>
+        <thead><tr><th>维度</th><th>Claude Code</th><th>ICE-DATA-WORK</th></tr></thead>
+        <tbody>
+          <tr><td class="el">执行内核</td><td><span class="mono">queryLoop</span> 有界 ReAct（async generator）</td><td><span class="mono">_run_single_hop</span> 单跳内核</td></tr>
+          <tr><td class="el">多 Agent</td><td>AgentTool 派生 / Fork / Coordinator 编排</td><td>Twin 唯一 leader + A2A 有界多跳</td></tr>
+          <tr><td class="el">Agent 声明</td><td><span class="mono">AgentDefinition</span>（tools / model / permissionMode / maxTurns）</td><td><span class="mono">agent.json</span>（tools / spawn_targets / permission_mode / effort）</td></tr>
+          <tr><td class="el">防失控</td><td><span class="mono">depth</span> 追踪 · fork 防递归 · maxTurns / 预算</td><td>HopState 防环 + 软硬跳数预算 + Twin 六道仲裁</td></tr>
+          <tr><td class="el">权限</td><td>五模式 × allow/deny/ask × 分类器</td><td>三轴权限 / HITL / 主动性护栏</td></tr>
+          <tr><td class="el">上下文</td><td>多级压缩 + 延迟加载 + 记忆分层</td><td>分层注入 + 访问控制内嵌读取点</td></tr>
+          <tr><td class="el">结果回流</td><td>子 Agent → <span class="mono">&lt;task-notification&gt;</span> user 消息</td><td>A2A handoff 事件 + 前序产出摘要</td></tr>
+          <tr><td class="el">真相源</td><td>transcript / task output 文件 + session</td><td>文件优先（G3）：jsonl / plan.json</td></tr>
+        </tbody>
+      </table>
+      <div class="note ok"><b>共通的手法：</b>两者都是"<b>单一稳定内核 + 外层循环叠能力 + 治理闸门横切</b>"。差异在治理重心——Claude Code 侧重<b>本地安全与成本 / 缓存</b>，ICE-DATA-WORK 侧重<b>多方协作的越权防护与可审计</b>。看懂一套，另一套的设计取舍也就有了参照系。</div>
+    </section>
+
+    <div class="footer">
+      Claude Code · Agent 机制解读　|　来源：<span class="mono">参考内容/cc-recovered-main/src/{QueryEngine, query, Tool, tools, Task}.ts · tools/AgentTool/* · coordinator/coordinatorMode.ts · types/permissions.ts</span>　|　对应版本 Claude Code 2.1.88（sourcemap 恢复版）
+    </div>
+
+  </div>
+  </main>
+</div>
+
+<script>
+  // 汉堡菜单
+  const hb = document.getElementById('hamburger');
+  const sb = document.getElementById('sidebar');
+  hb && hb.addEventListener('click', () => sb.classList.toggle('open'));
+
+  // 点击导航后在移动端收起
+  document.querySelectorAll('.sb-link').forEach(a => {
+    a.addEventListener('click', () => { if (window.innerWidth <= 900) sb.classList.remove('open'); });
+  });
+
+  // Scrollspy：高亮当前章节
+  const links = Array.from(document.querySelectorAll('.sb-link'));
+  const map = new Map();
+  links.forEach(a => { const id = a.getAttribute('href').slice(1); const el = document.getElementById(id); if (el) map.set(el, a); });
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const a = map.get(e.target); a && a.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-15% 0px -70% 0px', threshold: 0 });
+  map.forEach((_, el) => obs.observe(el));
+</script>
+</body>
+</html>

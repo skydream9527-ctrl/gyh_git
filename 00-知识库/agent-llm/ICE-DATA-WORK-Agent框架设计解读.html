@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ICE-DATA-WORK · Agent 框架设计解读</title>
+<style>
+  :root {
+    --blue: #2563eb;
+    --blue-soft: #eff4ff;
+    --violet: #7c3aed;
+    --green: #16a34a;
+    --amber: #d97706;
+    --red: #dc2626;
+    --slate: #64748b;
+    --ink: #111827;
+    --text: #1f2937;
+    --dim: #6b7280;
+    --line: #e5e7eb;
+    --bg: #f6f7f9;
+    --card: #ffffff;
+    --sidebar: #0f172a;
+    --sidebar-dim: #94a3b8;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    --radius: 12px;
+    --shadow: 0 1px 3px rgba(15, 23, 42, .06), 0 8px 24px rgba(15, 23, 42, .04);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    color: var(--text);
+    background: var(--bg);
+    line-height: 1.65;
+    font-size: 15px;
+  }
+  a { color: var(--blue); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  code {
+    font-family: var(--mono);
+    font-size: .86em;
+    background: #f1f5f9;
+    color: #334155;
+    padding: 1px 6px;
+    border-radius: 5px;
+    border: 1px solid #e2e8f0;
+  }
+
+  /* ---------- 布局 ---------- */
+  .layout { display: flex; min-height: 100vh; }
+  .sidebar {
+    width: 288px;
+    background: var(--sidebar);
+    color: #e2e8f0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    flex-shrink: 0;
+    padding: 20px 0 40px;
+  }
+  .sidebar::-webkit-scrollbar { width: 8px; }
+  .sidebar::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+  .sb-brand { padding: 6px 22px 16px; border-bottom: 1px solid #1e293b; margin-bottom: 10px; }
+  .sb-brand b { font-size: 16px; color: #fff; letter-spacing: .3px; }
+  .sb-brand span { display: block; font-size: 11.5px; color: var(--sidebar-dim); margin-top: 4px; }
+  .sb-group { font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: #64748b; padding: 16px 22px 6px; font-weight: 700; }
+  .sb-link {
+    display: block; padding: 6px 22px 6px 24px; color: #cbd5e1; font-size: 13.3px;
+    border-left: 3px solid transparent; cursor: pointer;
+  }
+  .sb-link:hover { background: #1e293b; color: #fff; text-decoration: none; }
+  .sb-link.active { border-left-color: var(--blue); background: #172033; color: #fff; font-weight: 600; }
+
+  .main { flex: 1; min-width: 0; }
+  .content { max-width: 1060px; margin: 0 auto; padding: 40px 44px 100px; }
+
+  /* ---------- Hero ---------- */
+  .hero {
+    background: linear-gradient(135deg, #1e293b 0%, #2563eb 120%);
+    color: #fff; border-radius: 18px; padding: 40px 40px 36px; margin-bottom: 32px;
+    box-shadow: var(--shadow);
+  }
+  .hero .eyebrow { font-size: 12.5px; letter-spacing: 2px; text-transform: uppercase; color: #bfdbfe; margin-bottom: 12px; }
+  .hero h1 { margin: 0 0 12px; font-size: 29px; line-height: 1.25; }
+  .hero p { margin: 0; color: #dbeafe; max-width: 780px; font-size: 15px; }
+  .hero .flow {
+    display: inline-flex; gap: 10px; align-items: center; margin-top: 22px;
+    background: rgba(255,255,255,.1); padding: 8px 16px; border-radius: 999px; font-size: 14px; font-weight: 600;
+  }
+  .hero .flow .arrow { color: #93c5fd; }
+  .hero-stats { display: flex; flex-wrap: wrap; gap: 30px; margin-top: 28px; }
+  .hero-stats .s b { font-size: 23px; display: block; }
+  .hero-stats .s span { font-size: 12.5px; color: #bfdbfe; }
+
+  /* ---------- 章节 ---------- */
+  section { margin-bottom: 14px; scroll-margin-top: 20px; }
+  .sec-h { display: flex; align-items: center; gap: 12px; margin: 44px 0 6px; }
+  .sec-h .num {
+    font-family: var(--mono); font-size: 13px; font-weight: 700; color: var(--blue);
+    background: var(--blue-soft); border: 1px solid #dbeafe; border-radius: 8px; padding: 3px 9px;
+  }
+  .sec-h h2 { font-size: 23px; margin: 0; color: var(--ink); }
+  .sec-desc { color: var(--dim); margin: 4px 0 18px; max-width: 830px; }
+  .sub-h { font-size: 17px; color: var(--ink); margin: 26px 0 10px; padding-left: 12px; border-left: 4px solid var(--blue); }
+
+  /* ---------- 卡片 ---------- */
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 20px 22px; margin-bottom: 16px; box-shadow: var(--shadow);
+  }
+  .card > h3 { margin: 0 0 4px; font-size: 16.5px; color: var(--ink); display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+  .card .lead { color: var(--dim); margin: 0 0 14px; font-size: 14px; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  @media (max-width: 860px) { .grid2, .grid3 { grid-template-columns: 1fr; } }
+
+  /* ---------- 表格 ---------- */
+  table { width: 100%; border-collapse: collapse; font-size: 13.6px; margin: 10px 0 6px; }
+  th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { background: #f8fafc; color: #475569; font-weight: 600; font-size: 12.5px; text-transform: uppercase; letter-spacing: .4px; }
+  tr:last-child td { border-bottom: none; }
+  td.el { font-weight: 600; color: var(--ink); white-space: nowrap; }
+  td .mono, .mono { font-family: var(--mono); }
+  tbody tr:hover { background: #fafbfc; }
+
+  /* ---------- 徽标 ---------- */
+  .pill {
+    display: inline-block; font-size: 11.5px; font-weight: 600; padding: 2px 9px; border-radius: 999px;
+    line-height: 1.7; white-space: nowrap;
+  }
+  .pill.blue { background: #dbeafe; color: #1d4ed8; }
+  .pill.green { background: #dcfce7; color: #15803d; }
+  .pill.amber { background: #fef3c7; color: #b45309; }
+  .pill.red { background: #fee2e2; color: #b91c1c; }
+  .pill.violet { background: #ede9fe; color: #6d28d9; }
+  .pill.slate { background: #f1f5f9; color: #475569; }
+
+  ul.clean { margin: 8px 0; padding-left: 20px; }
+  ul.clean li { margin-bottom: 6px; }
+  .note {
+    background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; padding: 12px 16px;
+    font-size: 13.6px; color: #92400e; margin: 14px 0;
+  }
+  .note.info { background: #eff6ff; border-color: #bfdbfe; color: #1e40af; }
+  .note.ok { background: #f0fdf4; border-color: #bbf7d0; color: #166534; }
+  .note.red { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+  .note b { font-weight: 700; }
+  .kicker { font-size: 12px; color: var(--slate); text-transform: uppercase; letter-spacing: .6px; font-weight: 700; margin: 18px 0 8px; }
+
+  /* ---------- 代码块 ---------- */
+  pre {
+    background: #0f172a; color: #e2e8f0; border-radius: 12px; padding: 16px 18px;
+    overflow-x: auto; font-family: var(--mono); font-size: 12.9px; line-height: 1.6;
+    margin: 12px 0; border: 1px solid #1e293b;
+  }
+  pre .c { color: #7c8db5; }        /* 注释 */
+  pre .k { color: #93c5fd; }        /* 关键点/关键字 */
+  pre .s { color: #86efac; }        /* 字符串/标记 */
+  pre .d { color: #fca5a5; }        /* 危险/拒绝 */
+  pre .m { color: #fcd34d; }        /* 强调 */
+  pre::-webkit-scrollbar { height: 9px; }
+  pre::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+
+  /* ---------- 流程盒 ---------- */
+  .flowbox { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 14px 0; }
+  .flowbox .step { background: var(--blue-soft); border: 1px solid #dbeafe; color: #1e40af; padding: 7px 13px; border-radius: 9px; font-size: 13px; font-weight: 600; }
+  .flowbox .arrow { color: var(--slate); font-weight: 700; }
+
+  /* 循环时序 */
+  .lane { border-left: 3px solid #dbeafe; margin: 16px 0 16px 6px; padding: 2px 0 2px 20px; }
+  .lane .row { position: relative; margin: 0 0 14px; }
+  .lane .row::before {
+    content: ""; position: absolute; left: -27px; top: 5px; width: 11px; height: 11px;
+    background: #fff; border: 3px solid var(--blue); border-radius: 50%;
+  }
+  .lane .row.gate::before { border-color: var(--amber); }
+  .lane .row.stop::before { border-color: var(--red); }
+  .lane .row .t { font-weight: 700; color: var(--ink); font-size: 14.5px; }
+  .lane .row .t .mono { font-size: 12.5px; color: var(--slate); font-weight: 500; }
+  .lane .row .dsc { color: var(--dim); font-size: 13.4px; margin-top: 2px; }
+  .loopback { color: var(--violet); font-weight: 700; font-size: 12.5px; margin: 2px 0 0 -2px; }
+
+  .footer { text-align: center; color: var(--dim); font-size: 13px; padding: 30px 0 10px; border-top: 1px solid var(--line); margin-top: 44px; }
+  .footer .mono { font-size: 12px; }
+
+  .hamburger { display: none; }
+  @media (max-width: 900px) {
+    .sidebar { position: fixed; left: -320px; z-index: 50; transition: left .25s; box-shadow: 4px 0 24px rgba(0,0,0,.3); }
+    .sidebar.open { left: 0; }
+    .content { padding: 20px 18px 80px; }
+    .hamburger {
+      display: flex; position: fixed; top: 14px; left: 14px; z-index: 60; width: 42px; height: 42px;
+      align-items: center; justify-content: center; background: var(--sidebar); color: #fff;
+      border: none; border-radius: 10px; font-size: 20px; cursor: pointer;
+    }
+    .hero { padding: 28px 22px; }
+    .hero h1 { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+<button class="hamburger" id="hamburger">☰</button>
+<div class="layout">
+  <!-- ============ 侧栏 ============ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-brand">
+      <b>Agent 框架设计解读</b>
+      <span>ICE-DATA-WORK · 运行时 / A2A 编排 / 回合后自驱</span>
+    </div>
+    <div class="sb-group">概览</div>
+    <a class="sb-link" href="#overview">设计全景：User → Twin → Agents</a>
+    <a class="sb-link" href="#layers">六层分层架构</a>
+    <a class="sb-link" href="#contract">Agent 声明式契约</a>
+    <a class="sb-link" href="#single-hop">运行时内核：单跳</a>
+    <div class="sb-group">A2A 编排（重点）</div>
+    <a class="sb-link" href="#a2a-loop">完整多跳循环</a>
+    <a class="sb-link" href="#directive">转交指令协议</a>
+    <a class="sb-link" href="#hopstate">HopState 状态机</a>
+    <a class="sb-link" href="#arbitrate">Twin 仲裁六道闸</a>
+    <a class="sb-link" href="#a2a-ctx">A2A 接手上下文</a>
+    <a class="sb-link" href="#persist">落盘与透传</a>
+    <a class="sb-link" href="#a2a-bounds">边界速查</a>
+    <div class="sb-group">回合后自驱</div>
+    <a class="sb-link" href="#autostep-trigger">触发与主循环</a>
+    <a class="sb-link" href="#reuse">如何复用单跳</a>
+    <a class="sb-link" href="#guardrails">护栏与两级预算</a>
+    <a class="sb-link" href="#proposal">拦成"提议"</a>
+    <a class="sb-link" href="#compare">A2A vs autostep</a>
+    <div class="sb-group">收尾</div>
+    <a class="sb-link" href="#principles">贯穿设计原则</a>
+    <a class="sb-link" href="#open">待确认的实现细节</a>
+  </aside>
+
+  <!-- ============ 正文 ============ -->
+  <main class="main">
+  <div class="content">
+
+    <div class="hero">
+      <div class="eyebrow">Runtime Deep-Dive</div>
+      <h1>Agent 框架设计解读</h1>
+      <p>一份面向工程读者的运行时解读：这套框架不是"一个大模型 + 几个工具"，而是一套<b>多参与者、受治理、文件优先</b>的 Agent 协作运行时。核心是同一个"单跳"执行内核，靠不同的外层循环叠加能力，靠治理闸门横切安全。</p>
+      <div class="flow"><span>User</span><span class="arrow">→</span><span>Twin（唯一 leader）</span><span class="arrow">→</span><span>Agents</span></div>
+      <div class="hero-stats">
+        <div class="s"><b>1</b><span>单跳内核 _run_single_hop</span></div>
+        <div class="s"><b>3 / 6</b><span>A2A 软预算 / 硬顶跳数</span></div>
+        <div class="s"><b>3 / 20</b><span>自驱：每回合 / 每日上限</span></div>
+        <div class="s"><b>6</b><span>Twin 仲裁拒绝闸</span></div>
+      </div>
+    </div>
+
+    <div class="note info">本文所有结论均来自 <span class="mono">backend/app/services/</span> 的真实实现（<span class="mono">agent_runtime · orchestrator_svc · context_assembler_svc · plan_svc · proactivity_svc · proposal_svc · tools/registry</span>）。注意：<span class="mono">agents/_shared/context-protocol.md</span> 描述的是<b>迁移来源 ice-workbench</b> 的运行时，与本项目实际实现不是同一套，勿混淆。</div>
+
+    <!-- ========== 概览 ========== -->
+    <section id="overview">
+      <div class="sec-h"><span class="num">01</span><h2>设计全景：User → Twin → Agents</h2></div>
+      <p class="sec-desc">协作的顶层模型是三层：你只跟自己的数字分身 <b>Twin</b> 对话；Twin 作为<b>唯一 leader</b> 去编排专业 Agent 干活；所有高风险动作回流给你确认（HITL）。Agent 之间不做对等自由对话——一切经 Twin 仲裁。</p>
+      <div class="flowbox">
+        <span class="step">用户发言</span><span class="arrow">→</span>
+        <span class="step">Twin 接管/编排</span><span class="arrow">→</span>
+        <span class="step">专业 Agent 执行</span><span class="arrow">→</span>
+        <span class="step">（可）Agent 间接力</span><span class="arrow">→</span>
+        <span class="step">高风险 → 回你确认</span>
+      </div>
+    </section>
+
+    <!-- ========== 分层 ========== -->
+    <section id="layers">
+      <div class="sec-h"><span class="num">02</span><h2>六层分层架构</h2></div>
+      <p class="sec-desc">框架自上而下分为六层，安全治理作为横切面贯穿每一层。理解这套分层，是理解后面 A2A 与自驱的前提。</p>
+      <table>
+        <thead><tr><th>层</th><th>落点</th><th>职责</th></tr></thead>
+        <tbody>
+          <tr><td class="el">定义层</td><td class="mono">agents/{id}/agent.json + agent.md</td><td>声明式契约：工具白名单 / 派单目标 / 权限模式 / 模型 / 推理强度</td></tr>
+          <tr><td class="el">运行时</td><td class="mono">agent_runtime.py</td><td>有界 ReAct + speaker 路由 + 事件流；<b>单跳</b>是最小执行单元</td></tr>
+          <tr><td class="el">编排层</td><td class="mono">orchestrator_svc.py</td><td>有界多跳 A2A 的纯函数状态机：防环 + 预算 + Twin 仲裁</td></tr>
+          <tr><td class="el">上下文层</td><td class="mono">context_assembler_svc.py</td><td>分层注入 + <b>访问控制内嵌在读取点</b>（先过滤后检索）</td></tr>
+          <tr><td class="el">工具层</td><td class="mono">tools/registry.py</td><td>统一执行入口 + fail-fast 治理门链 + 统一错误信封</td></tr>
+          <tr><td class="el">治理层</td><td class="mono">core/permissions · hitl · proactivity · control</td><td>三轴权限 / HITL / 主动性护栏 / 一键暂停 / 全程审计（横切）</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ========== 契约 ========== -->
+    <section id="contract">
+      <div class="sec-h"><span class="num">03</span><h2>Agent 声明式契约</h2></div>
+      <p class="sec-desc">每个 Agent 是一个目录，用 <span class="mono">agent.json</span> 声明能力边界，<span class="mono">prompt/</span> 合成 <span class="mono">agent.md</span> 作系统提示词来源。关键字段本身就是"契约"：</p>
+      <div class="grid2">
+        <div class="card">
+          <h3>能力与边界字段</h3>
+          <ul class="clean">
+            <li><span class="mono">tools</span> — 工具白名单（这个 Agent 能看到哪些工具）</li>
+            <li><span class="mono">spawn_targets</span> — 可派单子 Agent 白名单（<span class="mono">["*"]</span> 全部 / <span class="mono">[]</span> 不可派）</li>
+            <li><span class="mono">permission_mode</span> — <span class="mono">default / read_only / confirm_write / confirm_network</span></li>
+            <li><span class="mono">features</span> — 细粒度开关（todo_write / exit_plan_mode / spawn_subagent）</li>
+            <li><span class="mono">model / effort</span> — 模型分级与推理强度提示</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>一个关键设计哲学 <span class="pill violet">D-50</span></h3>
+          <p class="lead" style="margin:0">"<b>先兑现契约，再扩能力</b>"。这 11 个 Agent 从 ice-workbench 迁入，富字段一开始只是"无害透传"；随后在 M19 里把 <span class="mono">tools / permission_mode / effort / model</span> 在运行时<b>真正强制生效</b>——避免"声明了却不执行"的安全错觉。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== 单跳 ========== -->
+    <section id="single-hop">
+      <div class="sec-h"><span class="num">04</span><h2>运行时内核：单跳 <span class="mono" style="font-size:16px">_run_single_hop</span></h2></div>
+      <p class="sec-desc">整个框架只有<b>一个</b>执行内核。A2A 的每一次接力、autostep 的每一步推进，走的都是它。理解这个内核，就抓住了两条增强路径的共同基础。</p>
+      <pre><span class="c"># _run_single_hop：一个 speaker 的一跳</span>
+1. <span class="k">月度预算硬门</span>  llm_available() and is_over_budget() → yield budget_exceeded，不发付费调用
+2. yield turn_start（若来自转交，带 handoff）
+3. <span class="k">assemble_context</span>(task, speaker, handoff)   <span class="c"># 分层组装 + 访问控制内嵌</span>
+4. <span class="k">select_model</span>(speaker)                       <span class="c"># 按角色/预算选实际模型（M19-T02）</span>
+5. for evt in <span class="k">stream_chat</span>(...):  yield text / 记 error / done 记账
+6. raw = 原始输出（含指令）;  content = strip_directives(raw)  <span class="m"># raw/content 分离</span>
+7. <span class="k">append_turn</span>(content, handoff)  +  <span class="k">audit</span>  +  post_tool notify hook
+8. return {raw, content, errored}                <span class="c"># raw 交给编排器解析转交</span></pre>
+      <div class="note"><b>raw / content 分离</b>是贯穿 A2A 的关键：<span class="mono">raw</span>（含 <span class="mono">[[handoff...]]</span> 指令）交给编排器解析；<span class="mono">content</span>（已清洗）用于落盘和展示。用户永远看不到指令标记，但编排器能读到。</div>
+    </section>
+
+    <!-- ========== A2A 主循环 ========== -->
+    <section id="a2a-loop">
+      <div class="sec-h"><span class="num">05</span><h2>A2A 完整多跳循环</h2></div>
+      <p class="sec-desc">M7 把协作从"单跳"升级为"多个 Agent 一轮内接力"。入口和出口都在 <span class="mono">run_agent_turn</span> 的一个 <span class="mono">while True</span> 里；编排的"脑子"抽到 <span class="mono">orchestrator_svc</span> 的纯函数状态机，运行时只负责驱动。</p>
+      <div class="lane">
+        <div class="row"><div class="t">落盘用户发言 · 任务置 doing</div><div class="dsc">初始 <span class="mono">speaker = resolve_speaker()</span>：@定向 &gt; assignee &gt; Twin &gt; Agent &gt; 兜底 general</div></div>
+        <div class="row"><div class="t"><span class="mono">state = new_hop_state(speaker)</span></div><div class="dsc">初始 speaker 计入序列，但<b>不算一跳</b></div></div>
+        <div class="row"><div class="t">进入 while → <span class="mono">_run_single_hop(speaker, handoff)</span></div><div class="dsc">执行一跳，产出 turn_start / text / turn_done 事件，返回 {raw, content, errored}</div></div>
+        <div class="row stop"><div class="t">若 A2A 开关关 or 本跳出错 → <b>break</b></div><div class="dsc">开关默认关时退化为单跳，行为与 v1 完全一致</div></div>
+        <div class="row gate"><div class="t"><span class="mono">req = parse_directive(raw)</span></div><div class="dsc">解析输出末尾的转交指令；无指令 → break</div></div>
+        <div class="row gate"><div class="t"><span class="mono">decision = arbitrate_handoff(...)</span> ← Twin 仲裁</div><div class="dsc">刷新参与者后交给 Twin 把关（防环/预算/目标校验）</div></div>
+        <div class="row"><div class="t">yield <span class="mono">handoff</span> 事件（honored=?）</div><div class="dsc">无论批不批都发事件，前端可渲染"A→B 转交卡"；不 honor → break</div></div>
+        <div class="row"><div class="t">honor：auto_join → <span class="mono">add_participant(role=tool, L2)</span></div><div class="dsc">把"平台已知但未参与"的 Agent 拉进来，<b>不放宽其权限</b></div></div>
+        <div class="row"><div class="t"><span class="mono">record_hop</span> · <span class="mono">speaker = target</span></div><div class="dsc">hops+1、记转交对/序列、切换发言人</div><div class="loopback">↺ 回到 while 顶部，target 成为新 speaker</div></div>
+      </div>
+      <p style="margin-top:18px">循环结束后，才进入独立的 <a href="#autostep-trigger">回合后自驱 <span class="mono">_autostep</span></a>。</p>
+    </section>
+
+    <!-- ========== 指令协议 ========== -->
+    <section id="directive">
+      <div class="sec-h"><span class="num">06</span><h2>转交指令协议</h2></div>
+      <p class="sec-desc">这是个务实取舍：LLM 网关不产原生 function-calling 的 tool_use，所以转交靠<b>解析 speaker 输出末尾的文本标记</b>实现。</p>
+      <pre><span class="s">[[handoff:&lt;agent_id&gt;|&lt;理由&gt;]]</span>   <span class="c"># 请求接力（交出控制权）</span>
+<span class="s">[[ask:&lt;agent_id&gt;|&lt;问题&gt;]]</span>        <span class="c"># 一次性咨询</span></pre>
+      <ul class="clean">
+        <li><span class="mono">parse_directive</span> 取<b>最后一条</b>——Agent 可能先推理再给最终决定。</li>
+        <li><span class="mono">strip_directives</span> 把标记从展示文本里清掉。</li>
+        <li>另有 <span class="mono">handoff_to_agent</span> / <span class="mono">ask_agent</span> 两个工具作等价入口。</li>
+      </ul>
+    </section>
+
+    <!-- ========== HopState ========== -->
+    <section id="hopstate">
+      <div class="sec-h"><span class="num">07</span><h2>HopState：防环 + 预算的载体</h2></div>
+      <p class="sec-desc">编排状态机是<b>纯函数 + dataclass</b>，刻意不 import <span class="mono">agent_runtime</span>，既避免循环依赖，也让防环/预算逻辑能脱离运行环境独立单测。</p>
+      <pre>@dataclass
+class HopState:
+    hops: int = 0
+    max_hops: int = 3        <span class="c"># IDW_A2A_MAX_HOPS，软预算</span>
+    hard_cap: int = 6        <span class="c"># IDW_A2A_HARD_CAP，硬顶</span>
+    speaker_seq:   list[(type,id)]   <span class="c"># 出现过的发言序列</span>
+    handoff_pairs: list[(from,to)]   <span class="c"># 已发生的转交对</span>
+
+    effective_max = <span class="k">max(1, min(max_hops, hard_cap))</span>   <span class="c"># 软硬取小，至少 1</span>
+    budget_exhausted = hops &gt;= effective_max</pre>
+      <ul class="clean">
+        <li>初始 speaker 计入 <span class="mono">speaker_seq</span> 但不算一跳 → 默认 <span class="mono">max_hops=3</span> 允许 3 次转交、共 4 个 speaker 发言。</li>
+        <li><span class="mono">hard_cap</span> 是"即使把 max_hops 配到 99 也顶死在 6"的保险丝。</li>
+        <li><span class="mono">handoff_pairs</span> 是防环记忆：记 <span class="mono">(from,to)</span> 查重复，反查 <span class="mono">(to,from)</span> 查乒乓。</li>
+      </ul>
+    </section>
+
+    <!-- ========== 仲裁 ========== -->
+    <section id="arbitrate">
+      <div class="sec-h"><span class="num">08</span><h2>Twin 仲裁六道闸 <span class="pill violet">D-15</span></h2></div>
+      <p class="sec-desc"><b>Twin 是唯一 leader，不盲从 Agent 的转交请求。</b><span class="mono">arbitrate_handoff</span> 任何一条命中即拒绝。每条都有独立单测（纯函数，脱离环境可验证）。</p>
+      <table>
+        <thead><tr><th>拒绝条件</th><th>判据</th><th>防的是</th></tr></thead>
+        <tbody>
+          <tr><td class="el">目标为空</td><td class="mono">not to</td><td>指令残缺</td></tr>
+          <tr><td class="el">自转交</td><td class="mono">to == cur_id</td><td>Agent 转给自己空转</td></tr>
+          <tr><td class="el">目标不存在</td><td class="mono">不在参与者且不在平台已知</td><td>转给幽灵 Agent</td></tr>
+          <tr><td class="el">预算耗尽</td><td class="mono">budget_exhausted()</td><td>无限接力烧钱</td></tr>
+          <tr><td class="el">A↔B 乒乓</td><td class="mono">(to, cur) in handoff_pairs</td><td>两个 Agent 互踢皮球</td></tr>
+          <tr><td class="el">重复转交</td><td class="mono">(cur, to) in handoff_pairs</td><td>同一条边走两遍</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:14px">通过后返回 <span class="mono">honor=True</span> + <span class="mono">target</span>，并算出 <span class="mono">auto_join = 目标不在当前参与者里</span>。集成测试固化了闭环：<span class="mono">test_pingpong_blocked</span>（A→B 成功、B→A 被拦）、<span class="mono">test_budget_caps_hops</span>（max_hops=1 时第二次转交被预算拦）。</p>
+    </section>
+
+    <!-- ========== A2A 上下文 ========== -->
+    <section id="a2a-ctx">
+      <div class="sec-h"><span class="num">09</span><h2>A2A 接手上下文</h2></div>
+      <p class="sec-desc">切换 speaker 后，<span class="mono">incoming_handoff={from,to,reason}</span> 传进下一跳，触发 <span class="mono">context_assembler</span> 注入一个专门的 <span class="mono">a2a</span> 层："谁因何转交 + 前序产出摘要"（<span class="mono">last_content_by</span> 取来）。</p>
+      <pre># 协作接力（A2A）
+- 你是接手方：<span class="m">data-analysis</span> 因「写报告」把任务转交给你。
+- 请基于前序产出继续推进，<span class="k">不要重复</span>已完成的工作。
+
+## data-analysis 的前序产出（摘要）
+DAU 环比下降 8%，主因新增渠道质量下滑。   <span class="c"># ← last_content_by()</span></pre>
+      <div class="grid2">
+        <div class="card"><h3>① 转交上下文永不丢</h3><p class="lead" style="margin:0"><span class="mono">_budget_clamp</span> 显式跳过 <span class="mono">task</span> 与 <span class="mono">a2a</span> 层——哪怕 <span class="mono">char_budget=50</span> 也保留。转交上下文丢了，接手方就抓瞎。</p></div>
+        <div class="card"><h3>② 访问控制不放宽</h3><p class="lead" style="margin:0">接手 Agent 拿到"前序产出摘要"，但读记忆仍按 <span class="mono">by-user/{自己}</span> 走，<b>不会因为接力就能读发起方的私有经验</b>。</p></div>
+      </div>
+    </section>
+
+    <!-- ========== 落盘透传 ========== -->
+    <section id="persist">
+      <div class="sec-h"><span class="num">10</span><h2>落盘与透传：转交链可追溯</h2></div>
+      <div class="grid3">
+        <div class="card"><h3>落盘</h3><p class="lead" style="margin:0">接手方 turn 通过 <span class="mono">append_turn(handoff=...)</span> 带上转交元信息，<span class="mono">conversation.jsonl</span> 里就有完整接力链。</p></div>
+        <div class="card"><h3>透传</h3><p class="lead" style="margin:0"><span class="mono">ws.py</span> 把生成器每个事件<b>原样</b> <span class="mono">send_json</span> 给前端，含 <span class="mono">handoff</span> 事件（带 honored 与拒绝 note）。</p></div>
+        <div class="card"><h3>并发保护</h3><p class="lead" style="margin:0"><span class="mono">_inflight</span> 对同一 task_id <b>单飞</b>，避免两个回合互相打断。连接前先校验任务访问权。</p></div>
+      </div>
+    </section>
+
+    <!-- ========== 边界速查 ========== -->
+    <section id="a2a-bounds">
+      <div class="sec-h"><span class="num">11</span><h2>A2A 边界速查</h2></div>
+      <table>
+        <thead><tr><th>维度</th><th>机制</th><th>默认</th></tr></thead>
+        <tbody>
+          <tr><td class="el">是否启用</td><td class="mono">IDW_A2A_ENABLED</td><td><span class="pill slate">关（单跳）</span></td></tr>
+          <tr><td class="el">软预算</td><td class="mono">IDW_A2A_MAX_HOPS</td><td>3 次转交</td></tr>
+          <tr><td class="el">硬顶</td><td class="mono">IDW_A2A_HARD_CAP</td><td>6（配置再高也顶死）</td></tr>
+          <tr><td class="el">leader</td><td>Twin 唯一，Agent 不能对等自由对话</td><td>—</td></tr>
+          <tr><td class="el">防环</td><td>自转交 / 乒乓 / 重复转交</td><td><span class="pill green">全拦</span></td></tr>
+          <tr><td class="el">提权</td><td>auto_join 只给 tool / L2</td><td><span class="pill green">不放宽</span></td></tr>
+          <tr><td class="el">出错</td><td>任一跳 errored 立即 break</td><td>—</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ========== 自驱触发 ========== -->
+    <section id="autostep-trigger">
+      <div class="sec-h"><span class="num">12</span><h2>回合后自驱：触发与主循环</h2></div>
+      <p class="sec-desc"><span class="mono">_autostep</span> 在主循环（含 A2A 多跳）跑完之后才被调用，与 A2A <b>正交独立</b>。要同时满足三道前置门：</p>
+      <div class="flowbox">
+        <span class="step">IDW_AUTOSTEP_ENABLED 开</span><span class="arrow">&amp;</span>
+        <span class="step">本回合未出错</span><span class="arrow">&amp;</span>
+        <span class="step">非 Plan（只读）模式</span>
+      </div>
+      <pre>_autostep:
+  plan = get_plan(task_id)
+  <span class="k">if 无 plan 或无 steps: return</span>          <span class="c"># ← 自驱严格绑定"计划"，没计划不自驱</span>
+
+  steps_run = 0
+  while True:
+    nxt = <span class="k">next_ready_step()</span>              <span class="c"># 第一个 todo 且依赖全 done 的步</span>
+    if nxt is None: break                <span class="c"># 计划完成 or 被依赖阻塞 → 停</span>
+
+    gate = <span class="k">proactivity_svc.check()</span>       <span class="c"># 护栏三道闸</span>
+    if (not gate.allowed) or steps_run &gt;= <span class="m">AUTOSTEP_PER_TURN(=3)</span>:
+        prop = <span class="d">create_proposal</span>(KIND_NEXT_STEP, payload={step_id, owner_agent})
+        yield {"type":"proposal", "proposal":prop, "speaker": Twin}   <span class="c"># ← 拦成提议</span>
+        break                            <span class="c"># 不越权，交还用户裁决</span>
+
+    proactivity_svc.<span class="k">record</span>(kind="autostep")   <span class="c"># 计入每日预算 + 审计</span>
+    start_next()                              <span class="c"># nxt: todo → doing</span>
+    speaker = <span class="k">_step_speaker</span>(task, nxt)        <span class="c"># 步骤的 owner_agent</span>
+
+    hop = <span class="m">_run_single_hop</span>(speaker, handoff=None)   <span class="c"># ← 复用同一单跳</span>
+    if hop.errored:  update_step(error); break
+    update_step(done); steps_run += 1</pre>
+    </section>
+
+    <!-- ========== 复用单跳 ========== -->
+    <section id="reuse">
+      <div class="sec-h"><span class="num">13</span><h2>如何复用单跳（核心）</h2></div>
+      <p class="sec-desc">自驱的每一步和用户驱动的一跳走的是<b>完全同一个执行单元</b> <span class="mono">_run_single_hop</span>：同样的上下文组装、流式 LLM、落盘、审计、用量记账、月度预算硬门、pre/post hook 全部继承。差异只有三处：</p>
+      <table>
+        <thead><tr><th>&nbsp;</th><th>用户回合</th><th>A2A 接力跳</th><th>autostep 步</th></tr></thead>
+        <tbody>
+          <tr><td class="el">speaker 来源</td><td><span class="mono">resolve_speaker</span>（默认 Twin）</td><td>转交 target</td><td><span class="mono">_step_speaker</span>（步骤 owner_agent）</td></tr>
+          <tr><td class="el">handoff</td><td>None</td><td class="mono">{from,to,reason}</td><td>None</td></tr>
+          <tr><td class="el">外层循环</td><td>—</td><td>HopState 多跳</td><td>plan 步骤推进</td></tr>
+        </tbody>
+      </table>
+      <div class="note info"><b>一个重要边界：</b><span class="mono">_autostep</span> 直接调 <span class="mono">_run_single_hop</span>（<b>不是</b> <span class="mono">run_agent_turn</span>）。所以自驱推进的每一步是单跳的——<b>步骤内部不会再触发 A2A 多 Agent 接力</b>。横向接力与纵向推进不会互相嵌套失控。</div>
+      <p><b>计划是自驱的唯一真相源 <span class="pill violet">D-17</span>。</b>没有 <span class="mono">plan.steps</span> 直接返回——自驱不是"随便再多说几句"，而是严格"推进下一就绪步"。<span class="mono">next_ready_step</span> 返回 <span class="mono">None</span> 的两种情况（全做完 / 被 <span class="mono">depends_on</span> 阻塞）都直接停，<b>不强推被阻塞的步骤</b>；且每轮重新求就绪步，不预取，保证依赖与状态变化被重新评估。</p>
+    </section>
+
+    <!-- ========== 护栏 ========== -->
+    <section id="guardrails">
+      <div class="sec-h"><span class="num">14</span><h2>护栏与两级预算 <span class="pill violet">D-16</span></h2></div>
+      <p class="sec-desc"><span class="mono">proactivity_svc.check</span> 在<b>每一步之前</b>问一次，顺序判定三道闸：</p>
+      <div class="lane">
+        <div class="row gate"><div class="t">① 一键暂停 <span class="mono">control_svc.is_paused()</span></div><div class="dsc">全局治理开关，与运行时开头那道暂停门是同一个</div></div>
+        <div class="row gate"><div class="t">② 静默时段 <span class="mono">IDW_QUIET_HOURS="22-8"</span></div><div class="dsc">防打扰，支持跨午夜；深夜不主动打扰用户</div></div>
+        <div class="row gate"><div class="t">③ 每日预算 <span class="mono">IDW_AUTOSTEP_DAILY_CAP=20</span></div><div class="dsc">按任务按 UTC 日累计，超限拒绝</div></div>
+      </div>
+      <div class="note"><b>两级预算，务必分清：</b>
+        <ul class="clean" style="margin:8px 0 0">
+          <li><span class="mono">AUTOSTEP_PER_TURN = 3</span> — 硬编码常量，<b>单个用户回合内</b>最多自驱 3 步。防"一次对话把整个计划一口气跑完"。</li>
+          <li><span class="mono">IDW_AUTOSTEP_DAILY_CAP = 20</span> — <b>单任务按 UTC 日累积</b>的持久计数（读 <span class="mono">proactivity.jsonl</span> 日期前缀）。防"长期跨回合烧钱/刷屏"。</li>
+        </ul>
+        两者叠加。<span class="mono">record()</span> 每次自驱都 append + 审计，所以主动行为<b>全程可追溯、可一键停</b>。</div>
+    </section>
+
+    <!-- ========== 提议 ========== -->
+    <section id="proposal">
+      <div class="sec-h"><span class="num">15</span><h2>拦成"提议"：不越权的降级路径</h2></div>
+      <p class="sec-desc">护栏不通过（或本回合已推 3 步）时，<span class="mono">_autostep</span> 不静默停止，而是<b>降级成一条待确认提议</b>。这就是 agent.md「不可越权边界」的落地——主动性到"请求确认"为止，绝不替用户做最终决策。</p>
+      <div class="flowbox">
+        <span class="step">自驱受阻</span><span class="arrow">→</span>
+        <span class="step">create_proposal(next_step, step_id)</span><span class="arrow">→</span>
+        <span class="step">Twin Dock 待确认</span><span class="arrow">→</span>
+        <span class="step">用户 accept</span><span class="arrow">→</span>
+        <span class="step">上层据 step_id 重新驱动</span>
+      </div>
+      <ul class="clean">
+        <li>落 <span class="mono">proposals.jsonl</span>，<span class="mono">status=pending</span>，<span class="mono">payload</span> 带 <span class="mono">step_id</span>——记录"卡在哪一步、由谁负责"。</li>
+        <li><b>只提议"下一就绪步"这一条</b>，不为剩余所有步批量生成提议（后续步可能依赖这一步）。</li>
+        <li><span class="mono">proposal_svc</span> <b>不直接执行</b>；<span class="mono">decide(accepted)</span> 也<b>只记录裁决</b>，真实动作由调用方在 accept 后执行——队列与执行解耦。</li>
+        <li><span class="mono">list_pending_for_user</span> 把用户所有任务的 pending 提议聚合到 Workbench / Twin Dock，形成统一"待你确认"入口。</li>
+      </ul>
+    </section>
+
+    <!-- ========== 对比 ========== -->
+    <section id="compare">
+      <div class="sec-h"><span class="num">16</span><h2>A2A vs autostep：一对镜像</h2></div>
+      <p class="sec-desc">两条增强路径共享同一个单跳内核，各自用不同的外层循环 + 不同的治理闸包起来。这是这套框架最一致的设计手法。</p>
+      <table>
+        <thead><tr><th>&nbsp;</th><th>A2A 多跳</th><th>autostep 自驱</th></tr></thead>
+        <tbody>
+          <tr><td class="el">时机</td><td>用户回合<b>内</b></td><td>用户回合<b>后</b></td></tr>
+          <tr><td class="el">方向</td><td>横向：Agent → Agent 接力</td><td>纵向：推进 plan 步骤</td></tr>
+          <tr><td class="el">真相源</td><td>转交指令 + HopState</td><td class="mono">plan.json 步骤</td></tr>
+          <tr><td class="el">约束</td><td>防环 + 多跳预算（Twin 仲裁）</td><td>三道护栏 + 两级预算</td></tr>
+          <tr><td class="el">受阻时</td><td>break（可能带未 honor 的 handoff 事件）</td><td><b>降级成 proposal，请求确认</b></td></tr>
+          <tr><td class="el">复用</td><td class="mono">_run_single_hop</td><td class="mono">_run_single_hop</td></tr>
+          <tr><td class="el">开关</td><td class="mono">IDW_A2A_ENABLED</td><td class="mono">IDW_AUTOSTEP_ENABLED</td></tr>
+        </tbody>
+      </table>
+      <div class="note ok"><b>一句话总结这套手法：</b>内核稳定单一，能力靠外层循环叠加，安全靠闸门横切。两条路径都默认关、都以"不越权 / 可暂停 / 可审计"收口。</div>
+    </section>
+
+    <!-- ========== 原则 ========== -->
+    <section id="principles">
+      <div class="sec-h"><span class="num">17</span><h2>贯穿的设计原则</h2></div>
+      <div class="grid2">
+        <div class="card"><h3>① 文件优先（G3）</h3><p class="lead" style="margin:0">文件系统是唯一真相源；SQLite / pgvector 只是可重建派生索引。plan.json / conversation.jsonl / proposals.jsonl 都走 G3。</p></div>
+        <div class="card"><h3>② 访问控制内嵌读取点</h3><p class="lead" style="margin:0">不是事后过滤，而是"先过滤（访问边界）再排序（top-k 检索）"，越权数据根本不进检索池。</p></div>
+        <div class="card"><h3>③ 有界一切</h3><p class="lead" style="margin:0">多跳有预算、自驱有上限、上下文有 budget、成本有月度硬顶。没有无界的自动行为。</p></div>
+        <div class="card"><h3>④ 安全先于智能</h3><p class="lead" style="margin:0">能力默认关灰度、高风险恒 HITL、先兑现契约再扩能力。关时零行为变化。</p></div>
+      </div>
+      <div class="card"><h3>⑤ 可解释 / 可审计</h3><p class="lead" style="margin:0">上下文每层带来源标注（<span class="mono">_layer / _source</span>）；每跳、每次主动动作都落审计与 jsonl，事后可完整追溯。</p></div>
+    </section>
+
+    <!-- ========== 待确认 ========== -->
+    <section id="open">
+      <div class="sec-h"><span class="num">18</span><h2>待确认的实现细节</h2></div>
+      <p class="sec-desc">以下是读代码时发现、值得团队确认"是有意简化还是待补 gap"的点，非缺陷断言。</p>
+      <div class="note red"><b>① <span class="mono">ask</span> 目前与 <span class="mono">handoff</span> 同路径。</b>文档说 ask 是"咨询后控制权回到发起方"，但主循环拿到 <span class="mono">req</span> 后<b>不区分 action</b>，ask 也会 <span class="mono">record_hop</span> + <span class="mono">speaker=target</span>。即"问完返回发起方"的语义未在编排循环里落地。若需真正的咨询-返回，需补一个分支：ask 被 honor 时执行一跳拿回答，但不切换主 speaker。</div>
+      <div class="note"><b>② 自驱步失败会连带把任务置 <span class="mono">error</span>。</b><span class="mono">_run_single_hop</span> 内部 errored 就会 <span class="mono">set_status(error)</span>，自驱步失败与用户回合失败被同等对待——是否符合预期值得斟酌。</div>
+      <div class="note"><b>③ 提议的 speaker 是 Twin</b>（即便被卡步骤 owner 是具体 Agent）。语义上是"Twin 替你把关、代为请示"，与"Twin 唯一 leader"一致。</div>
+      <div class="note"><b>④ 静默时段走进程级 env</b>（<span class="mono">os.environ.get("IDW_QUIET_HOURS")</span>），不走 <span class="mono">get_settings()</span> 缓存——改环境变量即时生效，但未纳入 settings 统一管理，测试时需注意。</div>
+    </section>
+
+    <div class="footer">
+      ICE-DATA-WORK · Agent 框架设计解读　|　来源：<span class="mono">backend/app/services/{agent_runtime, orchestrator_svc, context_assembler_svc, plan_svc, proactivity_svc, proposal_svc}.py</span>　|　对应里程碑 M7（A2A / 计划 / 主动性）
+    </div>
+
+  </div>
+  </main>
+</div>
+
+<script>
+  // 汉堡菜单
+  const hb = document.getElementById('hamburger');
+  const sb = document.getElementById('sidebar');
+  hb && hb.addEventListener('click', () => sb.classList.toggle('open'));
+
+  // 点击导航后在移动端收起
+  document.querySelectorAll('.sb-link').forEach(a => {
+    a.addEventListener('click', () => { if (window.innerWidth <= 900) sb.classList.remove('open'); });
+  });
+
+  // Scrollspy：高亮当前章节
+  const links = Array.from(document.querySelectorAll('.sb-link'));
+  const map = new Map();
+  links.forEach(a => { const id = a.getAttribute('href').slice(1); const el = document.getElementById(id); if (el) map.set(el, a); });
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const a = map.get(e.target); a && a.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-15% 0px -70% 0px', threshold: 0 });
+  map.forEach((_, el) => obs.observe(el));
+</script>
+</body>
+</html>

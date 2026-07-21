@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Claude Code · Agent 机制交互演示</title>
+<style>
+  :root{
+    --ink:#0C0F14; --slate:#161B22; --slate2:#1E242D; --line:#2A313C;
+    --snow:#EDF1F7; --mist:#98A4B3;
+    --brand:#D97757; --brand2:#E8987B;
+    --green:#33D17A; --amber:#F5A524; --red:#F2555A; --blue:#6EA8FF;
+    --brand-dim:rgba(217,119,87,.13);
+    --amber-dim:rgba(245,165,36,.10);
+    --green-dim:rgba(51,209,122,.10);
+    --mono:"SFMono-Regular",Menlo,Consolas,"JetBrains Mono","Liberation Mono",monospace;
+    --sans:"PingFang SC","Source Han Sans SC","Microsoft YaHei","Hiragino Sans GB",system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;color:var(--snow);font-family:var(--sans);overflow:hidden}
+  body{
+    background:
+      radial-gradient(1200px 700px at -8% -12%, rgba(217,119,87,.08), transparent 55%),
+      radial-gradient(1000px 620px at 108% 112%, rgba(110,168,255,.05), transparent 55%),
+      linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px),
+      var(--ink);
+    background-size:auto,auto,56px 56px,56px 56px,auto;
+  }
+
+  /* ---------- deck engine ---------- */
+  #deck{position:fixed;inset:0}
+  .slide{
+    position:absolute;inset:0;display:none;
+    padding:5.4vh 6.5vw 8vh;flex-direction:column;justify-content:center;
+    opacity:0;transition:opacity .35s ease;
+  }
+  .slide.active{display:flex;opacity:1}
+  .slide.center{align-items:center;text-align:center}
+  .kicker{
+    position:absolute;top:4.2vh;left:6.5vw;font-family:var(--mono);font-size:13px;
+    color:var(--brand);letter-spacing:.22em;text-transform:uppercase;display:flex;align-items:center;gap:12px;
+  }
+  .kicker::before{content:"";width:26px;height:2px;background:var(--brand);border-radius:1px}
+  .kicker .n{color:var(--mist);letter-spacing:.08em}
+  .pageno{position:absolute;bottom:3.2vh;right:6.5vw;font-family:var(--mono);font-size:13px;color:var(--mist);opacity:.75}
+  .secnum{
+    position:absolute;right:4vw;bottom:-4vh;font-family:var(--mono);font-weight:800;
+    font-size:34vh;line-height:1;color:transparent;pointer-events:none;user-select:none;
+    -webkit-text-stroke:1.5px rgba(217,119,87,.14);
+  }
+
+  /* ---------- typography ---------- */
+  h1{font-size:clamp(28px,3.6vw,42px);font-weight:700;margin:0 0 20px;line-height:1.25;letter-spacing:.01em}
+  h1 .tag{font-size:.5em;color:var(--mist);font-weight:400;margin-left:12px}
+  .display{font-size:clamp(38px,5.4vw,72px);font-weight:800;line-height:1.18;margin:0}
+  .sub{font-size:clamp(18px,2vw,25px);color:var(--mist);font-weight:400;margin:20px 0 0;line-height:1.6}
+  p,li{font-size:clamp(16px,1.55vw,21px);line-height:1.6}
+  .mist{color:var(--mist)} .green{color:var(--green)} .amber{color:var(--amber)}
+  .brand{color:var(--brand)} .red{color:var(--red)} .blue{color:var(--blue)}
+  b,strong{font-weight:700}
+  .rule{width:104px;height:5px;background:linear-gradient(90deg,var(--brand),rgba(217,119,87,.25));border-radius:3px;margin:22px auto 0}
+  .rule.l{margin:22px 0 0}
+  .lead{font-family:var(--mono);color:var(--brand);font-size:15px;letter-spacing:.28em;margin:0 0 14px;text-transform:uppercase}
+  .hl{background:var(--brand-dim);border-left:4px solid var(--brand);padding:16px 22px;border-radius:0 12px 12px 0;font-size:clamp(17px,1.7vw,23px);font-weight:700;line-height:1.55}
+  .hl.warn{background:var(--amber-dim);border-left-color:var(--amber)}
+  .hl.ok{background:var(--green-dim);border-left-color:var(--green)}
+
+  /* cards / grids */
+  .cards{display:flex;gap:20px;flex-wrap:wrap;margin-top:12px}
+  .card{background:linear-gradient(180deg,rgba(255,255,255,.022),transparent 45%),var(--slate);border:1px solid var(--line);border-radius:16px;padding:22px 24px;flex:1;min-width:200px}
+  .card .ic{font-size:32px;line-height:1;margin-bottom:10px}
+  .card .t{font-size:clamp(18px,1.7vw,23px);font-weight:700;margin:0 0 8px}
+  .card .d{font-size:clamp(15px,1.4vw,19px);color:var(--mist);margin:0;line-height:1.55}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:8px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:8px}
+  ul.clean{list-style:none;padding:0;margin:8px 0 0}
+  ul.clean li{margin:0 0 12px;padding-left:32px;position:relative}
+  ul.clean li::before{content:"▸";position:absolute;left:0;color:var(--brand)}
+  .metric{font-family:var(--mono);font-weight:800;font-size:clamp(44px,5vw,72px);line-height:1}
+  .cap{font-size:clamp(15px,1.4vw,19px);color:var(--mist)}
+  code,.mono{font-family:var(--mono)}
+  .codeblk{background:var(--slate2);border:1px solid var(--line);border-left:4px solid var(--brand);border-radius:0 12px 12px 0;padding:16px 20px;font-family:var(--mono);font-size:clamp(14px,1.4vw,20px);color:var(--snow);white-space:pre-wrap;line-height:1.6}
+
+  /* fragments */
+  .fragment{opacity:0;transition:opacity .35s ease, transform .35s ease;transform:translateY(10px)}
+  .fragment.on{opacity:1;transform:none}
+
+  /* progress + nav */
+  #prog{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--brand),var(--amber));width:0;z-index:50;transition:width .3s}
+  .navbtn{position:fixed;bottom:2.6vh;width:42px;height:42px;border-radius:50%;border:1px solid var(--line);background:var(--slate);color:var(--snow);font-size:20px;cursor:pointer;z-index:40;opacity:.5;transition:opacity .2s}
+  .navbtn:hover{opacity:1}
+  #prev{left:6.5vw} #next{left:calc(6.5vw + 54px)}
+  .hint{position:fixed;bottom:3vh;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:12px;color:var(--mist);opacity:.45;z-index:40}
+
+  /* ---------- demo shared ---------- */
+  .demo{display:grid;grid-template-columns:1.1fr 1fr;gap:22px;margin-top:6px;align-items:stretch}
+  .panel{background:var(--slate2);border:1px solid var(--line);border-radius:18px;padding:18px 22px}
+  .panel h3{margin:0 0 12px;font-size:15px;color:var(--mist);font-family:var(--mono);letter-spacing:.06em;font-weight:600;line-height:1.5}
+  .btn{font-family:var(--sans);font-size:clamp(15px,1.4vw,19px);font-weight:700;color:var(--ink);background:var(--brand);border:none;border-radius:10px;padding:9px 18px;cursor:pointer;transition:transform .1s,filter .15s}
+  .btn:hover{filter:brightness(1.08)} .btn:active{transform:scale(.97)}
+  .btn:disabled{opacity:.32;cursor:not-allowed}
+  .btn.warn{background:var(--amber)} .btn.green{background:var(--green)} .btn.red{background:var(--red);color:#fff}
+  .btn.ghost{background:transparent;color:var(--mist);border:1px solid var(--line);font-weight:400;font-size:15px;padding:8px 14px}
+  .btnrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+  .toggle{display:flex;align-items:center;gap:12px;margin:12px 0;font-size:16px;cursor:pointer;user-select:none}
+  .switch{width:50px;height:27px;border-radius:20px;background:var(--line);position:relative;transition:background .2s;flex:0 0 auto}
+  .switch::after{content:"";position:absolute;top:3px;left:3px;width:21px;height:21px;border-radius:50%;background:var(--snow);transition:left .2s}
+  .toggle.on .switch{background:var(--amber)} .toggle.on .switch::after{left:26px}
+  .status{font-size:clamp(34px,4vw,54px);font-weight:800;font-family:var(--mono);line-height:1;margin:2px 0 8px}
+  .status.hit{color:var(--green)} .status.miss{color:var(--amber)} .status.idle{color:var(--mist)} .status.deny{color:var(--red)}
+  .lat{display:flex;align-items:baseline;gap:10px;margin:4px 0 6px}
+  .lat .v{font-family:var(--mono);font-size:clamp(26px,2.6vw,36px);font-weight:800;color:var(--brand)}
+  .lat .k{font-size:14px;color:var(--mist)}
+  .bar{height:14px;border-radius:8px;background:var(--line);margin-top:8px;overflow:hidden}
+  .bar>span{display:block;height:100%;border-radius:8px;width:0;transition:width .3s ease}
+  .mini{font-size:14px;color:var(--mist);margin-top:8px;min-height:20px;line-height:1.5}
+  .stat-row{display:flex;gap:18px;margin-top:14px;font-family:var(--mono)}
+  .stat-row .s{flex:1}
+  .stat-row .s .v{font-size:clamp(22px,2.2vw,29px);font-weight:800}
+  .stat-row .s .k{font-size:13px;color:var(--mist)}
+  .chip{font-family:var(--mono);font-size:13px;color:var(--mist);background:var(--slate);border:1px solid var(--line);border-radius:999px;padding:5px 12px;line-height:1.4}
+  .chip.ok{color:var(--green);border-color:var(--green)}
+  .chip.bad{color:var(--red);border-color:var(--red)}
+  .chip.warn2{color:var(--amber);border-color:var(--amber)}
+  .chiprow{display:flex;gap:9px;margin-top:10px;flex-wrap:wrap}
+  .ansbox{background:var(--slate);border:1px solid var(--line);border-radius:12px;padding:12px 16px;font-size:clamp(15px,1.4vw,18px);line-height:1.6;min-height:70px;margin-top:12px}
+
+  /* Demo① loop visualizer */
+  .loop{display:flex;flex-direction:column;gap:9px}
+  .lstep{display:flex;gap:13px;align-items:flex-start;background:var(--slate);border:1px solid var(--line);border-radius:12px;padding:12px 16px;opacity:.4;transition:opacity .3s,border-color .3s,background .3s}
+  .lstep.on{opacity:1;border-color:var(--brand);background:linear-gradient(90deg,var(--brand-dim),transparent)}
+  .lstep.done{opacity:1;border-color:var(--green)}
+  .lstep.skip{opacity:.5;border-color:var(--line)}
+  .lstep .ln{font-family:var(--mono);font-weight:800;font-size:16px;color:var(--brand);flex:0 0 auto;width:22px;text-align:center}
+  .lstep.done .ln{color:var(--green)}
+  .lstep .lc{flex:1}
+  .lstep .lt{font-size:clamp(15px,1.4vw,19px);font-weight:700;margin:0 0 2px}
+  .lstep .ld{font-size:13px;color:var(--mist);margin:0;line-height:1.45;font-family:var(--mono)}
+  .streambox{font-family:var(--mono);font-size:15px;background:var(--slate);border-left:4px solid var(--brand);border-radius:0 10px 10px 0;padding:12px 14px;color:var(--snow);line-height:1.6;min-height:80px;white-space:pre-wrap}
+  .toolchip{display:inline-block;font-family:var(--mono);font-size:14px;font-weight:700;color:var(--blue);background:rgba(110,168,255,.12);border:1px solid var(--blue);border-radius:8px;padding:3px 10px;margin:4px 6px 0 0}
+  .loopmeta{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:15px;color:var(--mist);margin-top:6px}
+  .loopmeta b{color:var(--brand);font-size:22px}
+  .decision{font-family:var(--mono);font-weight:800;font-size:20px;margin-top:4px}
+  .decision.cont{color:var(--brand)} .decision.stop{color:var(--green)}
+
+  /* Demo② timeline */
+  .tlwrap{display:flex;flex-direction:column;gap:16px;margin-top:8px}
+  .trow{display:flex;align-items:center;gap:14px}
+  .trow .lbl{width:120px;font-family:var(--mono);font-size:15px;color:var(--mist);text-align:right;flex:0 0 auto}
+  .trow .lbl b{display:block;color:var(--snow);font-size:16px}
+  .tl{flex:1;position:relative;height:46px;background:var(--slate2);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .seg{position:absolute;top:6px;height:34px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:12px;color:var(--ink);font-weight:700;opacity:0;transition:opacity .2s;overflow:hidden;white-space:nowrap}
+  .seg.on{opacity:1}
+  .seg.model{background:linear-gradient(180deg,var(--brand),#a8543a)}
+  .seg.read{background:linear-gradient(180deg,var(--green),#1f7d49)}
+  .seg.write{background:linear-gradient(180deg,var(--amber),#8a5c10)}
+  .ttime{font-family:var(--mono);font-weight:800;font-size:clamp(22px,2.4vw,32px)}
+  .axis{font-family:var(--mono);font-size:12px;color:var(--mist);text-align:right;margin-top:2px}
+
+  /* Demo③ permission */
+  .chooser{display:flex;flex-wrap:wrap;gap:9px;margin:4px 0 14px}
+  .opt{font-family:var(--mono);font-size:15px;color:var(--mist);background:var(--slate);border:1px solid var(--line);border-radius:10px;padding:9px 15px;cursor:pointer;transition:all .15s;user-select:none}
+  .opt:hover{border-color:var(--brand)}
+  .opt.sel{color:var(--ink);background:var(--brand);border-color:var(--brand);font-weight:700}
+  .grouplbl{font-family:var(--mono);font-size:13px;color:var(--mist);letter-spacing:.08em;margin:10px 0 4px;text-transform:uppercase}
+  .reasonbox{background:var(--slate);border:1px solid var(--line);border-radius:12px;padding:14px 18px;font-size:clamp(15px,1.45vw,19px);line-height:1.6;margin-top:12px;min-height:78px}
+  .chain{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+  .clink{font-family:var(--mono);font-size:13px;color:var(--mist);padding:6px 12px;border-radius:8px;background:var(--slate);border:1px solid var(--line);opacity:.45;transition:opacity .25s}
+  .clink.on{opacity:1;border-color:var(--brand);color:var(--snow)}
+  .clink.hit{border-color:var(--green);color:var(--green)}
+  .clink.hit.deny{border-color:var(--red);color:var(--red)}
+
+  /* Demo④ subagent tree + fork */
+  .tree{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+  .tnode{display:flex;align-items:center;gap:11px;background:var(--slate);border:1px solid var(--line);border-radius:11px;padding:10px 14px;transition:opacity .3s,transform .3s;opacity:0;transform:translateX(-8px)}
+  .tnode.on{opacity:1;transform:none}
+  .tnode .dep{font-family:var(--mono);font-size:12px;font-weight:800;color:var(--ink);background:var(--brand);border-radius:6px;padding:2px 8px;flex:0 0 auto}
+  .tnode .dep.d1{background:var(--blue)} .tnode .dep.d2{background:var(--amber)}
+  .tnode .nm{font-weight:700;font-size:16px} .tnode .role{font-family:var(--mono);font-size:13px;color:var(--mist)}
+  .tnode .notif{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--green);opacity:0;transition:opacity .3s}
+  .tnode .notif.on{opacity:1}
+  .forkbars{display:flex;flex-direction:column;gap:9px;margin-top:8px}
+  .fbar{display:flex;height:34px;border-radius:8px;overflow:hidden;border:1px solid var(--line);font-family:var(--mono);font-size:12px}
+  .fbar .shared{background:linear-gradient(180deg,var(--green),#1f7d49);display:flex;align-items:center;padding-left:12px;color:var(--ink);font-weight:700;white-space:nowrap}
+  .fbar .uniq{background:linear-gradient(180deg,var(--red),#6e1f27);display:flex;align-items:center;justify-content:center;color:#fff;flex:0 0 auto;white-space:nowrap;padding:0 8px}
+
+  /* Demo⑤ compaction pipeline */
+  .pipeline{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 14px}
+  .pstage{font-family:var(--mono);font-size:13px;color:var(--mist);background:var(--slate);border:1px solid var(--line);border-radius:999px;padding:6px 13px;transition:all .25s}
+  .pstage.fire{color:var(--ink);background:var(--brand);border-color:var(--brand);font-weight:700;transform:translateY(-2px)}
+  .pstage.done{color:var(--green);border-color:var(--green)}
+  .usewrap{margin-top:6px}
+  .usebar{position:relative;height:30px;background:var(--slate2);border:1px solid var(--line);border-radius:9px;overflow:hidden}
+  .usebar>span{display:block;height:100%;width:8%;background:linear-gradient(90deg,var(--brand),var(--amber));transition:width .35s ease,background .35s}
+  .thrline{position:absolute;top:-6px;bottom:-6px;border-left:2px dashed var(--amber)}
+  .thrline span{position:absolute;top:-20px;left:6px;font-family:var(--mono);font-size:12px;color:var(--amber);white-space:nowrap}
+  .winstat{display:flex;gap:18px;margin-top:16px;font-family:var(--mono)}
+  .winstat .s{flex:1}
+  .winstat .s .v{font-size:clamp(22px,2.2vw,29px);font-weight:800}
+  .winstat .s .k{font-size:13px;color:var(--mist)}
+  .slider{width:100%;-webkit-appearance:none;height:8px;border-radius:5px;background:var(--line);outline:none}
+  .slider::-webkit-slider-thumb{-webkit-appearance:none;width:23px;height:23px;border-radius:50%;background:var(--brand);cursor:pointer;border:3px solid var(--ink)}
+  .slider::-moz-range-thumb{width:23px;height:23px;border-radius:50%;background:var(--brand);cursor:pointer;border:3px solid var(--ink)}
+
+  /* pocket / speed sheet */
+  .pocket{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-top:6px}
+  .pline{background:var(--slate);border:1px solid var(--line);border-radius:13px;padding:15px 20px;font-size:clamp(15px,1.5vw,20px);line-height:1.5}
+  .mantra{grid-column:1/-1;background:var(--brand-dim);border:1px solid var(--brand);border-radius:13px;padding:16px 22px;font-size:clamp(17px,1.8vw,24px);font-weight:700;text-align:center}
+
+  @media print{
+    html,body{overflow:visible;height:auto}
+    #prog,.navbtn,.hint{display:none!important}
+    .slide{position:relative;display:flex!important;opacity:1!important;height:100vh;page-break-after:always;inset:auto}
+    .fragment{opacity:1!important;transform:none!important}
+  }
+</style>
+</head>
+<body>
+<div id="prog"></div>
+<div id="deck">
+
+<!-- ===== 封面 ===== -->
+<section class="slide center active">
+  <p class="lead">Interactive Deck</p>
+  <h1 class="display">Claude Code 的 Agent<br>到底怎么<span class="brand">转起来</span>?</h1>
+  <div class="rule"></div>
+  <p class="sub">5 个能动手玩的 Demo —— 把 <b class="brand">主循环 · 流式执行 · 权限 · 子 Agent · 上下文压缩</b> 一个个拆开演示</p>
+  <p class="mist" style="margin-top:26px;font-family:var(--mono);font-size:15px">← → 翻页　·　空格逐步展开　·　点页面里的按钮亲手玩</p>
+</section>
+
+<!-- ===== 章节一 封面 ===== -->
+<section class="slide center" data-kicker="一 · 主循环">
+  <div class="secnum">01</div>
+  <p class="lead">Section 01</p>
+  <h1 class="display">主循环:一圈一圈<br>把活干完</h1>
+  <div class="rule"></div>
+  <p class="sub">调模型 → 冒出工具调用 → 执行 → 结果回填 → 再来一圈</p>
+</section>
+
+<!-- ===== 概念页 queryLoop ===== -->
+<section class="slide" data-kicker="一 · 主循环">
+  <h1>一句话:Agent = 一个带工具的 <span class="brand">while 循环</span></h1>
+  <div class="hl fragment">模型自己不能读文件、跑命令。它只能<b>"说"出「我要调 Read」</b>,由运行时真正执行,再把结果塞回去,让它接着想下一步。</div>
+  <div class="cards" style="margin-top:22px">
+    <div class="card fragment"><div class="ic">🧠</div><div class="t">模型只负责"想"</div><p class="d">输出文字,或输出一个 <span class="mono">tool_use</span> 块表示"我要用某工具"。</p></div>
+    <div class="card fragment"><div class="ic">🔧</div><div class="t">运行时负责"做"</div><p class="d">执行工具,把结果包成一条 user 消息,回填进对话。</p></div>
+    <div class="card fragment"><div class="ic">🔁</div><div class="t">循环负责"续"</div><p class="d">只要这轮还有 <span class="mono">tool_use</span>,就再调一次模型;没有了就收工。</p></div>
+  </div>
+  <p class="fragment" style="margin-top:22px"><b class="brand">下一页,亲手拨一下"是否调工具"这个开关 —— 看循环是续圈还是收工。</b></p>
+</section>
+
+<!-- ===== Demo① 回合循环可视化 ===== -->
+<section class="slide" data-kicker="一 · 主循环" id="slide-d1">
+  <h1>Demo ① 回合循环可视化 <span class="tag">queryLoop 一圈怎么转</span></h1>
+  <div class="demo">
+    <div class="panel">
+      <h3>控制台 —— 你来决定模型这轮想不想调工具</h3>
+      <div class="toggle on" id="d1tool"><span class="switch"></span><span>让模型这一轮调用工具</span></div>
+      <div class="btnrow">
+        <button class="btn" id="d1run">▶ 跑一圈</button>
+        <button class="btn ghost" id="d1reset">重置</button>
+      </div>
+      <div class="loopmeta">本回合已转　<b id="d1round">0</b>　圈</div>
+      <div class="streambox" id="d1stream">（点「跑一圈」,模型开始流式输出…）</div>
+      <div id="d1tools" style="margin-top:4px"></div>
+      <div class="decision" id="d1decision"></div>
+    </div>
+    <div class="panel">
+      <h3>queryLoop 单圈时序（跟着高亮走）</h3>
+      <div class="loop" id="d1loop">
+        <div class="lstep" data-s="1"><span class="ln">①</span><div class="lc"><p class="lt">上下文治理</p><p class="ld">snip → microcompact → autocompact</p></div></div>
+        <div class="lstep" data-s="2"><span class="ln">②</span><div class="lc"><p class="lt">流式调模型</p><p class="ld">queryModelWithStreaming · 边吐边渲染</p></div></div>
+        <div class="lstep" data-s="3"><span class="ln">③</span><div class="lc"><p class="lt">检测 tool_use 块</p><p class="ld">有 → needsFollowUp = true</p></div></div>
+        <div class="lstep" data-s="4"><span class="ln">④</span><div class="lc"><p class="lt">执行工具</p><p class="ld">StreamingToolExecutor · 边流边跑</p></div></div>
+        <div class="lstep" data-s="5"><span class="ln">⑤</span><div class="lc"><p class="lt">结果回填 messages</p><p class="ld">normalizeMessagesForAPI → user 消息</p></div></div>
+        <div class="lstep" data-s="6"><span class="ln">⑥</span><div class="lc"><p class="lt">判定:续圈 or 收工</p><p class="ld">needsFollowUp ? continue : return</p></div></div>
+      </div>
+    </div>
+  </div>
+  <p class="mist" style="font-size:15px;margin-top:12px">💡 开关 <b class="brand">开</b>:模型冒出 <span class="mono">tool_use</span> → 走完 ④⑤ → 判定<b class="brand">续圈</b>,自动 ↺ 再转一圈。开关 <b>关</b>:模型只说话 → 跳过 ④⑤ → <b class="green">收工</b> return。这就是 <span class="mono">needsFollowUp</span> 唯一决定循环去留。</p>
+</section>
+
+<!-- ===== 章节二 封面 ===== -->
+<section class="slide center" data-kicker="二 · 流式并发">
+  <div class="secnum">02</div>
+  <p class="lead">Section 02</p>
+  <h1 class="display">流式执行:别等模型<br>说完才动手</h1>
+  <div class="rule"></div>
+  <p class="sub">把只读工具"藏"进模型流式输出的那几秒里</p>
+</section>
+
+<!-- ===== 概念页 流式/并发 ===== -->
+<section class="slide" data-kicker="二 · 流式并发">
+  <h1>一边听模型说,一边把工具<span class="brand">先跑起来</span></h1>
+  <div class="hl fragment">模型流式吐字要好几秒。与其干等它说完再批量跑工具,不如<b>边流边跑</b> —— 哪个 <span class="mono">tool_use</span> 块先说全,就先执行哪个。</div>
+  <div class="cards" style="margin-top:22px">
+    <div class="card fragment"><div class="ic">🌊</div><div class="t">StreamingToolExecutor</div><p class="d"><span class="mono">addTool()</span> 边流边排队执行,<span class="mono">getCompletedResults()</span> 边产出结果。</p></div>
+    <div class="card fragment"><div class="ic">🔀</div><div class="t">并发安全闸</div><p class="d"><span class="mono">isConcurrencySafe</span>:只读工具(Read/Grep)可并行;写工具默认串行,避免踩踏。</p></div>
+    <div class="card fragment"><div class="ic">✋</div><div class="t">中断安全</div><p class="d">中途取消,给排队/执行中的工具补齐<b>合成 tool_result</b>,保证块配对。</p></div>
+  </div>
+  <p class="fragment" style="margin-top:22px"><b class="brand">下一页,并排看两种执行方式的时间线 —— 谁把总时长压下来了。</b></p>
+</section>
+
+<!-- ===== Demo② 流式 vs 批量 时间线 ===== -->
+<section class="slide" data-kicker="二 · 流式并发" id="slide-d2">
+  <h1>Demo ② 流式 vs 批量 <span class="tag">同一批工具,谁更快</span></h1>
+  <p class="mist" style="font-size:15px;margin:0 0 6px">场景:模型这轮要调 3 个工具 —— <b class="green">Read×2（只读,可并行）</b> + <b class="amber">Bash（写,串行）</b>。看两种策略的时间线。</p>
+  <div class="tlwrap">
+    <!-- 批量 -->
+    <div>
+      <div style="display:flex;justify-content:space-between;align-items:baseline">
+        <span style="font-family:var(--mono);font-size:15px;color:var(--amber)">A · 批量执行 <span class="mist">（等模型完整输出,再跑工具）</span></span>
+        <span class="ttime amber">总耗时 <span id="d2tb">—</span></span>
+      </div>
+      <div class="trow" style="margin-top:6px"><span class="lbl"><b>模型流式</b></span>
+        <div class="tl"><div class="seg model" id="d2b_m" style="left:0;width:62%">model 流式输出</div></div>
+      </div>
+      <div class="trow" style="margin-top:8px"><span class="lbl">工具执行</span>
+        <div class="tl">
+          <div class="seg read" id="d2b_r" style="left:62%;width:23%">Read×2 并行</div>
+          <div class="seg write" id="d2b_b" style="left:85%;width:15%">Bash</div>
+        </div>
+      </div>
+    </div>
+    <!-- 流式 -->
+    <div>
+      <div style="display:flex;justify-content:space-between;align-items:baseline">
+        <span style="font-family:var(--mono);font-size:15px;color:var(--green)">B · 流式执行 <span class="mist">（边流边跑,只读工具藏进模型输出里）</span></span>
+        <span class="ttime green">总耗时 <span id="d2ts">—</span></span>
+      </div>
+      <div class="trow" style="margin-top:6px"><span class="lbl"><b>模型流式</b></span>
+        <div class="tl"><div class="seg model" id="d2s_m" style="left:0;width:62%">model 流式输出</div></div>
+      </div>
+      <div class="trow" style="margin-top:8px"><span class="lbl">工具执行</span>
+        <div class="tl">
+          <div class="seg read" id="d2s_r" style="left:16%;width:23%">Read×2 并行</div>
+          <div class="seg write" id="d2s_b" style="left:62%;width:15%">Bash</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="btnrow"><button class="btn" id="d2run">▶ 同时开跑</button><button class="btn ghost" id="d2reset">重置</button></div>
+  <p class="mini" id="d2note" style="font-size:15px">💡 点「同时开跑」:批量模式里 Read 只能等模型说完才排队;流式模式里 Read 在模型还在吐字时就跑完了 —— 省下的正是那段只读并行的时间。</p>
+</section>
+
+<!-- ===== 章节三 封面 ===== -->
+<section class="slide center" data-kicker="三 · 工具权限">
+  <div class="secnum">03</div>
+  <p class="lead">Section 03</p>
+  <h1 class="display">工具与权限:<br>能力要给,闸门也要有</h1>
+  <div class="rule"></div>
+  <p class="sub">60+ 工具 · 三态判定 · 五种模式 · 让模型给自己当安检</p>
+</section>
+
+<!-- ===== 概念页 工具/权限 ===== -->
+<section class="slide" data-kicker="三 · 工具权限">
+  <h1>每个工具跑之前,都要<span class="brand">过一道权限关</span></h1>
+  <div class="hl fragment"><span class="mono">canUseTool</span> 在执行前判定三态:<b class="green">allow</b> 直接放行 · <b class="red">deny</b> 拒绝 · <b class="amber">ask</b> 弹给用户确认。每个决策都带 <span class="mono">decisionReason</span>,可解释可审计。</div>
+  <div class="cards" style="margin-top:22px">
+    <div class="card fragment"><div class="ic">📜</div><div class="t">Tool 契约 fail-closed</div><p class="d"><span class="mono">buildTool</span> 默认"会写、不可并行" —— 除非工具明确声明安全。</p></div>
+    <div class="card fragment"><div class="ic">🎚️</div><div class="t">五种权限模式</div><p class="d"><span class="mono">default / plan / acceptEdits / bypassPermissions / auto</span>。</p></div>
+    <div class="card fragment"><div class="ic">🤖</div><div class="t">auto = 模型当安检</div><p class="d">Bash 命令交给 haiku 分类器判"该不该拦"。</p></div>
+  </div>
+  <p class="fragment" style="margin-top:22px"><b class="brand">下一页,任意组合"工具 × 模式",看判定结果和它走过的判定链。</b></p>
+</section>
+
+<!-- ===== Demo③ 权限判定器 ===== -->
+<section class="slide" data-kicker="三 · 工具权限" id="slide-d3">
+  <h1>Demo ③ 权限判定器 <span class="tag">工具 × 模式 → allow / deny / ask</span></h1>
+  <div class="demo">
+    <div class="panel">
+      <div class="grouplbl">① 选一个工具</div>
+      <div class="chooser" id="d3tools">
+        <span class="opt sel" data-t="read">Read <span class="mist">只读</span></span>
+        <span class="opt" data-t="grep">Grep <span class="mist">只读</span></span>
+        <span class="opt" data-t="edit">Edit <span class="mist">写</span></span>
+        <span class="opt" data-t="bash">Bash <span class="mist">执行</span></span>
+        <span class="opt" data-t="rm">删除文件 <span class="mist">危险</span></span>
+      </div>
+      <div class="grouplbl">② 选权限模式</div>
+      <div class="chooser" id="d3modes">
+        <span class="opt sel" data-m="default">default</span>
+        <span class="opt" data-m="plan">plan</span>
+        <span class="opt" data-m="acceptEdits">acceptEdits</span>
+        <span class="opt" data-m="bypass">bypassPermissions</span>
+        <span class="opt" data-m="auto">auto</span>
+      </div>
+      <div class="grouplbl" style="margin-top:14px">判定链（走到哪一步得出结论）</div>
+      <div class="chain" id="d3chain">
+        <div class="clink" data-c="1">① validateInput · 入参校验</div>
+        <div class="clink" data-c="2">② checkPermissions · 工具专属逻辑</div>
+        <div class="clink" data-c="3">③ deny 规则匹配?</div>
+        <div class="clink" data-c="4">④ allow 规则匹配?</div>
+        <div class="clink" data-c="5">⑤ 按权限模式 mode 决策</div>
+        <div class="clink" data-c="6">⑥ Hook / 分类器介入</div>
+      </div>
+    </div>
+    <div class="panel" style="display:flex;flex-direction:column;justify-content:center">
+      <div class="grouplbl">判定结果</div>
+      <div class="status idle" id="d3verdict">—</div>
+      <div class="reasonbox" id="d3reason">选左边的工具与模式,这里实时给出判定与理由。</div>
+      <div class="chiprow" id="d3tags"></div>
+    </div>
+  </div>
+  <p class="mist" style="font-size:15px;margin-top:12px">💡 试试:<b class="mono">plan</b> 模式下"删除文件"必被 <b class="red">deny</b>;<b class="mono">auto</b> 模式下 Bash 交给<b>分类器</b>裁决;<b class="mono">bypassPermissions</b> 一律放行(高危)。同一个工具,模式一换,结论就变。</p>
+</section>
+
+<!-- ===== 章节四 封面 ===== -->
+<section class="slide center" data-kicker="四 · 子 Agent">
+  <div class="secnum">04</div>
+  <p class="lead">Section 04</p>
+  <h1 class="display">子 Agent:一个能<br>生出很多个的 Agent</h1>
+  <div class="rule"></div>
+  <p class="sub">派生 · Fork 自我分身 · Coordinator 编排 · depth 追踪防套娃</p>
+</section>
+
+<!-- ===== 概念页 子Agent ===== -->
+<section class="slide" data-kicker="四 · 子 Agent">
+  <h1>主 Agent 能<span class="brand">派生子 Agent</span>,甚至 fork 自己</h1>
+  <div class="hl fragment"><span class="mono">AgentTool</span> 派生一个带独立上下文的子 Agent(<span class="mono">depth+1</span>)去干活,跑完只把<b>一条总结</b>交回来 —— 中间的工具噪音不污染主上下文。</div>
+  <div class="cards" style="margin-top:22px">
+    <div class="card fragment"><div class="ic">🌱</div><div class="t">派生 worker</div><p class="d">结果以 <span class="mono">&lt;task-notification&gt;</span> 回流;可并行 fan-out。</p></div>
+    <div class="card fragment"><div class="ic">🍴</div><div class="t">Fork 自我分身</div><p class="d">省略 <span class="mono">subagent_type</span>:继承上下文 + <b>共享 prompt 缓存</b>(前缀逐字节一致)。</p></div>
+    <div class="card fragment"><div class="ic">🛡️</div><div class="t">depth 追踪 + 防递归</div><p class="d"><span class="mono">depth+1</span> 可观测;<span class="mono">isInForkChild</span> 拦"fork 里再 fork"。</p></div>
+  </div>
+  <p class="fragment" style="margin-top:22px"><b class="brand">下一页:左边亲手派生一棵 Agent 树,右边对比 Fork 与新起子 Agent 的缓存差异。</b></p>
+</section>
+
+<!-- ===== Demo④ 派生树 + Fork ===== -->
+<section class="slide" data-kicker="四 · 子 Agent" id="slide-d4">
+  <h1>Demo ④ 派生树 &amp; Fork 缓存 <span class="tag">depth 追踪 · 前缀共享</span></h1>
+  <div class="demo" style="grid-template-columns:1fr 1fr">
+    <div class="panel">
+      <h3>A · 派生树 —— 每派生一层,depth + 1</h3>
+      <div class="tree" id="d4tree">
+        <div class="tnode on"><span class="dep">depth 0</span><span class="nm">主 Agent</span><span class="role">coordinator</span></div>
+      </div>
+      <div class="btnrow">
+        <button class="btn" id="d4spawn">➕ 派 worker（depth 1）</button>
+        <button class="btn" id="d4deep" style="background:var(--amber)">↳ worker 再派（depth 2）</button>
+      </div>
+      <div class="btnrow"><button class="btn ghost" id="d4treereset">重置树</button></div>
+      <div class="mini" id="d4treenote">💡 点「派 worker」并行长出子节点,约 1 秒后各自回流 <span class="mono">task-notification ✓</span>。</div>
+    </div>
+    <div class="panel">
+      <h3>B · Fork vs 新起子 Agent —— 谁能复用缓存</h3>
+      <div class="btnrow" style="margin-top:0">
+        <button class="btn green" id="d4fork">🍴 Fork ×3</button>
+        <button class="btn ghost" id="d4fresh">🆕 新起子 Agent ×3</button>
+      </div>
+      <div class="forkbars" id="d4forkbars" style="margin-top:14px;min-height:130px"></div>
+      <div class="mini" id="d4forknote">💡 <b class="green">Fork</b>:三个分身共享同一段绿色前缀(命中缓存),只有末尾红色 directive 不同。<b>新起</b>:各自零上下文,整段重建。</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 章节五 封面 ===== -->
+<section class="slide center" data-kicker="五 · 上下文">
+  <div class="secnum">05</div>
+  <p class="lead">Section 05</p>
+  <h1 class="display">上下文治理:<br>越聊越长怎么办</h1>
+  <div class="rule"></div>
+  <p class="sub">多级压缩 · compact_boundary · 缓存失效 · 续命不是回春</p>
+</section>
+
+<!-- ===== 概念页 压缩 ===== -->
+<section class="slide" data-kicker="五 · 上下文">
+  <h1>桌子快满了,系统<span class="brand">分级收拾</span></h1>
+  <div class="hl fragment">长会话的上下文会不断膨胀。Claude Code 在<b>每圈循环开头</b>叠一条压缩流水线,从"轻剪枝"到"全量摘要"层层递进 —— 尽量保住细粒度,实在不行才总结。</div>
+  <div class="cards" style="margin-top:22px">
+    <div class="card fragment"><div class="ic">✂️</div><div class="t">snip / microcompact</div><p class="d">剪僵尸消息、按 <span class="mono">tool_use_id</span> 删旧调用,细粒度腾空间。</p></div>
+    <div class="card fragment"><div class="ic">📝</div><div class="t">autocompact</div><p class="d">到阈值把历史摘成一段,打出 <span class="mono">compact_boundary</span> 边界。</p></div>
+    <div class="card fragment"><div class="ic">🚑</div><div class="t">reactive compact</div><p class="d">只有真的 413 撑爆了才兜底触发,摘要后重试一次。</p></div>
+  </div>
+  <div class="hl warn fragment" style="margin-top:18px">⚠️ 压缩 = 重写历史 = 开头变了 → <b>前缀缓存失效</b>;摘要还会丢细节 —— <b>续命,不是回春</b>。</div>
+</section>
+
+<!-- ===== Demo⑤ 多级压缩管线 ===== -->
+<section class="slide" data-kicker="五 · 上下文" id="slide-d5">
+  <h1>Demo ⑤ 多级压缩管线 <span class="tag">拖动回合数,看谁在工作</span></h1>
+  <div class="winwrap">
+    <div style="display:flex;align-items:center;gap:18px">
+      <span class="mono mist" style="font-size:15px">对话轮数</span>
+      <input type="range" min="1" max="40" value="5" class="slider" id="d5slider" />
+      <span class="mono brand" id="d5turns" style="font-size:22px;width:44px;text-align:right">5</span>
+    </div>
+
+    <div class="grouplbl" style="margin-top:16px">压缩流水线（当前哪一级在动）</div>
+    <div class="pipeline" id="d5pipe">
+      <span class="pstage" data-p="snip">✂️ snip 剪僵尸</span>
+      <span class="pstage" data-p="micro">🧹 microcompact 微压缩</span>
+      <span class="pstage" data-p="auto">📝 autocompact 摘要</span>
+      <span class="pstage" data-p="react">🚑 reactive 413 兜底</span>
+    </div>
+
+    <div class="usewrap" style="margin-top:20px">
+      <div class="usebar">
+        <span id="d5bar"></span>
+        <div class="thrline" style="left:85%"><span>autocompact 阈值 85%</span></div>
+      </div>
+    </div>
+
+    <div class="winstat">
+      <div class="s"><div class="v brand" id="d5usage">36%</div><div class="k">上下文占用</div></div>
+      <div class="s"><div class="v amber" id="d5comps">0</div><div class="k">已触发 autocompact</div></div>
+      <div class="s"><div class="v green" id="d5fid">100%</div><div class="k">细节保真度(回不去)</div></div>
+      <div class="s"><div class="v green" id="d5cache">命中</div><div class="k">前缀缓存状态</div></div>
+    </div>
+    <div class="ansbox" id="d5mem" style="min-height:0;margin-top:14px;font-size:16px;padding:10px 16px"><span class="mist">问它:「还记得第 1 轮的约束吗?」</span> → <span class="green">「预算 ≤ 5 万、只做安卓」—— 原话都在。</span></div>
+    <div class="mini" id="d5note" style="margin-top:6px">✅ 上下文还短 —— snip 在轻剪枝,占用低,记得清。</div>
+  </div>
+  <p class="mist" style="font-size:15px;margin-top:8px">💡 拖到底:占用逼近 85% 触发 <b class="amber">autocompact</b> → 占用回落、但<b class="red">缓存失效 + 保真度只降不升</b>。这就是"越用越慢又健忘"的根源。</p>
+</section>
+
+<!-- ===== 速查页 ===== -->
+<section class="slide" data-kicker="速查">
+  <h1>一页速查 <span class="tag">五个机制,一句话记住</span></h1>
+  <div class="pocket">
+    <div class="pline fragment"><b class="brand">① 主循环</b><br><span class="mono" style="font-size:.8em">needsFollowUp</span> 唯一决定:有工具就续圈,没有就收工。</div>
+    <div class="pline fragment"><b class="brand">② 流式执行</b><br>只读工具藏进模型输出里并行跑,写工具串行 —— 省时间。</div>
+    <div class="pline fragment"><b class="brand">③ 权限</b><br>三态 <b class="green">allow</b>/<b class="red">deny</b>/<b class="amber">ask</b> × 五模式,默认 fail-closed。</div>
+    <div class="pline fragment"><b class="brand">④ 子 Agent</b><br>派生 <span class="mono" style="font-size:.8em">depth+1</span> 回流 notification;Fork 共享前缀缓存。</div>
+    <div class="pline fragment"><b class="brand">⑤ 上下文压缩</b><br>多级管线;autocompact 一压 → 缓存失效、细节回不去。</div>
+    <div class="pline fragment" style="border-color:var(--amber)"><b class="amber">⚠️ 一条底线</b><br>有界一切:maxTurns / 预算 / token 上限 / depth,没有无界自动行为。</div>
+    <div class="mantra fragment">🏁 一个循环转起来 · 工具边流边跑 · 权限先过闸 · 活多就派 Agent · 满了就压缩</div>
+  </div>
+</section>
+
+<!-- ===== 结尾 ===== -->
+<section class="slide center">
+  <p class="lead">That's the loop</p>
+  <h1 class="display">谢谢!</h1>
+  <div class="rule"></div>
+  <p class="sub">调模型 · 冒出工具 · 执行回填 · 再来一圈 —— 直到收工</p>
+  <p class="mist" style="margin-top:24px;font-size:16px;font-family:var(--mono)">配套阅读:Claude-Code-Agent机制解读.html　·　源码:cc-recovered-main 2.1.88</p>
+</section>
+
+</div><!-- /#deck -->
+
+<button class="navbtn" id="prev">‹</button>
+<button class="navbtn" id="next">›</button>
+<div class="hint">← → 翻页　·　空格下一步　·　F 全屏　·　Home / End 首末页</div>
+
+<script>
+(function(){
+  /* ---------- helpers ---------- */
+  var timers=[];
+  function later(fn,ms){var t=setTimeout(fn,ms);timers.push(t);return t;}
+  function every(fn,ms){var t=setInterval(fn,ms);timers.push(t);return t;}
+  function clearTimers(){timers.forEach(function(t){clearTimeout(t);clearInterval(t);});timers=[];}
+  function $(id){return document.getElementById(id);}
+  function anim(dur,onF,onD){
+    var t0=Date.now();
+    var iv=setInterval(function(){
+      var p=Math.min(1,(Date.now()-t0)/dur);
+      onF(p);
+      if(p>=1){clearInterval(iv);onD&&onD();}
+    },40);
+    timers.push(iv);return iv;
+  }
+  function typeInto(el,text,speed,onD){
+    el.textContent='';var i=0;
+    var iv=setInterval(function(){
+      el.textContent+=text.charAt(i++);
+      if(i>=text.length){clearInterval(iv);onD&&onD();}
+    },speed);
+    timers.push(iv);return iv;
+  }
+
+  /* ---------- slide engine ---------- */
+  var slides=[].slice.call(document.querySelectorAll('.slide'));
+  var i=0, fi=0, prevIndex=-1;
+  var prog=$('prog');
+  function frags(s){return [].slice.call(s.querySelectorAll('.fragment'));}
+
+  function render(){
+    slides.forEach(function(s,idx){
+      s.classList.toggle('active', idx===i);
+      if(!s.querySelector('.kicker') && s.dataset.kicker){
+        var k=document.createElement('div'); k.className='kicker';
+        k.innerHTML=s.dataset.kicker+' <span class="n">/ '+String(slides.length).padStart(2,'0')+'</span>';
+        s.appendChild(k);
+      }
+      if(!s.querySelector('.pageno')){
+        var p=document.createElement('div'); p.className='pageno';
+        p.textContent=String(idx+1).padStart(2,'0'); s.appendChild(p);
+      }
+    });
+    var cur=slides[i], f=frags(cur);
+    f.forEach(function(el,idx){ el.classList.toggle('on', idx<fi); });
+    prog.style.width=(i/(slides.length-1)*100)+'%';
+    location.hash='s'+(i+1);
+    if(prevIndex!==i){
+      clearTimers();
+      prevIndex=i;
+      switch(cur.id){
+        case 'slide-d1': resetD1(); break;
+        case 'slide-d2': resetD2(); break;
+        case 'slide-d3': updateD3(); break;
+        case 'slide-d4': resetD4(); break;
+        case 'slide-d5': drawD5(); break;
+      }
+    }
+  }
+  function next(){ var f=frags(slides[i]); if(fi<f.length){fi++;render();return;} if(i<slides.length-1){i++;fi=0;render();} }
+  function prev(){ if(fi>0){fi--;render();return;} if(i>0){i--;fi=frags(slides[i]).length;render();} }
+  function go(n){ i=Math.max(0,Math.min(slides.length-1,n)); fi=0; render(); }
+  document.addEventListener('keydown',function(e){
+    if(['ArrowRight','ArrowDown',' ','PageDown'].indexOf(e.key)>-1){e.preventDefault();next();}
+    else if(['ArrowLeft','ArrowUp','PageUp'].indexOf(e.key)>-1){e.preventDefault();prev();}
+    else if(e.key==='Home'){go(0);}
+    else if(e.key==='End'){go(slides.length-1);}
+    else if(e.key==='f'||e.key==='F'){ if(!document.fullscreenElement)document.documentElement.requestFullscreen(); else document.exitFullscreen(); }
+  });
+  $('next').onclick=next; $('prev').onclick=prev;
+
+  /* ================ Demo ① 回合循环 ================ */
+  var d1={round:0,running:false,done:false,toolOn:true};
+  var d1loop=$('d1loop');
+  function d1clear(){ [].slice.call(d1loop.querySelectorAll('.lstep')).forEach(function(el){el.className='lstep';}); }
+  function d1mark(s,cls){ var el=d1loop.querySelector('[data-s="'+s+'"]'); if(el) el.className='lstep '+cls; }
+  function resetD1(){
+    clearTimers();
+    d1.round=0; d1.running=false; d1.done=false;
+    d1.toolOn=$('d1tool').classList.contains('on');
+    $('d1round').textContent='0';
+    $('d1stream').textContent='（点「跑一圈」,模型开始流式输出…）';
+    $('d1tools').innerHTML='';
+    $('d1decision').textContent=''; $('d1decision').className='decision';
+    $('d1run').disabled=false; $('d1run').textContent='▶ 跑一圈';
+    d1clear();
+  }
+  function runD1(){
+    if(d1.running||d1.done) return;
+    d1.running=true; d1.round++; $('d1round').textContent=d1.round;
+    $('d1decision').textContent=''; $('d1decision').className='decision';
+    $('d1tools').innerHTML=''; $('d1run').disabled=true; d1clear();
+    d1mark(1,'on');
+    later(function(){
+      d1mark(1,'done'); d1mark(2,'on');
+      var txt=d1.toolOn?'让我先查一下当前配置和测试结果……':'综合已有信息,配置无误,可以直接部署,无需更多操作。';
+      typeInto($('d1stream'),txt,24,function(){
+        d1mark(2,'done'); d1mark(3,'on');
+        later(function(){
+          if(d1.toolOn){
+            var tools=['Read(config.ts)','Bash(npm test)','Grep("error")'];
+            var tool=tools[(d1.round-1)%tools.length];
+            $('d1tools').innerHTML='<span class="toolchip">tool_use · '+tool+'</span>';
+            d1mark(3,'done'); d1mark(4,'on');
+            later(function(){ d1mark(4,'done'); d1mark(5,'on');
+              later(function(){ d1mark(5,'done'); d1mark(6,'on');
+                later(function(){ d1mark(6,'done');
+                  $('d1decision').className='decision cont';
+                  $('d1decision').textContent='needsFollowUp = true → ↺ 续圈';
+                  $('d1run').disabled=false; $('d1run').textContent='↺ 继续下一圈';
+                  d1.running=false;
+                },420);
+              },520);
+            },720);
+          } else {
+            $('d1tools').innerHTML='<span class="toolchip" style="color:var(--green);border-color:var(--green);background:var(--green-dim)">无 tool_use · 纯文本回答</span>';
+            d1mark(3,'done'); d1mark(4,'skip'); d1mark(5,'skip'); d1mark(6,'on');
+            later(function(){ d1mark(6,'done');
+              $('d1decision').className='decision stop';
+              $('d1decision').textContent='needsFollowUp = false → return 收工 ✓';
+              $('d1run').disabled=true; $('d1run').textContent='✓ 本回合结束(重置再来)';
+              d1.done=true; d1.running=false;
+            },420);
+          }
+        },520);
+      });
+    },500);
+  }
+  $('d1run').onclick=runD1;
+  $('d1reset').onclick=resetD1;
+  $('d1tool').onclick=function(){ d1.toolOn=!d1.toolOn; $('d1tool').classList.toggle('on',d1.toolOn); };
+
+  /* ================ Demo ② 流式 vs 批量 ================ */
+  var d2segs=[{e:'d2b_m',at:0},{e:'d2s_m',at:0},{e:'d2s_r',at:.16},{e:'d2b_r',at:.62},{e:'d2s_b',at:.62},{e:'d2b_b',at:.85}];
+  function resetD2(){
+    clearTimers();
+    d2segs.forEach(function(s){ $(s.e).classList.remove('on'); });
+    $('d2tb').textContent='—'; $('d2ts').textContent='—';
+    $('d2run').disabled=false;
+    $('d2note').innerHTML='💡 点「同时开跑」:批量模式里 Read 只能等模型说完才排队;流式模式里 Read 在模型还在吐字时就跑完了 —— 省下的正是那段只读并行的时间。';
+  }
+  $('d2run').onclick=function(){
+    resetD2(); $('d2run').disabled=true;
+    anim(2600,function(p){
+      d2segs.forEach(function(s){ if(p>=s.at) $(s.e).classList.add('on'); });
+      $('d2ts').textContent=(Math.min(p,.77)/.77*5.0).toFixed(1)+' s';
+      $('d2tb').textContent=(p*6.5).toFixed(1)+' s';
+    },function(){
+      $('d2ts').textContent='5.0 s'; $('d2tb').textContent='6.5 s';
+      $('d2note').innerHTML='✅ <b class="green">流式 5.0s</b> vs <b class="amber">批量 6.5s</b> —— 省下的正是 Read×2 被"藏进"模型输出里的那段并行时间。写工具 Bash 两边都得串行在最后。';
+      $('d2run').disabled=false;
+    });
+  };
+  $('d2reset').onclick=resetD2;
+
+  /* ================ Demo ③ 权限判定器 ================ */
+  var d3={tool:'read',mode:'default'};
+  var TOOLMETA={read:{k:'只读 · isReadOnly'},grep:{k:'只读 · isReadOnly'},edit:{k:'会写文件'},bash:{k:'执行命令'},rm:{k:'不可逆 · isDestructive'}};
+  function decideD3(t,m){
+    var kind = (t==='read'||t==='grep')?'read':(t==='edit'?'write':(t==='bash'?'exec':'destructive'));
+    if(m==='plan'){ return kind==='read'?{v:'allow',s:5,r:'<b class="green">plan 只读模式</b>:读操作放行,不落地任何改动。'}:{v:'deny',s:5,r:'<b class="red">plan 模式</b>:禁止任何落地改动,写/执行/删除一律拒绝。'}; }
+    if(m==='bypass'){ return {v:'allow',s:5,r:'<b class="amber">bypassPermissions</b>:绕过所有权限检查直接放行 —— ⚠️ 高危,仅受控环境使用。'}; }
+    if(m==='acceptEdits'){
+      if(kind==='read') return {v:'allow',s:5,r:'只读操作直接放行。'};
+      if(kind==='write') return {v:'allow',s:5,r:'<b class="green">acceptEdits</b>:自动接受文件编辑,不再逐次确认。'};
+      if(kind==='exec') return {v:'ask',s:5,r:'acceptEdits 只自动接受编辑;执行命令仍需你确认。'};
+      return {v:'ask',s:5,r:'删除不可逆 —— 即使 acceptEdits 也要弹确认。'};
+    }
+    if(m==='auto'){
+      if(kind==='read') return {v:'allow',s:5,r:'只读操作直接放行。'};
+      if(kind==='write') return {v:'allow',s:6,r:'<b class="brand">auto 分类器</b>评估该写操作为安全 → 自动放行(decisionReason: classifier)。'};
+      if(kind==='exec') return {v:'ask',s:6,r:'<b class="brand">auto 分类器</b>认为该命令有风险 → 弹给你确认(decisionReason: classifier)。'};
+      return {v:'deny',s:6,r:'<b class="brand">auto 分类器</b>判定为危险删除 → 直接拦截(decisionReason: classifier)。'};
+    }
+    /* default */
+    if(kind==='read') return {v:'allow',s:5,r:'<b>default</b>:只读操作直接放行。'};
+    if(kind==='write') return {v:'ask',s:5,r:'<b>default</b>:写操作需你确认(可记为持久 allow 规则)。'};
+    if(kind==='exec') return {v:'ask',s:5,r:'<b>default</b>:执行命令需你确认。'};
+    return {v:'ask',s:5,r:'<b>default</b>:危险删除需你确认。'};
+  }
+  function updateD3(){
+    var r=decideD3(d3.tool,d3.mode), vEl=$('d3verdict');
+    if(r.v==='allow'){vEl.className='status hit';vEl.textContent='ALLOW ✅';}
+    else if(r.v==='ask'){vEl.className='status miss';vEl.textContent='ASK ❓';}
+    else{vEl.className='status deny';vEl.textContent='DENY ⛔';}
+    $('d3reason').innerHTML=r.r;
+    var links=[].slice.call($('d3chain').querySelectorAll('.clink'));
+    links.forEach(function(el){
+      var c=parseInt(el.dataset.c);
+      el.className='clink';
+      if(c<r.s) el.classList.add('on');
+      if(c===r.s){ el.classList.add('on'); el.classList.add('hit'); if(r.v==='deny') el.classList.add('deny'); }
+    });
+    $('d3tags').innerHTML='<span class="chip">'+TOOLMETA[d3.tool].k+'</span><span class="chip '+(r.v==='allow'?'ok':(r.v==='deny'?'bad':'warn2'))+'">verdict: '+r.v+'</span><span class="chip">mode: '+d3.mode+'</span>';
+  }
+  [].slice.call($('d3tools').querySelectorAll('.opt')).forEach(function(o){
+    o.onclick=function(){ $('d3tools').querySelectorAll('.opt').forEach(function(x){x.classList.remove('sel');}); o.classList.add('sel'); d3.tool=o.dataset.t; updateD3(); };
+  });
+  [].slice.call($('d3modes').querySelectorAll('.opt')).forEach(function(o){
+    o.onclick=function(){ $('d3modes').querySelectorAll('.opt').forEach(function(x){x.classList.remove('sel');}); o.classList.add('sel'); d3.mode=o.dataset.m; updateD3(); };
+  });
+
+  /* ================ Demo ④ 派生树 + Fork ================ */
+  var d4={workers:0,deep:0,lastWorker:null};
+  function resetD4(){
+    clearTimers();
+    d4={workers:0,deep:0,lastWorker:null};
+    $('d4tree').innerHTML='<div class="tnode on"><span class="dep">depth 0</span><span class="nm">主 Agent</span><span class="role">coordinator</span></div>';
+    $('d4treenote').innerHTML='💡 点「派 worker」并行长出子节点,约 1 秒后各自回流 <span class="mono">task-notification ✓</span>。';
+    $('d4forkbars').innerHTML='';
+    $('d4forknote').innerHTML='💡 <b class="green">Fork</b>:三个分身共享同一段绿色前缀(命中缓存),只有末尾红色 directive 不同。<b>新起</b>:各自零上下文,整段重建。';
+  }
+  function d4mkNode(dep,depcls,nm,role,indent){
+    var n=document.createElement('div'); n.className='tnode';
+    if(indent) n.style.marginLeft=indent+'px';
+    n.innerHTML='<span class="dep '+depcls+'">depth '+dep+'</span><span class="nm">'+nm+'</span><span class="role">'+role+'</span><span class="notif">✓ 回流 task-notification</span>';
+    $('d4tree').appendChild(n);
+    later(function(){n.classList.add('on');},30);
+    later(function(){ var nf=n.querySelector('.notif'); if(nf) nf.classList.add('on'); },1100);
+    return n;
+  }
+  $('d4spawn').onclick=function(){
+    if(d4.workers>=3){ $('d4treenote').innerHTML='⚠️ 演示上限 3 个 worker —— 真实无硬限,但受 <span class="mono">depth</span> 与预算约束。'; return; }
+    d4.workers++;
+    d4.lastWorker=d4mkNode(1,'d1','worker '+d4.workers,'research · 并行',18);
+    $('d4treenote').innerHTML='🌱 主 Agent 并行派出 '+d4.workers+' 个 worker(都是 <span class="mono">depth 1</span>) —— 这就是 coordinator 的 fan-out。';
+  };
+  $('d4deep').onclick=function(){
+    if(!d4.lastWorker){ $('d4treenote').innerHTML='⚠️ 先派一个 worker,再让它往下派。'; return; }
+    if(d4.deep>=2){ $('d4treenote').innerHTML='🛡️ 层级到此为止 —— <span class="mono">depth</span> 越深越受约束,<span class="mono">isInForkChild</span> 还会拦"fork 里再 fork"。'; return; }
+    d4.deep++;
+    d4mkNode(2,'d2','sub-task '+d4.deep,'worker 再派 · depth+1',44);
+    $('d4treenote').innerHTML='↳ worker 又派出子任务(<span class="mono">depth 2</span>) —— 每下一层 <span class="mono">depth+1</span>,链路全程可观测。';
+  };
+  $('d4treereset').onclick=resetD4;
+  $('d4fork').onclick=function(){
+    $('d4forkbars').innerHTML=['A','B','C'].map(function(x){
+      return '<div class="fbar"><div class="shared" style="flex:1">继承对话上下文 · byte-identical 前缀 · 命中缓存</div><div class="uniq" style="width:104px">directive '+x+'</div></div>';
+    }).join('');
+    $('d4forknote').innerHTML='🍴 <b class="green">Fork ×3</b>:三个分身共享同一段绿色前缀(都命中父级缓存),只有末尾红色 directive 各不同 —— 又省又快。';
+  };
+  $('d4fresh').onclick=function(){
+    $('d4forkbars').innerHTML=[1,2,3].map(function(){
+      return '<div class="fbar"><div style="flex:1;background:linear-gradient(180deg,var(--amber),#8a5c10);display:flex;align-items:center;padding-left:12px;color:var(--ink);font-weight:700;font-family:var(--mono);font-size:12px">全新上下文 · 整段 prefill 重算 · 无缓存复用</div></div>';
+    }).join('');
+    $('d4forknote').innerHTML='🆕 <b class="amber">新起子 Agent ×3</b>:各自零上下文起步,整段重算,不共享缓存 —— 隔离干净但更贵。';
+  };
+
+  /* ================ Demo ⑤ 多级压缩管线 ================ */
+  var D5PER=5.6, D5THR=85, D5BASE=8;
+  function d5sim(turns){
+    var usage=D5BASE, comps=0, fid=100, just=false;
+    for(var t=0;t<turns;t++){ usage+=D5PER; just=false; if(usage>D5THR){ comps++; usage=30; fid=Math.round(fid*0.62); just=true; } }
+    return {usage:usage,comps:comps,fid:fid,just:just};
+  }
+  function d5stg(name,cls){ var el=$('d5pipe').querySelector('[data-p="'+name+'"]'); el.className='pstage'+(cls?' '+cls:''); }
+  function drawD5(){
+    var turns=parseInt($('d5slider').value);
+    $('d5turns').textContent=turns;
+    var r=d5sim(turns), u=Math.round(r.usage);
+    $('d5bar').style.width=u+'%';
+    $('d5bar').style.background = r.just?'var(--red)':(r.usage>72?'linear-gradient(90deg,var(--brand),var(--amber))':'linear-gradient(90deg,var(--brand),var(--brand2))');
+    $('d5usage').textContent=u+'%';
+    $('d5comps').textContent=r.comps;
+    var fEl=$('d5fid'); fEl.textContent=r.fid+'%'; fEl.style.color=r.fid>=80?'var(--green)':(r.fid>=45?'var(--amber)':'var(--red)');
+    var cEl=$('d5cache');
+    if(r.just){ cEl.textContent='刚失效'; cEl.style.color='var(--red)'; }
+    else if(r.comps>0){ cEl.textContent='已重建'; cEl.style.color='var(--amber)'; }
+    else { cEl.textContent='命中'; cEl.style.color='var(--green)'; }
+    d5stg('snip', r.usage>12?'done':'');
+    d5stg('micro', r.usage>=45?'fire':'');
+    d5stg('auto', r.just?'fire':(r.comps>0?'done':(r.usage>=75?'fire':'')));
+    d5stg('react','');
+    var mem=$('d5mem');
+    if(r.comps===0) mem.innerHTML='<span class="mist">问它:「还记得第 1 轮的约束吗?」</span> → <span class="green">「预算 ≤ 5 万、只做安卓」—— 原话都在。</span>';
+    else if(r.fid>=55) mem.innerHTML='<span class="mist">问它:「还记得第 1 轮的约束吗?」</span> → <span class="amber">「预算好像有个上限…记不太清了」—— 细节开始丢。</span>';
+    else if(r.fid>=30) mem.innerHTML='<span class="mist">问它:「还记得第 1 轮的约束吗?」</span> → <span class="amber">「记得聊过预算方面的要求」—— 只剩大意。</span>';
+    else mem.innerHTML='<span class="mist">问它:「还记得第 1 轮的约束吗?」</span> → <span class="red">「我们之前聊过这个吗?」—— 几乎全忘。</span>';
+    var note=$('d5note');
+    if(r.just) note.innerHTML='💥 <b class="red">刚触发 autocompact</b>:占用回落,但历史被重写 → 前缀缓存失效,这轮全价重读;保真度掉到 '+r.fid+'%。';
+    else if(r.usage>=75) note.innerHTML='⚠️ <b class="amber">快满了</b>:蹦字已明显变慢,即将触发 autocompact。';
+    else if(r.comps>0) note.innerHTML='✅ 压缩过 —— 但保真度停在 '+r.fid+'%,<b>回不去了</b>。';
+    else note.innerHTML='✅ 上下文还短 —— snip 在轻剪枝,占用低,记得清。';
+  }
+  $('d5slider').addEventListener('input',drawD5);
+
+  /* ---------- init ---------- */
+  var m=location.hash.match(/s(\d+)/); if(m){ i=Math.min(slides.length-1,Math.max(0,parseInt(m[1])-1)); }
+  render();
+})();
+</script>
+</body>
+</html>

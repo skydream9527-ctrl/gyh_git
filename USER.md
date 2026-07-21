@@ -1,49 +1,61 @@
-# USER.md — 我的个人画像
+# USER.md — 个人上下文
 
-> AI 每次对话都会读这个文件来了解我。信息来源：本人提供 + [project/data-product-workspace/MEMORY.md](project/data-product-workspace/MEMORY.md)。
+> 作用：告诉 AI「我是谁、在什么业务环境里工作、偏好什么协作方式」。低频更新，角色或业务边界变化时再改。
 
-## 基本信息
+## 角色
 
-- 姓名：gongyunhe（龚云荷）
-- 邮箱：gongyunhe@xiaomi.com
-- GitLab：skydream9527-ctrl / gongyunhe
-- 角色：数据产品经理
+- 姓名：龚云荷（gongyunhe）
+- 岗位：数据产品经理
 - 部门：ICE / 内容生态 / 浏览器
-- 主要方向：内容生态数据分析、AI Native 产品、数据工具建设、AI Agent 工作台
+- 工作主线：内容生态数据分析、AI Native 数据产品、数据工具建设、AI Agent 工作台
+- 核心身份：既是业务数据产品负责人，也是个人 AI 工作流与团队数据智能化建设的推动者
 
-## 我的业务域
+## 当前阶段
 
-- 核心产品：**ICE Data Workbench v3** — AI 数据工作流工作台（个人主导）
-  - 仓库：https://git.n.xiaomi.com/gongyunhe/gyh_gitlab
-  - 技术栈：FastAPI + React 19 + TypeScript + 多 Agent 架构
-  - 功能：任务工坊、Agent 管理、Skill 市场、SQL 审计、飞书集成、定时任务
-  - 本仓库只放参考副本（[project/ice-workbench-new/](project/ice-workbench-new/)），开发在 GitLab 正本
-- 业务：内容生态（浏览器）数据分析自动化
-- 用户群：浏览器内容生态用户
-- 核心指标：内容生态数据指标（DAU / 留存 / 转化 / 消费深度等，具体按看板）
-- 团队：2 人（1 社招 + 1 实习生），Q3 聚焦 nl-sql 自然语言取数场景
+- 当前周期：2026 年 Q3
+- 核心策略：聚焦原则，收缩战线，单点打透
+- 一号位目标：打透 `nl-sql` 自然语言取数场景，覆盖 80% 日常取数需求，准确率达到 90%+
+- 资源约束：团队 2 人，预留约 30% 精力支撑日常业务与核心看板维护
+- 平台原则：ICE Data Workbench、MCP、CLI、Skill 建设都服务于 `nl-sql` 核心场景，不做超前平台化
 
-## 常用工具
+## 工作环境
 
-- 数据：Kyuubi、SQL、Python（pandas/numpy/sklearn/prophet）
-- 文档：飞书文档 / 多维表格
-- 开发：React、FastAPI、Git
-- AI 协作：AI Agent、Claude Code、飞书 MCP
-- 沟通：飞书
+- 常用数据工具：Kyuubi、SQL、Python、DataWorks、飞书文档、飞书表格
+- 常用 AI 工具：Codex、Trae、Claude Code、AI Agent、Skill、MCP
+- 核心工程栈：FastAPI、React、TypeScript、多 Agent 架构
+- 主要本地项目：`01-业务项目/ICE-Data-Workbench-v3/`
+- 工作区根目录：`/Users/mi/Desktop/trae-cn/data-product`
 
-## 工作偏好
+## 决策偏好
 
-- 输出风格：先结论后细节，结构化
-- 图表偏好：表格优先，复杂数据用可视化；竞品分析必带对比表
-- 文档：优先 Markdown，飞书文档作为正式交付
-- 命名：日期+主题（`YYYY-MM-DD-主题`），便于检索
-- PRD：必须包含异常流程和边界条件
-- 数据：引用必须标注来源和时间，无数据标「推断」
-- 周报：结构化格式，先总后分
-- 协作：长期迭代，知识沉淀，复用优先
+- 先结论后细节，避免大段铺陈
+- 数据驱动；没有数据支撑时必须标注「推断」
+- 资源不足时优先保 P0，不因为新想法分散主线
+- 方案必须说明边界条件、异常流程、风险与取舍
+- 重要决策要回写到 `DECISIONS.md` 和 `MEMORY.md`
+- 竞品分析、对比评估、优先级排序优先使用表格
 
-## 沟通风格
+## 协作偏好
 
-- 语言：中文
-- 不确定的事主动问，不要猜
-- AI 做执行，我专注于决策和判断
+- 【重要】改动确认规则：同一文件的多处改动必须分开、串行提交，不要在同一批次/响应里对同一文件提交多个改动（会冲突）；不同文件之间才可并行
+- 输出优先 Markdown，正式交付再同步飞书文档
+- 新文件必须按目录规则存放，不能散落根目录
+- 可复用内容要沉淀到 `00-知识库/`
+- 日常工作记录进入 `05-个人成长/每日记录/`
+- 周期性计划进入 `WORK-PLAN.md` 和 `CURRENT.md`
+- 沟通关系与跟进事项进入 `04-会议纪要/沟通记录/`
+
+## 常用路径
+
+| 场景 | 优先读取 |
+|------|----------|
+| 当前重点 | `CURRENT.md`、`WORK-PLAN.md`、`MEMORY.md` |
+| 决策历史 | `DECISIONS.md`、`MEMORY.md`、`00-知识库/decision-frameworks/my-decisions/` |
+| 辅助决策/判断 | 填 `TEMPLATES/决策/决策请求卡.md` → 走决策生产线 → 过 `龚云荷决策护栏.md` 红线检查 |
+| 知识复用 | `00-知识库/README.md` 和对应知识域 README |
+| 日常记录 | `05-个人成长/每日记录/`、`05-个人成长/每周总结/` |
+| 绩效素材 | `05-个人成长/绩效/过程素材/` |
+| 业务项目 | `01-业务项目/` |
+| 数据分析 | `03-数据分析/`、`TEMPLATES/分析报告/`、`TEMPLATES/SQL脚本/`、`00-知识库/数据资产/` |
+| 定时自动化 | `07-定时任务/` |
+

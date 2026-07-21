@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html><head><style>
+html { background: #0D1117; }
+body { width: 720pt; height: 405pt; margin: 0; padding: 0; font-family: Arial, sans-serif; display: flex; background-image: url('bg-dark.png'); background-size: cover; }
+.wrap { margin: 36pt 50pt; width: 620pt; }
+</style></head><body>
+<div class="wrap">
+  <p style="color: #58A6FF; font-size: 11pt; margin: 0 0 6pt 0;">04 · 行业前沿</p>
+  <h1 style="color: #FFFFFF; font-size: 22pt; margin: 0 0 6pt 0;">Flow Engineering：确定性流程工程</h1>
+  <p style="color: #8B949E; font-size: 11pt; margin: 0 0 14pt 0;">高可靠性要求的企业级应用，不能完全依赖 LLM 的概率性输出</p>
+  <div style="background: #161B22; border: 1pt solid #21262D; border-radius: 8pt; padding: 16pt 20pt; margin-bottom: 14pt;">
+    <p style="color: #58A6FF; font-size: 13pt; font-weight: bold; margin: 0 0 10pt 0;">核心思想</p>
+    <ul style="color: #C9D1D9; font-size: 11pt; line-height: 1.8; margin: 0; padding-left: 16pt;">
+      <li>将业务逻辑构建为 <span style="font-weight: bold; color: #79C0FF;">有向无环图（DAG）</span> 或 <span style="font-weight: bold; color: #79C0FF;">有限状态机（FSM）</span></li>
+      <li>LLM 退化为 <span style="font-weight: bold; color: #F0883E;">"语义路由"</span> 或 <span style="font-weight: bold; color: #F0883E;">"信息提取器"</span></li>
+      <li>核心业务规则被代码锁死，LLM 无法产生幻觉去跳过规则</li>
+    </ul>
+  </div>
+  <div style="background: #0D2137; border: 1pt solid #1F4068; border-radius: 6pt; padding: 14pt 18pt;">
+    <p style="color: #58A6FF; font-size: 12pt; font-weight: bold; margin: 0 0 8pt 0;">在数据分析场景中的体现</p>
+    <div style="display: flex; gap: 10pt;">
+      <div style="flex: 1; background: #161B22; border-radius: 4pt; padding: 8pt 10pt;">
+        <p style="color: #79C0FF; font-size: 10pt; font-weight: bold; margin: 0 0 3pt 0;">取数流程</p>
+        <p style="color: #8B949E; font-size: 9pt; margin: 0;">NL→SQL (Skill) + 执行 (Skill)</p>
+      </div>
+      <div style="flex: 1; background: #161B22; border-radius: 4pt; padding: 8pt 10pt;">
+        <p style="color: #58A6FF; font-size: 10pt; font-weight: bold; margin: 0 0 3pt 0;">分析推理</p>
+        <p style="color: #8B949E; font-size: 9pt; margin: 0;">Agent 走固定框架流程</p>
+      </div>
+      <div style="flex: 1; background: #161B22; border-radius: 4pt; padding: 8pt 10pt;">
+        <p style="color: #F0883E; font-size: 10pt; font-weight: bold; margin: 0 0 3pt 0;">报告输出</p>
+        <p style="color: #8B949E; font-size: 9pt; margin: 0;">Skill 执行，格式固定</p>
+      </div>
+    </div>
+  </div>
+</div>
+</body></html>

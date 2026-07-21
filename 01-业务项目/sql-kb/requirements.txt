@@ -1,0 +1,10 @@
+# 本地 SQL 需求检索库依赖（几百条量级，纯检索，无需 GPU）
+# 首次安装：pip install -r requirements.txt
+# 首次运行 build_index.py 会自动下载 bge-large-zh-v1.5（约 1.3GB）到本地缓存
+
+sentence-transformers>=3.0     # 加载 BGE 中文向量模型
+chromadb>=0.5                  # 本地持久化向量库（免 Docker）
+rank-bm25>=0.2.2               # 关键词检索（抓表名/字段等精确词）
+
+# 说明：sentence-transformers 会带入 torch / numpy。
+# 若遇到 numpy 2.x 与 chromadb 冲突，执行： pip install "numpy<2"

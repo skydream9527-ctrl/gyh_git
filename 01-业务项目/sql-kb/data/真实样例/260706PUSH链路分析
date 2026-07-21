@@ -1,0 +1,113 @@
+---- 0706 PUSH调起链路数据 
+---- PUSH启动的 UV、PV 
+---- 埋点用 app_open  
+
+select  date,
+        count(distinct distinct_id) as uv,
+        count(distinct_id) as pv 
+from  iceberg_zjyprc_hadoop.dw.dwd_ot_event_di_31000000442
+where  date between 20260629 and 20260705
+and  event_name = 'app_open' 
+and properties['app_launch_way'] = '点击push'
+group by date 
+;
+
+
+---- PUSH进入当条，分图文和视频，看 UV、PV、和当次的时长 
+
+select  date,
+        properties['page'] as page_origin,
+        count(distinct distinct_id) as uv,
+        count(distinct_id) as pv,
+        sum(properties['duration']/1000) as duration
+from  iceberg_zjyprc_hadoop.dw.dwd_ot_event_di_31000000442
+where  date between 20260629 and 20260705
+and  event_name = 'content_duration_new' 
+and properties['app_launch_way'] = '点击push'
+and properties['feed_channel'] = 'push' 
+and properties['from_page'] = 'feed_info_rec'
+group by date, properties['page']
+;
+
+
+
+---- push 区分下滑 或者直接返回列表页 
+---- 同一个session_id 下，优先判断为有下滑 
+select  a.date, 
+        label,
+        count(distinct distinct_id) as uv,
+        count(distinct sessionId) as pv
+from  
+(  
+    select  a.date, 
+            a.distinct_id, 
+            a.sessionId,
+            e_ts,
+            label,
+            row_number() over(partition by a.date, a.distinct_id,  a.sessionId order by e_ts) as rank_num
+    from  
+    (  
+        select date, distinct_id, properties['sessionId'] as sessionId 
+        from  iceberg_zjyprc_hadoop.dw.dwd_ot_event_di_31000000442
+        where  date between 20260629 and 20260705
+        and  event_name = 'app_open' 
+        and properties['app_launch_way'] = '点击push'
+        group by date, distinct_id, properties['sessionId']
+    ) a 
+    left join 
+    (
+        select date, distinct_id, properties['sessionId'] as sessionId, e_ts, 'pull' as label
+        from iceberg_zjyprc_hadoop.dw.dwd_ot_event_di_31000000442
+        where date between 20260629 and 20260705
+        and event_name = 'content_duration_video_play_new' 
+        and properties['app_launch_way'] = '点击push'
+        and properties['feed_channel'] = 'push'
+        and properties['from_page'] in ('feed_content_detail', 'home')
+        and properties['page'] = 'feed_video_immersion'
+        and properties['item_position'] = '0'
+
+        union all 
+        select date, distinct_id, properties['sessionId'] as sessionId, e_ts, 'back' as label
+        from iceberg_zjyprc_hadoop.dw.dwd_ot_event_di_31000000442
+        where date between 20260629 and 20260705
+        and event_name = 'content_item_expose_enter' 
+        and properties['app_launch_way'] = '点击push'
+        and properties['feed_channel'] = '推荐'
+        and properties['from_page'] in ('feed_content_detail', 'feed_video_immersion')
+        and properties['page'] = 'feed_info_rec'
+    ) b 
+    on a.date = b.date 
+    and a.distinct_id = b.distinct_id 
+    and a.sessionId = b.sessionId
+) a 
+where rank_num = 1 
+group by a.date, 
+        label 
+;
+
+
+
+ 
+
+
+
+---- 分启动方式的时长和人数
+SELECT
+    date,
+    COALESCE(app_launch_way, '未知/空值') AS launch_way,
+    -- ========== DAU指标 ==========
+    count(DISTINCT CASE WHEN is_app_dau_2024 = 1 THEN did END) AS browser_dau,
+    count(DISTINCT CASE WHEN is_dau_feed_dapan_2024 = 1 THEN did END) AS feed_dau,
+    -- ========== 时长指标（总规模：万分钟） ==========
+    sum(CASE WHEN is_app_dau_2024 = 1 THEN app_dura ELSE 0 END) / 60000 / 10000 AS total_browser_dura_wan_min,
+    sum(CASE WHEN is_dau_feed_dapan_2024 = 1 AND feed_dura > 0 THEN feed_dura ELSE 0 END) / 60000 / 10000 AS total_feed_dura_wan_min,
+    -- ========== 人均指标（分钟） ==========
+    sum(CASE WHEN is_app_dau_2024 = 1 THEN app_dura ELSE 0 END) / 60000
+        / nullif(count(DISTINCT CASE WHEN is_app_dau_2024 = 1 THEN did END), 0) AS avg_browser_dura_min,
+    sum(CASE WHEN is_dau_feed_dapan_2024 = 1 AND feed_dura > 0 THEN feed_dura ELSE 0 END) / 60000
+        / nullif(count(DISTINCT CASE WHEN is_dau_feed_dapan_2024 = 1 AND feed_dura > 0 THEN did END), 0) AS avg_feed_dura_min
+FROM iceberg_zjyprc_hadoop.browser.dwm_browser_event_aggregation_label_di
+WHERE date BETWEEN 20260629 AND 20260705
+  AND is_app_dau_2024 = 1
+GROUP BY 1, 2
+ORDER BY 1, 4 DESC;

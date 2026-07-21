@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html><head><style>
+html { background: #0D1117; }
+body { width: 720pt; height: 405pt; margin: 0; padding: 0; font-family: Arial, sans-serif; display: flex; background-image: url('bg-dark.png'); background-size: cover; }
+.wrap { margin: 30pt 50pt; width: 620pt; }
+.stage { display: flex; align-items: flex-start; gap: 10pt; margin-bottom: 4pt; }
+.num { min-width: 22pt; height: 22pt; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.divider { height: 1pt; background: #21262D; margin: 8pt 0 8pt 0; }
+</style></head><body>
+<div class="wrap">
+  <p style="color: #58A6FF; font-size: 11pt; margin: 0 0 6pt 0;">03 · 实战案例</p>
+  <h1 style="color: #FFFFFF; font-size: 20pt; margin: 0 0 10pt 0;">生产级 Agent 的 7 个能力环节</h1>
+  <div class="stage">
+    <div class="num" style="background: #58A6FF;"><p style="color: #FFFFFF; font-size: 9pt; margin: 0;">1</p></div>
+    <p style="color: #C9D1D9; font-size: 10pt; margin: 0;">接收目标与指令，理解真实意图</p>
+    <p style="color: #8B949E; font-size: 9pt; margin: 0 0 0 6pt;">← LLM</p>
+  </div>
+  <div class="stage">
+    <div class="num" style="background: #58A6FF;"><p style="color: #FFFFFF; font-size: 9pt; margin: 0;">2</p></div>
+    <p style="color: #C9D1D9; font-size: 10pt; margin: 0;">基于目标完成推理、拆解与任务规划</p>
+    <p style="color: #8B949E; font-size: 9pt; margin: 0 0 0 6pt;">← LLM</p>
+  </div>
+  <div class="divider"></div>
+  <div class="stage">
+    <div class="num" style="background: #F0883E;"><p style="color: #FFFFFF; font-size: 9pt; margin: 0;">3</p></div>
+    <p style="color: #C9D1D9; font-size: 10pt; margin: 0;">自主选择并调用合适的工具（Skill）完成子任务</p>
+    <p style="color: #F0883E; font-size: 9pt; margin: 0 0 0 6pt;">← 工程</p>
+  </div>
+  <div class="stage">
+    <div class="num" style="background: #F0883E;"><p style="color: #FFFFFF; font-size: 9pt; margin: 0;">4</p></div>
+    <p style="color: #C9D1D9; font-size: 10pt; margin: 0;">持续记忆上下文信息、历史交互与业务知识</p>
+    <p style="color: #F0883E; font-size: 9pt; margin: 0 0 0 6pt;">← 工程</p>
+  </div>
+  <div class="stage">
+    <div class="num" style="background: #F0883E;"><p style="color: #FFFFFF; font-size: 9pt; margin: 0;">5</p></div>
+    <p style="color: #C9D1D9; font-size: 10pt; margin: 0;">基于规划与工具结果执行确定性动作</p>
+    <p style="color: #F0883E; font-size: 9pt; margin: 0 0 0 6pt;">← 工程</p>
+  </div>
+  <div class="stage">
+    <div class="num" style="background: #F0883E;"><p style="color: #FFFFFF; font-size: 9pt; margin: 0;">6</p></div>
+    <p style="color: #C9D1D9; font-size: 10pt; margin: 0;">自主处理异常与失败，完成故障自愈</p>
+    <p style="color: #F0883E; font-size: 9pt; margin: 0 0 0 6pt;">← 工程</p>
+  </div>
+  <div class="stage">
+    <div class="num" style="background: #F0883E;"><p style="color: #FFFFFF; font-size: 9pt; margin: 0;">7</p></div>
+    <p style="color: #C9D1D9; font-size: 10pt; margin: 0;">基于执行结果完成效果评估，持续迭代优化</p>
+    <p style="color: #F0883E; font-size: 9pt; margin: 0 0 0 6pt;">← 工程</p>
+  </div>
+  <div style="background: #161B22; border-radius: 6pt; padding: 8pt 14pt; margin-top: 8pt; text-align: center;">
+    <p style="color: #F0883E; font-size: 11pt; margin: 0;">只有 ①② 依赖 LLM，③④⑤⑥⑦ 全部需要工程体系支撑</p>
+  </div>
+</div>
+</body></html>

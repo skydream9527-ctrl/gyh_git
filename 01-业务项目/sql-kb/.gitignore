@@ -1,0 +1,16 @@
+# 向量库持久化目录（可由 build_index.py 重建，不入库）
+chroma_db/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+
+# 本地模型缓存（若配置下载到项目内）
+models/
+
+# 解析产物与原始文档：若含敏感表名/SQL，取消下面两行注释以排除
+# requirements.jsonl
+# data/*.md

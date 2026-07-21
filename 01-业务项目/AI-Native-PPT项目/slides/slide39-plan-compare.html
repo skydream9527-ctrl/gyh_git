@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html><head><style>
+html { background: #0D1117; }
+body { width: 720pt; height: 405pt; margin: 0; padding: 0; font-family: Arial, sans-serif; display: flex; background-image: url('bg-dark.png'); background-size: cover; }
+.wrap { margin: 32pt 50pt; width: 620pt; }
+.cols { display: flex; gap: 20pt; margin-top: 14pt; }
+.col { flex: 1; }
+.plan-card { border-radius: 8pt; padding: 16pt 18pt; height: 270pt; }
+.plan1 { background: #161B22; border: 1pt solid #21262D; border-top: 3pt solid #F0883E; }
+.plan2 { background: #161B22; border: 1pt solid #21262D; border-top: 3pt solid #58A6FF; }
+.step-box { background: #21262D; border-radius: 6pt; padding: 8pt 12pt; margin-bottom: 6pt; text-align: center; }
+.arrow-down { text-align: center; color: #F0883E; font-size: 14pt; margin: 2pt 0; }
+.skill-row { display: flex; gap: 6pt; margin-top: 8pt; }
+.skill-chip { flex: 1; background: #0D2137; border: 1pt solid #58A6FF; border-radius: 6pt; padding: 8pt 6pt; text-align: center; }
+.agent-box { background: #1A0D2E; border: 2pt solid #A371F7; border-radius: 8pt; padding: 10pt; margin-top: 8pt; text-align: center; }
+.vs-badge { background: #21262D; border-radius: 50%; width: 30pt; height: 30pt; text-align: center; margin: 0 auto; }
+</style></head><body>
+<div class="wrap">
+  <h1 style="color: #FFFFFF; font-size: 22pt; margin: 0 0 4pt 0; text-align: center;">方案对比：单 Skill vs 多 Skill + Agent</h1>
+  <div class="cols">
+    <div class="col">
+      <div class="plan-card plan1">
+        <p style="color: #F0883E; font-size: 16pt; font-weight: bold; margin: 0 0 12pt 0; text-align: center;">方案一：1 Skill 全搞定</p>
+        <div class="step-box"><p style="color: #F0883E; font-size: 11pt; margin: 0;">写 SQL</p></div>
+        <p class="arrow-down">↓</p>
+        <div class="step-box"><p style="color: #F0883E; font-size: 11pt; margin: 0;">查询数据</p></div>
+        <p class="arrow-down">↓</p>
+        <div class="step-box"><p style="color: #F0883E; font-size: 11pt; margin: 0;">分析数据</p></div>
+        <p class="arrow-down">↓</p>
+        <div class="step-box"><p style="color: #F0883E; font-size: 11pt; margin: 0;">整理文档</p></div>
+        <div style="background: #2A1A0E; border-radius: 4pt; padding: 6pt; margin-top: 8pt; text-align: center;">
+          <p style="color: #8B949E; font-size: 9pt; margin: 0;">一个 Skill 串行完成所有步骤</p>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="plan-card plan2">
+        <p style="color: #58A6FF; font-size: 16pt; font-weight: bold; margin: 0 0 12pt 0; text-align: center;">方案二：3 Skill + 1 Agent</p>
+        <div class="skill-row">
+          <div class="skill-chip"><p style="color: #58A6FF; font-size: 10pt; font-weight: bold; margin: 0;">Skill 1</p><p style="color: #8B949E; font-size: 8pt; margin: 2pt 0 0 0;">写 SQL</p><p style="color: #8B949E; font-size: 8pt; margin: 0;">查询数据</p></div>
+          <div class="skill-chip"><p style="color: #58A6FF; font-size: 10pt; font-weight: bold; margin: 0;">Skill 2</p><p style="color: #8B949E; font-size: 8pt; margin: 2pt 0 0 0;">分析数据</p></div>
+          <div class="skill-chip"><p style="color: #58A6FF; font-size: 10pt; font-weight: bold; margin: 0;">Skill 3</p><p style="color: #8B949E; font-size: 8pt; margin: 2pt 0 0 0;">整理文档</p></div>
+        </div>
+        <p style="color: #79C0FF; font-size: 12pt; text-align: center; margin: 6pt 0 2pt 0;">↑  ↑  ↑</p>
+        <div class="agent-box">
+          <p style="color: #A371F7; font-size: 13pt; font-weight: bold; margin: 0 0 4pt 0;">Agent 统筹编排</p>
+          <p style="color: #8B949E; font-size: 9pt; margin: 0;">决策调度 · 上下文管理 · 异常处理</p>
+        </div>
+        <div style="background: #0D2137; border-radius: 4pt; padding: 6pt; margin-top: 8pt; text-align: center;">
+          <p style="color: #8B949E; font-size: 9pt; margin: 0;">各司其职，Agent 负责编排与决策</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body></html>

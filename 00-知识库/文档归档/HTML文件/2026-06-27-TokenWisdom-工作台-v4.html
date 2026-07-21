@@ -1,0 +1,726 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TokenWisdom · Twin-Controlled Workbench v4</title>
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --paper: #ffffff;
+      --paper-soft: #f1f4f8;
+      --ink: #111827;
+      --muted: #667085;
+      --faint: #98a2b3;
+      --line: #e4e7ec;
+      --line-strong: #d0d5dd;
+      --blue: #2563eb;
+      --blue-soft: #eff6ff;
+      --green: #07885f;
+      --green-soft: #ecfdf3;
+      --amber: #b54708;
+      --amber-soft: #fffaeb;
+      --red: #b42318;
+      --red-soft: #fef3f2;
+      --violet: #6941c6;
+      --violet-soft: #f4f3ff;
+      --shadow: 0 16px 42px rgba(16, 24, 40, .08);
+      --shadow-soft: 0 8px 24px rgba(16, 24, 40, .05);
+      --radius-xl: 24px;
+      --radius-lg: 18px;
+      --radius: 14px;
+      --body: "Avenir Next", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      --mono: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 18% -8%, rgba(37, 99, 235, .10), transparent 30%),
+        linear-gradient(180deg, #fbfcfd 0%, var(--bg) 28%);
+      font-family: var(--body);
+    }
+
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    h1, h2, h3, p { margin: 0; }
+
+    .app {
+      display: grid;
+      grid-template-columns: 236px minmax(0, 1fr) 372px;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      padding: 20px 14px;
+      border-right: 1px solid var(--line);
+      background: rgba(255, 255, 255, .82);
+      backdrop-filter: blur(18px);
+      overflow: auto;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 8px 8px 18px;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 14px;
+    }
+
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      border-radius: 13px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-weight: 850;
+      letter-spacing: -.04em;
+      background: linear-gradient(135deg, #111827, #2563eb);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.22);
+    }
+
+    .brand strong { display: block; font-size: 15px; letter-spacing: -.01em; }
+    .brand span { display: block; margin-top: 2px; color: var(--muted); font-size: 12px; }
+
+    .nav-label {
+      padding: 14px 8px 7px;
+      color: var(--faint);
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .nav-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 0;
+      border-radius: 12px;
+      padding: 10px 9px;
+      color: var(--muted);
+      background: transparent;
+      text-align: left;
+    }
+
+    .nav-btn:hover { color: var(--ink); background: var(--paper-soft); }
+    .nav-btn.active { color: var(--blue); background: var(--blue-soft); font-weight: 760; }
+    .nav-btn .icon { width: 22px; text-align: center; }
+
+    .side-note {
+      margin: 18px 8px 0;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--paper-soft);
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .main {
+      min-width: 0;
+      padding: 22px 24px 52px;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 8;
+      padding-bottom: 16px;
+      background: linear-gradient(180deg, rgba(246, 247, 249, .94), rgba(246, 247, 249, .72), transparent);
+      backdrop-filter: blur(12px);
+    }
+
+    .command {
+      min-height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      background: rgba(255,255,255,.92);
+      box-shadow: var(--shadow-soft);
+      padding: 0 14px;
+    }
+
+    .command-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .command kbd { padding: 4px 7px; border-radius: 8px; background: var(--paper-soft); color: var(--muted); font-family: var(--mono); font-size: 11px; }
+    .command span { color: var(--muted); font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    .page { display: none; animation: fade .16s ease; }
+    .page.active { display: block; }
+
+    .page-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 16px;
+      align-items: end;
+      margin: 8px 0 18px;
+    }
+
+    .eyebrow {
+      margin-bottom: 7px;
+      color: var(--blue);
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    h1 { max-width: 920px; font-size: clamp(30px, 3.2vw, 44px); line-height: 1.12; letter-spacing: -.04em; }
+    h2 { font-size: 19px; letter-spacing: -.02em; }
+    h3 { font-size: 15px; letter-spacing: -.01em; }
+
+    .subtle { color: var(--muted); font-size: 14px; line-height: 1.7; }
+    .mono { font-family: var(--mono); }
+
+    .btn {
+      min-height: 36px;
+      border: 1px solid var(--line-strong);
+      border-radius: 10px;
+      background: var(--paper);
+      color: var(--ink);
+      padding: 0 12px;
+      font-weight: 680;
+      font-size: 13px;
+    }
+    .btn:hover { transform: translateY(-1px); box-shadow: var(--shadow-soft); }
+    .btn.primary { color: #fff; background: var(--blue); border-color: var(--blue); }
+    .btn.ghost { color: var(--muted); background: transparent; }
+    .btn.danger { color: var(--red); background: var(--red-soft); border-color: #fecdca; }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      width: fit-content;
+      min-height: 24px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 0 9px;
+      background: var(--paper);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 720;
+      white-space: nowrap;
+    }
+    .pill.blue { color: var(--blue); background: var(--blue-soft); border-color: #bfdbfe; }
+    .pill.green { color: var(--green); background: var(--green-soft); border-color: #bbf7d0; }
+    .pill.amber { color: var(--amber); background: var(--amber-soft); border-color: #fedf89; }
+    .pill.red { color: var(--red); background: var(--red-soft); border-color: #fecdca; }
+    .pill.violet { color: var(--violet); background: var(--violet-soft); border-color: #d9d6fe; }
+
+    .grid { display: grid; gap: 14px; }
+    .cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .main-side { grid-template-columns: minmax(0, 1fr) 340px; }
+    .manager-layout { grid-template-columns: 1.15fr .85fr; }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      background: rgba(255,255,255,.96);
+      box-shadow: 0 1px 0 rgba(255,255,255,.86), var(--shadow-soft);
+      overflow: hidden;
+    }
+    .card.pad { padding: 16px; }
+    .card-head {
+      min-height: 54px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 15px 16px;
+      border-bottom: 1px solid var(--line);
+    }
+    .card-body { padding: 16px; }
+
+    .status-strip {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .status-card {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--paper);
+      padding: 14px;
+      box-shadow: var(--shadow-soft);
+    }
+    .status-card b { display: block; font-size: 25px; letter-spacing: -.04em; }
+    .status-card span { display: block; margin-top: 3px; color: var(--muted); font-size: 12px; line-height: 1.45; }
+
+    .workspace-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+    .workspace-card {
+      position: relative;
+      min-height: 172px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-xl);
+      background: var(--paper);
+      padding: 16px;
+      text-align: left;
+      box-shadow: var(--shadow-soft);
+      overflow: hidden;
+    }
+    .workspace-card::after {
+      content: "";
+      position: absolute;
+      inset: auto -28px -44px auto;
+      width: 120px;
+      height: 120px;
+      border-radius: 999px;
+      background: rgba(37,99,235,.08);
+    }
+    .workspace-card:hover { border-color: #bfdbfe; transform: translateY(-2px); box-shadow: var(--shadow); }
+    .workspace-card h3 { font-size: 17px; margin: 10px 0 7px; }
+    .workspace-card p { color: var(--muted); font-size: 13px; line-height: 1.55; }
+    .workspace-meta { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 12px; }
+
+    .section-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .list { display: grid; gap: 10px; }
+    .list-item {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 11px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--paper);
+      padding: 12px;
+    }
+    .list-item.compact { grid-template-columns: minmax(0, 1fr) auto; }
+    .list-item strong { display: block; font-size: 14px; }
+    .list-item span { display: block; margin-top: 4px; color: var(--muted); font-size: 12px; line-height: 1.45; }
+    .marker { width: 34px; height: 34px; border-radius: 11px; display: grid; place-items: center; color: var(--blue); background: var(--blue-soft); font-weight: 850; }
+
+    .table { width: 100%; border-collapse: collapse; }
+    .table th, .table td { padding: 12px; border-bottom: 1px solid var(--line); text-align: left; font-size: 13px; }
+    .table th { color: var(--muted); background: var(--paper-soft); font-weight: 760; }
+    .table tr:last-child td { border-bottom: 0; }
+
+    .kanban { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+    .lane { border: 1px solid var(--line); border-radius: 16px; background: var(--paper-soft); padding: 12px; }
+    .lane h3 { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; color: var(--muted); font-size: 13px; }
+    .task-card { border: 1px solid var(--line); border-radius: 13px; background: var(--paper); padding: 11px; margin-bottom: 9px; }
+    .task-card strong { display: block; font-size: 13px; }
+    .task-card p { margin-top: 5px; color: var(--muted); font-size: 12px; line-height: 1.45; }
+
+    .agent-room {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 280px;
+      gap: 14px;
+    }
+    .conversation { display: grid; gap: 10px; }
+    .msg { max-width: 88%; border: 1px solid var(--line); border-radius: 15px; padding: 11px 12px; background: var(--paper); }
+    .msg.user { margin-left: auto; color: #fff; background: #111827; border-color: #111827; }
+    .msg.twin { background: var(--blue-soft); border-color: #bfdbfe; }
+    .msg.agent { background: var(--violet-soft); border-color: #d9d6fe; }
+    .msg .who { display: block; margin-bottom: 5px; font-size: 11px; font-weight: 850; opacity: .72; }
+    .msg p { font-size: 13px; line-height: 1.58; }
+
+    .artifact-card {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--paper);
+      padding: 14px;
+    }
+    .artifact-card h3 { margin: 9px 0 6px; }
+    .artifact-card p { color: var(--muted); font-size: 13px; line-height: 1.58; }
+    .artifact-meta { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 12px; }
+
+    .usage-bar { height: 8px; border-radius: 999px; background: var(--paper-soft); overflow: hidden; }
+    .usage-bar i { display: block; height: 100%; border-radius: inherit; background: var(--blue); }
+
+    .dock {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      padding: 18px 16px;
+      border-left: 1px solid var(--line);
+      background: rgba(255,255,255,.88);
+      backdrop-filter: blur(18px);
+      overflow: auto;
+    }
+    .dock-card {
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: var(--paper);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .dock-head { padding: 15px; border-bottom: 1px solid var(--line); background: linear-gradient(180deg, var(--blue-soft), #fff); }
+    .dock-title { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
+    .dock-title strong { display: block; font-size: 15px; }
+    .dock-title span { display: block; color: var(--muted); font-size: 12px; margin-top: 3px; line-height: 1.45; }
+    .dock-chat { display: grid; gap: 10px; padding: 14px; max-height: 330px; overflow: auto; }
+    .dock-msg { padding: 10px 11px; border-radius: 14px; font-size: 12px; line-height: 1.55; background: var(--paper-soft); }
+    .dock-msg.me { margin-left: 40px; color: #fff; background: #111827; }
+    .dock-msg.twin { margin-right: 28px; color: #174ea6; background: var(--blue-soft); }
+    .dock-input { display: flex; gap: 8px; padding: 12px; border-top: 1px solid var(--line); }
+    .dock-input input { min-width: 0; flex: 1; border: 1px solid var(--line); border-radius: 10px; padding: 0 10px; outline: none; }
+    .dock-section { margin-top: 14px; }
+    .dock-section h3 { margin-bottom: 8px; }
+    .quick-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .confirm-card { border: 1px solid #fedf89; border-radius: 15px; background: var(--amber-soft); padding: 12px; margin-bottom: 10px; }
+    .confirm-card strong { display: block; font-size: 13px; margin-bottom: 5px; }
+    .confirm-card p { color: #7a3f00; font-size: 12px; line-height: 1.55; }
+    .confirm-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+
+    @keyframes fade { from { opacity: .45; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+    @media (max-width: 1280px) {
+      .app { grid-template-columns: 220px minmax(0, 1fr); }
+      .dock { position: relative; height: auto; grid-column: 1 / -1; border-left: 0; border-top: 1px solid var(--line); }
+      .workspace-grid, .status-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 860px) {
+      .app { grid-template-columns: 1fr; }
+      .sidebar { position: relative; height: auto; }
+      .page-head, .command, .section-grid, .main-side, .manager-layout, .agent-room, .kanban, .cols-2, .cols-3, .cols-4, .workspace-grid, .status-strip { grid-template-columns: 1fr; }
+      .page-head { align-items: start; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">TW</div>
+        <div><strong>TokenWisdom</strong><span>Twin Workbench</span></div>
+      </div>
+
+      <div class="nav-label">Workspace</div>
+      <button class="nav-btn active" data-page="workbench"><span class="icon">⌂</span>Workbench</button>
+      <button class="nav-btn" data-page="workspace"><span class="icon">◫</span>Workspace Detail</button>
+      <button class="nav-btn" data-page="tasks"><span class="icon">☑</span>Tasks</button>
+      <button class="nav-btn" data-page="artifacts"><span class="icon">◩</span>Artifacts</button>
+      <button class="nav-btn" data-page="agents"><span class="icon">◎</span>Agents</button>
+      <button class="nav-btn" data-page="reports"><span class="icon">▤</span>Reports</button>
+
+      <div class="nav-label">Control</div>
+      <button class="nav-btn" data-page="twin"><span class="icon">✦</span>Twin Manager</button>
+      <button class="nav-btn" data-page="audit"><span class="icon">◷</span>Audit</button>
+
+      <div class="side-note">首页是工作台：展示任务、历史、Agent、好文档、总结和报告；深层配置进入 Twin Manager。</div>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <div class="command">
+          <div class="command-left"><kbd>⌘ K</kbd><span>让数字分身创建任务、继续工作、调用 Agent、总结或保存沉淀。</span></div>
+          <button class="btn primary open-page" data-open="workspace">New Work</button>
+        </div>
+      </div>
+
+      <section class="page active" id="page-workbench" data-title="Workbench">
+        <div class="page-head">
+          <div>
+            <div class="eyebrow">Personal AI Workbench</div>
+            <h1>这里不是概念页，而是你每天推进工作的主工作台。</h1>
+            <p class="subtle">右侧数字分身持续存在，可以操纵工作台上的任务、文档、报告和外部 Agent；每张卡片都能进入具体工作页面。</p>
+          </div>
+          <button class="btn primary open-page" data-open="twin">管理数字分身</button>
+        </div>
+
+        <div class="status-strip">
+          <div class="status-card"><b>7</b><span>在运行任务</span></div>
+          <div class="status-card"><b>3</b><span>等待用户确认</span></div>
+          <div class="status-card"><b>12</b><span>已用工具 Agent</span></div>
+          <div class="status-card"><b>18</b><span>已沉淀好文档</span></div>
+          <div class="status-card"><b>68k</b><span>今日 token 消耗</span></div>
+        </div>
+
+        <div class="workspace-grid">
+          <button class="workspace-card open-page" data-open="workspace">
+            <div><span class="pill violet">Code Development</span><h3>代码开发工作区</h3><p>调用 Claude Code / Codex / Cursor 修改项目，分身负责准备任务包和确认边界。</p></div>
+            <div class="workspace-meta"><span class="pill amber">2 running</span><span class="pill blue">Codex active</span></div>
+          </button>
+          <button class="workspace-card open-page" data-open="workspace">
+            <div><span class="pill green">Knowledge</span><h3>个人知识管理</h3><p>整理文件、学习资料、生成知识库，并把高质量结果沉淀为长期记忆。</p></div>
+            <div class="workspace-meta"><span class="pill green">5 docs</span><span class="pill amber">1 confirm</span></div>
+          </button>
+          <button class="workspace-card open-page" data-open="workspace">
+            <div><span class="pill blue">AI Tool Automation</span><h3>AI 工具自动化</h3><p>让 Browser Agent 或网页工具 Agent 执行搜索、总结、跨平台操作。</p></div>
+            <div class="workspace-meta"><span class="pill blue">3 agents</span><span class="pill green">running</span></div>
+          </button>
+          <button class="workspace-card open-page" data-open="workspace">
+            <div><span class="pill amber">Daily Ops</span><h3>日常事务代理</h3><p>邮件、日程、消息、提醒、待办推进；发送和同步必须用户确认。</p></div>
+            <div class="workspace-meta"><span class="pill red">approval</span><span class="pill">draft only</span></div>
+          </button>
+        </div>
+
+        <div class="section-grid">
+          <div class="card">
+            <div class="card-head"><h2>在运行的任务</h2><button class="btn ghost open-page" data-open="tasks">View all</button></div>
+            <div class="card-body list">
+              <div class="list-item"><div class="marker">D</div><div><strong>重构 TokenWisdom 工作台首页</strong><span>Twin + Codex，正在生成 v4 HTML 原型。</span></div><span class="pill amber">Confirm</span></div>
+              <div class="list-item"><div class="marker">K</div><div><strong>整理 ICE Workbench 可复用能力</strong><span>Twin + File Agent，正在归纳模块与架构。</span></div><span class="pill green">Running</span></div>
+              <div class="list-item"><div class="marker">B</div><div><strong>冷启动网页工具 Agent 能力卡</strong><span>Twin + Browser Agent，记录输入输出和限制。</span></div><span class="pill blue">Discussing</span></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><h2>历史任务</h2><button class="btn ghost open-page" data-open="tasks">Open</button></div>
+            <div class="card-body list">
+              <div class="list-item compact"><div><strong>产品方案讨论记录</strong><span>已完成，可继续生成 PRD。</span></div><span class="pill green">Done</span></div>
+              <div class="list-item compact"><div><strong>Mission Control 原型</strong><span>旧版概念页，保留为参考。</span></div><span class="pill">Archived</span></div>
+              <div class="list-item compact"><div><strong>Agent-to-Agent v3</strong><span>已确认关系框架，可作为底层模型。</span></div><span class="pill blue">Reusable</span></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><h2>已经用过的工具类 Agent</h2><button class="btn ghost open-page" data-open="agents">Manage</button></div>
+            <div class="card-body list">
+              <div class="list-item"><div class="marker">C</div><div><strong>Codex</strong><span>代码与文档生成；今日 41k tokens。</span></div><span class="pill violet">Active</span></div>
+              <div class="list-item"><div class="marker">F</div><div><strong>File Agent</strong><span>读取本地文件、归纳知识；本周 8 次。</span></div><span class="pill green">Trusted</span></div>
+              <div class="list-item"><div class="marker">W</div><div><strong>Browser Agent</strong><span>网页工具自动化；需逐次确认。</span></div><span class="pill amber">Limited</span></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><h2>过去工作中产生的好文档</h2><button class="btn ghost open-page" data-open="artifacts">Library</button></div>
+            <div class="card-body list">
+              <div class="list-item compact"><div><strong>TokenWisdom 产品方案讨论记录</strong><span>完整记录定位、能力边界、端形态。</span></div><span class="pill green">Good doc</span></div>
+              <div class="list-item compact"><div><strong>TokenWisdom × ICE Workbench 整合分析</strong><span>可复用 Runtime / Knowledge Hub 思路。</span></div><span class="pill blue">Reference</span></div>
+              <div class="list-item compact"><div><strong>Agent-to-Agent 页面层级 v3</strong><span>权限结构和对话框架已明确。</span></div><span class="pill violet">Spec</span></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><h2>总结</h2><button class="btn ghost open-page" data-open="artifacts">Review</button></div>
+            <div class="card-body list">
+              <div class="list-item compact"><div><strong>今日工作总结</strong><span>主页面需要从“产品页”改成“任务工作台”。</span></div><span class="pill amber">待确认</span></div>
+              <div class="list-item compact"><div><strong>分身边界总结</strong><span>分身可讨论和请求，不能替用户最终确认。</span></div><span class="pill green">Saved</span></div>
+              <div class="list-item compact"><div><strong>页面偏好总结</strong><span>清晰、高效、干净，避免作战室感。</span></div><span class="pill blue">Memory</span></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><h2>报告或其他输出</h2><button class="btn ghost open-page" data-open="reports">Reports</button></div>
+            <div class="card-body list">
+              <div class="list-item compact"><div><strong>Token 消耗周报</strong><span>按 Agent、任务、模型拆分。</span></div><span class="pill blue">Draft</span></div>
+              <div class="list-item compact"><div><strong>Agent 使用质量报告</strong><span>记录成功率、失败原因和推荐权限。</span></div><span class="pill green">Ready</span></div>
+              <div class="list-item compact"><div><strong>工作台信息架构报告</strong><span>可导出给产品和设计继续评审。</span></div><span class="pill amber">Review</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="page-workspace" data-title="Workspace Detail">
+        <div class="page-head">
+          <div><div class="eyebrow">Concrete Work Page</div><h1>点击工作台卡片后，进入具体工作页面。</h1><p class="subtle">这里承接一个实际工作：目标、参与 Agent、任务看板、Agent-to-Agent 对话和输出沉淀。</p></div>
+          <button class="btn primary">Ask Twin to Continue</button>
+        </div>
+        <div class="grid main-side">
+          <div class="card">
+            <div class="card-head"><h2>Task Board</h2><span class="pill amber">User confirmation required</span></div>
+            <div class="card-body kanban">
+              <div class="lane"><h3>To Confirm <span>2</span></h3><div class="task-card"><strong>允许写入 v4 HTML</strong><p>范围：新增文件并归档。</p></div><div class="task-card"><strong>固化页面偏好</strong><p>写入长期 memory。</p></div></div>
+              <div class="lane"><h3>Running <span>2</span></h3><div class="task-card"><strong>重构首页模块</strong><p>Codex 正在生成单文件原型。</p></div><div class="task-card"><strong>归纳 Workbench 模块</strong><p>Twin 正在压缩信息架构。</p></div></div>
+              <div class="lane"><h3>Review <span>1</span></h3><div class="task-card"><strong>检查管理页边界</strong><p>Token、Memory、Agent MD 是否独立。</p></div></div>
+              <div class="lane"><h3>Done <span>3</span></h3><div class="task-card"><strong>明确右侧 Twin Dock</strong><p>全局常驻。</p></div><div class="task-card"><strong>明确 Agent-to-Agent</strong><p>Twin 默认加入所有 Room。</p></div></div>
+            </div>
+          </div>
+          <div class="card pad">
+            <h2>Work Brief</h2>
+            <p class="subtle" style="margin-top:8px">目标：把首页改成可操作工作台，所有关键模块显示状态和入口，分身作为右侧控制层。</p>
+            <div class="list" style="margin-top:14px">
+              <div class="list-item compact"><div><strong>参与 Agent</strong><span>Twin Agent / Codex / File Agent</span></div><span class="pill violet">3</span></div>
+              <div class="list-item compact"><div><strong>权限边界</strong><span>写入、归档、记忆固化需用户确认。</span></div><span class="pill amber">L3</span></div>
+              <div class="list-item compact"><div><strong>输出</strong><span>页面层级 MD + 单文件 HTML。</span></div><span class="pill green">2 files</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:14px">
+          <div class="card-head"><h2>Agent Room</h2><span class="pill blue">Twin always joined</span></div>
+          <div class="card-body agent-room">
+            <div class="conversation">
+              <div class="msg user"><span class="who">User</span><p>我希望主页面是一个工作台，右侧仍然是数字分身对话框。</p></div>
+              <div class="msg twin"><span class="who">Twin Agent</span><p>我会把首页改成任务、历史、Agent、文档、总结、报告的状态入口，并保留我在右侧控制所有工作。</p></div>
+              <div class="msg agent"><span class="who">Codex</span><p>建议新增 v4 原型，不覆盖 v3；管理数字分身的 token、memory、Agent MD 放到 Twin Manager。</p></div>
+            </div>
+            <div class="card pad" style="box-shadow:none"><h3>Decision Request</h3><p class="subtle" style="margin-top:8px">允许新增 v4 HTML 和 v4 页面层级文档，并同步归档。</p><div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap"><button class="btn primary">允许</button><button class="btn">修改范围</button><button class="btn danger">拒绝</button></div></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="page-tasks" data-title="Tasks">
+        <div class="page-head"><div><div class="eyebrow">Task Center</div><h1>运行任务和历史任务都能从首页进入，这里做深层管理。</h1></div></div>
+        <div class="grid cols-2">
+          <div class="card"><div class="card-head"><h2>Running</h2></div><div class="card-body list"><div class="list-item compact"><div><strong>TokenWisdom Workbench v4</strong><span>生成新原型和归档。</span></div><span class="pill amber">Confirm</span></div><div class="list-item compact"><div><strong>AI Tool Agent 能力梳理</strong><span>冷启动工具 Agent 的输入输出边界。</span></div><span class="pill green">Running</span></div></div></div>
+          <div class="card"><div class="card-head"><h2>History</h2></div><div class="card-body list"><div class="list-item compact"><div><strong>Mission Control 原型</strong><span>旧版概念页。</span></div><span class="pill">Archived</span></div><div class="list-item compact"><div><strong>Agent-to-Agent v3</strong><span>关系与权限模型。</span></div><span class="pill blue">Reusable</span></div></div></div>
+        </div>
+      </section>
+
+      <section class="page" id="page-artifacts" data-title="Artifacts">
+        <div class="page-head"><div><div class="eyebrow">Artifacts Library</div><h1>好文档、总结和沉淀记录从首页露出，在这里集中管理。</h1></div></div>
+        <div class="grid cols-3">
+          <div class="artifact-card"><span class="pill green">Good Doc</span><h3>产品方案讨论记录</h3><p>记录从 AI 工具管家到 AI 分身的完整定位变化。</p><div class="artifact-meta"><span class="pill">MD</span><span class="pill blue">Knowledge</span></div></div>
+          <div class="artifact-card"><span class="pill violet">Spec</span><h3>页面层级 v3</h3><p>明确 User → Twin Agent → Agents 和权限确认链路。</p><div class="artifact-meta"><span class="pill">IA</span><span class="pill green">Saved</span></div></div>
+          <div class="artifact-card"><span class="pill amber">Summary</span><h3>今日工作总结</h3><p>首页应从关系图升级为可操作工作台。</p><div class="artifact-meta"><span class="pill amber">Confirm memory</span></div></div>
+        </div>
+      </section>
+
+      <section class="page" id="page-agents" data-title="Agents">
+        <div class="page-head"><div><div class="eyebrow">Used Tool Agents</div><h1>这里管理过去使用过的工具类 Agent 与再次调用入口。</h1></div><button class="btn primary">Add Agent</button></div>
+        <div class="grid cols-3">
+          <div class="card pad"><span class="pill blue">Twin</span><h2 style="margin-top:10px">Wisdom Twin</h2><p class="subtle">用户唯一数字分身，操纵工作台并代表用户进入 Agent Room。</p></div>
+          <div class="card pad"><span class="pill violet">Code</span><h2 style="margin-top:10px">Codex</h2><p class="subtle">代码与文档生成，写入前需用户确认。</p></div>
+          <div class="card pad"><span class="pill violet">Code</span><h2 style="margin-top:10px">Claude Code</h2><p class="subtle">专业研发执行 Agent，适合长任务。</p></div>
+          <div class="card pad"><span class="pill green">File</span><h2 style="margin-top:10px">File Agent</h2><p class="subtle">整理文件、知识库和本地资料。</p></div>
+          <div class="card pad"><span class="pill amber">Browser</span><h2 style="margin-top:10px">Browser Agent</h2><p class="subtle">自动使用网页工具，外部提交需确认。</p></div>
+          <div class="card pad"><span class="pill red">Ops</span><h2 style="margin-top:10px">Mail / Calendar</h2><p class="subtle">日常事务代理，默认只草拟不发送。</p></div>
+        </div>
+      </section>
+
+      <section class="page" id="page-reports" data-title="Reports">
+        <div class="page-head"><div><div class="eyebrow">Reports</div><h1>报告页承接首页露出的报告、周报、消耗分析和导出内容。</h1></div></div>
+        <div class="card"><div class="card-head"><h2>Recent Reports</h2></div><table class="table"><thead><tr><th>报告</th><th>来源</th><th>状态</th><th>下一步</th></tr></thead><tbody><tr><td>Token 消耗周报</td><td>Twin Manager</td><td><span class="pill blue">Draft</span></td><td>用户确认后发送</td></tr><tr><td>Agent 使用质量报告</td><td>Agents</td><td><span class="pill green">Ready</span></td><td>加入沉淀库</td></tr><tr><td>工作台信息架构报告</td><td>Workbench</td><td><span class="pill amber">Review</span></td><td>产品评审</td></tr></tbody></table></div>
+      </section>
+
+      <section class="page" id="page-twin" data-title="Twin Manager">
+        <div class="page-head">
+          <div><div class="eyebrow">Twin Manager</div><h1>每个用户都有一个数字分身管理界面，用于管理分身本身、消耗、memory 和沉淀。</h1><p class="subtle">这不是首页内容。首页只展示摘要和入口，深层配置进入这里。</p></div>
+          <button class="btn danger">Pause Twin</button>
+        </div>
+        <div class="grid manager-layout">
+          <div class="grid">
+            <div class="card">
+              <div class="card-head"><h2>Twin Profile</h2><span class="pill blue">L3 Request</span></div>
+              <div class="card-body list">
+                <div class="list-item compact"><div><strong>名称</strong><span>Wisdom Twin，代表用户参与讨论和整理上下文。</span></div><span class="pill">Edit</span></div>
+                <div class="list-item compact"><div><strong>工作风格</strong><span>清晰、高效、干净；先结论后细节。</span></div><span class="pill green">Saved</span></div>
+                <div class="list-item compact"><div><strong>不可越权</strong><span>不能替用户最终确认、发送、写入高风险内容。</span></div><span class="pill red">Locked</span></div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-head"><h2>Memory Files</h2><button class="btn">Open Folder</button></div>
+              <table class="table"><thead><tr><th>文件</th><th>内容</th><th>状态</th></tr></thead><tbody><tr><td>user-preferences.memory.md</td><td>页面偏好、沟通风格</td><td><span class="pill green">Active</span></td></tr><tr><td>tokenwisdom-project.memory.md</td><td>项目定位和边界</td><td><span class="pill blue">Project</span></td></tr><tr><td>pending-memory.md</td><td>待用户确认的记忆</td><td><span class="pill amber">Review</span></td></tr></tbody></table>
+            </div>
+            <div class="card">
+              <div class="card-head"><h2>Agent MD Files</h2><button class="btn">Sync</button></div>
+              <div class="card-body list">
+                <div class="list-item compact"><div><strong>codex-agent.md</strong><span>调用方式、适用任务、风险边界。</span></div><span class="pill violet">Code</span></div>
+                <div class="list-item compact"><div><strong>claude-code-agent.md</strong><span>长任务执行、评审和交付规则。</span></div><span class="pill violet">Code</span></div>
+                <div class="list-item compact"><div><strong>browser-agent.md</strong><span>网页工具自动化说明和限制。</span></div><span class="pill amber">Web</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="grid">
+            <div class="card">
+              <div class="card-head"><h2>API Token & Cost</h2><span class="pill amber">Budget 72%</span></div>
+              <table class="table"><thead><tr><th>Agent</th><th>Today</th><th>Budget</th></tr></thead><tbody><tr><td>Codex</td><td>41k</td><td><div class="usage-bar"><i style="width:72%"></i></div></td></tr><tr><td>Browser Agent</td><td>12k</td><td><div class="usage-bar"><i style="width:38%"></i></div></td></tr><tr><td>File Agent</td><td>8k</td><td><div class="usage-bar"><i style="width:24%"></i></div></td></tr></tbody></table>
+            </div>
+            <div class="card">
+              <div class="card-head"><h2>Saved Learnings</h2></div>
+              <div class="card-body list">
+                <div class="list-item compact"><div><strong>高质量 prompt</strong><span>适合产品页面重构的任务包模板。</span></div><span class="pill blue">Prompt</span></div>
+                <div class="list-item compact"><div><strong>Agent 协作经验</strong><span>Twin 先问清范围，再让执行 Agent 产出。</span></div><span class="pill green">Pattern</span></div>
+                <div class="list-item compact"><div><strong>可复用工作流</strong><span>文档 → 页面层级 → HTML → 归档。</span></div><span class="pill violet">Workflow</span></div>
+              </div>
+            </div>
+            <div class="card pad"><h2>Permission Defaults</h2><p class="subtle" style="margin-top:8px">默认允许讨论、总结、草拟；写文件、调用付费 Agent、发送消息、固化长期记忆必须用户确认。</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="page-audit" data-title="Audit">
+        <div class="page-head"><div><div class="eyebrow">Audit</div><h1>完整审计不放在首页，只展示关键确认入口。</h1></div></div>
+        <div class="card"><div class="card-head"><h2>Recent Events</h2></div><table class="table"><thead><tr><th>时间</th><th>事件</th><th>主体</th><th>结果</th></tr></thead><tbody><tr><td>10:31</td><td>创建 v4 页面层级</td><td>Codex</td><td><span class="pill green">Done</span></td></tr><tr><td>10:34</td><td>Twin 请求写入 HTML</td><td>Wisdom Twin</td><td><span class="pill amber">Pending</span></td></tr><tr><td>10:36</td><td>归档文档</td><td>Codex</td><td><span class="pill blue">Logged</span></td></tr></tbody></table></div>
+      </section>
+    </main>
+
+    <aside class="dock" aria-label="Persistent Digital Twin Dock">
+      <div class="dock-card">
+        <div class="dock-head">
+          <div class="dock-title">
+            <div><strong>Wisdom Twin</strong><span>常驻数字分身 · 可操纵当前工作台</span></div>
+            <span class="pill blue">L3 Request</span>
+          </div>
+        </div>
+        <div class="dock-chat">
+          <div class="dock-msg twin">当前页面：<b id="dock-context">Workbench</b>。我可以帮你创建任务、继续工作、调用 Agent、总结结果或保存沉淀。</div>
+          <div class="dock-msg me">把首页改成工作台，任务和历史都要能点进去。</div>
+          <div class="dock-msg twin">已处理。我会把首页卡片作为入口，深层配置放进 Twin Manager。</div>
+          <div class="dock-msg twin">需要确认：是否允许 Codex 新增 v4 HTML，并同步归档？</div>
+        </div>
+        <div class="dock-input">
+          <input placeholder="对数字分身说：继续这个任务 / 生成报告 / 调用 Codex…" />
+          <button class="btn primary">Send</button>
+        </div>
+      </div>
+
+      <div class="dock-section">
+        <h3>Workbench Control</h3>
+        <div class="quick-actions">
+          <button class="btn open-page" data-open="workspace">继续任务</button>
+          <button class="btn open-page" data-open="agents">调用 Agent</button>
+          <button class="btn open-page" data-open="reports">生成报告</button>
+          <button class="btn open-page" data-open="artifacts">保存沉淀</button>
+        </div>
+      </div>
+
+      <div class="dock-section">
+        <h3>Pending Confirmations</h3>
+        <div class="confirm-card"><strong>允许新增 v4 原型？</strong><p>范围：新增工作台 HTML 和页面层级 MD，保留旧版本。</p><div class="confirm-actions"><button class="btn primary">允许</button><button class="btn">修改</button><button class="btn danger">拒绝</button></div></div>
+        <div class="confirm-card"><strong>固化新的首页原则？</strong><p>首页是工作台；分身常驻右侧；深层配置进入 Twin Manager。</p><div class="confirm-actions"><button class="btn primary">确认</button><button class="btn">稍后</button></div></div>
+      </div>
+
+      <div class="dock-section">
+        <h3>Current Work</h3>
+        <div class="list">
+          <div class="list-item compact"><div><strong>Workbench v4</strong><span>Twin + Codex</span></div><span class="pill amber">Confirm</span></div>
+          <div class="list-item compact"><div><strong>Twin Manager</strong><span>Memory / Token / Agent MD</span></div><span class="pill blue">Design</span></div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <script>
+    const pages = Array.from(document.querySelectorAll('.page'));
+    const navButtons = Array.from(document.querySelectorAll('[data-page]'));
+    const openButtons = Array.from(document.querySelectorAll('[data-open]'));
+    const dockContext = document.getElementById('dock-context');
+
+    function showPage(name) {
+      pages.forEach((page) => page.classList.toggle('active', page.id === `page-${name}`));
+      navButtons.forEach((btn) => btn.classList.toggle('active', btn.dataset.page === name));
+      const active = pages.find((page) => page.id === `page-${name}`);
+      if (active && dockContext) dockContext.textContent = active.dataset.title || name;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    navButtons.forEach((btn) => btn.addEventListener('click', () => showPage(btn.dataset.page)));
+    openButtons.forEach((btn) => btn.addEventListener('click', () => showPage(btn.dataset.open)));
+  </script>
+</body>
+</html>

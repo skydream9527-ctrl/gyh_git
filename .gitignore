@@ -1,88 +1,40 @@
 .DS_Store
-.env
-.env.local
-.env.*.local
-.ai/skills/external/text2html2png/node_modules/
-.ai/outputs/viz/**/*.png
+Thumbs.db
 
-# Python
+# Local editor and agent runtime state
+.claude/settings.local.json
+.micode/
+.playwright-cli/
+.trae/
+.vscode/
+.idea/
+
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+07-定时任务/config/*
+!07-定时任务/config/*.example.*
+
+# Dependencies and generated artifacts
+node_modules/
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
-*.egg-info/
+*.py[cod]
 .pytest_cache/
 .ruff_cache/
 .mypy_cache/
-backend/.venv/
-backend/.venv-sandbox/
-backend/build/
-backend/dist/
-
-# Node
-node_modules/
-frontend/dist/
-
-# Runtime data (G3 file-first storage; populated at runtime)
 .cache/
-**/.cache/
-users/*
-!users/README.md
-tasks/*
-!tasks/README.md
-agents/**/prompt/cards.md
-*.lock
-*.lock~
-.tmp-*
+dist/
+build/
+*.egg-info/
 
-# Logs
+# Logs, reports, and temporary files
 *.log
-/tmp/uvicorn*.log
-/tmp/uv-*.log
+07-定时任务/logs/
+07-定时任务/reports/
+99-临时文件/
 
-# Claude Code local settings (per-user, includes runtime PIDs/IPs)
-.claude/settings.local.json
-
-# OS / editor
-Thumbs.db
-.idea/
-.vscode/
-*.swp
-*~
-
-# Large extracted reference (legacy v2 codebase, not part of v3 build)
-extracted/
-ice_data_workspace_v2.zip
-
-# Distributable bundles produced by `make pack`
-ice-workbench-*.zip
-
-# 工作 staging
-update_file/
-test_file/
-SQL口径与取数表清单.md
-rewrite_guide.py
-
-# Project subdirectories - common excludes
-**/node_modules/
-**/__pycache__/
-**/*.pyc
-**/.cache/
-**/.DS_Store
-**/.env
-**/.env.local
-**/dist/
-**/build/
-**/.pytest_cache/
-**/.ruff_cache/
-**/.mypy_cache/
-**/*.log
-**/.kiro/
-**/.planning/
-**/frontend/dist/
-**/backend/.venv/
-**/backend/.venv-sandbox/
-
-# Playwright artifacts
-**/.playwright-cli/
-**/test-results/
+# Archives and nested Git metadata
+*.zip
+.git/
+**/.git/

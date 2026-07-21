@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ICE-DATA-WORK · Agent 框架交互解读</title>
+<style>
+  :root {
+    --bg: #f4f1ea;
+    --surface: #fffaf0;
+    --surface-2: #f6efe2;
+    --ink: #171717;
+    --text: #2f302c;
+    --muted: #777366;
+    --line: #ded5c3;
+    --panel: #111513;
+    --panel-2: #181f1b;
+    --panel-text: #f6f2e8;
+    --panel-muted: #9aa59d;
+    --mint: #2ed3b7;
+    --green: #24a46d;
+    --amber: #d99a19;
+    --oxide: #b45236;
+    --red: #c84133;
+    --blue: #3f77b5;
+    --shadow: 0 18px 60px rgba(31, 27, 18, .14);
+    --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    --sans: "Avenir Next", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    --serif: "Songti SC", "Noto Serif CJK SC", Georgia, serif;
+    --sidebar-w: 280px;
+    --inspector-w: 316px;
+  }
+
+  [data-theme="dark"] {
+    --bg: #0c0e0c;
+    --surface: #151814;
+    --surface-2: #1d211b;
+    --ink: #f7f4ea;
+    --text: #e0ded4;
+    --muted: #9a988d;
+    --line: #2d332b;
+    --panel: #090b0a;
+    --panel-2: #121713;
+    --panel-text: #f7f4ea;
+    --panel-muted: #8d988f;
+    --shadow: 0 24px 80px rgba(0, 0, 0, .42);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    font-family: var(--sans);
+    color: var(--text);
+    background:
+      radial-gradient(circle at 70% -10%, rgba(46, 211, 183, .16), transparent 30%),
+      linear-gradient(135deg, rgba(180, 82, 54, .08), transparent 34%),
+      var(--bg);
+    overflow: hidden;
+    line-height: 1.55;
+  }
+  button, input, textarea { font: inherit; }
+  button { color: inherit; }
+  a { color: inherit; }
+  .app { display: grid; grid-template-columns: var(--sidebar-w) minmax(0, 1fr) var(--inspector-w); height: 100vh; }
+  body.sidebar-collapsed .app { grid-template-columns: 0 minmax(0, 1fr) var(--inspector-w); }
+  body.inspector-collapsed .app { grid-template-columns: var(--sidebar-w) minmax(0, 1fr) 0; }
+  body.focus-mode .app { grid-template-columns: 0 minmax(0, 1fr) 0; }
+
+  .sidebar, .inspector {
+    min-width: 0;
+    overflow: hidden;
+    background: var(--panel);
+    color: var(--panel-text);
+    border-color: rgba(255,255,255,.08);
+    transition: opacity .22s ease, transform .22s ease;
+  }
+  body.sidebar-collapsed .sidebar, body.focus-mode .sidebar { opacity: 0; transform: translateX(-16px); pointer-events: none; }
+  body.inspector-collapsed .inspector, body.focus-mode .inspector { opacity: 0; transform: translateX(16px); pointer-events: none; }
+  .sidebar-inner, .inspector-inner { height: 100%; overflow-y: auto; padding: 18px 16px 22px; }
+  .sidebar { border-right: 1px solid rgba(255,255,255,.08); }
+  .inspector { border-left: 1px solid rgba(255,255,255,.08); }
+  .brand { display: flex; gap: 12px; align-items: center; padding: 2px 0 16px; }
+  .mark { width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center; background: linear-gradient(145deg, #2ed3b7, #f2b23b); color: #06110e; font-weight: 900; letter-spacing: -.03em; }
+  .brand b { display: block; font-size: 15px; line-height: 1.2; }
+  .brand span { display: block; margin-top: 3px; color: var(--panel-muted); font-size: 12px; }
+  .search { position: relative; margin: 10px 0 18px; }
+  .search input { width: 100%; height: 38px; border: 1px solid rgba(255,255,255,.12); border-radius: 10px; background: rgba(255,255,255,.05); color: var(--panel-text); padding: 0 12px 0 34px; outline: none; }
+  .search input:focus { border-color: rgba(46,211,183,.64); box-shadow: 0 0 0 3px rgba(46,211,183,.12); }
+  .search:before { content: "⌕"; position: absolute; left: 12px; top: 7px; color: var(--panel-muted); }
+  .tree-group { margin: 15px 0 6px; color: var(--panel-muted); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
+  .nav-item { width: 100%; display: grid; grid-template-columns: 28px 1fr auto; align-items: center; gap: 8px; min-height: 34px; padding: 7px 9px; border: 0; border-radius: 9px; background: transparent; color: #cbd4ce; text-align: left; cursor: pointer; }
+  .nav-item:hover { background: rgba(255,255,255,.06); color: #fff; }
+  .nav-item.active { background: rgba(46,211,183,.14); color: #fff; box-shadow: inset 2px 0 0 var(--mint); }
+  .nav-index { font-family: var(--mono); font-size: 11px; color: var(--panel-muted); }
+  .nav-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; }
+  .nav-tag { font-size: 10px; color: #121510; background: var(--mint); border-radius: 999px; padding: 1px 6px; opacity: .95; }
+  .sidebar-foot { margin-top: 18px; padding: 12px; border: 1px solid rgba(255,255,255,.08); border-radius: 12px; color: var(--panel-muted); font-size: 12px; background: rgba(255,255,255,.035); }
+
+  .workspace { min-width: 0; display: grid; grid-template-rows: 50px minmax(0, 1fr) 58px; height: 100vh; }
+  .topbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; border-bottom: 1px solid var(--line); background: rgba(255,250,240,.78); backdrop-filter: blur(18px); padding: 0 16px; }
+  [data-theme="dark"] .topbar { background: rgba(21,24,20,.78); }
+  .crumbs { display: flex; align-items: center; gap: 8px; min-width: 0; color: var(--muted); font-size: 13px; }
+  .crumbs strong { color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .icon-btn, .tool-btn { border: 1px solid var(--line); background: var(--surface); border-radius: 9px; min-width: 36px; height: 34px; display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 0 10px; cursor: pointer; box-shadow: 0 1px 0 rgba(0,0,0,.02); }
+  .icon-btn:hover, .tool-btn:hover { border-color: rgba(46,211,183,.7); color: var(--ink); }
+  .tool-btn { font-size: 13px; color: var(--text); }
+  .toolbar { display: flex; align-items: center; gap: 8px; }
+
+  .stage { min-height: 0; overflow: hidden; position: relative; padding: 24px; }
+  .slide-shell { height: 100%; display: grid; place-items: center; }
+  .slide {
+    width: min(1080px, 100%);
+    height: min(690px, calc(100vh - 154px));
+    min-height: 500px;
+    background:
+      linear-gradient(90deg, rgba(23,23,23,.035) 1px, transparent 1px),
+      linear-gradient(180deg, rgba(23,23,23,.035) 1px, transparent 1px),
+      var(--surface);
+    background-size: 38px 38px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+  [data-theme="dark"] .slide { background-image: linear-gradient(90deg, rgba(255,255,255,.045) 1px, transparent 1px), linear-gradient(180deg, rgba(255,255,255,.045) 1px, transparent 1px); }
+  .slide-head { padding: 28px 34px 18px; border-bottom: 1px solid var(--line); display: grid; grid-template-columns: 1fr auto; gap: 18px; align-items: start; }
+  .kicker { color: var(--muted); font-family: var(--mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 6px; }
+  .slide h1 { margin: 0; font-family: var(--serif); font-size: clamp(30px, 4.3vw, 54px); line-height: 1.06; letter-spacing: 0; color: var(--ink); }
+  .slide h2 { margin: 0; font-size: clamp(24px, 3vw, 38px); line-height: 1.16; letter-spacing: 0; color: var(--ink); }
+  .slide-lead { margin: 12px 0 0; max-width: 820px; color: var(--muted); font-size: 16px; }
+  .slide-no { font-family: var(--mono); color: var(--muted); font-size: 20px; }
+  .slide-body { min-height: 0; overflow: auto; padding: 24px 34px 34px; }
+  .slide-body::-webkit-scrollbar, .sidebar-inner::-webkit-scrollbar, .inspector-inner::-webkit-scrollbar { width: 6px; height: 6px; }
+  .slide-body::-webkit-scrollbar-thumb, .sidebar-inner::-webkit-scrollbar-thumb, .inspector-inner::-webkit-scrollbar-thumb { background: rgba(125,118,95,.36); border-radius: 999px; }
+
+  .grid { display: grid; gap: 14px; }
+  .cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .card { border: 1px solid var(--line); background: rgba(255,255,255,.54); border-radius: 10px; padding: 15px 16px; }
+  [data-theme="dark"] .card { background: rgba(255,255,255,.035); }
+  .card h3 { margin: 0 0 7px; color: var(--ink); font-size: 16px; }
+  .card p { margin: 0; color: var(--muted); font-size: 14px; }
+  .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 20px; }
+  .stat { border-top: 3px solid var(--mint); background: rgba(46,211,183,.08); padding: 12px 14px; border-radius: 10px; }
+  .stat b { display: block; color: var(--ink); font-size: 24px; line-height: 1; }
+  .stat span { display: block; margin-top: 7px; color: var(--muted); font-size: 12px; }
+  .flow { display: flex; flex-wrap: wrap; gap: 9px; align-items: center; }
+  .step { display: inline-flex; align-items: center; min-height: 34px; border: 1px solid var(--line); border-radius: 9px; padding: 6px 11px; background: var(--surface-2); color: var(--ink); font-weight: 650; font-size: 13px; }
+  .arrow { color: var(--muted); font-weight: 900; }
+  .pill { display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 999px; font-size: 11px; font-weight: 800; letter-spacing: .02em; background: var(--surface-2); color: var(--muted); border: 1px solid var(--line); }
+  .pill.mint { color: #073a31; background: rgba(46,211,183,.78); border-color: transparent; }
+  .pill.amber { color: #3e2900; background: rgba(217,154,25,.78); border-color: transparent; }
+  .pill.red { color: #fff; background: var(--red); border-color: transparent; }
+  .note { margin: 14px 0; border-left: 4px solid var(--amber); background: rgba(217,154,25,.11); padding: 12px 14px; border-radius: 0 10px 10px 0; color: var(--text); }
+  .note.info { border-left-color: var(--blue); background: rgba(63,119,181,.12); }
+  .note.ok { border-left-color: var(--green); background: rgba(36,164,109,.12); }
+  .note.danger { border-left-color: var(--red); background: rgba(200,65,51,.12); }
+  .mono, code { font-family: var(--mono); font-size: .92em; }
+  code { background: rgba(23,23,23,.08); border: 1px solid var(--line); border-radius: 6px; padding: 1px 5px; }
+  pre { margin: 14px 0; padding: 16px 18px; background: #111513; color: #dfe8e0; border-radius: 12px; overflow: auto; font-family: var(--mono); font-size: 13px; line-height: 1.55; border: 1px solid rgba(255,255,255,.08); }
+  pre .c { color: #8e9b92; }
+  pre .k { color: #70d8c4; }
+  pre .m { color: #f0bd45; }
+  pre .d { color: #ff8172; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13.5px; }
+  th, td { border-bottom: 1px solid var(--line); padding: 10px 10px; vertical-align: top; text-align: left; }
+  th { color: var(--muted); font-size: 12px; letter-spacing: .04em; text-transform: uppercase; }
+  td:first-child { color: var(--ink); font-weight: 750; }
+  ul { margin: 10px 0; padding-left: 20px; }
+  li { margin: 7px 0; }
+  .timeline { border-left: 2px solid var(--line); padding-left: 18px; margin: 12px 0; }
+  .time-row { position: relative; padding: 0 0 15px; }
+  .time-row:before { content: ""; position: absolute; left: -25px; top: 4px; width: 11px; height: 11px; border: 3px solid var(--mint); background: var(--surface); border-radius: 50%; }
+  .time-row.gate:before { border-color: var(--amber); }
+  .time-row.stop:before { border-color: var(--red); }
+  .time-row b { color: var(--ink); }
+  .time-row p { margin: 3px 0 0; color: var(--muted); font-size: 13px; }
+  .sim { display: grid; grid-template-columns: minmax(0, 1fr) 210px; gap: 16px; align-items: stretch; margin-top: 14px; }
+  .sim-track { border: 1px solid var(--line); border-radius: 12px; padding: 16px; background: rgba(46,211,183,.06); }
+  .sim-nodes { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .sim-node { min-width: 86px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--muted); text-align: center; font-weight: 800; }
+  .sim-node.active { background: rgba(46,211,183,.18); color: var(--ink); border-color: rgba(46,211,183,.8); box-shadow: 0 0 0 3px rgba(46,211,183,.12); }
+  .sim-log { margin-top: 12px; color: var(--muted); min-height: 40px; font-size: 13px; }
+  .sandbox { border: 1px solid var(--line); border-radius: 12px; padding: 14px; background: rgba(255,255,255,.45); }
+  [data-theme="dark"] .sandbox { background: rgba(255,255,255,.035); }
+  .range-row { display: grid; grid-template-columns: 96px 1fr 36px; align-items: center; gap: 10px; margin: 9px 0; font-size: 13px; }
+  input[type="range"] { width: 100%; accent-color: var(--mint); }
+  .meter { height: 12px; border-radius: 999px; overflow: hidden; background: var(--surface-2); border: 1px solid var(--line); margin-top: 10px; }
+  .meter span { display: block; height: 100%; width: 50%; background: linear-gradient(90deg, var(--mint), var(--amber)); }
+
+  .bottom { display: grid; grid-template-columns: 160px 1fr 160px; align-items: center; gap: 16px; border-top: 1px solid var(--line); background: rgba(255,250,240,.74); backdrop-filter: blur(18px); padding: 0 18px; }
+  [data-theme="dark"] .bottom { background: rgba(21,24,20,.74); }
+  .pager { display: flex; gap: 8px; }
+  .progress { height: 6px; border-radius: 999px; background: var(--surface-2); overflow: hidden; border: 1px solid var(--line); }
+  .progress span { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--mint), var(--amber), var(--oxide)); transition: width .2s ease; }
+  .hint { justify-self: end; color: var(--muted); font-size: 12px; }
+
+  .inspector h3 { margin: 6px 0 8px; font-size: 16px; }
+  .inspector .meta { color: var(--panel-muted); font-size: 12px; margin-bottom: 14px; }
+  .takeaways { display: grid; gap: 8px; margin-bottom: 18px; }
+  .takeaway { border: 1px solid rgba(255,255,255,.08); background: rgba(255,255,255,.04); border-radius: 10px; padding: 10px 11px; font-size: 13px; color: #d8e0da; }
+  .comment-box { border-top: 1px solid rgba(255,255,255,.1); padding-top: 15px; }
+  .comment-box textarea, .comment-box input { width: 100%; border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.05); color: var(--panel-text); border-radius: 9px; outline: none; padding: 9px 10px; margin-bottom: 8px; }
+  .comment-box textarea { resize: vertical; min-height: 82px; }
+  .comment-actions { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .comment-list { display: grid; gap: 8px; margin-top: 12px; }
+  .comment { border: 1px solid rgba(255,255,255,.08); border-radius: 10px; padding: 9px 10px; background: rgba(255,255,255,.035); }
+  .comment b { display: block; font-size: 12px; color: #fff; }
+  .comment p { margin: 4px 0 0; color: #c9d1ca; font-size: 12px; }
+  .comment time { color: var(--panel-muted); font-size: 11px; }
+  .ghost { border: 1px solid rgba(255,255,255,.12); color: var(--panel-text); background: rgba(255,255,255,.05); border-radius: 9px; height: 32px; padding: 0 10px; cursor: pointer; }
+  .ghost:hover { border-color: rgba(46,211,183,.6); }
+  .empty { color: var(--panel-muted); font-size: 12px; padding: 10px 0; }
+  mark { background: rgba(217,154,25,.28); color: inherit; padding: 0 2px; border-radius: 3px; }
+
+  @media (max-width: 1080px) {
+    .app { grid-template-columns: 0 minmax(0, 1fr) 0; }
+    .sidebar, .inspector { position: fixed; top: 0; bottom: 0; z-index: 20; width: min(86vw, 330px); }
+    .sidebar { left: 0; transform: translateX(-100%); }
+    .inspector { right: 0; transform: translateX(100%); }
+    body.mobile-sidebar .sidebar { opacity: 1; transform: translateX(0); pointer-events: auto; }
+    body.mobile-inspector .inspector { opacity: 1; transform: translateX(0); pointer-events: auto; }
+    .slide { height: calc(100vh - 154px); min-height: 0; }
+    .slide-head { padding: 22px 20px 14px; }
+    .slide-body { padding: 20px; }
+    .cols-2, .cols-3, .stats, .sim { grid-template-columns: 1fr; }
+    .tool-btn span { display: none; }
+    .bottom { grid-template-columns: auto 1fr auto; }
+    .hint { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-inner">
+      <div class="brand"><div class="mark">H5</div><div><b>AI Native H5</b><span>ICE-DATA-WORK / Agent 框架</span></div></div>
+      <div class="search"><input id="search" type="search" placeholder="搜索章节、机制、代码名"></div>
+      <div id="nav"></div>
+      <div class="sidebar-foot">快捷键：←/→ 翻页，空格下一页，F 演示模式，Ctrl+B 折叠目录，Ctrl+/ 评论面板。</div>
+    </div>
+  </aside>
+
+  <main class="workspace">
+    <header class="topbar">
+      <div class="crumbs">
+        <button class="icon-btn" id="toggleSidebar" title="折叠/展开侧栏">☰</button>
+        <span id="crumbGroup">概览</span><span>·</span><strong id="crumbTitle">Agent 框架设计解读</strong>
+      </div>
+      <div class="toolbar">
+        <button class="tool-btn" id="themeBtn" title="切换明暗主题">◐ <span>主题</span></button>
+        <button class="tool-btn" id="focusBtn" title="演示模式">□ <span>演示</span></button>
+        <button class="tool-btn" id="printBtn" title="打印或导出 PDF">⇩ <span>导出</span></button>
+        <button class="icon-btn" id="toggleInspector" title="评论面板">▣</button>
+      </div>
+    </header>
+
+    <section class="stage">
+      <div class="slide-shell"><article class="slide" id="slide"></article></div>
+    </section>
+
+    <footer class="bottom">
+      <div class="pager"><button class="icon-btn" id="prevBtn" title="上一页">‹</button><button class="icon-btn" id="nextBtn" title="下一页">›</button></div>
+      <div class="progress"><span id="progress"></span></div>
+      <div class="hint" id="pageHint">01 / 18</div>
+    </footer>
+  </main>
+
+  <aside class="inspector" id="inspector">
+    <div class="inspector-inner">
+      <h3 id="inspectorTitle">讲解面板</h3>
+      <div class="meta" id="inspectorMeta">当前页重点与本地评论</div>
+      <div class="takeaways" id="takeaways"></div>
+      <div class="comment-box">
+        <h3>当页评论</h3>
+        <input id="commentName" placeholder="你的名字（默认匿名）">
+        <textarea id="commentText" placeholder="写下这页的疑问、补充或评审意见"></textarea>
+        <div class="comment-actions"><button class="ghost" id="clearComment">清空</button><button class="ghost" id="saveComment">发送</button></div>
+        <div class="comment-list" id="commentList"></div>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<script>
+const slides = [
+  {
+    group: "概览", tag: "Start", title: "Agent 框架设计解读", kicker: "Runtime Deep Dive", 
+    lead: "这套框架不是一个大模型加几个工具，而是一套多参与者、受治理、文件优先的 Agent 协作运行时。核心是同一个单跳执行内核，靠外层循环叠加 A2A 与回合后自驱能力。",
+    takeaways: ["顶层模型是 User -> Twin -> Agents。", "Twin 是唯一 leader，所有高风险动作回流给用户确认。", "同一个 _run_single_hop 同时支撑 A2A 与 autostep。"],
+    html: `<div class="flow"><span class="step">User</span><span class="arrow">-></span><span class="step">Twin 唯一 leader</span><span class="arrow">-></span><span class="step">专业 Agents</span><span class="arrow">-></span><span class="step">HITL 确认</span></div>
+      <div class="stats"><div class="stat"><b>1</b><span>单跳内核 _run_single_hop</span></div><div class="stat"><b>3 / 6</b><span>A2A 软预算 / 硬顶跳数</span></div><div class="stat"><b>3 / 20</b><span>自驱每回合 / 每日上限</span></div><div class="stat"><b>6</b><span>Twin 仲裁拒绝闸</span></div></div>
+      <div class="note info"><b>来源边界：</b>结论来自 backend/app/services/ 的真实实现：agent_runtime、orchestrator_svc、context_assembler_svc、plan_svc、proactivity_svc、proposal_svc、tools/registry。agents/_shared/context-protocol.md 描述的是迁移来源 ice-workbench 的运行时，不能混同。</div>`
+  },
+  {
+    group: "概览", tag: "Layer", title: "六层分层架构", kicker: "Architecture", 
+    lead: "框架自上而下分为六层，安全治理作为横切面贯穿每一层。理解分层，是理解 A2A 与自驱的前提。",
+    takeaways: ["定义层用 agent.json 与 agent.md 固化能力契约。", "运行时只认单跳，编排层负责多跳状态机。", "访问控制在读取点前置，而不是事后过滤。"],
+    html: `<table><thead><tr><th>层</th><th>落点</th><th>职责</th></tr></thead><tbody>
+      <tr><td>定义层</td><td><code>agents/{id}/agent.json + agent.md</code></td><td>声明式契约：工具白名单、派单目标、权限模式、模型、推理强度。</td></tr>
+      <tr><td>运行时</td><td><code>agent_runtime.py</code></td><td>有界 ReAct、speaker 路由、事件流；单跳是最小执行单元。</td></tr>
+      <tr><td>编排层</td><td><code>orchestrator_svc.py</code></td><td>有界多跳 A2A 纯函数状态机：防环、预算、Twin 仲裁。</td></tr>
+      <tr><td>上下文层</td><td><code>context_assembler_svc.py</code></td><td>分层注入，访问控制内嵌在读取点，先过滤后检索。</td></tr>
+      <tr><td>工具层</td><td><code>tools/registry.py</code></td><td>统一执行入口，fail-fast 治理门链，统一错误信封。</td></tr>
+      <tr><td>治理层</td><td><code>core/permissions · hitl · proactivity · control</code></td><td>三轴权限、HITL、主动性护栏、一键暂停、全程审计。</td></tr>
+      </tbody></table>`
+  },
+  {
+    group: "概览", tag: "Contract", title: "Agent 声明式契约", kicker: "Agent Definition",
+    lead: "每个 Agent 是一个目录，用 agent.json 声明能力边界，用 prompt/ 合成 agent.md 作为系统提示词来源。关键字段本身就是契约。",
+    takeaways: ["tools 是工具白名单，不只是说明文字。", "spawn_targets 控制可派单的子 Agent。", "D-50 的核心是先兑现契约，再扩能力。"],
+    html: `<div class="grid cols-2"><div class="card"><h3>能力与边界字段</h3><ul><li><code>tools</code>：工具白名单。</li><li><code>spawn_targets</code>：可派单子 Agent 白名单。</li><li><code>permission_mode</code>：default / read_only / confirm_write / confirm_network。</li><li><code>features</code>：todo_write、exit_plan_mode、spawn_subagent。</li><li><code>model / effort</code>：模型分级与推理强度提示。</li></ul></div>
+      <div class="card"><h3>关键设计哲学 <span class="pill amber">D-50</span></h3><p>先兑现契约，再扩能力。11 个 Agent 从 ice-workbench 迁入后，富字段先作为无害透传，随后在 M19 中把 tools、permission_mode、effort、model 在运行时真正强制生效，避免声明了却不执行的安全错觉。</p></div></div>`
+  },
+  {
+    group: "概览", tag: "Kernel", title: "运行时内核：单跳", kicker: "_run_single_hop",
+    lead: "整个框架只有一个执行内核。A2A 的每一次接力、autostep 的每一步推进，走的都是它。",
+    takeaways: ["月度预算硬门在付费调用前执行。", "raw 与 content 分离是 A2A 的关键。", "raw 给编排器解析，content 给用户展示与落盘。"],
+    html: `<pre><span class="c"># 一个 speaker 的一跳</span>
+1. <span class="k">月度预算硬门</span> llm_available() and is_over_budget() -> budget_exceeded
+2. yield turn_start；若来自转交，带 handoff
+3. <span class="k">assemble_context</span>(task, speaker, handoff)  <span class="c"># 分层组装 + 访问控制内嵌</span>
+4. <span class="k">select_model</span>(speaker)                      <span class="c"># 按角色/预算选模型</span>
+5. for evt in <span class="k">stream_chat</span>(...): yield text / 记 error / done 记账
+6. raw = 原始输出；content = strip_directives(raw) <span class="m"># raw/content 分离</span>
+7. <span class="k">append_turn</span>(content, handoff) + audit + post_tool notify hook
+8. return {raw, content, errored}</pre>
+      <div class="note"><b>raw / content 分离：</b>raw 含 [[handoff...]] 指令，交给编排器解析；content 已清洗，用于落盘和展示。用户看不到指令标记，但编排器能读到。</div>`
+  },
+  {
+    group: "A2A 编排", tag: "Loop", title: "A2A 完整多跳循环", kicker: "Handoff Loop",
+    lead: "M7 把协作从单跳升级为多个 Agent 在一轮内接力。入口和出口都在 run_agent_turn 的 while True 里；编排的脑子抽到 orchestrator_svc 的纯函数状态机。",
+    takeaways: ["初始 speaker 进入序列但不算一跳。", "每跳后解析 raw 末尾指令，再交给 Twin 仲裁。", "无论 honor 与否，前端都可渲染 handoff 事件。"],
+    html: `<div class="timeline"><div class="time-row"><b>落盘用户发言，任务置 doing</b><p>初始 speaker = resolve_speaker：@定向 > assignee > Twin > Agent > general。</p></div><div class="time-row"><b>new_hop_state(speaker)</b><p>初始 speaker 计入序列，但不算一跳。</p></div><div class="time-row"><b>_run_single_hop(speaker, handoff)</b><p>执行一跳，产出 turn_start / text / turn_done，返回 raw、content、errored。</p></div><div class="time-row stop"><b>A2A 关或本跳出错 -> break</b><p>默认关闭时退化为单跳。</p></div><div class="time-row gate"><b>parse_directive(raw)</b><p>无指令则 break。</p></div><div class="time-row gate"><b>arbitrate_handoff(...)</b><p>刷新参与者后由 Twin 防环、防预算耗尽、校验目标。</p></div><div class="time-row"><b>yield handoff 事件</b><p>honor=false 也发事件，便于前端展示拒绝原因。</p></div><div class="time-row"><b>record_hop，speaker = target</b><p>hops+1，记录转交对，回到 while 顶部。</p></div></div>
+      <div class="sim"><div class="sim-track"><div class="sim-nodes"><div class="sim-node active" data-node="0">Twin</div><span class="arrow">-></span><div class="sim-node" data-node="1">Data</div><span class="arrow">-></span><div class="sim-node" data-node="2">Report</div><span class="arrow">-></span><div class="sim-node" data-node="3">QC</div></div><div class="sim-log" id="simLog">点击推进，观察一轮内的 speaker 接力。</div></div><button class="tool-btn" id="simNext">推进一步</button></div>`
+  },
+  {
+    group: "A2A 编排", tag: "Directive", title: "转交指令协议", kicker: "Directive Protocol",
+    lead: "这是务实取舍：LLM 网关不产原生 function-calling 的 tool_use，所以转交靠解析 speaker 输出末尾的文本标记实现。",
+    takeaways: ["handoff 是交出控制权。", "ask 文档上是一次性咨询，但实现目前仍与 handoff 同路径。", "parse_directive 只取最后一条。"],
+    html: `<pre><span class="k">[[handoff:&lt;agent_id&gt;|&lt;理由&gt;]]</span>  <span class="c"># 请求接力，交出控制权</span>
+<span class="k">[[ask:&lt;agent_id&gt;|&lt;问题&gt;]]</span>       <span class="c"># 一次性咨询</span></pre><ul><li><code>parse_directive</code> 取最后一条，允许 Agent 先推理再给最终决定。</li><li><code>strip_directives</code> 把标记从展示文本里清掉。</li><li><code>handoff_to_agent</code> / <code>ask_agent</code> 两个工具是等价入口。</li></ul>`
+  },
+  {
+    group: "A2A 编排", tag: "State", title: "HopState：防环 + 预算的载体", kicker: "State Machine",
+    lead: "编排状态机是纯函数 + dataclass，刻意不 import agent_runtime，既避免循环依赖，也让防环与预算逻辑能脱离运行环境独立单测。",
+    takeaways: ["max_hops 是软预算，hard_cap 是保险丝。", "effective_max 取软硬较小值且至少为 1。", "handoff_pairs 同时用于查重复与乒乓。"],
+    html: `<pre>@dataclass
+class HopState:
+    hops: int = 0
+    max_hops: int = 3        <span class="c"># IDW_A2A_MAX_HOPS，软预算</span>
+    hard_cap: int = 6        <span class="c"># IDW_A2A_HARD_CAP，硬顶</span>
+    speaker_seq: list[(type,id)]
+    handoff_pairs: list[(from,to)]
+
+    effective_max = <span class="k">max(1, min(max_hops, hard_cap))</span>
+    budget_exhausted = hops &gt;= effective_max</pre>
+    <div class="sandbox" id="hopSandbox"><b>预算沙盘</b><div class="range-row"><span>max_hops</span><input id="maxHops" type="range" min="0" max="10" value="3"><b id="maxHopsVal">3</b></div><div class="range-row"><span>hard_cap</span><input id="hardCap" type="range" min="1" max="10" value="6"><b id="hardCapVal">6</b></div><div class="meter"><span id="hopMeter"></span></div><p id="hopResult" style="margin:8px 0 0;color:var(--muted)"></p></div>`
+  },
+  {
+    group: "A2A 编排", tag: "Gate", title: "Twin 仲裁六道闸", kicker: "D-15",
+    lead: "Twin 是唯一 leader，不盲从 Agent 的转交请求。arbitrate_handoff 任何一条命中即拒绝，每条都有独立单测。",
+    takeaways: ["目标、预算、防环是三类主要拒绝维度。", "自转交、乒乓、重复转交都被拦截。", "通过后才 auto_join，且不放宽权限。"],
+    html: `<table><thead><tr><th>拒绝条件</th><th>判据</th><th>防的是</th></tr></thead><tbody><tr><td>目标为空</td><td><code>not to</code></td><td>指令残缺。</td></tr><tr><td>自转交</td><td><code>to == cur_id</code></td><td>Agent 转给自己空转。</td></tr><tr><td>目标不存在</td><td>不在参与者且不在平台已知</td><td>转给不存在的 Agent。</td></tr><tr><td>预算耗尽</td><td><code>budget_exhausted()</code></td><td>无限接力烧钱。</td></tr><tr><td>A/B 乒乓</td><td><code>(to, cur) in handoff_pairs</code></td><td>两个 Agent 互相推回。</td></tr><tr><td>重复转交</td><td><code>(cur, to) in handoff_pairs</code></td><td>同一条边走两遍。</td></tr></tbody></table><div class="note ok">通过后返回 honor=true + target，并算出 auto_join = 目标不在当前参与者里。</div>`
+  },
+  {
+    group: "A2A 编排", tag: "Context", title: "A2A 接手上下文", kicker: "Context Handoff",
+    lead: "切换 speaker 后，incoming_handoff 传入下一跳，触发 context_assembler 注入专门的 a2a 层。",
+    takeaways: ["a2a 层告诉接手方谁因何转交。", "last_content_by 提供前序产出摘要。", "转交上下文永不被预算裁掉，但访问控制不放宽。"],
+    html: `<pre># 协作接力（A2A）
+- 你是接手方：<span class="m">data-analysis</span> 因「写报告」把任务转交给你。
+- 请基于前序产出继续推进，<span class="k">不要重复</span>已完成的工作。
+
+## data-analysis 的前序产出（摘要）
+DAU 环比下降 8%，主因新增渠道质量下滑。 <span class="c"># last_content_by()</span></pre><div class="grid cols-2"><div class="card"><h3>转交上下文永不丢</h3><p>_budget_clamp 显式跳过 task 与 a2a 层，即使 char_budget=50 也保留。</p></div><div class="card"><h3>访问控制不放宽</h3><p>接手 Agent 可拿前序产出摘要，但读记忆仍按 by-user/{自己}，不会因为接力就读到发起方私有经验。</p></div></div>`
+  },
+  {
+    group: "A2A 编排", tag: "Trace", title: "落盘与透传：转交链可追溯", kicker: "Persistence",
+    lead: "转交不是只在内存里跑一轮，而是通过落盘、事件透传和并发保护形成可追溯链路。",
+    takeaways: ["append_turn(handoff=...) 记录完整接力链。", "ws.py 原样透传每个事件。", "_inflight 对同一 task_id 单飞。"],
+    html: `<div class="grid cols-3"><div class="card"><h3>落盘</h3><p>接手方 turn 通过 append_turn(handoff=...) 带上转交元信息，conversation.jsonl 中有完整链路。</p></div><div class="card"><h3>透传</h3><p>ws.py 把生成器每个事件原样 send_json 给前端，含 handoff 事件及 honored / note。</p></div><div class="card"><h3>并发保护</h3><p>_inflight 对同一 task_id 单飞，避免两个回合互相打断；连接前先校验任务访问权。</p></div></div>`
+  },
+  {
+    group: "A2A 编排", tag: "Bounds", title: "A2A 边界速查", kicker: "Operating Bounds",
+    lead: "A2A 默认关闭，打开后仍受软预算、硬顶、防环和权限边界约束。",
+    takeaways: ["IDW_A2A_ENABLED 默认关。", "max_hops 默认 3，hard_cap 默认 6。", "auto_join 只加入参与者，不提权。"],
+    html: `<table><thead><tr><th>维度</th><th>机制</th><th>默认</th></tr></thead><tbody><tr><td>是否启用</td><td><code>IDW_A2A_ENABLED</code></td><td><span class="pill">关（单跳）</span></td></tr><tr><td>软预算</td><td><code>IDW_A2A_MAX_HOPS</code></td><td>3 次转交。</td></tr><tr><td>硬顶</td><td><code>IDW_A2A_HARD_CAP</code></td><td>6，配置再高也顶死。</td></tr><tr><td>leader</td><td>Twin 唯一，Agent 不能对等自由对话</td><td>固定。</td></tr><tr><td>防环</td><td>自转交 / 乒乓 / 重复转交</td><td><span class="pill mint">全拦</span></td></tr><tr><td>提权</td><td>auto_join 只给 tool / L2</td><td><span class="pill mint">不放宽</span></td></tr><tr><td>出错</td><td>任一跳 errored 立即 break</td><td>固定。</td></tr></tbody></table>`
+  },
+  {
+    group: "回合后自驱", tag: "Auto", title: "回合后自驱：触发与主循环", kicker: "Autostep",
+    lead: "_autostep 在主循环（含 A2A 多跳）跑完之后才被调用，与 A2A 正交独立。",
+    takeaways: ["前置门：开关打开、本回合未出错、非 Plan 只读模式。", "没有 plan 或 steps 就不自驱。", "自驱严格推进 next_ready_step。"],
+    html: `<div class="flow"><span class="step">IDW_AUTOSTEP_ENABLED 开</span><span class="arrow">&</span><span class="step">本回合未出错</span><span class="arrow">&</span><span class="step">非 Plan 只读模式</span></div><pre>_autostep:
+  plan = get_plan(task_id)
+  <span class="k">if 无 plan 或无 steps: return</span>
+
+  while True:
+    nxt = <span class="k">next_ready_step()</span>
+    if nxt is None: break
+    gate = <span class="k">proactivity_svc.check()</span>
+    if not gate.allowed or steps_run &gt;= <span class="m">AUTOSTEP_PER_TURN</span>:
+        create_proposal(KIND_NEXT_STEP, payload={step_id, owner_agent})
+        yield {type:"proposal", speaker:Twin}
+        break
+    proactivity_svc.<span class="k">record</span>(kind="autostep")
+    start_next()
+    hop = <span class="m">_run_single_hop</span>(speaker, handoff=None)
+    update_step(done or error)</pre>`
+  },
+  {
+    group: "回合后自驱", tag: "Reuse", title: "如何复用单跳", kicker: "Shared Kernel",
+    lead: "自驱的每一步和用户驱动的一跳走的是完全同一个执行单元：同样的上下文组装、流式 LLM、落盘、审计、用量记账、月度预算硬门、pre/post hook。",
+    takeaways: ["差异只在 speaker 来源、handoff、外层循环。", "autostep 直接调 _run_single_hop，不调 run_agent_turn。", "横向接力与纵向推进不互相嵌套。"],
+    html: `<table><thead><tr><th></th><th>用户回合</th><th>A2A 接力跳</th><th>autostep 步</th></tr></thead><tbody><tr><td>speaker 来源</td><td>resolve_speaker（默认 Twin）</td><td>转交 target</td><td>_step_speaker（步骤 owner_agent）</td></tr><tr><td>handoff</td><td>None</td><td>{from,to,reason}</td><td>None</td></tr><tr><td>外层循环</td><td>无</td><td>HopState 多跳</td><td>plan 步骤推进</td></tr></tbody></table><div class="note info"><b>重要边界：</b>_autostep 直接调 _run_single_hop，不是 run_agent_turn。所以自驱推进的每一步是单跳的，步骤内部不会再触发 A2A 多 Agent 接力。</div><div class="note"><b>计划是真相源：</b>没有 plan.steps 直接返回；next_ready_step 返回 None（全做完或被 depends_on 阻塞）就停，不强推被阻塞步骤。</div>`
+  },
+  {
+    group: "回合后自驱", tag: "Guard", title: "护栏与两级预算", kicker: "D-16",
+    lead: "proactivity_svc.check 在每一步之前问一次，顺序判定三道闸；同时用每回合和每日两个预算限制主动行为。",
+    takeaways: ["一键暂停优先级最高。", "静默时段避免深夜主动打扰。", "AUTOSTEP_PER_TURN 与 IDW_AUTOSTEP_DAILY_CAP 叠加。"],
+    html: `<div class="timeline"><div class="time-row gate"><b>一键暂停 control_svc.is_paused()</b><p>全局治理开关。</p></div><div class="time-row gate"><b>静默时段 IDW_QUIET_HOURS="22-8"</b><p>支持跨午夜，深夜不主动打扰用户。</p></div><div class="time-row gate"><b>每日预算 IDW_AUTOSTEP_DAILY_CAP=20</b><p>按任务按 UTC 日累计，超限拒绝。</p></div></div><div class="grid cols-2"><div class="card"><h3>每回合预算</h3><p>AUTOSTEP_PER_TURN = 3，防止一次对话把整个计划一口气跑完。</p></div><div class="card"><h3>每日预算</h3><p>IDW_AUTOSTEP_DAILY_CAP = 20，防止长期跨回合烧钱或刷屏。</p></div></div>`
+  },
+  {
+    group: "回合后自驱", tag: "Proposal", title: "拦成提议：不越权的降级路径", kicker: "Proposal Queue",
+    lead: "护栏不通过或本回合已推 3 步时，_autostep 不静默停止，而是降级成一条待确认提议。主动性到请求确认为止，不替用户做最终决策。",
+    takeaways: ["proposal 记录卡在哪一步、由谁负责。", "只提议下一就绪步，不批量生成后续提议。", "proposal_svc 只记录裁决，不直接执行。"],
+    html: `<div class="flow"><span class="step">自驱受阻</span><span class="arrow">-></span><span class="step">create_proposal(next_step)</span><span class="arrow">-></span><span class="step">Twin Dock 待确认</span><span class="arrow">-></span><span class="step">用户 accept</span><span class="arrow">-></span><span class="step">上层据 step_id 重新驱动</span></div><ul><li>落 proposals.jsonl，status=pending，payload 带 step_id。</li><li>只提议下一就绪步，不为剩余所有步骤批量生成提议。</li><li>decide(accepted) 只记录裁决，真实动作由调用方在 accept 后执行。</li><li>list_pending_for_user 聚合用户所有任务的 pending 提议，形成统一确认入口。</li></ul>`
+  },
+  {
+    group: "回合后自驱", tag: "Mirror", title: "A2A vs autostep：一对镜像", kicker: "Comparison",
+    lead: "两条增强路径共享同一个单跳内核，各自用不同外层循环和不同治理闸包起来，这是这套框架最一致的设计手法。",
+    takeaways: ["A2A 是用户回合内的横向接力。", "autostep 是用户回合后的纵向推进。", "两者都默认关，都以不越权和可审计收口。"],
+    html: `<table><thead><tr><th></th><th>A2A 多跳</th><th>autostep 自驱</th></tr></thead><tbody><tr><td>时机</td><td>用户回合内</td><td>用户回合后</td></tr><tr><td>方向</td><td>横向：Agent -> Agent 接力</td><td>纵向：推进 plan 步骤</td></tr><tr><td>真相源</td><td>转交指令 + HopState</td><td>plan.json 步骤</td></tr><tr><td>约束</td><td>防环 + 多跳预算 + Twin 仲裁</td><td>三道护栏 + 两级预算</td></tr><tr><td>受阻时</td><td>break，可能带未 honor 的 handoff 事件</td><td>降级成 proposal，请求确认</td></tr><tr><td>复用</td><td>_run_single_hop</td><td>_run_single_hop</td></tr><tr><td>开关</td><td>IDW_A2A_ENABLED</td><td>IDW_AUTOSTEP_ENABLED</td></tr></tbody></table><div class="note ok"><b>一句话：</b>内核稳定单一，能力靠外层循环叠加，安全靠闸门横切。</div>`
+  },
+  {
+    group: "收尾", tag: "Rule", title: "贯穿的设计原则", kicker: "Design Principles",
+    lead: "这套运行时不是靠单点复杂能力堆起来，而是靠几条一致原则把复杂度压住。",
+    takeaways: ["文件系统是唯一真相源。", "访问控制要内嵌读取点。", "所有自动行为都必须有界、可暂停、可审计。"],
+    html: `<div class="grid cols-2"><div class="card"><h3>文件优先（G3）</h3><p>文件系统是唯一真相源；SQLite / pgvector 只是可重建派生索引。</p></div><div class="card"><h3>访问控制内嵌读取点</h3><p>不是事后过滤，而是先过滤访问边界，再进行 top-k 检索排序。</p></div><div class="card"><h3>有界一切</h3><p>多跳有预算，自驱有上限，上下文有 budget，成本有月度硬顶。</p></div><div class="card"><h3>安全先于智能</h3><p>能力默认关灰度，高风险恒 HITL，先兑现契约再扩能力。</p></div></div><div class="card" style="margin-top:14px"><h3>可解释 / 可审计</h3><p>上下文每层带来源标注；每跳、每次主动动作都落审计与 jsonl，事后可完整追溯。</p></div>`
+  },
+  {
+    group: "收尾", tag: "Gap", title: "待确认的实现细节", kicker: "Open Questions",
+    lead: "以下是读代码时发现、值得团队确认是有意简化还是待补 gap 的点，非缺陷断言。",
+    takeaways: ["ask 目前与 handoff 同路径。", "自驱步失败会把任务置 error，语义需确认。", "静默时段走进程级 env，不走 settings 缓存。"],
+    html: `<div class="note danger"><b>1. ask 目前与 handoff 同路径：</b>文档说 ask 是咨询后控制权回到发起方，但主循环拿到 req 后不区分 action，ask 也会 record_hop + speaker=target。若需真正咨询返回，需补 ask 分支。</div><div class="note"><b>2. 自驱步失败会连带把任务置 error：</b>_run_single_hop 内部 errored 就会 set_status(error)，自驱步失败与用户回合失败被同等对待，是否符合预期值得确认。</div><div class="note"><b>3. 提议的 speaker 是 Twin：</b>即便被卡步骤 owner 是具体 Agent，语义上仍是 Twin 替用户把关、代为请示，与 Twin 唯一 leader 一致。</div><div class="note"><b>4. 静默时段走进程级 env：</b>IDW_QUIET_HOURS 直接从 os.environ 读取，改环境变量即时生效，但未纳入 settings 统一管理。</div>`
+  }
+];
+
+const state = { index: 0, query: "", simStep: 0 };
+const els = {
+  nav: document.getElementById("nav"), slide: document.getElementById("slide"), progress: document.getElementById("progress"), pageHint: document.getElementById("pageHint"),
+  crumbGroup: document.getElementById("crumbGroup"), crumbTitle: document.getElementById("crumbTitle"), takeaways: document.getElementById("takeaways"), inspectorTitle: document.getElementById("inspectorTitle"), inspectorMeta: document.getElementById("inspectorMeta"),
+  search: document.getElementById("search"), commentName: document.getElementById("commentName"), commentText: document.getElementById("commentText"), commentList: document.getElementById("commentList")
+};
+
+function pad(n) { return String(n + 1).padStart(2, "0"); }
+function textOf(slide) { return `${slide.group} ${slide.tag} ${slide.title} ${slide.lead} ${slide.html}`.replace(/<[^>]+>/g, " "); }
+function matches(slide) { return !state.query || textOf(slide).toLowerCase().includes(state.query.toLowerCase()); }
+function highlight(text) {
+  if (!state.query) return text;
+  const q = state.query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return text.replace(new RegExp(q, "ig"), m => `<mark>${m}</mark>`);
+}
+
+function renderNav() {
+  const groups = [...new Set(slides.map(s => s.group))];
+  els.nav.innerHTML = groups.map(group => {
+    const items = slides.map((slide, i) => ({ slide, i })).filter(x => x.slide.group === group && matches(x.slide));
+    if (!items.length) return "";
+    return `<div class="tree-group">${group}</div>` + items.map(({slide, i}) => `<button class="nav-item ${i === state.index ? "active" : ""}" data-go="${i}"><span class="nav-index">${pad(i)}</span><span class="nav-title">${highlight(slide.title)}</span><span class="nav-tag">${slide.tag}</span></button>`).join("");
+  }).join("") || `<div class="empty">未找到匹配章节</div>`;
+  els.nav.querySelectorAll("[data-go]").forEach(btn => btn.addEventListener("click", () => go(Number(btn.dataset.go))));
+}
+
+function renderSlide() {
+  const s = slides[state.index];
+  els.slide.innerHTML = `<div class="slide-head"><div><div class="kicker">${s.kicker}</div><h2>${highlight(s.title)}</h2><p class="slide-lead">${highlight(s.lead)}</p></div><div class="slide-no">${pad(state.index)}</div></div><div class="slide-body">${s.html}</div>`;
+  els.crumbGroup.textContent = s.group;
+  els.crumbTitle.textContent = s.title;
+  els.progress.style.width = `${((state.index + 1) / slides.length) * 100}%`;
+  els.pageHint.textContent = `${pad(state.index)} / ${String(slides.length).padStart(2, "0")}`;
+  els.inspectorTitle.textContent = s.title;
+  els.inspectorMeta.textContent = `${s.group} · ${s.kicker}`;
+  els.takeaways.innerHTML = s.takeaways.map(t => `<div class="takeaway">${t}</div>`).join("");
+  attachSlideInteractions();
+  renderComments();
+}
+
+function attachSlideInteractions() {
+  const simBtn = document.getElementById("simNext");
+  if (simBtn) {
+    const logs = ["Twin 接收用户回合，resolve_speaker 完成。", "Data Agent 完成分析后发出 handoff 指令。", "Report Agent 接手，context_assembler 注入 a2a 前序摘要。", "QC Agent 检查风险；若无后续指令，循环 break。"];
+    simBtn.addEventListener("click", () => {
+      state.simStep = (state.simStep + 1) % 4;
+      document.querySelectorAll(".sim-node").forEach((node, i) => node.classList.toggle("active", i === state.simStep));
+      document.getElementById("simLog").textContent = logs[state.simStep];
+    });
+  }
+  const maxHops = document.getElementById("maxHops");
+  const hardCap = document.getElementById("hardCap");
+  if (maxHops && hardCap) {
+    const update = () => {
+      const max = Number(maxHops.value); const hard = Number(hardCap.value); const effective = Math.max(1, Math.min(max, hard));
+      document.getElementById("maxHopsVal").textContent = max;
+      document.getElementById("hardCapVal").textContent = hard;
+      document.getElementById("hopMeter").style.width = `${effective * 10}%`;
+      document.getElementById("hopResult").textContent = `effective_max = max(1, min(${max}, ${hard})) = ${effective}；允许 ${effective} 次转交，共最多 ${effective + 1} 个 speaker 发言。`;
+    };
+    maxHops.addEventListener("input", update); hardCap.addEventListener("input", update); update();
+  }
+}
+
+function go(i) {
+  state.index = Math.max(0, Math.min(slides.length - 1, i));
+  state.simStep = 0;
+  renderNav(); renderSlide();
+}
+function next() { go(state.index + 1); }
+function prev() { go(state.index - 1); }
+function commentKey() { return `idw-agent-deck-comments:${state.index}`; }
+function getComments() { try { return JSON.parse(localStorage.getItem(commentKey()) || "[]"); } catch { return []; } }
+function setComments(list) { localStorage.setItem(commentKey(), JSON.stringify(list)); }
+function renderComments() {
+  const list = getComments();
+  els.commentList.innerHTML = list.length ? list.map(c => `<div class="comment"><b>${c.name}<time> · ${c.time}</time></b><p>${c.text}</p></div>`).join("") : `<div class="empty">还没有评论。选中某页后可在这里记录评审意见。</div>`;
+}
+
+document.getElementById("nextBtn").addEventListener("click", next);
+document.getElementById("prevBtn").addEventListener("click", prev);
+document.getElementById("toggleSidebar").addEventListener("click", () => {
+  if (window.innerWidth <= 1080) document.body.classList.toggle("mobile-sidebar");
+  else document.body.classList.toggle("sidebar-collapsed");
+});
+document.getElementById("toggleInspector").addEventListener("click", () => {
+  if (window.innerWidth <= 1080) document.body.classList.toggle("mobile-inspector");
+  else document.body.classList.toggle("inspector-collapsed");
+});
+document.getElementById("focusBtn").addEventListener("click", () => document.body.classList.toggle("focus-mode"));
+document.getElementById("themeBtn").addEventListener("click", () => {
+  const nextTheme = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+  document.documentElement.dataset.theme = nextTheme;
+  localStorage.setItem("idw-agent-deck-theme", nextTheme);
+});
+document.getElementById("printBtn").addEventListener("click", () => window.print());
+document.getElementById("saveComment").addEventListener("click", () => {
+  const text = els.commentText.value.trim();
+  if (!text) return;
+  const name = els.commentName.value.trim() || "匿名";
+  const list = getComments();
+  list.unshift({ name, text, time: new Date().toLocaleString("zh-CN", { hour12: false }) });
+  setComments(list); els.commentText.value = ""; renderComments();
+});
+document.getElementById("clearComment").addEventListener("click", () => { els.commentText.value = ""; });
+els.search.addEventListener("input", e => { state.query = e.target.value.trim(); renderNav(); renderSlide(); });
+
+document.addEventListener("keydown", e => {
+  const typing = ["INPUT", "TEXTAREA"].includes(document.activeElement.tagName);
+  if (!typing && (e.key === "ArrowRight" || e.key === " ")) { e.preventDefault(); next(); }
+  if (!typing && e.key === "ArrowLeft") { e.preventDefault(); prev(); }
+  if (!typing && e.key === "Home") { e.preventDefault(); go(0); }
+  if (!typing && e.key === "End") { e.preventDefault(); go(slides.length - 1); }
+  if (!typing && e.key.toLowerCase() === "f") { e.preventDefault(); document.body.classList.toggle("focus-mode"); }
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "b") { e.preventDefault(); document.getElementById("toggleSidebar").click(); }
+  if ((e.ctrlKey || e.metaKey) && e.key === "/") { e.preventDefault(); document.getElementById("toggleInspector").click(); }
+});
+
+const savedTheme = localStorage.getItem("idw-agent-deck-theme");
+if (savedTheme) document.documentElement.dataset.theme = savedTheme;
+renderNav();
+renderSlide();
+</script>
+</body>
+</html>

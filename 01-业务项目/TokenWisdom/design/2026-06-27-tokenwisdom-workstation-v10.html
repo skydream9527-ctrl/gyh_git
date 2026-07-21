@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TokenWisdom · Workstation v10</title>
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --panel: #ffffff;
+      --panel-soft: #f1f4f8;
+      --ink: #14171f;
+      --muted: #667085;
+      --faint: #9aa3b2;
+      --line: #e4e7ec;
+      --line-strong: #d0d5dd;
+      --blue: #245de8;
+      --blue-soft: #eff5ff;
+      --green: #07885f;
+      --green-soft: #ecfdf3;
+      --amber: #b54708;
+      --amber-soft: #fffaeb;
+      --red: #b42318;
+      --red-soft: #fef3f2;
+      --violet: #6941c6;
+      --violet-soft: #f4f3ff;
+      --shadow: 0 18px 46px rgba(16, 24, 40, .08);
+      --shadow-soft: 0 8px 22px rgba(16, 24, 40, .055);
+      --radius-xl: 24px;
+      --radius-lg: 18px;
+      --radius: 14px;
+      --body: "Avenir Next", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      --mono: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; color: var(--ink); background: var(--bg); font-family: var(--body); }
+    h1, h2, h3, p { margin: 0; }
+    button, input, textarea { font: inherit; }
+    button { cursor: pointer; }
+
+    .app { display: grid; grid-template-columns: 236px minmax(0, 1fr) 360px; min-height: 100vh; }
+    .sidebar { position: sticky; top: 0; height: 100vh; border-right: 1px solid var(--line); background: rgba(255,255,255,.92); backdrop-filter: blur(18px); overflow: auto; }
+    .brand { display: flex; gap: 11px; align-items: center; padding: 22px 18px 18px; border-bottom: 1px solid var(--line); }
+    .brand-mark { width: 40px; height: 40px; border-radius: 14px; display: grid; place-items: center; color: #fff; font-weight: 900; background: linear-gradient(145deg, #111827, var(--blue)); }
+    .brand strong { display: block; font-size: 15px; letter-spacing: -.02em; }
+    .brand span { display: block; margin-top: 2px; color: var(--muted); font-size: 12px; }
+    .nav { padding: 14px 12px; display: grid; gap: 6px; }
+    .nav-label { padding: 12px 8px 6px; color: var(--faint); font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
+    .nav-btn { width: 100%; display: flex; align-items: center; gap: 10px; border: 0; border-radius: 13px; padding: 11px 10px; color: var(--muted); background: transparent; text-align: left; }
+    .nav-btn:hover { color: var(--ink); background: var(--panel-soft); }
+    .nav-btn.active { color: var(--blue); background: var(--blue-soft); font-weight: 760; }
+    .nav-btn .icon { width: 24px; text-align: center; }
+    .side-card { margin: 16px 12px; padding: 13px; border: 1px solid var(--line); border-radius: 16px; background: var(--panel-soft); color: var(--muted); font-size: 12px; line-height: 1.55; }
+
+    .main { min-width: 0; padding: 18px 20px 44px; }
+    .topbar { position: sticky; top: 0; z-index: 20; background: linear-gradient(180deg, rgba(246,247,249,.98), rgba(246,247,249,.82), transparent); backdrop-filter: blur(12px); padding-bottom: 14px; }
+    .command { min-height: 48px; display: flex; align-items: center; justify-content: space-between; gap: 12px; border: 1px solid var(--line); border-radius: 16px; background: rgba(255,255,255,.94); box-shadow: var(--shadow-soft); padding: 0 14px; }
+    .command-left { min-width: 0; display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 14px; }
+    kbd { padding: 4px 7px; border-radius: 8px; background: var(--panel-soft); color: var(--muted); font-family: var(--mono); font-size: 11px; }
+
+    .page { display: none; animation: fade .18s ease; }
+    .page.active { display: block; }
+    .page-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 16px; align-items: end; margin: 8px 0 18px; }
+    .eyebrow { margin-bottom: 7px; color: var(--blue); font-family: var(--mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; }
+    h1 { font-size: clamp(28px, 3vw, 42px); line-height: 1.1; letter-spacing: -.045em; }
+    h2 { font-size: 18px; letter-spacing: -.02em; }
+    h3 { font-size: 15px; letter-spacing: -.01em; }
+    .subtle { color: var(--muted); font-size: 14px; line-height: 1.65; }
+
+    .btn { min-height: 36px; padding: 0 12px; border: 1px solid var(--line-strong); border-radius: 10px; color: var(--ink); background: #fff; font-size: 13px; font-weight: 720; }
+    .btn:hover { transform: translateY(-1px); box-shadow: var(--shadow-soft); }
+    .btn.primary { color: #fff; background: var(--blue); border-color: var(--blue); }
+    .btn.ghost { color: var(--muted); background: transparent; }
+    .btn.danger { color: var(--red); background: var(--red-soft); border-color: #fecdca; }
+    .btn.drawer-active { color: var(--blue); background: var(--blue-soft); border-color: #c7d7fe; }
+
+    .pill { display: inline-flex; align-items: center; gap: 6px; width: fit-content; min-height: 24px; padding: 0 9px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); background: #fff; font-size: 12px; font-weight: 760; white-space: nowrap; }
+    .pill.blue { color: var(--blue); background: var(--blue-soft); border-color: #c7d7fe; }
+    .pill.green { color: var(--green); background: var(--green-soft); border-color: #bbf7d0; }
+    .pill.amber { color: var(--amber); background: var(--amber-soft); border-color: #fedf89; }
+    .pill.red { color: var(--red); background: var(--red-soft); border-color: #fecdca; }
+    .pill.violet { color: var(--violet); background: var(--violet-soft); border-color: #d9d6fe; }
+
+    .grid { display: grid; gap: 14px; }
+    .cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .workstation-hero { border: 1px solid var(--line); border-radius: var(--radius-xl); background: linear-gradient(145deg, #111827, #1e3a8a 62%, #245de8); color: #fff; box-shadow: var(--shadow); padding: 20px; overflow: hidden; position: relative; }
+    .workstation-hero::after { content: ""; position: absolute; right: -90px; top: -90px; width: 270px; height: 270px; border-radius: 999px; background: rgba(255,255,255,.12); }
+    .workstation-hero p { max-width: 780px; color: rgba(255,255,255,.78); margin-top: 8px; }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; position: relative; z-index: 1; }
+    .hero-actions .btn { border-color: rgba(255,255,255,.32); }
+
+    .status { border: 1px solid var(--line); border-radius: 16px; background: #fff; padding: 14px; box-shadow: var(--shadow-soft); }
+    .status b { display: block; font-size: 24px; letter-spacing: -.04em; }
+    .status span { display: block; margin-top: 4px; color: var(--muted); font-size: 12px; line-height: 1.45; }
+    .card { border: 1px solid var(--line); border-radius: var(--radius-lg); background: rgba(255,255,255,.96); box-shadow: var(--shadow-soft); overflow: hidden; }
+    .card.pad { padding: 16px; }
+    .card-head { min-height: 54px; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 15px 16px; border-bottom: 1px solid var(--line); }
+    .card-body { padding: 16px; }
+
+    .list { display: grid; gap: 10px; }
+    .list-item { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 11px; border: 1px solid var(--line); border-radius: 14px; background: #fff; padding: 12px; }
+    .list-item.compact { grid-template-columns: minmax(0, 1fr) auto; }
+    .marker { width: 34px; height: 34px; border-radius: 11px; display: grid; place-items: center; color: var(--blue); background: var(--blue-soft); font-weight: 850; }
+    .list-item strong { display: block; font-size: 14px; }
+    .list-item span { display: block; margin-top: 3px; color: var(--muted); font-size: 12px; line-height: 1.45; }
+    .artifact-card { border: 1px solid var(--line); border-radius: 16px; background: #fff; padding: 15px; min-height: 148px; box-shadow: var(--shadow-soft); }
+    .artifact-card h3 { margin: 10px 0 6px; }
+    .artifact-card p { color: var(--muted); font-size: 13px; line-height: 1.55; }
+    .meta { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 12px; }
+
+    .workspace-shell { display: grid; grid-template-columns: minmax(460px, 1.05fr) minmax(380px, .95fr); gap: 14px; align-items: stretch; }
+    .panel { border: 1px solid var(--line); border-radius: var(--radius-lg); background: rgba(255,255,255,.96); box-shadow: var(--shadow-soft); overflow: hidden; min-height: 650px; display: flex; flex-direction: column; }
+    .panel-head { min-height: 56px; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 15px 16px; border-bottom: 1px solid var(--line); }
+    .panel-body { padding: 16px; flex: 1; overflow: auto; }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 14px; }
+
+    .doc-title h2, .report-title h2 { font-size: 24px; margin-bottom: 6px; }
+    .doc-block, .finding { border: 1px solid var(--line); border-radius: 15px; background: #fff; padding: 12px; margin-top: 10px; }
+    .doc-block strong, .finding strong { display: block; font-size: 14px; margin-bottom: 5px; }
+    .doc-block p, .finding p { color: var(--muted); font-size: 13px; line-height: 1.58; }
+    .metric-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 14px 0; }
+    .metric { border: 1px solid var(--line); border-radius: 15px; background: var(--panel-soft); padding: 12px; }
+    .metric b { display: block; font-size: 22px; letter-spacing: -.04em; }
+    .metric span { display: block; margin-top: 4px; color: var(--muted); font-size: 12px; line-height: 1.4; }
+    .chart { height: 160px; border: 1px solid var(--line); border-radius: 16px; background: linear-gradient(180deg, #fff, var(--panel-soft)); padding: 16px; display: grid; align-items: end; grid-template-columns: repeat(12, 1fr); gap: 7px; margin-bottom: 14px; }
+    .bar { border-radius: 9px 9px 3px 3px; background: linear-gradient(180deg, #78a4ff, #245de8); min-height: 20px; }
+    .bar.warn { background: linear-gradient(180deg, #ffc772, #b54708); }
+
+    .chat-stream { display: grid; gap: 12px; padding-bottom: 10px; }
+    .turn { display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 11px; align-items: start; }
+    .avatar { width: 36px; height: 36px; display: grid; place-items: center; border-radius: 13px; color: #fff; background: #111827; font-size: 12px; font-weight: 850; }
+    .avatar.twin { background: var(--blue); }
+    .avatar.agent { background: var(--violet); }
+    .avatar.sql { background: var(--green); }
+    .bubble { border: 1px solid var(--line); border-radius: 16px; padding: 12px; background: var(--panel-soft); }
+    .bubble strong { display: block; font-size: 13px; margin-bottom: 5px; }
+    .bubble p { color: var(--muted); font-size: 13px; line-height: 1.6; }
+    .tool-card { margin-top: 9px; border: 1px solid #bbf7d0; border-radius: 13px; background: var(--green-soft); padding: 10px; color: #05603a; font-size: 12px; line-height: 1.45; }
+    .composer { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; padding: 14px; border-top: 1px solid var(--line); background: var(--panel-soft); }
+    .composer textarea { width: 100%; min-height: 76px; border: 1px solid var(--line); border-radius: 14px; padding: 12px; outline: none; resize: vertical; }
+
+    .dock { position: sticky; top: 0; height: 100vh; border-left: 1px solid var(--line); background: #fff; overflow: auto; }
+    .dock-inner { padding: 18px 16px; }
+    .dock-card { border: 1px solid var(--line); border-radius: 20px; background: #fff; box-shadow: var(--shadow); overflow: hidden; }
+    .dock-head { padding: 15px; border-bottom: 1px solid var(--line); background: linear-gradient(180deg, var(--blue-soft), #fff); }
+    .dock-title { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+    .dock-title strong { display: block; font-size: 15px; }
+    .dock-title span { display: block; margin-top: 3px; color: var(--muted); font-size: 12px; line-height: 1.45; }
+    .dock-chat { display: grid; gap: 10px; padding: 14px; max-height: 300px; overflow: auto; }
+    .dock-msg { padding: 10px 11px; border-radius: 14px; background: var(--panel-soft); font-size: 12px; line-height: 1.55; }
+    .dock-msg.me { margin-left: 42px; color: #fff; background: #111827; }
+    .dock-msg.twin { margin-right: 28px; color: #174ea6; background: var(--blue-soft); }
+    .dock-input { display: flex; gap: 8px; padding: 12px; border-top: 1px solid var(--line); }
+    .dock-input input { min-width: 0; flex: 1; border: 1px solid var(--line); border-radius: 10px; padding: 0 10px; outline: none; }
+    .dock-section { margin-top: 14px; }
+    .dock-section h3 { margin-bottom: 8px; }
+    .suggestion { border: 1px solid #c7d7fe; border-radius: 15px; background: var(--blue-soft); padding: 12px; margin-bottom: 10px; }
+    .suggestion strong { display: block; font-size: 13px; margin-bottom: 5px; }
+    .suggestion p { color: #174ea6; font-size: 12px; line-height: 1.55; }
+    .confirm-card { border: 1px solid #fedf89; border-radius: 15px; background: var(--amber-soft); padding: 12px; margin-bottom: 10px; }
+    .confirm-card strong { display: block; font-size: 13px; margin-bottom: 5px; }
+    .confirm-card p { color: #7a3f00; font-size: 12px; line-height: 1.55; }
+    .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+
+    .drawer-backdrop { position: fixed; inset: 0; background: rgba(17,24,39,.18); opacity: 0; pointer-events: none; transition: opacity .18s ease; z-index: 40; }
+    .drawer-backdrop.open { opacity: 1; pointer-events: auto; }
+    .drawer { position: fixed; top: 0; right: 0; width: min(440px, calc(100vw - 24px)); height: 100vh; background: #fff; border-left: 1px solid var(--line); box-shadow: -18px 0 50px rgba(16,24,40,.16); transform: translateX(104%); transition: transform .2s ease; z-index: 50; display: flex; flex-direction: column; }
+    .drawer.open { transform: translateX(0); }
+    .drawer-head { min-height: 62px; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px; border-bottom: 1px solid var(--line); }
+    .drawer-body { padding: 16px; overflow: auto; display: grid; gap: 12px; }
+    .drawer-section { border: 1px solid var(--line); border-radius: 15px; background: var(--panel-soft); padding: 12px; }
+    .drawer-section strong { display: block; font-size: 13px; margin-bottom: 5px; }
+    .drawer-section span, .drawer-section p { color: var(--muted); font-size: 12px; line-height: 1.5; }
+    .mini-list { display: grid; gap: 8px; }
+    .mini-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; border: 1px solid var(--line); border-radius: 13px; padding: 10px; background: #fff; }
+    .mini-row strong { display: block; font-size: 13px; }
+    .mini-row span { display: block; margin-top: 3px; color: var(--muted); font-size: 12px; }
+
+    @keyframes fade { from { opacity: .45; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 1280px) { .app { grid-template-columns: 220px minmax(0, 1fr); } .dock { grid-column: 1 / -1; position: relative; height: auto; border-left: 0; border-top: 1px solid var(--line); } }
+    @media (max-width: 980px) { .app { grid-template-columns: 1fr; } .sidebar { position: relative; height: auto; } .page-head, .cols-2, .cols-3, .cols-4, .workspace-shell, .metric-grid, .composer { grid-template-columns: 1fr; } }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand"><div class="brand-mark">TW</div><div><strong>TokenWisdom</strong><span>Workstation + Workspace</span></div></div>
+      <nav class="nav" aria-label="TokenWisdom Navigation">
+        <div class="nav-label">Platform</div>
+        <button class="nav-btn active" data-page="workstation"><span class="icon">⌂</span>Workstation</button>
+        <div class="nav-label">Workspace</div>
+        <button class="nav-btn" data-page="data"><span class="icon">▦</span>数据分析工作台</button>
+        <button class="nav-btn" data-page="normal"><span class="icon">▣</span>普通工作台</button>
+        <div class="nav-label">Hidden Panels</div>
+        <button class="nav-btn" data-drawer="status"><span class="icon">◷</span>状态 / 任务</button>
+        <button class="nav-btn" data-drawer="agents"><span class="icon">◎</span>Agent / 工具</button>
+        <button class="nav-btn" data-drawer="files"><span class="icon">◩</span>文件 / 数据</button>
+      </nav>
+      <div class="side-card">概念区分：Workstation 是平台最外层页面；Workspace 是点击具体任务、文档或 Agent 后进入的工作页面。</div>
+    </aside>
+
+    <main class="main">
+      <div class="topbar"><div class="command"><div class="command-left"><kbd>⌘ K</kbd><span>Workstation 展示运行内容；Workspace 承接具体工作。</span></div><button class="btn primary" data-page="workstation">回到 Workstation</button></div></div>
+
+      <section class="page active" id="page-workstation" data-title="Workstation">
+        <div class="page-head"><div><div class="eyebrow">Main Workstation</div><h1>Workstation 是平台最外层主页，用来展示正在运行的内容和核心产物。</h1><p class="subtle">它不是具体工作台。用户在这里看到定时任务、当前一次对话任务、最近任务、核心产物，并点击进入文档或对应 Workspace。</p></div><button class="btn primary">新建任务</button></div>
+        <div class="workstation-hero"><span class="pill blue">Workstation ≠ Workspace</span><h1 style="margin-top:10px">今天有 4 类内容值得继续推进</h1><p>分身已经将运行中的任务、最近对话任务、历史任务和核心产物整理为可点击入口。进入后会根据内容类型打开“数据分析工作台”或“普通工作台”。</p><div class="hero-actions"><button class="btn primary" data-page="data">进入数据分析工作台</button><button class="btn" data-page="normal">进入普通工作台</button></div></div>
+        <div class="grid cols-4" style="margin-top:14px"><div class="status"><b>3</b><span>定时任务运行中</span></div><div class="status"><b>1</b><span>当前对话任务</span></div><div class="status"><b>8</b><span>最近任务</span></div><div class="status"><b>12</b><span>核心产物</span></div></div>
+
+        <div class="grid cols-2" style="margin-top:14px">
+          <div class="card"><div class="card-head"><h2>定时任务</h2><span class="pill amber">Autopilot</span></div><div class="card-body list"><div class="list-item"><div class="marker">D</div><div><strong>每日 DAU 波动巡检</strong><span>每天 10:00 自动查询核心指标，异常时请求用户确认。</span></div><button class="btn" data-page="data">打开</button></div><div class="list-item"><div class="marker">W</div><div><strong>每周文档沉淀</strong><span>整理一周任务产物，生成总结和记忆候选。</span></div><button class="btn" data-page="normal">打开</button></div></div></div>
+          <div class="card"><div class="card-head"><h2>当前一次对话的任务</h2><span class="pill blue">Current</span></div><div class="card-body list"><div class="list-item"><div class="marker">A</div><div><strong>浏览器 6.20 DAU 下滑归因分析</strong><span>用户正在与 Twin + Data Agent 讨论，报告草稿已生成。</span></div><button class="btn primary" data-page="data">进入</button></div><div class="list-item"><div class="marker">P</div><div><strong>TokenWisdom 页面概念澄清</strong><span>区分 Workstation 与 Workspace，等待沉淀为产品原则。</span></div><button class="btn" data-page="normal">进入</button></div></div></div>
+          <div class="card"><div class="card-head"><h2>最近任务</h2><span class="pill green">Recent</span></div><div class="card-body list"><div class="list-item compact"><div><strong>设计数据分析工作台 v9</strong><span>核心为产出物 + 对话窗口，其他内容抽屉隐藏。</span></div><button class="btn" data-page="data">打开</button></div><div class="list-item compact"><div><strong>ICE 全页面映射 v7</strong><span>参考 ICE 的 Dashboard / Workspace / Agent / Skill。</span></div><button class="btn" data-page="normal">打开</button></div><div class="list-item compact"><div><strong>任务工作台 v8</strong><span>选择具体任务或工具 Agent 后进入的工作页面。</span></div><button class="btn" data-page="normal">打开</button></div></div></div>
+          <div class="card"><div class="card-head"><h2>核心产物</h2><span class="pill violet">Artifacts</span></div><div class="card-body grid cols-2"><div class="artifact-card"><span class="pill green">Report</span><h3>DAU 下滑归因报告</h3><p>数据分析工作台产出，可继续补查 ANR。</p><div class="meta"><button class="btn" data-page="data">进入工作台</button></div></div><div class="artifact-card"><span class="pill blue">Doc</span><h3>Workstation 概念定义</h3><p>普通工作台产出，可沉淀为产品文档。</p><div class="meta"><button class="btn" data-page="normal">打开文档</button></div></div></div></div>
+        </div>
+      </section>
+
+      <section class="page" id="page-data" data-title="数据分析工作台">
+        <div class="page-head"><div><div class="eyebrow">Data Analysis Workspace</div><h1>数据分析工作台用于展示分析视图，核心是分析产出物和对话窗口。</h1><p class="subtle">状态、Agent、文件、对话列表、执行记录默认隐藏，通过按钮抽屉打开。</p></div><button class="btn primary">请求用户确认</button></div>
+        <div class="toolbar"><button class="btn drawer-toggle" data-drawer="status">任务状态</button><button class="btn drawer-toggle" data-drawer="agents">Agent / 工具</button><button class="btn drawer-toggle" data-drawer="files">文件 / 数据</button><button class="btn drawer-toggle" data-drawer="conversations">对话列表</button><button class="btn drawer-toggle" data-drawer="timeline">执行记录</button></div>
+        <div class="workspace-shell">
+          <section class="panel"><div class="panel-head"><h2>工作产出物 · DAU 归因报告</h2><span class="pill amber">等待确认</span></div><div class="panel-body"><div class="report-title"><h2>DAU 下滑主要由新版本冷启动耗时上升 + 渠道流量回落共同造成</h2><p class="subtle">数据来自 Kyuubi 查询与历史任务文件，当前为报告草稿 v0.7。</p></div><div class="metric-grid"><div class="metric"><b>-3.8%</b><span>DAU 环比</span></div><div class="metric"><b>+420ms</b><span>P95 冷启动</span></div><div class="metric"><b>-12.6%</b><span>渠道 A 新增</span></div><div class="metric"><b>72%</b><span>可解释占比</span></div></div><div class="chart"><div class="bar" style="height:72%"></div><div class="bar" style="height:74%"></div><div class="bar" style="height:78%"></div><div class="bar" style="height:75%"></div><div class="bar warn" style="height:60%"></div><div class="bar warn" style="height:58%"></div><div class="bar warn" style="height:61%"></div><div class="bar" style="height:65%"></div><div class="bar" style="height:68%"></div><div class="bar" style="height:71%"></div><div class="bar" style="height:70%"></div><div class="bar" style="height:73%"></div></div><div class="finding"><strong>结论 1：版本性能指标异常与 DAU 下滑同日出现</strong><p>6.20 版本灰度后，P95 冷启动耗时从 1.8s 上升到 2.2s，影响新用户首日留存和次日回访。</p></div><div class="finding"><strong>结论 2：渠道 A 流量回落解释约 31% 的下滑</strong><p>渠道 A 新增用户下降 12.6%，但老用户活跃未同步下滑，因此该因素是辅助原因。</p></div></div></section>
+          <section class="panel"><div class="panel-head"><h2>对话窗口 · Twin + Data Agent</h2><span class="pill blue">核心工作区</span></div><div class="panel-body"><div class="chat-stream"><div class="turn"><div class="avatar">我</div><div class="bubble"><strong>User</strong><p>帮我分析 6 月 20 日之后浏览器 DAU 下滑的主要原因。</p></div></div><div class="turn"><div class="avatar twin">T</div><div class="bubble"><strong>Wisdom Twin</strong><p>我会让 Data Agent 分层查询 DAU、版本、渠道和性能指标。高风险动作只生成建议。</p></div></div><div class="turn"><div class="avatar agent">D</div><div class="bubble"><strong>Data Analysis Agent</strong><p>已拆成三个查询：DAU 趋势、版本维度、渠道维度。</p><div class="tool-card">Tool call · kyuubi_query · success · rows: 14,238</div></div></div><div class="turn"><div class="avatar sql">K</div><div class="bubble"><strong>Kyuubi Tool</strong><p>6.20 版本用户 DAU 下滑更明显，渠道 A 新增流量同步下降。</p></div></div></div></div><div class="composer"><textarea placeholder="继续提问，例如：继续查 ANR 和崩溃率…"></textarea><button class="btn primary">发送</button></div></section>
+        </div>
+      </section>
+
+      <section class="page" id="page-normal" data-title="普通工作台">
+        <div class="page-head"><div><div class="eyebrow">General Workspace</div><h1>普通工作台包含文档和对话窗口，非核心内容同样通过按钮隐藏。</h1><p class="subtle">适合产品方案、代码方案、资料整理、日常事务等非分析视图任务。</p></div><button class="btn primary">保存文档</button></div>
+        <div class="toolbar"><button class="btn drawer-toggle" data-drawer="status">任务状态</button><button class="btn drawer-toggle" data-drawer="agents">Agent / 工具</button><button class="btn drawer-toggle" data-drawer="files">文件 / 文档</button><button class="btn drawer-toggle" data-drawer="conversations">对话列表</button><button class="btn drawer-toggle" data-drawer="timeline">执行记录</button></div>
+        <div class="workspace-shell">
+          <section class="panel"><div class="panel-head"><h2>文档 · Workstation 概念定义</h2><span class="pill green">可沉淀</span></div><div class="panel-body"><div class="doc-title"><h2>TokenWisdom 页面概念分层</h2><p class="subtle">这份文档由普通工作台产出，用于固化产品 IA。</p></div><div class="doc-block"><strong>1. Workstation</strong><p>平台最外层首页，用于展示用户正在运行的内容：定时任务、当前一次对话的任务、最近任务和核心产物。</p></div><div class="doc-block"><strong>2. Data Analysis Workspace</strong><p>用于数据分析类任务，核心展示分析视图和对话窗口，其余信息通过抽屉隐藏。</p></div><div class="doc-block"><strong>3. General Workspace</strong><p>用于普通任务，核心展示文档和对话窗口，状态、Agent、文件、对话列表通过按钮隐藏。</p></div><div class="doc-block"><strong>4. Digital Twin</strong><p>数字分身始终参与，负责维护上下文、提出建议、请求用户确认，不替用户最终确认。</p></div></div></section>
+          <section class="panel"><div class="panel-head"><h2>对话窗口 · Twin + Codex</h2><span class="pill blue">核心工作区</span></div><div class="panel-body"><div class="chat-stream"><div class="turn"><div class="avatar">我</div><div class="bubble"><strong>User</strong><p>请区分 Workstation 和 Workspace，并恢复主工作站。</p></div></div><div class="turn"><div class="avatar twin">T</div><div class="bubble"><strong>Wisdom Twin</strong><p>我会把 Workstation 作为平台首页，把数据分析和普通工作台作为进入后的具体工作页面。</p></div></div><div class="turn"><div class="avatar agent">C</div><div class="bubble"><strong>Codex</strong><p>建议新增 v10：一个 Workstation 首页 + 两类 Workspace，并统一抽屉隐藏非核心信息。</p></div></div></div></div><div class="composer"><textarea placeholder="继续修改文档，例如：把这段沉淀到产品方案…"></textarea><button class="btn primary">发送</button></div></section>
+        </div>
+      </section>
+    </main>
+
+    <aside class="dock" aria-label="Digital Twin Dock">
+      <div class="dock-inner"><div class="dock-card"><div class="dock-head"><div class="dock-title"><div><strong>Wisdom Twin</strong><span>当前页面：<b id="dock-page">Workstation</b></span></div><span class="pill blue">L3 Request</span></div></div><div class="dock-chat"><div class="dock-msg twin">已恢复主 Workstation。它展示运行内容和核心产物；具体工作进入数据分析或普通 Workspace。</div><div class="dock-msg me">这次概念要区分清楚。</div><div class="dock-msg twin">已区分：Workstation 是最外层页面，Workspace 是具体工作页面。</div></div><div class="dock-input"><input placeholder="问分身下一步…" /><button class="btn primary">Send</button></div></div><div class="dock-section"><h3>数字分身建议</h3><div class="suggestion"><strong>建议固化 IA</strong><p>把 Workstation / Data Workspace / General Workspace 写入产品方案。</p><div class="actions"><button class="btn primary">继续计划</button><button class="btn">稍后</button></div></div></div><div class="dock-section"><h3>待用户确认</h3><div class="confirm-card"><strong>确认 v10 概念分层？</strong><p>新增 v10 HTML 并归档；后续原型以 Workstation 为平台首页。</p><div class="actions"><button class="btn primary">确认执行</button><button class="btn">修改范围</button><button class="btn danger">拒绝</button></div></div></div></div>
+    </aside>
+  </div>
+
+  <div class="drawer-backdrop" id="drawerBackdrop"></div>
+  <aside class="drawer" id="drawer" aria-label="Hidden workspace panel"><div class="drawer-head"><div><h2 id="drawerTitle">任务状态</h2><p class="subtle" id="drawerSubtitle">非核心信息通过抽屉展示。</p></div><button class="btn" id="closeDrawer">关闭</button></div><div class="drawer-body" id="drawerBody"></div></aside>
+
+  <template id="drawer-status"><div class="drawer-section"><strong>状态 / 任务</strong><p>Workstation: 汇总运行内容。Workspace: 当前任务进度、阶段、待确认动作。</p></div><div class="mini-list"><div class="mini-row"><div><strong>当前阶段</strong><span>概念分层确认</span></div><span class="pill blue">Step 2</span></div><div class="mini-row"><div><strong>待确认</strong><span>是否将 v10 作为主设计</span></div><span class="pill amber">Waiting</span></div></div></template>
+  <template id="drawer-agents"><div class="drawer-section"><strong>Agent / 工具</strong><p>Twin 负责协调；Data Agent 负责分析；Codex 负责文档和原型。</p></div><div class="mini-list"><div class="mini-row"><div><strong>Wisdom Twin</strong><span>上下文、建议、确认请求</span></div><span class="pill blue">Always</span></div><div class="mini-row"><div><strong>Data Agent</strong><span>指标拆解与归因</span></div><span class="pill violet">Analysis</span></div><div class="mini-row"><div><strong>Codex</strong><span>HTML 和文档生成</span></div><span class="pill green">Build</span></div></div></template>
+  <template id="drawer-files"><div class="drawer-section"><strong>文件 / 数据</strong><p>工作台核心区不展示文件列表，只在抽屉里查看输入输出。</p></div><div class="mini-list"><div class="mini-row"><div><strong>analysis_report_v07.md</strong><span>数据分析报告草稿</span></div><span class="pill green">Report</span></div><div class="mini-row"><div><strong>workstation_ia.md</strong><span>概念定义文档</span></div><span class="pill blue">Doc</span></div><div class="mini-row"><div><strong>dau_trend.csv</strong><span>查询结果</span></div><span class="pill amber">Data</span></div></div></template>
+  <template id="drawer-conversations"><div class="drawer-section"><strong>对话列表</strong><p>历史对话默认隐藏，当前对话始终在主视图。</p></div><div class="mini-list"><div class="mini-row"><div><strong>当前概念澄清</strong><span>Twin + Codex</span></div><span class="pill blue">Current</span></div><div class="mini-row"><div><strong>DAU 归因分析</strong><span>Twin + Data Agent</span></div><span class="pill green">Analysis</span></div></div></template>
+  <template id="drawer-timeline"><div class="drawer-section"><strong>执行记录</strong><p>工具调用、HITL 请求和归档事件。</p></div><div class="mini-list"><div class="mini-row"><div><strong>创建 v10 原型</strong><span>Codex 生成 HTML</span></div><span class="pill green">Done</span></div><div class="mini-row"><div><strong>归档索引</strong><span>等待更新</span></div><span class="pill amber">Pending</span></div></div></template>
+
+  <script>
+    const pages = Array.from(document.querySelectorAll('.page'));
+    const pageButtons = Array.from(document.querySelectorAll('[data-page]'));
+    const dockPage = document.getElementById('dock-page');
+    function showPage(name) {
+      pages.forEach((page) => page.classList.toggle('active', page.id === `page-${name}`));
+      document.querySelectorAll('.nav-btn[data-page]').forEach((btn) => btn.classList.toggle('active', btn.dataset.page === name));
+      const active = pages.find((page) => page.id === `page-${name}`);
+      if (active && dockPage) dockPage.textContent = active.dataset.title || name;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    pageButtons.forEach((button) => button.addEventListener('click', () => showPage(button.dataset.page)));
+
+    const drawer = document.getElementById('drawer');
+    const backdrop = document.getElementById('drawerBackdrop');
+    const drawerTitle = document.getElementById('drawerTitle');
+    const drawerBody = document.getElementById('drawerBody');
+    const closeDrawer = document.getElementById('closeDrawer');
+    const labels = { status: '状态 / 任务', agents: 'Agent / 工具', files: '文件 / 数据', conversations: '对话列表', timeline: '执行记录' };
+    function openDrawer(name) {
+      const template = document.getElementById(`drawer-${name}`);
+      if (!template) return;
+      drawerTitle.textContent = labels[name] || '详情';
+      drawerBody.innerHTML = template.innerHTML;
+      drawer.classList.add('open');
+      backdrop.classList.add('open');
+      document.querySelectorAll('[data-drawer]').forEach((btn) => btn.classList.toggle('drawer-active', btn.dataset.drawer === name));
+    }
+    function hideDrawer() { drawer.classList.remove('open'); backdrop.classList.remove('open'); document.querySelectorAll('[data-drawer]').forEach((btn) => btn.classList.remove('drawer-active')); }
+    document.querySelectorAll('[data-drawer]').forEach((button) => button.addEventListener('click', () => openDrawer(button.dataset.drawer)));
+    closeDrawer.addEventListener('click', hideDrawer);
+    backdrop.addEventListener('click', hideDrawer);
+    document.addEventListener('keydown', (event) => { if (event.key === 'Escape') hideDrawer(); });
+  </script>
+</body>
+</html>

@@ -1,0 +1,1545 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ICE-DATA-WORK · 已实现功能全景说明</title>
+<style>
+  :root {
+    --blue: #2563eb;
+    --blue-soft: #eff4ff;
+    --violet: #7c3aed;
+    --green: #16a34a;
+    --amber: #d97706;
+    --red: #dc2626;
+    --slate: #64748b;
+    --ink: #111827;
+    --text: #1f2937;
+    --dim: #6b7280;
+    --line: #e5e7eb;
+    --bg: #f6f7f9;
+    --card: #ffffff;
+    --sidebar: #0f172a;
+    --sidebar-dim: #94a3b8;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    --radius: 12px;
+    --shadow: 0 1px 3px rgba(15, 23, 42, .06), 0 8px 24px rgba(15, 23, 42, .04);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    color: var(--text);
+    background: var(--bg);
+    line-height: 1.65;
+    font-size: 15px;
+  }
+  a { color: var(--blue); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  code {
+    font-family: var(--mono);
+    font-size: .86em;
+    background: #f1f5f9;
+    color: #334155;
+    padding: 1px 6px;
+    border-radius: 5px;
+    border: 1px solid #e2e8f0;
+  }
+
+  /* ---------- 布局 ---------- */
+  .layout { display: flex; min-height: 100vh; }
+  .sidebar {
+    width: 280px;
+    background: var(--sidebar);
+    color: #e2e8f0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    flex-shrink: 0;
+    padding: 20px 0 40px;
+  }
+  .sidebar::-webkit-scrollbar { width: 8px; }
+  .sidebar::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+  .sb-brand { padding: 6px 22px 16px; border-bottom: 1px solid #1e293b; margin-bottom: 10px; }
+  .sb-brand b { font-size: 17px; color: #fff; letter-spacing: .5px; }
+  .sb-brand span { display: block; font-size: 11.5px; color: var(--sidebar-dim); margin-top: 4px; }
+  .sb-search { padding: 0 18px 12px; }
+  .sb-search input {
+    width: 100%; padding: 8px 11px; border-radius: 8px; border: 1px solid #334155;
+    background: #1e293b; color: #e2e8f0; font-size: 13px; outline: none;
+  }
+  .sb-search input::placeholder { color: #64748b; }
+  .sb-group { font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: #64748b; padding: 16px 22px 6px; font-weight: 700; }
+  .sb-link {
+    display: block; padding: 6px 22px 6px 24px; color: #cbd5e1; font-size: 13.3px;
+    border-left: 3px solid transparent; cursor: pointer;
+  }
+  .sb-link:hover { background: #1e293b; color: #fff; text-decoration: none; }
+  .sb-link.active { border-left-color: var(--blue); background: #172033; color: #fff; font-weight: 600; }
+
+  .main { flex: 1; min-width: 0; }
+  .content { max-width: 1080px; margin: 0 auto; padding: 40px 44px 100px; }
+
+  /* ---------- Hero ---------- */
+  .hero {
+    background: linear-gradient(135deg, #1e293b 0%, #2563eb 120%);
+    color: #fff; border-radius: 18px; padding: 40px 40px 36px; margin-bottom: 32px;
+    box-shadow: var(--shadow);
+  }
+  .hero .eyebrow { font-size: 12.5px; letter-spacing: 2px; text-transform: uppercase; color: #bfdbfe; margin-bottom: 12px; }
+  .hero h1 { margin: 0 0 12px; font-size: 30px; line-height: 1.25; }
+  .hero p { margin: 0; color: #dbeafe; max-width: 760px; font-size: 15px; }
+  .hero .flow {
+    display: inline-flex; gap: 10px; align-items: center; margin-top: 22px;
+    background: rgba(255,255,255,.1); padding: 8px 16px; border-radius: 999px; font-size: 14px; font-weight: 600;
+  }
+  .hero .flow .arrow { color: #93c5fd; }
+  .hero-stats { display: flex; flex-wrap: wrap; gap: 26px; margin-top: 26px; }
+  .hero-stats .s b { font-size: 24px; display: block; }
+  .hero-stats .s span { font-size: 12.5px; color: #bfdbfe; }
+
+  /* ---------- 章节 ---------- */
+  section { margin-bottom: 14px; scroll-margin-top: 20px; }
+  .sec-h { display: flex; align-items: center; gap: 12px; margin: 40px 0 6px; }
+  .sec-h .num {
+    font-family: var(--mono); font-size: 13px; font-weight: 700; color: var(--blue);
+    background: var(--blue-soft); border: 1px solid #dbeafe; border-radius: 8px; padding: 3px 9px;
+  }
+  .sec-h h2 { font-size: 23px; margin: 0; color: var(--ink); }
+  .sec-desc { color: var(--dim); margin: 4px 0 18px; max-width: 820px; }
+  .sub-h { font-size: 17px; color: var(--ink); margin: 26px 0 10px; padding-left: 12px; border-left: 4px solid var(--blue); }
+
+  /* ---------- 卡片 ---------- */
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 20px 22px; margin-bottom: 16px; box-shadow: var(--shadow);
+  }
+  .card > h3 { margin: 0 0 4px; font-size: 16.5px; color: var(--ink); display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+  .card .path { font-family: var(--mono); font-size: 12px; color: var(--slate); margin: 2px 0 14px; word-break: break-all; }
+  .card .lead { color: var(--dim); margin: 0 0 14px; font-size: 14px; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  @media (max-width: 860px) { .grid2, .grid3 { grid-template-columns: 1fr; } }
+
+  /* ---------- 表格 ---------- */
+  table { width: 100%; border-collapse: collapse; font-size: 13.6px; margin: 6px 0 4px; }
+  th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { background: #f8fafc; color: #475569; font-weight: 600; font-size: 12.5px; text-transform: uppercase; letter-spacing: .4px; }
+  tr:last-child td { border-bottom: none; }
+  td.el { font-weight: 600; color: var(--ink); white-space: nowrap; }
+  td .mono { font-family: var(--mono); font-size: 12.5px; color: var(--slate); }
+  tbody tr:hover { background: #fafbfc; }
+
+  /* ---------- 徽标 ---------- */
+  .pill {
+    display: inline-block; font-size: 11.5px; font-weight: 600; padding: 2px 9px; border-radius: 999px;
+    line-height: 1.7; white-space: nowrap;
+  }
+  .pill.blue { background: #dbeafe; color: #1d4ed8; }
+  .pill.green { background: #dcfce7; color: #15803d; }
+  .pill.amber { background: #fef3c7; color: #b45309; }
+  .pill.red { background: #fee2e2; color: #b91c1c; }
+  .pill.violet { background: #ede9fe; color: #6d28d9; }
+  .pill.slate { background: #f1f5f9; color: #475569; }
+
+  ul.clean { margin: 8px 0; padding-left: 20px; }
+  ul.clean li { margin-bottom: 5px; }
+  .note {
+    background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; padding: 12px 16px;
+    font-size: 13.5px; color: #92400e; margin: 12px 0;
+  }
+  .note.info { background: #eff6ff; border-color: #bfdbfe; color: #1e40af; }
+  .note.ok { background: #f0fdf4; border-color: #bbf7d0; color: #166534; }
+  .kicker { font-size: 12px; color: var(--slate); text-transform: uppercase; letter-spacing: .6px; font-weight: 700; margin: 18px 0 8px; }
+
+  .flowbox { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 14px 0; }
+  .flowbox .step { background: var(--blue-soft); border: 1px solid #dbeafe; color: #1e40af; padding: 7px 13px; border-radius: 9px; font-size: 13px; font-weight: 600; }
+  .flowbox .arrow { color: var(--slate); font-weight: 700; }
+
+  .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .footer { text-align: center; color: var(--dim); font-size: 13px; padding: 30px 0 10px; border-top: 1px solid var(--line); margin-top: 40px; }
+
+  .toc-mini { columns: 2; column-gap: 30px; }
+  @media (max-width: 700px) { .toc-mini { columns: 1; } }
+  .toc-mini a { display: block; padding: 3px 0; font-size: 14px; }
+
+  .hamburger { display: none; }
+  @media (max-width: 900px) {
+    .sidebar { position: fixed; left: -300px; z-index: 50; transition: left .25s; box-shadow: 4px 0 24px rgba(0,0,0,.3); }
+    .sidebar.open { left: 0; }
+    .content { padding: 20px 18px 80px; }
+    .hamburger {
+      display: flex; position: fixed; top: 14px; left: 14px; z-index: 60; width: 42px; height: 42px;
+      align-items: center; justify-content: center; background: var(--sidebar); color: #fff;
+      border: none; border-radius: 10px; font-size: 20px; cursor: pointer;
+    }
+    .hero { padding: 28px 22px; }
+    .hero h1 { font-size: 23px; }
+  }
+  .hl { background: #fef08a; border-radius: 3px; padding: 0 2px; }
+
+  /* ---------- 图示 / SVG ---------- */
+  .figure {
+    background: #fbfcfe; border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 18px 20px 12px; margin: 16px 0; overflow-x: auto;
+  }
+  .figure svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  .figure-cap { color: var(--slate); font-size: 12.5px; margin-top: 10px; text-align: center; }
+  svg text { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; margin-top: 10px; font-size: 12.5px; color: var(--slate); }
+  .legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
+  /* 线框示意图（mockup）配色，供 SVG 内 class 复用 */
+  .mk-win { fill: #ffffff; stroke: #cbd5e1; }
+  .mk-bar { fill: #0f172a; }
+  .mk-side { fill: #f1f5f9; stroke: #e2e8f0; }
+  .mk-btn { fill: #2563eb; }
+  .mk-btn2 { fill: #eff4ff; stroke: #bfdbfe; }
+  .mk-danger { fill: #dc2626; }
+  .mk-box { fill: #ffffff; stroke: #e5e7eb; }
+  .mk-line { fill: #e2e8f0; }
+  .mk-t { fill: #334155; }
+  .mk-tw { fill: #ffffff; }
+  .mk-dim { fill: #94a3b8; }
+  .mk-cap { fill: #b45309; font-weight: 600; }
+</style>
+</head>
+<body>
+<button class="hamburger" onclick="document.querySelector('.sidebar').classList.toggle('open')">☰</button>
+<div class="layout">
+  <!-- ============ 侧边导航 ============ -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sb-brand">
+      <b>ICE-DATA-WORK</b>
+      <span>已实现功能全景说明</span>
+    </div>
+    <div class="sb-search">
+      <input type="text" id="navSearch" placeholder="🔍 过滤章节…" oninput="filterNav(this.value)" />
+    </div>
+
+    <div class="sb-group">总览</div>
+    <a class="sb-link" href="#rationale">设计理念 · 为什么</a>
+    <a class="sb-link" href="#overview">项目概述</a>
+    <a class="sb-link" href="#architecture">系统架构与技术栈</a>
+    <a class="sb-link" href="#concept">核心理念 User→Twin→Agents</a>
+    <a class="sb-link" href="#navigation">全局导航与布局</a>
+
+    <div class="sb-group">前端页面（逐一说明）</div>
+    <a class="sb-link" href="#page-login">1 · 登录 / 注册</a>
+    <a class="sb-link" href="#page-workbench">2 · 工作台 Workbench</a>
+    <a class="sb-link" href="#page-board">3 · 任务看板 Board</a>
+    <a class="sb-link" href="#page-newmission">4 · 新建任务 New Mission</a>
+    <a class="sb-link" href="#page-workspace">5 · 任务工作区 Workspace</a>
+    <a class="sb-link" href="#page-agents">6 · Agent Hub</a>
+    <a class="sb-link" href="#page-agentdetail">7 · Agent 详情</a>
+    <a class="sb-link" href="#page-knowledge">8 · 知识与产物</a>
+    <a class="sb-link" href="#page-history">9 · 任务历史</a>
+    <a class="sb-link" href="#page-public">10 · 公共内容</a>
+    <a class="sb-link" href="#page-approvals">11 · 审批与审计</a>
+    <a class="sb-link" href="#page-admin">12 · 管理后台</a>
+    <a class="sb-link" href="#page-runtime">13 · 本机 Runtime</a>
+    <a class="sb-link" href="#page-grants">14 · 跨用户授权</a>
+    <a class="sb-link" href="#page-squads">15 · Agent 小队</a>
+    <a class="sb-link" href="#page-autopilots">16 · 自动任务</a>
+    <a class="sb-link" href="#page-team">17 · 团队空间</a>
+    <a class="sb-link" href="#page-project">18 · 项目空间</a>
+    <a class="sb-link" href="#page-twin">19 · Twin 管理</a>
+    <a class="sb-link" href="#components">常驻交互组件</a>
+
+    <div class="sb-group">后端运行逻辑</div>
+    <a class="sb-link" href="#backend">后端架构总览</a>
+    <a class="sb-link" href="#runtime">对话运行时与 A2A 编排</a>
+    <a class="sb-link" href="#context">上下文分层组装</a>
+    <a class="sb-link" href="#llm">LLM 网关与成本</a>
+    <a class="sb-link" href="#tools">内置工具集</a>
+    <a class="sb-link" href="#sandbox">代码沙盒</a>
+    <a class="sb-link" href="#memory">记忆隔离与复用</a>
+    <a class="sb-link" href="#skills">技能自演进</a>
+    <a class="sb-link" href="#governance">安全与治理</a>
+
+    <div class="sb-group">Agent 实现能力</div>
+    <a class="sb-link" href="#agents-cap">内置 Agent 清单</a>
+    <a class="sb-link" href="#agent-model">Agent 能力模型</a>
+    <a class="sb-link" href="#skill-assets">Skill 资产库</a>
+
+    <div class="sb-group">平台与集成</div>
+    <a class="sb-link" href="#platform">平台扩展能力</a>
+    <a class="sb-link" href="#integration">外部集成</a>
+    <a class="sb-link" href="#api">API 端点总览</a>
+    <a class="sb-link" href="#config">特性开关与部署</a>
+  </nav>
+
+  <!-- ============ 正文 ============ -->
+  <main class="main">
+  <div class="content">
+
+    <div class="hero">
+      <div class="eyebrow">Team Data Workbench · 功能全景</div>
+      <h1>ICE-DATA-WORK：人 + AI 分身 + 工具 Agent<br/>在同一块任务看板上协作的团队数据工作台</h1>
+      <p>你对自己的数字分身（Wisdom Twin）说话，分身去协调专业 Agent 干活，高风险动作回来请你确认。底座为 FastAPI + React + G3 文件优先存储，融合分级授权、Agent 即同事、看板与运行时。本页逐一说明前端每个页面的按钮与操作框、后端运行逻辑，以及 Agent 的实现能力。</p>
+      <div class="flow"><span>User</span><span class="arrow">→</span><span>Wisdom Twin</span><span class="arrow">→</span><span>Agents</span></div>
+      <div class="hero-stats">
+        <div class="s"><b>19</b><span>前端功能页面</span></div>
+        <div class="s"><b>40+</b><span>后端服务模块</span></div>
+        <div class="s"><b>24</b><span>API 路由域</span></div>
+        <div class="s"><b>11+</b><span>内置 Agent</span></div>
+        <div class="s"><b>18</b><span>Skill 资产</span></div>
+        <div class="s"><b>M0–M18</b><span>里程碑全部完成</span></div>
+      </div>
+    </div>
+
+    <!-- ===================== 项目概述 ===================== -->
+    <section id="overview">
+      <div class="sec-h"><span class="num">00</span><h2>项目概述</h2></div>
+      <p class="sec-desc">ICE-DATA-WORK 是一个面向团队的数据智能工作台。核心工作方式是「用户 → 数字分身（Twin） → 工具 Agent」的三层协作：用户把目标交给自己的 Twin，Twin 负责编排合适的专业 Agent 接力干活，任何高风险动作（写文件、跑命令、发消息、付费调用、固化记忆、跨空间读取）都会回到用户面前请求确认。</p>
+
+      <div class="grid3">
+        <div class="card">
+          <h3>🧑‍🤝‍🧑 协作现场</h3>
+          <p class="lead">任务看板上，人和 Agent 都是一等的 assignee。同一个任务里，用户、Twin、多个工具 Agent 可以在一条对话流里流式接力。</p>
+        </div>
+        <div class="card">
+          <h3>🔒 安全先于智能</h3>
+          <p class="lead">三轴权限（平台角色 × 成员角色 × Twin 等级）+ 高风险动作必须确认 + 用户贡献代码一律沙盒执行 + 全程审计 + 一键暂停。</p>
+        </div>
+        <div class="card">
+          <h3>🧠 越用越懂你</h3>
+          <p class="lead">记忆分区隔离（默认私有、显式共享）+ 技能自演进（跑通的代码沉淀为可复用 Skill）+ Twin 成熟度成长。</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>本页涵盖的三大部分</h3>
+        <div class="toc-mini">
+          <a href="#navigation">① 前端：全局导航与布局</a>
+          <a href="#page-workspace">① 前端：19 个页面的按钮与操作框</a>
+          <a href="#components">① 前端：常驻交互组件（Twin Dock / ⌘K）</a>
+          <a href="#backend">② 后端：架构与文件优先存储</a>
+          <a href="#runtime">② 后端：对话运行时与多 Agent 编排</a>
+          <a href="#governance">② 后端：安全与治理机制</a>
+          <a href="#agents-cap">③ Agent：11+ 内置 Agent 能力</a>
+          <a href="#skill-assets">③ Agent：18 个 Skill 资产</a>
+          <a href="#platform">③ Agent：平台扩展与外部集成</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== 系统架构 ===================== -->
+    <section id="architecture">
+      <div class="sec-h"><span class="num">01</span><h2>系统架构与技术栈</h2></div>
+      <p class="sec-desc">前后端分离；后端 FastAPI，前端 React 18 + Vite + TypeScript + Zustand；存储遵循 G3「文件优先」不变量——文件系统是唯一真相源，SQLite 与 pgvector 都是可重建的派生索引。</p>
+
+      <div class="grid2">
+        <div class="card">
+          <h3>技术栈</h3>
+          <table>
+            <tr><td class="el">后端</td><td>FastAPI · Python · JWT / 米盾(Aegis) 双认证 · 统一错误信封</td></tr>
+            <tr><td class="el">前端</td><td>React 18 · Vite · TypeScript · Zustand · React Router</td></tr>
+            <tr><td class="el">存储</td><td>G3 文件优先（JSON / JSONL / .memory.md）+ SQLite 派生索引 + 可选 Postgres+pgvector 语义检索</td></tr>
+            <tr><td class="el">实时</td><td>WebSocket 流式对话（逐 token 推送 + 工具卡 + 转交卡）</td></tr>
+            <tr><td class="el">模型</td><td>mify 网关（OpenAI 兼容）/ Anthropic 直连 / 无 key 时 mock 流降级</td></tr>
+          </table>
+        </div>
+        <div class="card">
+          <h3>四层空间（G3 文件优先）</h3>
+          <table>
+            <tr><td class="el">任务空间</td><td><code>tasks/{tid}/</code> — 对话、文件、计划、过程记忆（不跨任务）</td></tr>
+            <tr><td class="el">Agent 空间</td><td><code>agents/{aid}/</code> — 手册、技能、经验（定义团队共享，情景记忆按用户分区）</td></tr>
+            <tr><td class="el">用户空间</td><td><code>users/{uid}/</code> — Twin 画像、长期记忆（仅本人）</td></tr>
+            <tr><td class="el">团队/项目</td><td><code>teams/{tid}/…</code> — 共享文件 / 知识 / 产物（按团队或项目隔离）</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>请求主链路</h3>
+        <div class="flowbox">
+          <span class="step">前端页面 / ⌘K</span><span class="arrow">→</span>
+          <span class="step">API 客户端（Bearer Token）</span><span class="arrow">→</span>
+          <span class="step">FastAPI 路由（三轴权限校验）</span><span class="arrow">→</span>
+          <span class="step">Service 层</span><span class="arrow">→</span>
+          <span class="step">G3 文件读写 + 审计</span>
+        </div>
+        <div class="flowbox">
+          <span class="step">对话输入</span><span class="arrow">→</span>
+          <span class="step">WebSocket /ws/tasks/{id}</span><span class="arrow">→</span>
+          <span class="step">Agent 运行时（组装上下文 → LLM 流式 → 工具 → 落盘）</span><span class="arrow">→</span>
+          <span class="step">逐事件回推前端</span>
+        </div>
+        <p class="lead" style="margin-top:12px">生产环境后端可单端口伺服前端 SPA（<code>frontend/dist</code>），并注入安全响应头（X-Content-Type-Options / X-Frame-Options / HSTS / CSP），生产不回显原始异常。</p>
+      </div>
+
+      <div class="figure">
+        <svg viewBox="0 0 760 340" role="img" aria-label="系统分层架构图">
+          <defs>
+            <marker id="ar2" markerWidth="10" markerHeight="8" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L8,3 L0,6 Z" fill="#64748b"/></marker>
+          </defs>
+          <rect x="230" y="16" width="300" height="56" rx="10" fill="#eff4ff" stroke="#bfdbfe"/>
+          <text x="380" y="40" text-anchor="middle" font-size="14" font-weight="700" fill="#1e40af">前端 · React 18 + Vite + TS + Zustand</text>
+          <text x="380" y="59" text-anchor="middle" font-size="11" fill="#64748b">页面 · ⌘K 命令面板 · Twin Dock</text>
+          <rect x="230" y="100" width="300" height="56" rx="10" fill="#ede9fe" stroke="#ddd6fe"/>
+          <text x="380" y="124" text-anchor="middle" font-size="14" font-weight="700" fill="#6d28d9">API · FastAPI /api/v1（23 路由域）</text>
+          <text x="380" y="143" text-anchor="middle" font-size="11" fill="#7c6aa8">三轴权限校验 · 统一错误信封</text>
+          <rect x="230" y="184" width="300" height="56" rx="10" fill="#dcfce7" stroke="#bbf7d0"/>
+          <text x="380" y="208" text-anchor="middle" font-size="14" font-weight="700" fill="#15803d">Service · 40+ 服务模块</text>
+          <text x="380" y="227" text-anchor="middle" font-size="11" fill="#4d7c5a">运行时 / 上下文 / 记忆 / HITL / 沙盒 …</text>
+          <rect x="230" y="268" width="300" height="56" rx="10" fill="#f1f5f9" stroke="#e2e8f0"/>
+          <text x="380" y="292" text-anchor="middle" font-size="14" font-weight="700" fill="#334155">存储 · G3 文件优先（唯一真相源）</text>
+          <text x="380" y="311" text-anchor="middle" font-size="11" fill="#64748b">tasks / agents / users / teams</text>
+          <line x1="380" y1="72" x2="380" y2="98" stroke="#64748b" stroke-width="2" marker-end="url(#ar2)"/>
+          <line x1="380" y1="156" x2="380" y2="182" stroke="#64748b" stroke-width="2" marker-end="url(#ar2)"/>
+          <line x1="380" y1="240" x2="380" y2="266" stroke="#64748b" stroke-width="2" marker-end="url(#ar2)"/>
+          <rect x="596" y="16" width="148" height="56" rx="10" fill="#fff" stroke="#e5e7eb"/>
+          <text x="670" y="39" text-anchor="middle" font-size="12" font-weight="700" fill="#334155">WebSocket</text>
+          <text x="670" y="57" text-anchor="middle" font-size="10.5" fill="#64748b">流式对话回推</text>
+          <line x1="594" y1="44" x2="532" y2="44" stroke="#94a3b8" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#ar2)"/>
+          <rect x="16" y="184" width="150" height="56" rx="10" fill="#fff" stroke="#e5e7eb"/>
+          <text x="91" y="207" text-anchor="middle" font-size="12" font-weight="700" fill="#334155">LLM 网关</text>
+          <text x="91" y="225" text-anchor="middle" font-size="10.5" fill="#64748b">mify / Anthropic / mock</text>
+          <line x1="168" y1="212" x2="228" y2="212" stroke="#94a3b8" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#ar2)"/>
+          <rect x="596" y="268" width="148" height="56" rx="10" fill="#fff" stroke="#e5e7eb"/>
+          <text x="670" y="288" text-anchor="middle" font-size="12" font-weight="700" fill="#334155">派生索引</text>
+          <text x="670" y="306" text-anchor="middle" font-size="10.5" fill="#64748b">SQLite + pgvector（可重建）</text>
+          <line x1="594" y1="296" x2="532" y2="296" stroke="#94a3b8" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#ar2)"/>
+        </svg>
+        <div class="figure-cap">图 1-1 · 系统分层架构：前端 → API（三轴权限）→ Service → G3 文件（唯一真相源）；SQLite / pgvector 为可重建派生索引</div>
+      </div>
+
+      <div class="figure">
+        <svg viewBox="0 0 760 300" role="img" aria-label="User 到 Twin 到 Agents 的协作关系">
+          <defs>
+            <marker id="ar3" markerWidth="10" markerHeight="8" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/></marker>
+            <marker id="ar3r" markerWidth="10" markerHeight="8" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L8,3 L0,6 Z" fill="#dc2626"/></marker>
+          </defs>
+          <rect x="30" y="108" width="130" height="64" rx="12" fill="#f1f5f9" stroke="#cbd5e1"/>
+          <text x="95" y="136" text-anchor="middle" font-size="14" font-weight="700" fill="#334155">User</text>
+          <text x="95" y="156" text-anchor="middle" font-size="11" fill="#64748b">目标 · 最终决策</text>
+          <rect x="300" y="98" width="150" height="82" rx="14" fill="#ede9fe" stroke="#c4b5fd"/>
+          <text x="375" y="128" text-anchor="middle" font-size="14" font-weight="700" fill="#6d28d9">Wisdom Twin</text>
+          <text x="375" y="148" text-anchor="middle" font-size="11" fill="#7c6aa8">编排 · 仲裁 · 按计划推进</text>
+          <text x="375" y="166" text-anchor="middle" font-size="11" fill="#7c6aa8">权限 L0–L5</text>
+          <rect x="580" y="58" width="150" height="44" rx="10" fill="#dcfce7" stroke="#bbf7d0"/>
+          <text x="655" y="85" text-anchor="middle" font-size="12.5" font-weight="700" fill="#15803d">数据分析 Agent</text>
+          <rect x="580" y="116" width="150" height="44" rx="10" fill="#dcfce7" stroke="#bbf7d0"/>
+          <text x="655" y="143" text-anchor="middle" font-size="12.5" font-weight="700" fill="#15803d">实验分析 Agent</text>
+          <rect x="580" y="174" width="150" height="44" rx="10" fill="#dcfce7" stroke="#bbf7d0"/>
+          <text x="655" y="201" text-anchor="middle" font-size="12.5" font-weight="700" fill="#15803d">灰度 / 更多 Agent</text>
+          <line x1="160" y1="140" x2="298" y2="140" stroke="#2563eb" stroke-width="2" marker-end="url(#ar3)"/>
+          <text x="229" y="132" text-anchor="middle" font-size="11" fill="#2563eb">说目标</text>
+          <line x1="450" y1="130" x2="578" y2="82" stroke="#2563eb" stroke-width="2" marker-end="url(#ar3)"/>
+          <line x1="450" y1="140" x2="578" y2="138" stroke="#2563eb" stroke-width="2" marker-end="url(#ar3)"/>
+          <line x1="450" y1="150" x2="578" y2="194" stroke="#2563eb" stroke-width="2" marker-end="url(#ar3)"/>
+          <text x="515" y="116" text-anchor="middle" font-size="11" fill="#2563eb">编排 · 派单</text>
+          <path d="M736,80 L748,138 L736,196" fill="none" stroke="#7c3aed" stroke-width="1.8"/>
+          <text x="742" y="230" text-anchor="middle" font-size="10.5" fill="#7c3aed">A2A</text>
+          <path d="M375,180 L375,250 L95,250 L95,174" fill="none" stroke="#dc2626" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#ar3r)"/>
+          <rect x="300" y="234" width="150" height="34" rx="8" fill="#fee2e2" stroke="#fecaca"/>
+          <text x="375" y="256" text-anchor="middle" font-size="11.5" font-weight="700" fill="#b91c1c">HITL 审批队列</text>
+          <text x="235" y="242" text-anchor="middle" font-size="10.5" fill="#dc2626">高风险动作</text>
+          <text x="150" y="268" text-anchor="middle" font-size="10.5" fill="#dc2626">回你确认 / 拒绝</text>
+        </svg>
+        <div class="figure-cap">图 1-2 · User → Twin → Agents 协作：Twin 编排并仲裁 A2A 接力；写文件 / 跑命令 / 发消息等高风险动作走 HITL 回到你确认</div>
+      </div>
+    </section>
+
+    <!-- ===================== 核心理念 ===================== -->
+    <section id="concept">
+      <div class="sec-h"><span class="num">02</span><h2>核心理念：User → Twin → Agents</h2></div>
+      <p class="sec-desc">这是贯穿整个产品的协作模型，也是理解每个页面与后端逻辑的钥匙。</p>
+      <div class="grid3">
+        <div class="card">
+          <h3>👤 User（你）</h3>
+          <p class="lead">目标的提出者与最终决策者。高风险动作的确认权永远在你手上，Twin 可以请求，但不能替你拍板。</p>
+        </div>
+        <div class="card">
+          <h3>🧠 Wisdom Twin（分身）</h3>
+          <p class="lead">你的 AI 化身，代表你在平台中与 Agent 协作。它编排任务、仲裁 Agent 之间的转交、按计划推进、主动提议下一步。权限分 L0–L5 六级。</p>
+        </div>
+        <div class="card">
+          <h3>🤖 Agents（工具 Agent）</h3>
+          <p class="lead">专业分工的执行者（数据分析、实验、灰度、知识库…）。像同事一样被指派到任务，可在 Twin 仲裁下互相接力（A2A）。</p>
+        </div>
+      </div>
+      <div class="note info">💡 落到产品上：你在「新建任务」里说目标 → Twin 生成计划预览并推荐 Agent 组合 → 你确认权限/风险/成本后创建 → 在「工作区」里三方流式协作 → 高风险动作进「审批」队列 → 沉淀记忆与技能，下次更聪明。</div>
+    </section>
+
+    <!-- ===================== 全局导航与布局 ===================== -->
+    <section id="navigation">
+      <div class="sec-h"><span class="num">03</span><h2>全局导航与布局</h2></div>
+      <p class="sec-desc">登录后进入统一的 App 外壳（AppLayout）：左侧常驻导航栏，中间是页面主体，右下角常驻「我的 Twin」入口，任意页面可用 <code>⌘K</code> 唤起全局命令面板。移动端顶部提供汉堡菜单，侧栏改为抽屉式滑出。</p>
+
+      <div class="grid2">
+        <div class="card">
+          <h3>左侧导航栏（Sidebar）</h3>
+          <p class="path">components/AppLayout.tsx</p>
+          <table>
+            <tr><th>元素</th><th>功能</th></tr>
+            <tr><td class="el">团队切换下拉</td><td>切换当前团队，联动刷新其项目列表与看板数据</td></tr>
+            <tr><td class="el">🔍 搜索（⌘K）</td><td>点击或按 ⌘K/Ctrl+K 唤起全局命令面板</td></tr>
+            <tr><td class="el">工作组</td><td>工作台 / 任务看板 / 任务历史 / Agent Hub / 知识与产物 / 公共内容</td></tr>
+            <tr><td class="el">治理组</td><td>审批与审计；管理后台（仅 admin / super_admin 可见）</td></tr>
+            <tr><td class="el">平台扩展组</td><td>本机 Runtime / 跨用户授权 / Agent 小队 / 自动任务</td></tr>
+            <tr><td class="el">空间组</td><td>团队 / 项目 / Twin</td></tr>
+            <tr><td class="el">用户信息 + 退出</td><td>底部显示昵称与平台角色；退出清除 token 回登录页</td></tr>
+          </table>
+        </div>
+        <div class="card">
+          <h3>常驻元素与响应式</h3>
+          <table>
+            <tr><th>元素</th><th>功能</th></tr>
+            <tr><td class="el">Twin Dock</td><td>右下角悬浮球（FAB），聚合主动建议 + 指令式导航（详见「常驻交互组件」）</td></tr>
+            <tr><td class="el">命令面板</td><td>全局挂载，⌘K 唤起，导航 + 实时搜索</td></tr>
+            <tr><td class="el">移动端顶栏</td><td>汉堡按钮打开抽屉侧栏 + 半透明遮罩，点击遮罩关闭</td></tr>
+            <tr><td class="el">路由守卫</td><td>无 token 自动跳登录页；根路径 <code>/</code> 重定向到 <code>/workbench</code></td></tr>
+          </table>
+          <div class="note info">未登录访问任意受保护路由都会被重定向到登录页；管理后台入口只对管理员显示，非管理员即使直达也会被后端拒绝。</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== 前端页面分节 ===================== -->
+    <section>
+      <div class="sec-h"><span class="num">04</span><h2>前端页面：按钮与操作框逐一说明</h2></div>
+      <p class="sec-desc">以下按侧栏顺序逐页说明。每页给出用途、以及页面上每个按钮 / 输入框 / 下拉 / 开关等操作元素的功能与对应后端接口。徽标含义：<span class="pill green">安全/低风险</span> <span class="pill amber">需确认/灰度</span> <span class="pill red">高风险</span> <span class="pill blue">导航/信息</span>。</p>
+    </section>
+
+    <!-- 1 · 登录 -->
+    <section id="page-login">
+      <div class="sub-h">页面 1 · 登录 / 注册 <span class="pill blue">/login</span></div>
+      <div class="card">
+        <p class="lead">用户名 + 密码登录；支持自助注册。登录成功后签发 Bearer Token 并跳转工作台。</p>
+        <table>
+          <tr><th>操作元素</th><th>类型</th><th>功能</th></tr>
+          <tr><td class="el">登录 / 注册切换</td><td>链接</td><td>在「登录」与「注册」两种模式间切换，切换表单字段</td></tr>
+          <tr><td class="el">用户名</td><td>输入框</td><td>账号名，登录/注册必填，自动聚焦</td></tr>
+          <tr><td class="el">昵称</td><td>输入框</td><td>仅注册模式显示，用作显示名称</td></tr>
+          <tr><td class="el">密码</td><td>密码框</td><td>登录/注册必填，掩码输入</td></tr>
+          <tr><td class="el">登录 / 注册</td><td>主按钮</td><td>提交表单；处理中禁用防重复提交 → <span class="mono">POST /auth/login</span> 或 <span class="mono">/auth/register</span></td></tr>
+        </table>
+        <div class="note">开发环境内置演示账号 <code>admin / admin123</code>、<code>test / test123</code>（生产环境默认关闭演示账号）。首次登录会自动建号并创建个人 Twin 与个人项目。</div>
+      </div>
+    </section>
+
+    <!-- 2 · 工作台 -->
+    <section id="page-workbench">
+      <div class="sub-h">页面 2 · 工作台 Workbench <span class="pill blue">/workbench</span></div>
+      <div class="figure">
+        <svg viewBox="0 0 760 372" role="img" aria-label="工作台 Workbench 页面线框示意">
+          <rect class="mk-win" x="10" y="10" width="740" height="352" rx="10"/>
+          <path class="mk-bar" d="M10,20 a10,10 0 0 1 10,-10 h720 a10,10 0 0 1 10,10 v18 h-740 z"/>
+          <circle cx="28" cy="25" r="4" fill="#f87171"/><circle cx="44" cy="25" r="4" fill="#fbbf24"/><circle cx="60" cy="25" r="4" fill="#34d399"/>
+          <rect x="90" y="17" width="260" height="16" rx="8" fill="#334155"/><text x="100" y="29" font-size="10.5" fill="#cbd5e1">/workbench</text>
+          <rect class="mk-side" x="10" y="38" width="120" height="324"/>
+          <rect x="18" y="60" width="104" height="20" rx="4" fill="#2563eb"/><text x="30" y="74" font-size="10" fill="#fff">工作台</text>
+          <rect x="24" y="88" width="92" height="12" rx="3" fill="#e2e8f0"/>
+          <rect x="24" y="108" width="92" height="12" rx="3" fill="#e2e8f0"/>
+          <rect x="24" y="128" width="92" height="12" rx="3" fill="#e2e8f0"/>
+          <text x="146" y="60" font-size="14" font-weight="700" fill="#0f172a">你的团队 AI 工作台</text>
+          <rect x="626" y="46" width="106" height="24" rx="6" fill="#2563eb"/><text x="679" y="62" text-anchor="middle" font-size="10.5" fill="#fff">新建 Mission</text>
+          <rect x="146" y="78" width="586" height="56" rx="8" fill="#f5f3ff" stroke="#ddd6fe"/>
+          <rect x="158" y="88" width="188" height="16" rx="8" fill="#dbeafe"/><text x="252" y="100" text-anchor="middle" font-size="9" fill="#1d4ed8">User → Wisdom Twin → Agents</text>
+          <text x="180" y="122" text-anchor="middle" font-size="14" font-weight="700" fill="#6d28d9">3</text><text x="180" y="132" text-anchor="middle" font-size="8.5" fill="#7c6aa8">运行中</text>
+          <text x="300" y="122" text-anchor="middle" font-size="14" font-weight="700" fill="#6d28d9">1</text><text x="300" y="132" text-anchor="middle" font-size="8.5" fill="#7c6aa8">待确认</text>
+          <text x="420" y="122" text-anchor="middle" font-size="14" font-weight="700" fill="#6d28d9">8</text><text x="420" y="132" text-anchor="middle" font-size="8.5" fill="#7c6aa8">已完成</text>
+          <text x="560" y="122" text-anchor="middle" font-size="14" font-weight="700" fill="#6d28d9">L2</text><text x="560" y="132" text-anchor="middle" font-size="8.5" fill="#7c6aa8">Twin 权限</text>
+          <rect class="mk-box" x="146" y="142" width="186" height="74" rx="8"/><text x="158" y="162" font-size="11" font-weight="700" fill="#334155">运行中的任务</text>
+          <rect x="158" y="172" width="120" height="12" rx="3" fill="#f1f5f9"/><rect x="278" y="188" width="46" height="18" rx="5" fill="#2563eb"/><text x="301" y="200" text-anchor="middle" font-size="8.5" fill="#fff">进入</text>
+          <rect class="mk-box" x="342" y="142" width="186" height="74" rx="8"/><text x="354" y="162" font-size="11" font-weight="700" fill="#b45309">待确认</text>
+          <rect x="354" y="172" width="120" height="12" rx="3" fill="#f1f5f9"/><rect x="474" y="188" width="46" height="18" rx="5" fill="#eff4ff" stroke="#bfdbfe"/><text x="497" y="200" text-anchor="middle" font-size="8.5" fill="#1d4ed8">查看</text>
+          <rect class="mk-box" x="538" y="142" width="194" height="74" rx="8"/><text x="550" y="162" font-size="11" font-weight="700" fill="#334155">最近任务</text>
+          <rect x="550" y="172" width="140" height="12" rx="3" fill="#f1f5f9"/><rect x="550" y="190" width="110" height="12" rx="3" fill="#f1f5f9"/>
+          <rect class="mk-box" x="146" y="224" width="139" height="66" rx="8"/><text x="157" y="243" font-size="10" font-weight="700" fill="#334155">核心产物</text><rect x="157" y="252" width="90" height="10" rx="3" fill="#f1f5f9"/><rect x="157" y="268" width="70" height="10" rx="3" fill="#f1f5f9"/>
+          <rect class="mk-box" x="293" y="224" width="139" height="66" rx="8"/><text x="304" y="243" font-size="10" font-weight="700" fill="#334155">定时任务</text><rect x="304" y="252" width="90" height="10" rx="3" fill="#f1f5f9"/><rect x="304" y="268" width="70" height="10" rx="3" fill="#f1f5f9"/>
+          <rect class="mk-box" x="440" y="224" width="139" height="66" rx="8"/><text x="451" y="243" font-size="10" font-weight="700" fill="#334155">Token / 成本</text><rect x="451" y="252" width="90" height="10" rx="3" fill="#f1f5f9"/><rect x="451" y="268" width="70" height="10" rx="3" fill="#f1f5f9"/>
+          <rect class="mk-box" x="587" y="224" width="145" height="66" rx="8"/><text x="598" y="243" font-size="10" font-weight="700" fill="#334155">已连接 Agent</text><rect x="598" y="252" width="90" height="10" rx="3" fill="#f1f5f9"/><rect x="598" y="268" width="70" height="10" rx="3" fill="#f1f5f9"/>
+          <circle cx="626" cy="58" r="8" fill="#2563eb"/><text x="626" y="61.5" text-anchor="middle" font-size="9" font-weight="700" fill="#fff">1</text>
+          <circle cx="146" cy="78" r="8" fill="#2563eb"/><text x="146" y="81.5" text-anchor="middle" font-size="9" font-weight="700" fill="#fff">2</text>
+          <circle cx="146" cy="142" r="8" fill="#2563eb"/><text x="146" y="145.5" text-anchor="middle" font-size="9" font-weight="700" fill="#fff">3</text>
+          <text x="146" y="322" font-size="10.5" fill="#334155">① 新建 Mission　② Twin 今日总结 + 运行中/待确认/已完成/Twin 权限统计　③ 资产卡片区，点卡进入对应任务</text>
+        </svg>
+        <div class="figure-cap">图 2-1 · 工作台页面示意：Twin 今日总结 + 运行中 / 待确认 / 最近任务 + 核心产物 / 定时任务 / 成本 / 已连接 Agent</div>
+      </div>
+      <div class="card">
+        <p class="lead">工作「推进台」（不是配置页）：一屏看清正在推进什么、待你确认什么、下一步做什么。数据来自 <span class="mono">GET /tasks/summary</span>（按当前项目过滤）。</p>
+        <table>
+          <tr><th>操作元素</th><th>类型</th><th>功能</th></tr>
+          <tr><td class="el">新建 Mission</td><td>主按钮</td><td>跳转「新建任务」页</td></tr>
+          <tr><td class="el">Twin 今日总结</td><td>信息区</td><td>展示当前项目名 + Twin 生成的今日聚焦 + 4 项统计（运行中 / 待确认 / 已完成 / Twin 权限等级）</td></tr>
+          <tr><td class="el">运行中的任务</td><td>卡片列表</td><td>每条含参与者数、任务类型；「进入」按钮打开该任务工作区</td></tr>
+          <tr><td class="el">待确认</td><td>卡片列表</td><td>「查看」进入任务；若还有审批/主动提议，底部链接「还有 N 项…→」跳审批页</td></tr>
+          <tr><td class="el">最近任务</td><td>卡片列表</td><td>带状态徽标；「打开」进入任务</td></tr>
+          <tr><td class="el">核心产物</td><td>卡片列表</td><td>本月已发布产物，点击跳到所属任务</td></tr>
+          <tr><td class="el">定时任务</td><td>卡片列表</td><td>展示启用中的触发器（类型 + 已触发次数）</td></tr>
+          <tr><td class="el">Token / 成本</td><td>指标卡</td><td>本月成本、月度预算、预算占用百分比、调用次数</td></tr>
+          <tr><td class="el">已连接 Agent</td><td>卡片列表</td><td>可用 Agent 及状态；点击进入 Agent 详情</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <!-- 3 · 看板 -->
+    <section id="page-board">
+      <div class="sub-h">页面 3 · 任务看板 Board <span class="pill blue">/board</span></div>
+      <div class="card">
+        <p class="lead">按状态分列的任务看板。Agent 与人一样是「一等的 assignee」。数据来自 <span class="mono">GET /tasks</span>（按当前项目过滤）。</p>
+        <table>
+          <tr><th>操作元素</th><th>类型</th><th>功能</th></tr>
+          <tr><td class="el">新建任务</td><td>主按钮</td><td>跳转「新建任务」页</td></tr>
+          <tr><td class="el">当前范围徽标</td><td>信息</td><td>显示当前项目 / 团队 / 全部</td></tr>
+          <tr><td class="el">四条泳道</td><td>看板列</td><td>待办 / 执行中（含报错、已暂停子态）/ 待确认 / 已完成，各带计数</td></tr>
+          <tr><td class="el">任务卡片</td><td>可点击卡</td><td>显示状态徽标、assignee 头像、类型、产物数；点击（或回车）进入工作区</td></tr>
+          <tr><td class="el">重试</td><td>卡内按钮</td><td>仅报错卡；将任务状态改回执行中 → <span class="mono">PUT /tasks/{id}/status</span></td></tr>
+          <tr><td class="el">恢复</td><td>卡内按钮</td><td>仅已暂停卡；恢复执行</td></tr>
+        </table>
+        <div class="note info">任务状态机 6 态：<code>todo</code> 待办 · <code>doing</code> 执行中 · <code>await</code> 待确认 · <code>done</code> 已完成 · <code>error</code> 报错 · <code>paused</code> 已暂停。</div>
+      </div>
+    </section>
+
+    <!-- 4 · 新建任务 -->
+    <section id="page-newmission">
+      <div class="sub-h">页面 4 · 新建任务 New Mission <span class="pill blue">/new-mission</span></div>
+      <div class="card">
+        <p class="lead">渐进式建任务：说清目标 → Twin 生成计划预览 + 推荐 Agent + 权限/风险/成本 → 确认后创建。左侧输入，右侧预览。</p>
+        <table>
+          <tr><th>操作元素</th><th>类型</th><th>功能</th></tr>
+          <tr><td class="el">任务标题</td><td>输入框</td><td>必填，任务名称</td></tr>
+          <tr><td class="el">任务目标</td><td>多行文本</td><td>自然语言目标，供 Twin 拆解计划</td></tr>
+          <tr><td class="el">完成判据（DoD）</td><td>输入框</td><td>可选，定义任务「算完成」的判据</td></tr>
+          <tr><td class="el">任务类型</td><td>下拉</td><td>数据分析 / 通用；切换会清空预览</td></tr>
+          <tr><td class="el">邀请我的 Twin</td><td>勾选框</td><td>是否让 Twin 参与编排协调（默认勾选）</td></tr>
+          <tr><td class="el">生成 Twin 计划预览</td><td>按钮</td><td>调 <span class="mono">POST /tasks/preview</span>，右侧显示执行计划步骤、推荐 Agent、权限/风险/成本</td></tr>
+          <tr><td class="el">取消</td><td>链接</td><td>返回看板</td></tr>
+          <tr><td class="el">推荐 Agent 组合</td><td>预览列表</td><td>每个 Agent 显示推荐理由 + 权限等级 / 是否已安装</td></tr>
+          <tr><td class="el">权限·风险·成本</td><td>预览区</td><td>所需 Twin 等级、风险等级徽标、预估成本、本月已用/预算</td></tr>
+          <tr><td class="el">确认并创建并进入</td><td>主按钮</td><td>创建任务并把 Twin + 可用推荐 Agent 加为参与者 → <span class="mono">POST /tasks</span>，随后进入工作区</td></tr>
+        </table>
+        <div class="note">执行前显式确认权限与成本，体现「安全先于智能」——先看清代价再执行。</div>
+      </div>
+    </section>
+
+    <!-- 5 · 工作区 -->
+    <section id="page-workspace">
+      <div class="sub-h">页面 5 · 任务工作区 Workspace <span class="pill blue">/task/:taskId</span></div>
+      <div class="card">
+        <p class="lead">三方协作现场：用户、Twin、多个工具 Agent 在同一条流式对话里接力。顶部任务条 + 状态操作行 + 主对话区 + 可切换的右侧抽屉（计划 / 记忆 / 技能 / 产物）。对话走 WebSocket <span class="mono">/ws/tasks/{id}</span>。</p>
+        <div class="kicker">顶部任务条 & 状态操作行</div>
+        <table>
+          <tr><th>操作元素</th><th>类型</th><th>功能</th></tr>
+          <tr><td class="el">← 看板</td><td>链接</td><td>返回任务看板</td></tr>
+          <tr><td class="el">状态徽标 / 当前步</td><td>信息</td><td>显示任务状态；有计划时显示「现在：X（n/m）」</td></tr>
+          <tr><td class="el">参与者 chips</td><td>信息</td><td>用户 / Twin / Agent 头像；发言中高亮并显示 live 点</td></tr>
+          <tr><td class="el">计划 ▸</td><td>抽屉按钮</td><td>打开计划面板，显示 完成步数/总步数 与待确认建议数</td></tr>
+          <tr><td class="el">记忆/确认</td><td>抽屉按钮</td><td>打开记忆候选 + 待确认面板</td></tr>
+          <tr><td class="el">技能</td><td>抽屉按钮</td><td>打开 Skill 候选面板</td></tr>
+          <tr><td class="el">产物 ▸ N</td><td>抽屉按钮</td><td>打开产物列表</td></tr>
+          <tr><td class="el">批准继续 / 标记完成</td><td>按钮</td><td>待确认态：批准继续（转执行中）或标记完成（置 done，带 confirm 满足 DoD）</td></tr>
+          <tr><td class="el">一键暂停 / 恢复执行</td><td>按钮</td><td>执行中可暂停；已暂停可恢复 → <span class="mono">PUT /tasks/{id}/status</span></td></tr>
+          <tr><td class="el">重新打开</td><td>按钮</td><td>已完成态可重新打开</td></tr>
+        </table>
+        <div class="kicker">对话区 & 抽屉</div>
+        <table>
+          <tr><th>操作元素</th><th>类型</th><th>功能</th></tr>
+          <tr><td class="el">消息输入 + 发送</td><td>文本框</td><td>Enter 发送，Shift+Enter 换行；流式回推 Agent/Twin 应答</td></tr>
+          <tr><td class="el">据目标自动拆解</td><td>计划抽屉按钮</td><td>无计划时按目标生成步骤 → <span class="mono">POST /tasks/{id}/plan/decompose</span></td></tr>
+          <tr><td class="el">采纳 / 忽略（建议）</td><td>计划抽屉按钮</td><td>裁决 Twin 主动建议 → <span class="mono">POST /tasks/{id}/proposals/{id}/decide</span></td></tr>
+          <tr><td class="el">请求发布（产物）</td><td>产物抽屉按钮</td><td>草稿产物提交发布审批 → <span class="mono">POST /tasks/{id}/artifacts/{id}/request-publish</span>（进 HITL）</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <!-- 6 · Agent Hub -->
+    <section id="page-agents">
+      <div class="sub-h">页面 6 · Agent Hub <span class="pill blue">/agents</span></div>
+      <div class="card">
+        <p class="lead">平台内置与团队共享的工具 Agent 一览。支持通过 Twin「冷启动采访」生成新 Agent 的 Card 草稿（不直接上线）。数据来自 <span class="mono">GET /agents</span>。</p>
+        <table>
+          <tr><th>操作元素</th><th>类型</th><th>功能</th></tr>
+          <tr><td class="el">冷启动采访新 Agent</td><td>按钮</td><td>展开/收起采访面板</td></tr>
+          <tr><td class="el">Agent 名称 / 角色</td><td>输入框</td><td>采访面板内填写新 Agent 的名称与角色</td></tr>
+          <tr><td class="el">生成采访问题</td><td>按钮</td><td>Twin 生成一组采访问题 → <span class="mono">POST /agents/interview</span></td></tr>
+          <tr><td class="el">保存为草稿</td><td>按钮</td><td>存为 Agent Card 草稿（待确认，不直接上线）→ <span class="mono">POST /agents/card-draft</span></td></tr>
+          <tr><td class="el">Agent 卡片</td><td>可点击卡</td><td>显示名称、类型（内置）、描述、技能标签；点击进入详情</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <!-- 7 · Agent 详情 -->
+    <section id="page-agentdetail">
+      <div class="sub-h">页面 7 · Agent 详情 <span class="pill blue">/agents/:agentId</span></div>
+      <div class="card">
+        <p class="lead">单个 Agent 的能力卡、记忆分区、技能列表与操作手册。数据来自 <span class="mono">GET /agents/{id}</span> 与 <span class="mono">/agents/{id}/card</span>。</p>
+        <table>
+          <tr><th>操作元素</th><th>类型</th><th>功能</th></tr>
+          <tr><td class="el">← Agent Hub</td><td>面包屑链接</td><td>返回 Hub</td></tr>
+          <tr><td class="el">能力 / 技能卡</td><td>信息</td><td>类型、版本、能力列表</td></tr>
+          <tr><td class="el">记忆分区卡</td><td>信息</td><td>by-user（我的私有经验）与 by-team（贡献后团队共享）两分区说明</td></tr>
+          <tr><td class="el">内置技能 / 团队技能</td><td>列表</td><td>builtin 工具 + 团队共享 Skill（含「何时用」提示）</td></tr>
+          <tr><td class="el">沙盒测试</td><td>按钮</td><td>对团队/我的草稿 Skill 触发沙盒 test-run → <span class="mono">POST /skills/test-run</span></td></tr>
+          <tr><td class="el">回滚</td><td>按钮</td><td>草稿 Skill 版本 &gt;1 时回滚到上一版（生成新版本，不删历史）→ <span class="mono">POST /skills/rollback</span></td></tr>
+          <tr><td class="el">Agent Card</td><td>信息</td><td>权限等级、风险、最佳实践、connector/runtime 状态、成本</td></tr>
+          <tr><td class="el">操作手册（agent.md）</td><td>只读文本</td><td>展示合成的 Agent 手册</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <!-- 8 · 知识与产物 -->
+    <section id="page-knowledge">
+      <div class="sub-h">页面 8 · 知识与产物 Knowledge <span class="pill blue">/knowledge</span></div>
+      <div class="card">
+        <p class="lead">按层级（项目 / 团队）× 类型（文件 / 知识 / 产物）浏览共享资产，并可导入外部 AI 对话为私有草稿。数据来自 <span class="mono">GET /teams/{tid}/projects/{pid}/assets</span>。</p>
+        <table>
+          <tr><th>操作元素</th><th>类型</th><th>功能</th></tr>
+          <tr><td class="el">导入 AI 对话</td><td>按钮</td><td>展开/收起导入面板</td></tr>
+          <tr><td class="el">标题 / 内容</td><td>输入 + 文本框</td><td>粘贴 ChatGPT/Claude 等对话内容</td></tr>
+          <tr><td class="el">导入为私有草稿</td><td>按钮</td><td>导入为仅自己可见的草稿（不公开发布）→ <span class="mono">POST /integrations/import</span></td></tr>
+          <tr><td class="el">层级筛选</td><td>下拉</td><td>全部 / 项目级 / 团队级</td></tr>
+          <tr><td class="el">类型筛选</td><td>下拉</td><td>全部 / 文件 / 知识 / 产物</td></tr>
+          <tr><td class="el">资产行</td><td>列表</td><td>名称 + 层级徽标 + 类型徽标 + 大小</td></tr>
+        </table>
+        <div class="note info">导入内容只生成「私有草稿」，不直接发布，呼应「只读优先、写操作走治理」的设计原则。</div>
+      </div>
+    </section>
+
+    <!-- 9 · 任务历史 -->
+    <section id="page-history">
+      <div class="sub-h">页面 9 · 任务历史 History <span class="pill blue">/history</span></div>
+      <div class="card">
+        <p class="lead">回顾历史任务的执行记录、复盘摘要与产物，可再次打开。数据来自 <span class="mono">GET /history</span> 与 <span class="mono">/history/{id}</span>。</p>
+        <table>
+          <tr><th>操作元素</th><th>类型</th><th>功能</th></tr>
+          <tr><td class="el">状态筛选</td><td>下拉</td><td>按任务状态过滤历史</td></tr>
+          <tr><td class="el">搜索框</td><td>输入框</td><td>按标题 / 目标搜索，回车或点按钮触发</td></tr>
+          <tr><td class="el">搜索</td><td>按钮</td><td>提交筛选条件重新加载列表</td></tr>
+          <tr><td class="el">历史任务项</td><td>可点击行</td><td>显示类型、计划进度、产物数、状态；点击加载右侧复盘</td></tr>
+          <tr><td class="el">复盘摘要</td><td>信息区</td><td>结果、计划进度、对话轮次、工具调用、产物数、高风险动作数、耗时、要点</td></tr>
+          <tr><td class="el">再次打开</td><td>主按钮</td><td>跳回该任务工作区继续</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <!-- 10 · 公共内容 -->
+    <section id="page-public">
+      <div class="sub-h">页面 10 · 公共内容 Public Content <span class="pill blue">/public-content</span></div>
+      <div class="card">
+        <p class="lead">浏览公共 Agent Card、任务模板与工作流；导入只创建私有草稿，不直接发布或执行。数据来自 <span class="mono">GET /public-content</span>。</p>
+        <table>
+          <tr><th>操作元素</th><th>类型</th><th>功能</th></tr>
+          <tr><td class="el">类型标签页</td><td>Tab</td><td>全部 / Agent Card / 任务模板 / 工作流</td></tr>
+          <tr><td class="el">公共内容卡</td><td>卡片</td><td>标题、摘要、能力/步骤标签</td></tr>
+          <tr><td class="el">导入为私有草稿</td><td>按钮</td><td>导入为私有草稿（未发布）→ <span class="mono">POST /public-content/{id}/import</span></td></tr>
+          <tr><td class="el">我导入的草稿</td><td>列表</td><td>展示已导入草稿及状态</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <!-- 11 · 审批与审计 -->
+    <section id="page-approvals">
+      <div class="sub-h">页面 11 · 审批与审计 Approvals <span class="pill blue">/approvals</span></div>
+      <div class="card">
+        <p class="lead">高风险动作进确认队列，所有执行可追溯。Twin 可请求，但最终确认权在你。含一键暂停全局执行。</p>
+        <table>
+          <tr><th>操作元素</th><th>类型</th><th>功能</th></tr>
+          <tr><td class="el">一键暂停全部执行</td><td class="el"><span class="pill red">危险按钮</span></td><td>暂停全局，新回合被拒绝 → <span class="mono">POST /governance/control/pause</span></td></tr>
+          <tr><td class="el">恢复全部执行</td><td>主按钮</td><td>解除全局暂停 → <span class="mono">POST /governance/control/resume</span></td></tr>
+          <tr><td class="el">待我确认卡</td><td>列表</td><td>显示动作类型、任务、风险等级</td></tr>
+          <tr><td class="el">确认 / 拒绝</td><td>按钮</td><td>裁决审批项（资格校验 + payload 一致 + 未过期）</td></tr>
+          <tr><td class="el">权限日志 / 工具调用</td><td>列表</td><td>展示审计流水（执行者、摘要、结果徽标）→ <span class="mono">GET /governance/audit</span></td></tr>
+          <tr><td class="el">失败复盘</td><td>列表</td><td>过滤 error / blocked 记录，用于复盘</td></tr>
+        </table>
+        <div class="note">高风险动作类型：写文件、跑命令、发消息、付费调用、固化记忆、跨空间读取。审批带 eligible approvers、payload 哈希与过期时间，非资格人无法裁决、已决/过期不可执行。</div>
+      </div>
+    </section>
+
+    <!-- 12 · 管理后台 -->
+    <section id="page-admin">
+      <div class="sub-h">页面 12 · 管理后台 Admin <span class="pill amber">/admin · 仅管理员</span></div>
+      <div class="card">
+        <p class="lead">平台级概览与设置，5 个标签页。角色编辑限 super_admin。非管理员访问返回权限提示。</p>
+        <table>
+          <tr><th>标签页 / 元素</th><th>功能</th></tr>
+          <tr><td class="el">概览</td><td>用户 / 团队 / 项目 / Agent / 任务数、累计 Token 与成本、执行状态 → <span class="mono">GET /admin/overview</span></td></tr>
+          <tr><td class="el">用户</td><td>用户列表与平台角色徽标 → <span class="mono">GET /admin/users</span>；改角色 <span class="mono">PUT /admin/users/{uid}/role</span>（限 super_admin）</td></tr>
+          <tr><td class="el">团队 / 项目</td><td>团队列表（成员数 / 项目数）→ <span class="mono">GET /admin/teams</span></td></tr>
+          <tr><td class="el">用量与成本</td><td>调用 / Token / 成本 / 预算占用 + 按模型明细；<b>导出 CSV</b> 链接 <span class="mono">/usage/export</span></td></tr>
+          <tr><td class="el">系统设置</td><td>LLM / pgvector / 飞书 / Kyuubi 配置状态、特性开关 JSON</td></tr>
+          <tr><td class="el">重建索引</td><td>重建 SQLite 派生索引并显示各表行数/一致性 → <span class="mono">POST /admin/index/rebuild</span></td></tr>
+          <tr><td class="el">本机 Runtime</td><td>显示 daemon 能力探测结果（未启用时提示开关）</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <!-- 13 · 本机 Runtime -->
+    <section id="page-runtime">
+      <div class="sub-h">页面 13 · 本机 Runtime（daemon）<span class="pill amber">/runtime · 灰度</span></div>
+      <div class="figure">
+        <svg viewBox="0 0 760 372" role="img" aria-label="本机 Runtime 页面线框示意">
+          <rect class="mk-win" x="10" y="10" width="740" height="352" rx="10"/>
+          <path class="mk-bar" d="M10,20 a10,10 0 0 1 10,-10 h720 a10,10 0 0 1 10,10 v18 h-740 z"/>
+          <circle cx="28" cy="25" r="4" fill="#f87171"/><circle cx="44" cy="25" r="4" fill="#fbbf24"/><circle cx="60" cy="25" r="4" fill="#34d399"/>
+          <rect x="90" y="17" width="260" height="16" rx="8" fill="#334155"/>
+          <text x="100" y="29" font-size="10.5" fill="#cbd5e1">/runtime</text>
+          <rect class="mk-side" x="10" y="38" width="120" height="324"/>
+          <rect x="24" y="60" width="92" height="12" rx="3" fill="#e2e8f0"/>
+          <rect x="24" y="82" width="92" height="12" rx="3" fill="#e2e8f0"/>
+          <rect x="18" y="104" width="104" height="20" rx="4" fill="#2563eb"/>
+          <text x="30" y="118" font-size="10" fill="#fff">本机 Runtime</text>
+          <rect x="24" y="132" width="92" height="12" rx="3" fill="#e2e8f0"/>
+          <rect x="24" y="154" width="92" height="12" rx="3" fill="#e2e8f0"/>
+          <text x="146" y="62" font-size="14" font-weight="700" fill="#0f172a">本机 Runtime（daemon）</text>
+          <rect class="mk-box" x="146" y="76" width="270" height="112" rx="8"/>
+          <text x="160" y="98" font-size="12" font-weight="700" fill="#334155">能力探测</text>
+          <rect x="356" y="86" width="50" height="16" rx="8" fill="#dcfce7"/><text x="381" y="98" text-anchor="middle" font-size="9.5" fill="#15803d">已启用</text>
+          <rect x="160" y="112" width="240" height="14" rx="3" fill="#f1f5f9"/><text x="166" y="123" font-size="9.5" fill="#64748b">Claude Code · 可用</text>
+          <rect x="160" y="132" width="240" height="14" rx="3" fill="#f1f5f9"/><text x="166" y="143" font-size="9.5" fill="#64748b">Codex / Cursor · 探测中</text>
+          <rect x="160" y="152" width="240" height="14" rx="3" fill="#f1f5f9"/><text x="166" y="163" font-size="9.5" fill="#64748b">local-fs · 可用</text>
+          <rect class="mk-box" x="430" y="76" width="300" height="112" rx="8"/>
+          <text x="444" y="98" font-size="12" font-weight="700" fill="#334155">请求本机执行</text>
+          <rect x="640" y="86" width="76" height="16" rx="8" fill="#fef3c7"/><text x="678" y="98" text-anchor="middle" font-size="9.5" fill="#b45309">High Risk</text>
+          <rect x="444" y="110" width="272" height="16" rx="4" fill="#f8fafc" stroke="#e5e7eb"/><text x="450" y="122" font-size="9.5" fill="#94a3b8">命令：python train.py</text>
+          <rect x="444" y="132" width="272" height="16" rx="4" fill="#f8fafc" stroke="#e5e7eb"/><text x="450" y="144" font-size="9.5" fill="#94a3b8">scoped_files / network_policy …</text>
+          <rect x="444" y="158" width="156" height="22" rx="6" fill="#2563eb"/><text x="522" y="173" text-anchor="middle" font-size="10.5" fill="#fff">请求执行（建审批）</text>
+          <rect class="mk-box" x="146" y="200" width="584" height="96" rx="8"/>
+          <text x="160" y="222" font-size="12" font-weight="700" fill="#334155">执行简报已进审批队列</text>
+          <rect x="160" y="234" width="204" height="22" rx="6" fill="#2563eb"/><text x="262" y="249" text-anchor="middle" font-size="10.5" fill="#fff">执行已批准（fake exec）</text>
+          <rect x="160" y="266" width="560" height="18" rx="4" fill="#f1f5f9"/><text x="166" y="279" font-size="9.5" fill="#64748b">简报：命令 / Agent / 日志 / 变更文件 / 测试 / 回滚提示</text>
+          <circle cx="146" cy="76" r="9" fill="#2563eb"/><text x="146" y="80" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">1</text>
+          <circle cx="600" cy="169" r="9" fill="#2563eb"/><text x="600" y="173" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">2</text>
+          <circle cx="364" cy="245" r="9" fill="#2563eb"/><text x="364" y="249" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">3</text>
+          <text x="146" y="322" font-size="10.5" fill="#334155">① 能力探测只读，绝不执行　② 请求执行＝建 HITL 审批（不直接跑）　③ 审批通过后产出可复盘简报</text>
+        </svg>
+        <div class="figure-cap">图 13-1 · 本机 Runtime 页面示意与关键按钮：探测（只读）→ 请求执行（建审批）→ 执行已批准（简报）</div>
+      </div>
+      <div class="card">
+        <p class="lead">探测本机 Claude Code / Codex / Cursor 等能力；请求本机执行须经审批（HITL），执行为受控 fake exec 闭环并产出可复盘简报。受 <code>IDW_DAEMON_ENABLED</code> 灰度，默认关。</p>
+        <table>
+          <tr><th>操作元素</th><th>类型</th><th>功能</th></tr>
+          <tr><td class="el">能力探测卡</td><td>信息</td><td>显示 daemon 是否启用及各能力可用性 → <span class="mono">GET /runtime/capabilities</span>（只读，绝不执行）</td></tr>
+          <tr><td class="el">任务</td><td>下拉</td><td>选择要在本机执行的宿主任务</td></tr>
+          <tr><td class="el">命令 / Agent 类型</td><td>输入框</td><td>要执行的命令与本机 Agent 类型（如 claude-code）</td></tr>
+          <tr><td class="el">scoped_files</td><td>输入框</td><td>限定可改文件（逗号分隔）</td></tr>
+          <tr><td class="el">network_policy</td><td>下拉</td><td>none / restricted / full 网络策略</td></tr>
+          <tr><td class="el">墙钟上限 / 回滚提示</td><td>输入框</td><td>允许执行时长与回滚提示</td></tr>
+          <tr><td class="el">请求执行（建审批）</td><td class="el"><span class="pill red">高风险</span></td><td>创建审批不直接执行 → <span class="mono">POST /runtime/execute</span></td></tr>
+          <tr><td class="el">执行已批准（fake exec）</td><td>按钮</td><td>审批通过后执行并产出简报 → <span class="mono">POST /runtime/execute/apply</span>（未批准返回 409）</td></tr>
+          <tr><td class="el">执行简报</td><td>信息</td><td>命令、Agent、日志、变更文件、测试、回滚提示</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <!-- 14 · 跨用户授权 -->
+    <section id="page-grants">
+      <div class="sub-h">页面 14 · 跨用户 Twin 授权 Grants <span class="pill amber">/grants · 灰度</span></div>
+      <div class="figure">
+        <svg viewBox="0 0 760 366" role="img" aria-label="跨用户授权 Grants 页面线框示意">
+          <rect class="mk-win" x="10" y="10" width="740" height="346" rx="10"/>
+          <path class="mk-bar" d="M10,20 a10,10 0 0 1 10,-10 h720 a10,10 0 0 1 10,10 v18 h-740 z"/>
+          <circle cx="28" cy="25" r="4" fill="#f87171"/><circle cx="44" cy="25" r="4" fill="#fbbf24"/><circle cx="60" cy="25" r="4" fill="#34d399"/>
+          <rect x="90" y="17" width="260" height="16" rx="8" fill="#334155"/><text x="100" y="29" font-size="10.5" fill="#cbd5e1">/grants</text>
+          <rect class="mk-side" x="10" y="38" width="120" height="318"/>
+          <rect x="24" y="60" width="92" height="12" rx="3" fill="#e2e8f0"/>
+          <rect x="18" y="82" width="104" height="20" rx="4" fill="#2563eb"/><text x="30" y="96" font-size="10" fill="#fff">跨用户授权</text>
+          <rect x="24" y="112" width="92" height="12" rx="3" fill="#e2e8f0"/>
+          <rect x="24" y="134" width="92" height="12" rx="3" fill="#e2e8f0"/>
+          <text x="146" y="62" font-size="14" font-weight="700" fill="#0f172a">跨用户 Twin 授权（Grants）</text>
+          <rect class="mk-box" x="146" y="76" width="270" height="150" rx="8"/>
+          <text x="160" y="98" font-size="12" font-weight="700" fill="#334155">授权列表</text>
+          <rect x="160" y="108" width="242" height="34" rx="5" fill="#f8fafc" stroke="#e5e7eb"/>
+          <text x="168" y="122" font-size="9.5" fill="#334155">u_tester → 任务 A</text><text x="168" y="135" font-size="9" fill="#94a3b8">可读 会话/产物 · 到期 7 天</text>
+          <rect x="356" y="114" width="40" height="18" rx="5" fill="#eff4ff" stroke="#bfdbfe"/><text x="376" y="126" text-anchor="middle" font-size="9" fill="#1d4ed8">撤销</text>
+          <rect x="160" y="150" width="242" height="34" rx="5" fill="#f8fafc" stroke="#e5e7eb"/>
+          <text x="168" y="164" font-size="9.5" fill="#334155">u_wang → 任务 C</text><text x="168" y="177" font-size="9" fill="#94a3b8">可读 会话 · 可写 会话</text>
+          <rect x="356" y="156" width="40" height="18" rx="5" fill="#eff4ff" stroke="#bfdbfe"/><text x="376" y="168" text-anchor="middle" font-size="9" fill="#1d4ed8">撤销</text>
+          <rect class="mk-box" x="430" y="76" width="300" height="250" rx="8"/>
+          <text x="444" y="98" font-size="12" font-weight="700" fill="#334155">新建授权</text>
+          <rect x="656" y="86" width="60" height="16" rx="8" fill="#fef3c7"/><text x="686" y="98" text-anchor="middle" font-size="9" fill="#b45309">High Risk</text>
+          <rect x="444" y="108" width="272" height="16" rx="4" fill="#f8fafc" stroke="#e5e7eb"/><text x="450" y="120" font-size="9.5" fill="#94a3b8">host 任务 ▾</text>
+          <rect x="444" y="130" width="272" height="16" rx="4" fill="#f8fafc" stroke="#e5e7eb"/><text x="450" y="142" font-size="9.5" fill="#94a3b8">访客用户 ID</text>
+          <text x="444" y="166" font-size="10" font-weight="700" fill="#334155">可读层</text>
+          <rect x="444" y="172" width="60" height="17" rx="8" fill="#dbeafe"/><text x="474" y="184" text-anchor="middle" font-size="9" fill="#1d4ed8">会话</text>
+          <rect x="510" y="172" width="60" height="17" rx="8" fill="#dbeafe"/><text x="540" y="184" text-anchor="middle" font-size="9" fill="#1d4ed8">产物</text>
+          <rect x="576" y="172" width="60" height="17" rx="8" fill="#f1f5f9"/><text x="606" y="184" text-anchor="middle" font-size="9" fill="#475569">计划</text>
+          <rect x="642" y="172" width="60" height="17" rx="8" fill="#f1f5f9"/><text x="672" y="184" text-anchor="middle" font-size="9" fill="#475569">文件</text>
+          <text x="444" y="212" font-size="10" font-weight="700" fill="#334155">可写层</text>
+          <rect x="444" y="218" width="60" height="17" rx="8" fill="#dcfce7"/><text x="474" y="230" text-anchor="middle" font-size="9" fill="#15803d">会话</text>
+          <rect x="510" y="218" width="60" height="17" rx="8" fill="#f1f5f9"/><text x="540" y="230" text-anchor="middle" font-size="9" fill="#475569">产物</text>
+          <rect x="576" y="218" width="60" height="17" rx="8" fill="#f1f5f9"/><text x="606" y="230" text-anchor="middle" font-size="9" fill="#475569">计划</text>
+          <rect x="642" y="218" width="60" height="17" rx="8" fill="#f1f5f9"/><text x="672" y="230" text-anchor="middle" font-size="9" fill="#475569">文件</text>
+          <rect x="444" y="250" width="272" height="16" rx="4" fill="#f8fafc" stroke="#e5e7eb"/><text x="450" y="262" font-size="9.5" fill="#94a3b8">有效期（天）：7</text>
+          <rect x="444" y="278" width="90" height="24" rx="6" fill="#2563eb"/><text x="489" y="294" text-anchor="middle" font-size="10.5" fill="#fff">授权</text>
+          <circle cx="444" cy="160" r="8" fill="#2563eb"/><text x="444" y="163.5" text-anchor="middle" font-size="9" font-weight="700" fill="#fff">1</text>
+          <circle cx="444" cy="206" r="8" fill="#2563eb"/><text x="444" y="209.5" text-anchor="middle" font-size="9" font-weight="700" fill="#fff">2</text>
+          <circle cx="356" cy="114" r="8" fill="#2563eb"/><text x="356" y="117.5" text-anchor="middle" font-size="9" font-weight="700" fill="#fff">3</text>
+          <text x="146" y="344" font-size="10.5" fill="#334155">① 可读层点选　② 可写层须为可读层子集（勾可写自动并入可读）　③ 授权带 TTL、可随时撤销；访客绝不读 host 私有记忆</text>
+        </svg>
+        <div class="figure-cap">图 14-1 · 跨用户授权页面示意：授权列表（可撤销）+ 新建授权（可读/可写层点选，可写须为可读子集）</div>
+      </div>
+      <div class="card">
+        <p class="lead">任务参与者显式授权访客用户的 Twin 在<strong>指定任务层</strong>读/写，带过期 + 可撤销；访客绝不读 host 私有记忆。受 <code>IDW_CROSS_TWIN_ENABLED</code> 灰度。</p>
+        <table>
+          <tr><th>操作元素</th><th>类型</th><th>功能</th></tr>
+          <tr><td class="el">授权列表</td><td>列表</td><td>访客 → host 任务、可读/可写层、到期时间、状态 → <span class="mono">GET /grants</span></td></tr>
+          <tr><td class="el">撤销</td><td>按钮</td><td>撤销激活中的授权 → <span class="mono">DELETE /grants/{id}</span></td></tr>
+          <tr><td class="el">host 任务</td><td>下拉</td><td>选择被授权的宿主任务</td></tr>
+          <tr><td class="el">访客用户 ID</td><td>输入框</td><td>被授权的访客用户</td></tr>
+          <tr><td class="el">可读层</td><td>可点选徽标</td><td>task_conversation / task_artifacts / task_plan / task_files（仅任务空间层）</td></tr>
+          <tr><td class="el">可写层</td><td>可点选徽标</td><td>必须是可读层子集；勾可写自动并入可读</td></tr>
+          <tr><td class="el">有效期（天）/ 授权</td><td>输入 + 按钮</td><td>设置 TTL 并创建授权 → <span class="mono">POST /grants</span></td></tr>
+        </table>
+      </div>
+    </section>
+
+    <!-- 15 · Agent 小队 -->
+    <section id="page-squads">
+      <div class="sub-h">页面 15 · Agent 小队 Squads <span class="pill amber">/squads · 灰度</span></div>
+      <div class="figure">
+        <svg viewBox="0 0 760 344" role="img" aria-label="Agent 小队 Squads 页面线框示意">
+          <rect class="mk-win" x="10" y="10" width="740" height="324" rx="10"/>
+          <path class="mk-bar" d="M10,20 a10,10 0 0 1 10,-10 h720 a10,10 0 0 1 10,10 v18 h-740 z"/>
+          <circle cx="28" cy="25" r="4" fill="#f87171"/><circle cx="44" cy="25" r="4" fill="#fbbf24"/><circle cx="60" cy="25" r="4" fill="#34d399"/>
+          <rect x="90" y="17" width="260" height="16" rx="8" fill="#334155"/><text x="100" y="29" font-size="10.5" fill="#cbd5e1">/squads</text>
+          <rect class="mk-side" x="10" y="38" width="120" height="296"/>
+          <rect x="24" y="60" width="92" height="12" rx="3" fill="#e2e8f0"/>
+          <rect x="24" y="82" width="92" height="12" rx="3" fill="#e2e8f0"/>
+          <rect x="18" y="104" width="104" height="20" rx="4" fill="#2563eb"/><text x="30" y="118" font-size="10" fill="#fff">Agent 小队</text>
+          <rect x="24" y="134" width="92" height="12" rx="3" fill="#e2e8f0"/>
+          <text x="146" y="62" font-size="14" font-weight="700" fill="#0f172a">Agent 小队（Squads）</text>
+          <rect class="mk-box" x="146" y="74" width="186" height="82" rx="8"/>
+          <text x="158" y="96" font-size="11.5" font-weight="700" fill="#334155">增长归因小队</text>
+          <rect x="250" y="84" width="74" height="15" rx="7" fill="#dbeafe"/><text x="287" y="95" text-anchor="middle" font-size="8.5" fill="#1d4ed8">round_robin</text>
+          <text x="158" y="118" font-size="9.5" fill="#64748b">leader：data-analysis</text>
+          <text x="158" y="136" font-size="9.5" fill="#64748b">成员：general · ab-experiment</text>
+          <rect class="mk-box" x="340" y="74" width="186" height="82" rx="8"/>
+          <text x="352" y="96" font-size="11.5" font-weight="700" fill="#334155">实验评审小队</text>
+          <rect x="452" y="84" width="66" height="15" rx="7" fill="#ede9fe"/><text x="485" y="95" text-anchor="middle" font-size="8" fill="#6d28d9">leader_decides</text>
+          <text x="352" y="118" font-size="9.5" fill="#64748b">leader：ab-experiment</text>
+          <text x="352" y="136" font-size="9.5" fill="#64748b">成员：volcano-abtest</text>
+          <rect class="mk-box" x="534" y="74" width="186" height="82" rx="8" stroke-dasharray="4 3"/>
+          <text x="627" y="120" text-anchor="middle" font-size="22" fill="#cbd5e1">＋</text>
+          <rect class="mk-box" x="146" y="172" width="574" height="130" rx="8"/>
+          <text x="160" y="194" font-size="12" font-weight="700" fill="#334155">新建小队</text>
+          <rect x="160" y="204" width="260" height="16" rx="4" fill="#f8fafc" stroke="#e5e7eb"/><text x="166" y="216" font-size="9.5" fill="#94a3b8">名称：增长归因小队</text>
+          <rect x="432" y="204" width="280" height="16" rx="4" fill="#f8fafc" stroke="#e5e7eb"/><text x="438" y="216" font-size="9.5" fill="#94a3b8">leader（Agent）▾</text>
+          <rect x="160" y="228" width="260" height="16" rx="4" fill="#f8fafc" stroke="#e5e7eb"/><text x="166" y="240" font-size="9.5" fill="#94a3b8">成员：general, ab-experiment</text>
+          <rect x="432" y="228" width="280" height="16" rx="4" fill="#f8fafc" stroke="#e5e7eb"/><text x="438" y="240" font-size="9.5" fill="#94a3b8">策略：round_robin / leader_decides ▾</text>
+          <rect x="160" y="256" width="100" height="24" rx="6" fill="#2563eb"/><text x="210" y="272" text-anchor="middle" font-size="10.5" fill="#fff">创建小队</text>
+          <circle cx="146" cy="74" r="8" fill="#2563eb"/><text x="146" y="77.5" text-anchor="middle" font-size="9" font-weight="700" fill="#fff">1</text>
+          <circle cx="432" cy="236" r="8" fill="#2563eb"/><text x="432" y="239.5" text-anchor="middle" font-size="9" font-weight="700" fill="#fff">2</text>
+          <text x="146" y="322" font-size="10.5" fill="#334155">① 点小队卡进入详情（成员/leader/删除）　② leader 按策略路由成员　③ 沿用有界多跳的防环 / 预算，每跳落审计</text>
+        </svg>
+        <div class="figure-cap">图 15-1 · Agent 小队页面示意：小队卡（leader + 成员 + 策略）+ 新建小队表单</div>
+      </div>
+      <div class="card">
+        <p class="lead">由 leader Agent 领衔的小队；任务派给小队后由 leader 按策略路由成员，沿用有界多跳的防环/预算约束。路由生效受 <code>IDW_SQUADS_ENABLED</code> 灰度（管理本身始终可用）。</p>
+        <table>
+          <tr><th>操作元素</th><th>类型</th><th>功能</th></tr>
+          <tr><td class="el">小队卡</td><td>可点击卡</td><td>显示 leader、成员、策略；点击进入详情 → <span class="mono">GET /squads</span></td></tr>
+          <tr><td class="el">名称 / leader / 成员</td><td>输入 + 下拉</td><td>小队名、leader Agent、成员（逗号分隔）</td></tr>
+          <tr><td class="el">路由策略</td><td>下拉</td><td>round_robin（成员轮转）/ leader_decides（leader 决策）</td></tr>
+          <tr><td class="el">归属项目</td><td>输入框</td><td>可空</td></tr>
+          <tr><td class="el">创建小队</td><td>按钮</td><td>→ <span class="mono">POST /squads</span></td></tr>
+          <tr><td class="el">删除小队（详情页）</td><td class="el"><span class="pill red">危险按钮</span></td><td>删除小队 → <span class="mono">DELETE /squads/{id}</span></td></tr>
+        </table>
+      </div>
+    </section>
+
+    <!-- 16 · 自动任务 -->
+    <section id="page-autopilots">
+      <div class="sub-h">页面 16 · 自动任务 / 触发器 Autopilots <span class="pill amber">/autopilots · 灰度</span></div>
+      <div class="card">
+        <p class="lead">手动 / 定时 / webhook 触发自动建任务并派发；受预算（max_fires）+ 全局暂停 + 审计治理。触发执行受 <code>IDW_TRIGGERS_ENABLED</code> 灰度。</p>
+        <table>
+          <tr><th>操作元素</th><th>类型</th><th>功能</th></tr>
+          <tr><td class="el">触发器列表</td><td>列表</td><td>类型、调度、已触发次数、webhook token、失败原因、启用状态 → <span class="mono">GET /triggers</span></td></tr>
+          <tr><td class="el">暂停 / 恢复</td><td>按钮</td><td>启停触发器 → <span class="mono">PUT /triggers/{id}</span></td></tr>
+          <tr><td class="el">触发</td><td>按钮</td><td>手动触发并建任务 → <span class="mono">POST /triggers/{id}/fire</span></td></tr>
+          <tr><td class="el">删除</td><td>按钮</td><td>→ <span class="mono">DELETE /triggers/{id}</span></td></tr>
+          <tr><td class="el">名称 / 类型</td><td>输入 + 下拉</td><td>触发器名与类型（manual / cron / webhook）</td></tr>
+          <tr><td class="el">调度方式</td><td>下拉 + 输入</td><td>cron 时：daily（HH:MM）/ interval（分钟）/ once（ISO 时间）</td></tr>
+          <tr><td class="el">任务模板</td><td>输入 + 文本框</td><td>触发后建任务的标题 / 目标 / 类型</td></tr>
+          <tr><td class="el">创建触发器</td><td>按钮</td><td>→ <span class="mono">POST /triggers</span></td></tr>
+        </table>
+      </div>
+    </section>
+
+    <!-- 17 · 团队空间 -->
+    <section id="page-team">
+      <div class="sub-h">页面 17 · 团队空间 Team <span class="pill blue">/team</span></div>
+      <div class="card">
+        <p class="lead">团队资产枢纽：成员 + 团队级共享（文件/知识/产物，可新建·查看·编辑·删除）+ 项目入口 + 新建任务。读写删复用 <span class="mono">/teams/{tid}/shared/{kind}</span>，成员写权、删除前端二次确认。</p>
+        <table>
+          <tr><th>操作元素</th><th>类型</th><th>功能</th></tr>
+          <tr><td class="el">＋ 新建任务</td><td>主按钮</td><td>跳新建任务页</td></tr>
+          <tr><td class="el">成员卡</td><td>列表</td><td>成员及角色（owner 高亮）→ <span class="mono">GET /teams/{id}</span></td></tr>
+          <tr><td class="el">共享资产（三类）</td><td>列表</td><td>文件/知识/产物分组，每条含大小</td></tr>
+          <tr><td class="el">查看</td><td>行内按钮</td><td>只读打开内容 → <span class="mono">GET .../shared/{kind}/{name}</span></td></tr>
+          <tr><td class="el">编辑</td><td>行内按钮</td><td>编辑并保存（同名覆盖）→ <span class="mono">POST .../shared/{kind}</span></td></tr>
+          <tr><td class="el">删除</td><td>行内按钮</td><td>二次确认后删除 → <span class="mono">DELETE .../shared/{kind}/{name}</span></td></tr>
+          <tr><td class="el">新建团队共享条目</td><td>表单</td><td>类型 + 名称 + 内容 → 保存到团队共享</td></tr>
+          <tr><td class="el">项目入口</td><td>列表 + 按钮</td><td>管理项目 / 打开某项目</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <!-- 18 · 项目空间 -->
+    <section id="page-project">
+      <div class="sub-h">页面 18 · 项目空间 Project <span class="pill blue">/project</span></div>
+      <div class="card">
+        <p class="lead">项目选择器 + 当前项目一览：成员 / 项目级共享（新建·查看·编辑·删除）/ 在此新建任务。读列表走 <span class="mono">/assets</span>，读写删走 <span class="mono">/projects/{pid}/shared/{kind}</span>。</p>
+        <table>
+          <tr><th>操作元素</th><th>类型</th><th>功能</th></tr>
+          <tr><td class="el">项目选择器</td><td>卡网格</td><td>点击选择当前项目（当前项高亮）</td></tr>
+          <tr><td class="el">＋ 在此新建任务</td><td>主按钮</td><td>新建归属该项目的任务</td></tr>
+          <tr><td class="el">在知识与产物查看</td><td>按钮</td><td>跳知识与产物页</td></tr>
+          <tr><td class="el">成员卡</td><td>列表</td><td>项目成员及角色</td></tr>
+          <tr><td class="el">项目共享资产</td><td>列表</td><td>文件/知识/产物，每条 查看 / 编辑 / 删除</td></tr>
+          <tr><td class="el">新建项目共享条目</td><td>表单</td><td>类型 + 名称 + 内容 → 保存到项目共享</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <!-- 19 · Twin 管理 -->
+    <section id="page-twin">
+      <div class="sub-h">页面 19 · Twin 管理 <span class="pill blue">/twin</span></div>
+      <div class="card">
+        <p class="lead">管理你的数字分身：成熟度、权限等级、画像、记忆（冻结/删除）、权限例外与按任务成本。数据来自 <span class="mono">GET /twin/overview</span>。</p>
+        <table>
+          <tr><th>操作元素</th><th>类型</th><th>功能</th></tr>
+          <tr><td class="el">成熟度卡</td><td>信息</td><td>成熟度评分、权限等级、记忆条目数、已完成任务数</td></tr>
+          <tr><td class="el">编辑 / 保存 / 取消</td><td>按钮</td><td>进入/提交/放弃编辑 → <span class="mono">PUT /twin</span></td></tr>
+          <tr><td class="el">权限等级</td><td>下拉</td><td>编辑态可选 L0–L5（仅观察→完全自治）</td></tr>
+          <tr><td class="el">画像</td><td>多行文本</td><td>编辑态可改 Twin 人设</td></tr>
+          <tr><td class="el">冻结 / 恢复</td><td>按钮</td><td>冻结/恢复记忆条目（不改源文件）→ <span class="mono">PUT /twin/memory/{id}/state</span></td></tr>
+          <tr><td class="el">删除（记忆）</td><td>按钮</td><td>软删除记忆条目</td></tr>
+          <tr><td class="el">权限策略例外 / 按任务成本</td><td>信息</td><td>展示权限例外与各任务的调用/Token/成本</td></tr>
+        </table>
+        <div class="note info">Twin 权限六级：<code>L0</code> 仅观察 · <code>L1</code> 建议 · <code>L2</code> 起草委托 · <code>L3</code> 请求执行 · <code>L4</code> 有界自治 · <code>L5</code> 完全自治。</div>
+      </div>
+    </section>
+
+    <!-- ===================== 常驻交互组件 ===================== -->
+    <section id="components">
+      <div class="sec-h"><span class="num">05</span><h2>常驻交互组件</h2></div>
+      <p class="sec-desc">跨页面常驻的交互组件，构成协作现场的「随时可用」能力。</p>
+
+      <div class="grid2">
+        <div class="card">
+          <h3>🧠 Twin Dock（右下角悬浮）</h3>
+          <p class="path">components/TwinDock.tsx</p>
+          <table>
+            <tr><th>元素</th><th>功能</th></tr>
+            <tr><td class="el">悬浮球 + 徽标</td><td>常驻右下角；有待确认主动建议时显示数量角标</td></tr>
+            <tr><td class="el">主动建议</td><td>Twin/Agent 主动提议，采纳 / 忽略 / 去任务（轮询 <span class="mono">/proposals/pending</span>，60s）</td></tr>
+            <tr><td class="el">指令导航输入</td><td>如「带我去看板」按关键词匹配跳转（看板/工作台/团队/项目/Twin/新建任务）</td></tr>
+          </table>
+        </div>
+        <div class="card">
+          <h3>⌘K 命令面板</h3>
+          <p class="path">components/CommandPalette.tsx</p>
+          <table>
+            <tr><th>元素</th><th>功能</th></tr>
+            <tr><td class="el">唤起</td><td>任意页 ⌘K / Ctrl+K，或点侧栏搜索</td></tr>
+            <tr><td class="el">快捷导航</td><td>16 项常用页面直达</td></tr>
+            <tr><td class="el">实时搜索</td><td>防抖 200ms 调 <span class="mono">/search</span>，覆盖 任务 / 产物 / 知识 / Agent（结果按访问控制过滤）</td></tr>
+            <tr><td class="el">键盘操作</td><td>↑↓ 选择 · ↵ 打开 · Esc 关闭</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="grid3">
+        <div class="card">
+          <h3>💬 Chat 对话流</h3>
+          <p class="path">components/Chat.tsx</p>
+          <ul class="clean">
+            <li>多 speaker 气泡：用户 / Twin / Agent / 系统，含头像与流式光标 ▋</li>
+            <li><b>工具卡</b>：run_user_code 展示沙盒 stdout / 产物 / 耗时，其余工具展示名称+状态</li>
+            <li><b>转交卡</b>：A→B 转交 + 理由 + 是否被 Twin 采纳（A2A）</li>
+            <li><b>提议卡</b>：主动建议，采纳 / 忽略</li>
+            <li>输入栏：Enter 发送、Shift+Enter 换行</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>🗂 记忆面板</h3>
+          <p class="path">components/MemoryPanel.tsx</p>
+          <ul class="clean">
+            <li>两个标签页：记忆候选 / 待确认</li>
+            <li>候选卡可选晋升 scope（含「贡献给团队」升级）</li>
+            <li>晋升 / 拒绝候选，批准 / 拒绝待确认项</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>🛠 技能面板</h3>
+          <p class="path">components/SkillPanel.tsx</p>
+          <ul class="clean">
+            <li>Skill 候选卡：runtime 徽标 + 风险徽标 + 代码预览 + 入参</li>
+            <li>运行证据（run_id / code_hash）展示</li>
+            <li>「沉淀为 Skill（个人草稿·立即可用）」；贡献团队需证据+测试+审核</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== 后端架构总览 ===================== -->
+    <section id="backend">
+      <div class="sec-h"><span class="num">06</span><h2>后端运行逻辑</h2></div>
+      <p class="sec-desc">后端 FastAPI，分层清晰：<code>api/v1</code> 路由（三轴权限校验）→ <code>services/*_svc</code> 服务层（业务逻辑）→ <code>core/storage</code>（G3 文件读写 + 原子事务）。所有文件 IO 走服务层，不在路由层直接读写。共 40+ 服务模块、23 个路由域。</p>
+
+      <div class="grid2">
+        <div class="card">
+          <h3>G3「文件优先」不变量</h3>
+          <ul class="clean">
+            <li>文件系统是<strong>唯一真相源</strong>；SQLite 与 pgvector 都是<strong>可重建派生索引</strong></li>
+            <li>启动时若索引缺失或与文件不一致，自动重建（lifespan 自愈）</li>
+            <li>列表查询走索引加速候选定位，<strong>详情一律回文件读</strong></li>
+            <li>多文件写入走 <code>file_transaction</code> 事务（备份 + 回滚）；追加型用 <code>.jsonl</code></li>
+            <li>一切路径走 <code>core/storage/paths.py</code> 的 <code>safe_child</code> 防穿越，禁止内联拼接</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>统一约定</h3>
+          <ul class="clean">
+            <li><b>错误信封</b>：统一 <code>{code, message, error_code, data}</code>；服务层 raise <code>APIError</code></li>
+            <li><b>外部 CLI 降级</b>：kyuubi / feishu 缺失返回 <code>*_NOT_CONFIGURED</code>，不阻塞启动</li>
+            <li><b>治理</b>：高风险动作必确认 + 审计；新机制用 <code>IDW_*_ENABLED</code> 灰度、默认关</li>
+            <li><b>生产基线</b>：拒绝默认密钥/演示账号、安全响应头、异常不回显、WS 短票据</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>四层空间与派生索引</h3>
+        <div class="flowbox">
+          <span class="step">tasks/{tid}</span><span class="step">agents/{aid}</span><span class="step">users/{uid}</span><span class="step">teams/{tid}/…</span>
+          <span class="arrow">⟶ 派生 ⟶</span>
+          <span class="step">.cache/index.db（SQLite）</span><span class="step">pgvector（可选语义检索）</span>
+        </div>
+        <p class="lead" style="margin-top:8px">派生索引仅加速列表/搜索候选定位，可随时重建（<code>make reindex</code> 或 admin「重建索引」）；语义检索 <code>IDW_PGVECTOR_ENABLED</code> 默认关，未开启走关键词检索。</p>
+      </div>
+    </section>
+
+    <!-- 对话运行时 -->
+    <section id="runtime">
+      <div class="sub-h">6.1 · 对话运行时与 A2A 编排 <span class="pill slate">agent_runtime · orchestrator_svc</span></div>
+      <div class="card">
+        <p class="lead">对话经 WebSocket <span class="mono">/ws/tasks/{id}</span> 进入运行时，逐事件流式回推前端。核心是「有界 ReAct + Twin 编排 + 有界多跳 A2A」。</p>
+        <div class="flowbox">
+          <span class="step">选定发言者 resolve_speaker</span><span class="arrow">→</span>
+          <span class="step">组装上下文</span><span class="arrow">→</span>
+          <span class="step">LLM 流式</span><span class="arrow">→</span>
+          <span class="step">解析工具调用 / 转交指令</span><span class="arrow">→</span>
+          <span class="step">执行工具（暂停/HITL 门）</span><span class="arrow">→</span>
+          <span class="step">落盘 + 计划推进</span>
+        </div>
+        <table>
+          <tr><th>机制</th><th>说明</th></tr>
+          <tr><td class="el">发言者路由</td><td>按 @mention / 计划步骤 owner / Twin 仲裁选定当前 speaker</td></tr>
+          <tr><td class="el">有界多跳 A2A</td><td>Twin 作 leader，单轮内 A→评估→B 接力；<code>max_hops</code> 默认 3 / 硬顶 6 + 防环 + 预算；受 <code>IDW_A2A_ENABLED</code> 灰度</td></tr>
+          <tr><td class="el">转交协议</td><td>Agent 输出 <code>[[handoff:agent|理由]]</code> / <code>[[ask:agent|问题]]</code>，由 Twin 仲裁是否接力（防 A↔B 死循环/自转交/超预算）</td></tr>
+          <tr><td class="el">回合后自驱</td><td><code>_autostep</code>：Twin 自动推进计划下一步；<code>IDW_AUTOSTEP_ENABLED</code> 默认关；超限转提议、绝不越权</td></tr>
+          <tr><td class="el">预算硬闸</td><td>发起真实付费调用前查月度预算，超限拦截并回 <code>budget_exceeded</code>（不翻 error 态）</td></tr>
+          <tr><td class="el">全局暂停</td><td><code>execute_tool</code> 在暂停态拒绝任何工具执行</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <!-- 上下文组装 -->
+    <section id="context">
+      <div class="sub-h">6.2 · 上下文分层组装 <span class="pill slate">context_assembler_svc</span></div>
+      <div class="card">
+        <p class="lead">每次发言前，为当前 speaker 组装分层上下文，<strong>访问控制内嵌在组装里（先过滤后检索）</strong>——越权内容绝不进入上下文。</p>
+        <table>
+          <tr><th>层</th><th>内容</th></tr>
+          <tr><td class="el">任务系统层</td><td>任务目标 / DoD / 系统提示</td></tr>
+          <tr><td class="el">A2A 层</td><td>被转交 Agent 注入「前序产出摘要 + 转交理由」，访问控制不放宽</td></tr>
+          <tr><td class="el">参与者层</td><td>Twin 画像 + 长期记忆；Agent 手册 + 技能 + 情景记忆（按 acting_user 分区）</td></tr>
+          <tr><td class="el">共享层</td><td>项目 / 团队共享知识</td></tr>
+          <tr><td class="el">会话层</td><td>近若干轮对话（默认 12 轮）</td></tr>
+          <tr><td class="el">技能层</td><td>该 Agent 可见的 Skill 注入（灰度）</td></tr>
+        </table>
+        <div class="note info">检索命中的记忆切片必须在<strong>访问边界过滤之后</strong>才进入检索池；组装后经 <code>_budget_clamp</code> 按预算裁剪。跨用户访客走独立的 <code>assemble_visitor_context</code>，绝不读 host 私有记忆。</div>
+      </div>
+    </section>
+
+    <!-- LLM 网关 -->
+    <section id="llm">
+      <div class="sub-h">6.3 · LLM 网关与成本 <span class="pill slate">llm_gateway · usage_svc</span></div>
+      <div class="grid2">
+        <div class="card">
+          <h3>模型路由</h3>
+          <ul class="clean">
+            <li>mify 网关（OpenAI 兼容，按前缀路由）</li>
+            <li>Anthropic 直连</li>
+            <li>未配置 key 时走 <b>mock 流</b>（免费），保证无 key 也能跑通</li>
+            <li>统一流式事件格式，逐 token 回推</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>成本与预算</h3>
+          <ul class="clean">
+            <li>从 SSE 解析真实 token 用量（mify include_usage / Anthropic message_start·delta）</li>
+            <li>按模型单价落账，月度口径统计</li>
+            <li>月度预算硬上限 <code>IDW_MONTHLY_BUDGET_USD</code>（默认 100，&lt;=0 无上限）</li>
+            <li>超预算拦截真实付费调用（mock 免费不拦），审计 <code>llm_budget_blocked</code></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 内置工具集 -->
+    <section id="tools">
+      <div class="sub-h">6.4 · 内置工具集 <span class="pill slate">services/tools/registry.py</span></div>
+      <div class="card">
+        <p class="lead">每个工具声明 name / description / 参数 schema / 风险等级 / handler。统一返回 <code>{ok, data, error_code, message}</code>。<strong>高风险工具未携带 approved 时返回 <code>APPROVAL_REQUIRED</code></strong>，由上层进 HITL。</p>
+        <table>
+          <tr><th>工具</th><th>风险</th><th>功能</th></tr>
+          <tr><td class="el">now</td><td><span class="pill green">低</span></td><td>获取当前 UTC 时间</td></tr>
+          <tr><td class="el">read_space_file</td><td><span class="pill green">低</span></td><td>读取任务空间文件（safe_child 防穿越，仅本任务）</td></tr>
+          <tr><td class="el">write_file</td><td><span class="pill red">高</span></td><td>写文件到任务输出区（需确认）</td></tr>
+          <tr><td class="el">kyuubi_query</td><td><span class="pill green">低</span></td><td>Kyuubi 只读 SQL；结果落为 table 产物；未配置降级</td></tr>
+          <tr><td class="el">propose_memory</td><td><span class="pill red">高</span></td><td>提议记忆候选（待审批晋升）</td></tr>
+          <tr><td class="el">request_approval</td><td><span class="pill green">低</span></td><td>发起人工确认（HITL）</td></tr>
+          <tr><td class="el">list_agents</td><td><span class="pill green">低</span></td><td>列出平台可用工具 Agent</td></tr>
+          <tr><td class="el">run_user_code</td><td><span class="pill green">低*</span></td><td>沙盒执行用户代码（沙盒即边界）；落 run_id 证据</td></tr>
+          <tr><td class="el">propose_skill</td><td><span class="pill green">低</span></td><td>把跑通的代码沉淀为 Skill 候选（自动抽入参 schema + 绑证据）</td></tr>
+          <tr><td class="el">handoff_to_agent</td><td><span class="pill green">低</span></td><td>请求转交控制权给另一 Agent（Twin 仲裁，A2A）</td></tr>
+          <tr><td class="el">ask_agent</td><td><span class="pill green">低</span></td><td>一次性咨询另一 Agent（不交出控制权）</td></tr>
+          <tr><td class="el">read_skill</td><td><span class="pill green">低</span></td><td>读取指令型 Skill 的 SKILL.md 及参考资料</td></tr>
+        </table>
+        <div class="note">* run_user_code 本身标低风险，因为其安全边界由沙盒保证；全局暂停仍会拦截其执行。</div>
+      </div>
+    </section>
+
+    <!-- 沙盒 -->
+    <section id="sandbox">
+      <div class="sub-h">6.5 · 代码沙盒 <span class="pill slate">services/sandbox.py</span></div>
+      <div class="card">
+        <p class="lead">用户贡献的代码一律视为不可信，先进沙盒执行。总开关 <code>IDW_SELF_EVOLVE_ENABLED</code>，未启用返回 <code>SANDBOX_NOT_ENABLED</code>（不阻塞启动）。</p>
+        <table>
+          <tr><th>约束</th><th>实现</th></tr>
+          <tr><td class="el">无网络</td><td>preamble monkeypatch socket 断网（始终注入，纵深防御）+ Linux network namespace（<code>unshare -r -n</code>）内核级真断网</td></tr>
+          <tr><td class="el">netns 策略</td><td><code>IDW_SANDBOX_NETNS</code>：auto（可用则真断网否则回退）/ on（不可用则失败关闭 <code>SANDBOX_NETNS_UNAVAILABLE</code>，绝不降级）/ off（仅 monkeypatch）</td></tr>
+          <tr><td class="el">限资源</td><td>RLIMIT_CPU（默认 10s）/ RLIMIT_FSIZE（默认 50MB）/（可选）RLIMIT_AS 内存上限</td></tr>
+          <tr><td class="el">无凭证</td><td>清空环境变量，仅保留 PATH/LANG 等白名单，绝不传 *_KEY/TOKEN/SECRET</td></tr>
+          <tr><td class="el">隔离目录</td><td>cwd / HOME / TMPDIR 指向任务沙盒目录，禁止访问任务外</td></tr>
+          <tr><td class="el">墙钟超时</td><td>默认 15s，超时整组 kill（setsid 新进程组）；输出截断 20000 字符</td></tr>
+        </table>
+        <div class="note">诚实边界：进程级沙盒在 macOS/通用 POSIX 上无内核级隔离；Linux 生产开 netns 获得内核级无网络，更强可叠加 seccomp / gVisor / firejail + cgroup。</div>
+      </div>
+    </section>
+
+    <!-- 记忆 -->
+    <section id="memory">
+      <div class="sub-h">6.6 · 记忆隔离与复用 <span class="pill slate">memory_svc · memory_retrieval · hitl_svc</span></div>
+      <div class="card">
+        <p class="lead">默认私有、显式共享。记忆以候选 → 审核 → 晋升的闭环沉淀，5 个 scope，晋升走原子事务。</p>
+        <table>
+          <tr><th>scope</th><th>归属与可见性</th></tr>
+          <tr><td class="el">user_preference</td><td>用户偏好，注入自己的 Twin，仅本人</td></tr>
+          <tr><td class="el">agent_user</td><td>「我 + 某 Agent」的私有使用经验，默认隔离不泄漏</td></tr>
+          <tr><td class="el">agent_team</td><td>「贡献给团队」审核后的 Agent 口径/方法，团队成员受益</td></tr>
+          <tr><td class="el">project</td><td>项目共享记忆</td></tr>
+          <tr><td class="el">team</td><td>团队共享记忆</td></tr>
+        </table>
+        <div class="note info">晋升到共享空间需经 HITL 审核（needs_review）；候选与目标 <code>.memory.md</code> 在同一 <code>file_transaction</code> 内原子写入，保证一致性。检索默认关键词 top-k，开 pgvector 后语义检索（先过滤后排序）。</div>
+      </div>
+    </section>
+
+    <!-- 技能自演进 -->
+    <section id="skills">
+      <div class="sub-h">6.7 · 技能自演进 <span class="pill slate">skill_svc · skill_evolve_svc · skill_eval_svc</span></div>
+      <div class="card">
+        <p class="lead">跑通的代码可沉淀为可复用 Skill。个人草稿宽松（立即可用），团队共享严格（<strong>证据 + 测试 + 审核三门</strong>）。</p>
+        <div class="flowbox">
+          <span class="step">run_user_code 跑通（落 run_id 证据）</span><span class="arrow">→</span>
+          <span class="step">propose_skill 生成候选（抽入参 schema）</span><span class="arrow">→</span>
+          <span class="step">沉淀为个人草稿（立即可用）</span><span class="arrow">→</span>
+          <span class="step">团队晋升三门</span>
+        </div>
+        <table>
+          <tr><th>门</th><th>要求</th></tr>
+          <tr><td class="el">门 1 · 证据链</td><td>候选带 evidence，源自可复现的成功运行（code_hash 校验，改码失效）</td></tr>
+          <tr><td class="el">门 2 · 测试</td><td>有测试用例须全过，否则要求沙盒 test-run 通过</td></tr>
+          <tr><td class="el">门 3 · 审核</td><td>owner / admin（eligible approver）审核通过</td></tr>
+        </table>
+        <div class="note">另有风险评分（SQL 写 / Python 高危 import / 危险调用 → high，保守偏高提示审核）、评价闭环（成功率 / 反馈）、版本回滚（生成新版本不删历史）。指令型 Skill（SKILL.md）走独立只读通道 <code>agentic_skill_svc</code>，不进代码型沙盒/晋升链。</div>
+      </div>
+    </section>
+
+    <!-- 安全与治理 -->
+    <section id="governance">
+      <div class="sub-h">6.8 · 安全与治理 <span class="pill slate">三轴权限 · HITL · 审计 · 一键暂停</span></div>
+      <div class="grid2">
+        <div class="card">
+          <h3>三轴权限</h3>
+          <ul class="clean">
+            <li><b>平台角色</b>：user / admin / super_admin</li>
+            <li><b>成员角色</b>：团队/项目 owner / admin / member</li>
+            <li><b>Twin 等级</b>：L0–L5</li>
+            <li>资源访问 Guard：非任务参与者读任务 403；非成员读项目 403（内容隔离、审计可见）</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>HITL 审批强绑定</h3>
+          <ul class="clean">
+            <li>审批带 action_type + resource_ref + <b>eligible_approvers</b></li>
+            <li><b>payload_hash</b> 绑定：执行校验一致性，改内容失效</li>
+            <li><b>expires_at</b> 过期：已决 / 过期不可执行</li>
+            <li>非资格人裁决 403</li>
+          </ul>
+        </div>
+      </div>
+      <div class="card">
+        <h3>治理闭环</h3>
+        <table>
+          <tr><th>能力</th><th>说明</th></tr>
+          <tr><td class="el">审计</td><td>权限 / 工具调用 / 跨空间拦截全程可追溯（audit_svc）</td></tr>
+          <tr><td class="el">一键暂停</td><td>全局暂停后运行时与工具执行在暂停态一律拒绝（control_svc）</td></tr>
+          <tr><td class="el">失败复盘</td><td>错误结构化分类（error_type / recoverable / suggested，7 类规则）</td></tr>
+          <tr><td class="el">主动性护栏</td><td>每日速率/预算上限 + 防打扰静默时段 + 一键关闭（proactivity_svc）</td></tr>
+          <tr><td class="el">生产 fail-fast</td><td>生产环境拒默认密钥 / 演示账号；Aegis 头默认不信任；WS 用短票据</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===================== Agent 实现能力 ===================== -->
+    <section id="agents-cap">
+      <div class="sec-h"><span class="num">07</span><h2>Agent 实现能力</h2></div>
+      <p class="sec-desc">平台内置 Agent 以 <code>agent.json</code> 声明能力边界，以 <code>prompt/</code> 下的 markdown 作为系统提示词来源。运行时按白名单暴露工具、按 <code>spawn_targets</code> 派单子 Agent。</p>
+      <div class="card">
+        <h3>内置 Agent 清单</h3>
+        <table>
+          <tr><th>Agent</th><th>状态</th><th>能力</th><th>工具/派单</th></tr>
+          <tr><td class="el">通用 Agent<br><span class="mono">general</span></td><td><span class="pill green">已上线</span></td><td>自由对话 · 跨范式多工具编排 · 入口编排者，优先派单给更专业子 Agent</td><td>17 工具 / 1 派单</td></tr>
+          <tr><td class="el">数据分析 Agent<br><span class="mono">data-analysis</span></td><td><span class="pill green">已上线</span></td><td>NL→SQL · Kyuubi 查询 · Python 沙箱（预测/STL/变点/拟合）· 8 分析范式 · 自动出报告（BM/BF/CC）</td><td>16 工具 / 3 派单</td></tr>
+          <tr><td class="el">实验分析 Agent<br><span class="mono">ab-experiment</span></td><td><span class="pill green">已上线</span></td><td>AB 显著性 · 下钻 · 放量决策（V2.4）</td><td>14 工具 / 4 派单</td></tr>
+          <tr><td class="el">灰度版本 Agent<br><span class="mono">gray-release</span></td><td><span class="pill green">已上线</span></td><td>版本灰度 SOP · 决策矩阵 · AI 下钻 · 放量决策</td><td>14 工具 / 3 派单</td></tr>
+          <tr><td class="el">知识库 Agent<br><span class="mono">know</span></td><td><span class="pill green">已上线</span></td><td>对接飞书知识空间，对话式管理 / 使用 / 维护</td><td>14 工具</td></tr>
+          <tr><td class="el">火山实验分析<br><span class="mono">volcano-abtest</span></td><td><span class="pill green">已上线</span></td><td>火山引擎 ABtest · 浏览器/桌面内容中心实验数据查询与涨跌报告</td><td>11 工具 / 4 派单</td></tr>
+          <tr><td class="el">自建数据分析<br><span class="mono">zijian-data-analysis</span></td><td><span class="pill green">已上线</span></td><td>都江堰自建信息流分析 · CTE+model.sql 取数 · 7 大分析框架 · 飞书报告</td><td>14 工具 / 4 派单</td></tr>
+          <tr><td class="el">日报推送<br><span class="mono">djy-daily-report</span></td><td><span class="pill green">已上线</span></td><td>上传 SQL 自动查数 · AI 日报生成与飞书推送 · 内容池巡检/补跑/异常告警</td><td>15 工具 / 3 派单</td></tr>
+          <tr><td class="el">数据监控 Agent<br><span class="mono">data-monitor</span></td><td><span class="pill green">已上线</span></td><td>定时检测关注指标异常，按 cron 执行 SQL 检测，超阈值经通知中心/飞书推送告警</td><td>10 工具</td></tr>
+          <tr><td class="el">经营洞察 Agent<br><span class="mono">biz-insight</span></td><td><span class="pill amber">预告</span></td><td>经营报告与洞察</td><td>—</td></tr>
+          <tr><td class="el">波动归因 Agent<br><span class="mono">wave-attribution</span></td><td><span class="pill amber">预告</span></td><td>指标异动归因</td><td>—</td></tr>
+        </table>
+        <div class="note info">Agent 定义为团队共享，情景记忆按用户分区（by-user 私有 / by-team 共享）。数据分析类 Agent 之间可互相派单：数据分析遇实验议题派 ab-experiment、自建组派 zijian-data-analysis、异动归因派 wave-attribution。</div>
+      </div>
+    </section>
+
+    <section id="agent-model">
+      <div class="sub-h">7.1 · Agent 能力模型（agent.json）</div>
+      <div class="card">
+        <p class="lead">每个 Agent 通过 <code>agent.json</code> 声明能力边界与运行约束，prompt_layout v3 用 <code>identity.md</code> + <code>sop.md</code> + 共享片段组装系统提示词。</p>
+        <table>
+          <tr><th>字段</th><th>含义</th></tr>
+          <tr><td class="el">tools</td><td>该 Agent 可见的 function tools 白名单</td></tr>
+          <tr><td class="el">spawn_targets</td><td>可派单的子 Agent 白名单（<code>["*"]</code> 全部；空数组不可派单）</td></tr>
+          <tr><td class="el">skills</td><td>推荐的说明型 Skill id（提示词 hint）</td></tr>
+          <tr><td class="el">features</td><td>细粒度开关：todo_write / exit_plan_mode / spawn_subagent / run_background</td></tr>
+          <tr><td class="el">permission_mode</td><td>工具权限策略：default / read_only / confirm_write / confirm_network</td></tr>
+          <tr><td class="el">disallowed_tools</td><td>白名单后再移除的工具（负向权限）</td></tr>
+          <tr><td class="el">max_turns / effort</td><td>单轮 ReAct 工具轮数上限 / 推理强度提示</td></tr>
+          <tr><td class="el">hooks / mcp_servers</td><td>轻量 Hook（pre_tool 阻断 / post_tool 事件）；声明型外部能力</td></tr>
+        </table>
+        <div class="note">共享运行时片段：tool_contract（工具契约）、context-protocol（上下文协议）、spawn_routing（派单规则，仅启用 spawn_subagent 时注入）、plan_mode（Plan Mode，仅启用 exit_plan_mode 时注入）。</div>
+      </div>
+    </section>
+
+    <section id="skill-assets">
+      <div class="sub-h">7.2 · Skill 资产库</div>
+      <div class="card">
+        <p class="lead">两类 Skill：<b>代码型</b>（走 skill_svc，草稿/版本/沙盒 test-run/证据链/三门晋升）与 <b>指令型</b>（SKILL.md，走 agentic_skill_svc 只读通道 + read_skill 工具）。当前内置 18 个指令型 Skill 资产。</p>
+        <div class="tag-row">
+          <span class="pill slate">nl-mapping-table-sql</span><span class="pill slate">nl-python</span><span class="pill slate">sql</span><span class="pill slate">kyuubi</span>
+          <span class="pill slate">data.an</span><span class="pill slate">datum-cli</span><span class="pill slate">data-platform-mcp</span><span class="pill slate">djy-pool-analysis</span>
+          <span class="pill slate">feishu</span><span class="pill slate">feishu-pyramid-writer</span><span class="pill slate">mify-knowledge-base</span><span class="pill slate">mify-model-gateway</span>
+          <span class="pill slate">daily-news-collector</span><span class="pill slate">schedule-send</span><span class="pill slate">text2html2png</span>
+          <span class="pill slate">docx</span><span class="pill slate">pdf</span><span class="pill slate">pptx</span>
+        </div>
+        <div class="note info">指令型 Skill 以 <code>SKILL.md</code>（frontmatter + references/scripts）描述「何时用、怎么用」，经 <code>read_skill</code> 工具按需读取（safe_child 防穿越，fail-closed <code>SKILL_NOT_FOUND</code>）；不入 SQLite 索引、不造 skill.json，与代码型正交。</div>
+      </div>
+    </section>
+
+    <!-- ===================== 平台扩展能力 ===================== -->
+    <section id="platform">
+      <div class="sec-h"><span class="num">08</span><h2>平台扩展能力（默认关灰度）</h2></div>
+      <p class="sec-desc">面向长期形态的受治理最小闭环，全部默认关、按 runbook 灰度放量；高风险动作一律 HITL + 审计。</p>
+      <div class="grid2">
+        <div class="card">
+          <h3>🖥 本机 Runtime（daemon_svc）</h3>
+          <p class="lead">探测本机 Claude Code/Codex/Cursor 能力；执行 = Execution Brief → HITL 审批 → 执行（当前 fake exec）→ 简报（日志/变更文件/回滚提示）。<code>IDW_DAEMON_ENABLED</code></p>
+        </div>
+        <div class="card">
+          <h3>🤝 跨用户 Twin（grant_svc）</h3>
+          <p class="lead">scoped grant 显式声明可读/可写任务层 + 过期 + 可撤销；访客只贡献任务空间，绝不读 host 私有记忆，候选回流访客自己审批。<code>IDW_CROSS_TWIN_ENABLED</code></p>
+        </div>
+        <div class="card">
+          <h3>👥 Squads（squad_svc）</h3>
+          <p class="lead">leader 领衔 + 成员策略路由，在有界多跳的防环/预算之上，不放宽，每跳落审计。<code>IDW_SQUADS_ENABLED</code></p>
+        </div>
+        <div class="card">
+          <h3>⏰ Autopilots（trigger_svc）</h3>
+          <p class="lead">recurring mission + 预算 max_fires + 失败恢复（接 error_classifier）+ 日报 + pause/resume；自动建任务/派发全程审计。<code>IDW_TRIGGERS_ENABLED</code></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== 外部集成 ===================== -->
+    <section id="integration">
+      <div class="sec-h"><span class="num">09</span><h2>外部集成</h2></div>
+      <p class="sec-desc">外部集成为可注入边界：未配置安全降级（<code>*_NOT_CONFIGURED</code>，不阻塞启动）；配置后所有调用落审计、失败可复盘；密钥只在服务端，写动作走 HITL。</p>
+      <div class="card">
+        <table>
+          <tr><th>集成</th><th>现状 / 接入条件</th></tr>
+          <tr><td class="el">Kyuubi 查询</td><td>可配置边界（<code>KYUUBI_HOST</code>）；未配置降级，配置后只读查询 + 结果落产物 + 审计</td></tr>
+          <tr><td class="el">飞书 OAuth 登录</td><td>可注入边界（<code>FEISHU_APP_ID/SECRET</code>）；连接状态可查，密钥不回显前端</td></tr>
+          <tr><td class="el">飞书写动作</td><td>发消息/上传上下文走「请求 → HITL → 执行 → 审计」闭环（<code>execute_approved_feishu</code>）</td></tr>
+          <tr><td class="el">浏览器对话导入</td><td>导入外部 AI 对话为私有 Knowledge/Artifact 草稿，不直接发布</td></tr>
+          <tr><td class="el">嵌入端点</td><td>可注入；未接真实端点时回退本地确定性向量</td></tr>
+          <tr><td class="el">米盾（Aegis）</td><td>内部部署认证；生产默认不信任 Aegis 头（fail-closed）</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===================== API 端点总览 ===================== -->
+    <section id="api">
+      <div class="sec-h"><span class="num">10</span><h2>API 端点总览</h2></div>
+      <p class="sec-desc">REST 前缀 <code>/api/v1</code>，共 23 个路由域；对话走 WebSocket。所有端点接入三轴权限校验，越权返回 403 / 4403。</p>
+      <div class="grid2">
+        <div class="card">
+          <h3>核心业务</h3>
+          <table>
+            <tr><td class="el">auth</td><td>login / register / me / ws-ticket / feishu callback</td></tr>
+            <tr><td class="el">teams</td><td>CRUD + members + role + projects</td></tr>
+            <tr><td class="el">projects</td><td>CRUD + members</td></tr>
+            <tr><td class="el">tasks</td><td>CRUD + summary + preview + status + participants + conversation + turns + plan(+decompose/steps)</td></tr>
+            <tr><td class="el">ws</td><td>/ws/tasks/{id}（流式对话）</td></tr>
+            <tr><td class="el">artifacts</td><td>CRUD + status + save + new-version + request/apply-publish</td></tr>
+            <tr><td class="el">shared</td><td>团队/项目 shared/{kind}[/{name}] GET/POST/DELETE + assets</td></tr>
+          </table>
+        </div>
+        <div class="card">
+          <h3>智能与治理</h3>
+          <table>
+            <tr><td class="el">memory</td><td>candidates / promote / reject</td></tr>
+            <tr><td class="el">skills</td><td>candidates / materialize / mine / team / test-run / promote / bind / rollback / tests / eval</td></tr>
+            <tr><td class="el">agents</td><td>list / tools / card / interview / card-draft</td></tr>
+            <tr><td class="el">twin</td><td>get / put / level / memory / overview / state / permission-exceptions</td></tr>
+            <tr><td class="el">governance</td><td>audit / control(pause/resume) / usage/export</td></tr>
+            <tr><td class="el">proactivity</td><td>proposals(+pending/decide) / monitor / triggers(CRUD/fire/webhook)</td></tr>
+            <tr><td class="el">search</td><td>统一搜索（tasks/artifacts/knowledge/agents/skills，按访问控制过滤）</td></tr>
+          </table>
+        </div>
+      </div>
+      <div class="card">
+        <h3>平台扩展 · 集成 · 系统</h3>
+        <table>
+          <tr><td class="el">runtime</td><td>capabilities / execute / execute/apply</td></tr>
+          <tr><td class="el">grants</td><td>POST / GET / DELETE</td></tr>
+          <tr><td class="el">squads</td><td>POST / GET / {id} / DELETE</td></tr>
+          <tr><td class="el">integrations</td><td>status / import / imports / feishu(send/upload/apply)</td></tr>
+          <tr><td class="el">history · public_content</td><td>任务历史列表/详情；公共内容列表/草稿/导入</td></tr>
+          <tr><td class="el">admin · users · health</td><td>后台概览/用户/团队/用量/设置/索引；用户；健康检查</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===================== 特性开关与部署 ===================== -->
+    <section id="config">
+      <div class="sec-h"><span class="num">11</span><h2>特性开关与部署</h2></div>
+      <div class="grid2">
+        <div class="card">
+          <h3>特性开关（默认关灰度）</h3>
+          <table>
+            <tr><td class="el">IDW_A2A_ENABLED</td><td>有界多跳 A2A 编排</td></tr>
+            <tr><td class="el">IDW_AUTOSTEP_ENABLED</td><td>回合后 Twin 自驱推进</td></tr>
+            <tr><td class="el">IDW_TRIGGERS_ENABLED</td><td>触发器 / Autopilots</td></tr>
+            <tr><td class="el">IDW_SELF_EVOLVE_ENABLED</td><td>沙盒 / 自演进</td></tr>
+            <tr><td class="el">IDW_PGVECTOR_ENABLED</td><td>pgvector 语义检索</td></tr>
+            <tr><td class="el">IDW_DAEMON_ENABLED</td><td>本机 Runtime</td></tr>
+            <tr><td class="el">IDW_CROSS_TWIN_ENABLED</td><td>跨用户 Twin 授权</td></tr>
+            <tr><td class="el">IDW_SQUADS_ENABLED</td><td>Agent 小队路由</td></tr>
+          </table>
+        </div>
+        <div class="card">
+          <h3>关键配置</h3>
+          <table>
+            <tr><td class="el">IDW_ENV</td><td>development / production（生产 fail-fast）</td></tr>
+            <tr><td class="el">IDW_MONTHLY_BUDGET_USD</td><td>月度预算硬上限（默认 100，&lt;=0 无上限）</td></tr>
+            <tr><td class="el">IDW_SANDBOX_NETNS</td><td>沙盒网络命名空间 auto / on / off</td></tr>
+            <tr><td class="el">MIFY_GATEWAY_* / ANTHROPIC_API_KEY</td><td>LLM 网关，未配置走 mock 流</td></tr>
+            <tr><td class="el">KYUUBI_HOST / FEISHU_APP_ID</td><td>外部集成，缺失则降级</td></tr>
+            <tr><td class="el">DATABASE_URL</td><td>Postgres + pgvector（可选）</td></tr>
+          </table>
+        </div>
+      </div>
+      <div class="card">
+        <h3>部署形态</h3>
+        <div class="flowbox">
+          <span class="step">make install</span><span class="arrow">→</span>
+          <span class="step">make dev（后端 :8000 + 前端 :5173）</span>
+          <span class="arrow">或</span>
+          <span class="step">docker compose up（app + Postgres/pgvector）</span>
+        </div>
+        <p class="lead" style="margin-top:8px">生产可单端口伺服前端 SPA（<code>frontend/dist</code>）+ 深链刷新回退；<code>deploy.sh --pack/--restore</code> 支持 G3 七目录 + .env 打包迁移不丢数据。面向「单机 / 小团队可信 / 开 Skill 执行 + LLM」场景已出生产基线配置与 runbook。</p>
+      </div>
+    </section>
+
+    <div class="footer">
+      ICE-DATA-WORK · 已实现功能全景说明 · 里程碑 M0–M18 全部完成 · 后端 pytest 474 全绿 / 前端 build 通过<br/>
+      本页由源码逐页逐服务梳理生成：前端 19 页面 + 6 组件、后端 23 路由域 + 40+ 服务、12 内置工具、11+ Agent、18 Skill。
+    </div>
+
+  </div>
+  </main>
+</div>
+
+<script>
+  // 侧栏章节过滤
+  function filterNav(kw) {
+    var q = (kw || "").trim().toLowerCase();
+    document.querySelectorAll(".sb-link").forEach(function (a) {
+      var hit = !q || a.textContent.toLowerCase().indexOf(q) !== -1;
+      a.style.display = hit ? "" : "none";
+    });
+  }
+
+  // 滚动高亮当前章节（scrollspy）
+  (function () {
+    var links = Array.prototype.slice.call(document.querySelectorAll(".sb-link"));
+    var map = {};
+    links.forEach(function (a) {
+      var id = a.getAttribute("href");
+      if (id && id.charAt(0) === "#") map[id.slice(1)] = a;
+    });
+    var targets = Object.keys(map)
+      .map(function (id) { return document.getElementById(id); })
+      .filter(Boolean);
+    if (!("IntersectionObserver" in window) || targets.length === 0) return;
+    var visible = {};
+    var obs = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) visible[e.target.id] = true;
+        else delete visible[e.target.id];
+      });
+      var top = null, topY = Infinity;
+      Object.keys(visible).forEach(function (id) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        var y = el.getBoundingClientRect().top;
+        if (y < topY) { topY = y; top = id; }
+      });
+      links.forEach(function (a) { a.classList.remove("active"); });
+      if (top && map[top]) map[top].classList.add("active");
+    }, { rootMargin: "-10% 0px -80% 0px", threshold: 0 });
+    targets.forEach(function (t) { obs.observe(t); });
+  })();
+
+  // 移动端点导航后自动收起侧栏
+  document.querySelectorAll(".sb-link").forEach(function (a) {
+    a.addEventListener("click", function () {
+      if (window.innerWidth <= 900) document.querySelector(".sidebar").classList.remove("open");
+    });
+  });
+</script>
+</body>
+</html>
