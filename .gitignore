@@ -38,3 +38,5 @@ build/
 *.zip
 .git/
 **/.git/
+# GitHub large file workaround - PDF files excluded for GitHub compatibility
+*.pdf
